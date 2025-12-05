@@ -10,7 +10,7 @@ const Navbar = () => {
     { name: 'Tournaments', href: '#tournaments' },
     { name: 'Leaderboard', href: '#leaderboard' },
     { name: 'Teams', href: '#teams' },
-    { name: 'News', href: '#news' },
+    { name: 'My Profile', href: '/player' },
   ];
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastscrollX, setLastscrollX] = useState(0);
@@ -47,7 +47,7 @@ const Navbar = () => {
           {/* Logo/Platform Name */}
           <Link
             href="/"
-            className="flex-shrink-0 text-2xl font-extrabold text-neon-blue tracking-wider"
+            className="shrink-0 text-2xl font-extrabold text-neon-blue tracking-wider"
             aria-label="BGMI Elite Home"
           >
             BGMI ELITE
