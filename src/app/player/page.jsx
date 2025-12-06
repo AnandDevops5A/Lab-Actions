@@ -1,13 +1,15 @@
 'use client';
 
 import React from 'react';
-import profileBackImage from '../images/profile.png'
+import profileBackImage from '../images/profile.png';
+import Avatar from '../images/avatar.png';
 // --- MOCK DATA for demonstration ---
+
 const mockPlayer = {
   ign: "SHADOW_LORD_07",
   bgmiId: "1234567890",
   teamName: "Inferno Squad",
-  avatarUrl: "https://via.placeholder.com/150/FF4500/000000?text=SL", // Placeholder URL
+  avatarUrl: Avatar.src, // Placeholder URL
   totalKills: 345,
   kdRatio: 4.87,
   matchesPlayed: 71,
@@ -27,31 +29,38 @@ const mockMatchHistory = [
 // components/ProfileHeader.jsx
 
 const ProfileHeader = ({ player }) => (
-    <div 
-        className="relative h-64 bg-cover bg-center" 
-        style={{ backgroundImage: profileBackImage.src }}
-    >
-        {/* Semi-transparent aggressive overlay */}
-        <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm"></div>
+  <div
+    className="relative h-48 sm:h-56 md:h-64 lg:h-72 bg-cover bg-center mt-16"
+    style={{ backgroundImage: `url(${profileBackImage.src})` }}
+  >
+    {/* Semi-transparent overlay */}
+    <div className="absolute inset-0 bg-gray-900/70 backdrop-blur-sm"></div>
 
-        <div className="relative p-6 flex  flex-row-reverse justify-evenly  h-full">
-            {/* Player Avatar */}
-            <img 
-                src={player.avatarUrl} 
-                alt={player.ign} 
-                className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-red-500 object-cover transform -translate-y-1/2 shadow-xl shadow-red-500/30"
-            />
-                <div>
-            <h1 className="text-4xl md:text-6xl font-extrabold uppercase tracking-widest text-red-500 mt-2">
-                {player.ign}
-            </h1>
-            <p className="text-lg text-gray-300">
-                Team: <span className="font-semibold text-white">{player.teamName}</span> | Player ID: {player.bgmiId}
-            </p>
-            </div>
-        </div>
+    <div className="relative p-4 sm:p-6 flex flex-col md:flex-row-reverse items-center justify-evenly h-full gap-6">
+      {/* Player Avatar */}
+      <img
+        src={player.avatarUrl}
+        alt={player.ign}
+        className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-full border-4 border-green-400 object-cover shadow-xl shadow-red-500/30"
+      />
+
+      {/* Player Info */}
+      <div className="text-center md:text-left max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-extrabold uppercase tracking-widest text-red-400 wrap-break-word">
+          {player.ign}
+        </h1>
+        <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 mt-2">
+          Team: <span className="font-semibold text-white">{player.teamName}</span> | Player ID: {player.bgmiId}
+        </p>
+      </div>
     </div>
+  </div>
 );
+
+
+
+
+
 
 // components/PlayerStats.jsx
 

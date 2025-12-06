@@ -15,31 +15,31 @@ const Navbar = () => {
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastscrollX, setLastscrollX] = useState(0);
 
-//   useEffect(() => {
-//     const handleScroll = () => {
+ useEffect(() => {
+  const handleScroll = () => {
+    const currentScrollY = window.scrollY;
 
-//  const currentscrollX = window.scrollX;
+    if (currentScrollY > lastscrollX) {
+      // scrolling down → hide navbar
+      setShowNavbar(false);
+    } else {
+      // scrolling up → show navbar
+      setShowNavbar(true);
+    }
 
-//       if (currentscrollX > lastscrollX) {
-//         // Scrolling down
-//         setShowNavbar(true);
-//       } else {
-//         // Scrolling up
-//         setShowNavbar(false);
-//       }
+    setLastscrollX(currentScrollY);
+  };
 
-//       setLastscrollX(currentscrollX);
-//     };
+  window.addEventListener('scroll', handleScroll);
+  return () => window.removeEventListener('scroll', handleScroll);
+}, [lastscrollX]);
 
-//     window.addEventListener('scroll', handleScroll);
-
-//     return () => window.removeEventListener('scroll', handleScroll);
-//   }, [lastscrollX]);
   return (
     showNavbar ? 
       <nav
-      className="bg-black/80 backdrop-blur-sm fixed w-full z-50 shadow-lg border-b border-neon-blue/20"
-      role="navigation"
+ className={`bg-black/80 backdrop-blur-sm fixed w-full z-50 shadow-lg border-b border-neon-blue/20 transition-transform duration-1000 ${
+    showNavbar ? 'translate-y-0' : '-translate-y-full'
+  }`}      role="navigation"
       aria-label="Main Navigation"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -47,10 +47,10 @@ const Navbar = () => {
           {/* Logo/Platform Name */}
           <Link
             href="/"
-            className="shrink-0 text-2xl font-extrabold text-neon-blue tracking-wider"
+            className="shrink-0 text-2xl font-extrabold text-cyan-200 tracking-wider"
             aria-label="BGMI Elite Home"
           >
-            BGMI ELITE
+            Pearl Esports
           </Link>
 
           {/* Desktop Nav Links */}
