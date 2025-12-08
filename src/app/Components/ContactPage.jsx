@@ -6,8 +6,7 @@ export default function ContactPage() {
   return (
     <div className="min-h-[80vh] flex flex-col  md:flex-row ">
       {/* Left Side with Background Image */}
-        <div
-        className="md:w-1/2 w-full h-44 md:h-auto bg-cover bg-center m-3 border-cyan-300 border rounded shadow-amber-300"
+        <div className="md:w-1/2 w-full h-44 md:h-auto bg-cover bg-center lg:m-3 border-cyan-300 border rounded shadow-amber-300"
         style={{
           backgroundImage: `url(${contactImage.src})`, // replace with your photo
         }}

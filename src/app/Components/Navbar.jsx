@@ -9,17 +9,19 @@ const Navbar = () => {
   const navItems = [
     { name: 'Tournaments', href: '#tournaments' },
     { name: 'Leaderboard', href: '#leaderboard' },
-    { name: 'Teams', href: '#teams' },
+    { name: 'Admin', href: '/Malik' },
     { name: 'My Profile', href: '/player' },
+    { name: 'Register', href: '/register' },
   ];
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastscrollX, setLastscrollX] = useState(0);
+  const [scrollTimeout, setScrollTimeout] = useState(null);
 
  useEffect(() => {
   const handleScroll = () => {
     const currentScrollY = window.scrollY;
 
-    if (currentScrollY > lastscrollX) {
+    if (currentScrollY > lastscrollX && currentScrollY > 50) {
       // scrolling down → hide navbar
       setShowNavbar(false);
     } else {
@@ -30,15 +32,15 @@ const Navbar = () => {
     setLastscrollX(currentScrollY);
   };
 
-  window.addEventListener('scroll', handleScroll);
+  window.addEventListener('scroll', handleScroll, { passive: true });
   return () => window.removeEventListener('scroll', handleScroll);
 }, [lastscrollX]);
 
   return (
     showNavbar ? 
       <nav
- className={`bg-black/80 backdrop-blur-sm fixed w-full z-50 shadow-lg border-b border-neon-blue/20 transition-transform duration-1000 ${
-    showNavbar ? 'translate-y-0' : '-translate-y-full'
+ className={`bg-black/80 backdrop-blur-sm fixed w-full z-50 shadow-lg border-b border-neon-blue/20 transition-all duration-300 ease-out animate-navbarSlideIn ${
+    showNavbar ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
   }`}      role="navigation"
       aria-label="Main Navigation"
     >
@@ -47,10 +49,13 @@ const Navbar = () => {
           {/* Logo/Platform Name */}
           <Link
             href="/"
-            className="shrink-0 text-2xl font-extrabold text-cyan-200 tracking-wider"
+            className="shrink-0 flex items-center space-x-2"
             aria-label="BGMI Elite Home"
           >
-            Pearl Esports
+            <div className="h-10 w-10 bg-linear-to-br from-red-600 via-orange-600 to-yellow-600 rounded-full flex items-center justify-center shadow-lg shadow-red-500/50">
+              <img src="/gun.svg" alt="Pearl Esports Logo" className="h-6 w-6 filter brightness-0 invert" />
+            </div>
+            <span className="text-2xl font-extrabold bg-linear-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent tracking-wider">Gold_Pearl</span>
           </Link>
 
           {/* Desktop Nav Links */}
@@ -59,27 +64,13 @@ const Navbar = () => {
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-gray-300 hover:text-neon-red px-3 py-2 text-sm font-medium transition duration-200"
+                className="text-gray-300 hover:text-neon-red px-3 py-2 text-sm font-medium transition duration-200 border-l-2 border-r-2 border-transparent hover:border-l-neon-red hover:border-r-neon-red"
               >
                 {item.name}
               </Link>
             ))}
 
-            {/* Desktop Auth Buttons */}
-            <div className="flex space-x-3 ml-6">
-              {/* <Link
-                href="/login"
-                className="text-white border border-neon-blue hover:bg-neon-blue/20 px-4 py-1.5 rounded text-sm font-semibold transition duration-200"
-              >
-                Login
-              </Link> */}
-              <Link
-                href="/register"
-                className="bg-neon-red hover:bg-neon-red/80 text-white px-4 py-1.5 rounded text-sm font-bold transition duration-200 shadow-blue-500 border-2 shadow-md"
-              >
-                Register
-              </Link>
-            </div>
+            
           </div>
 
           {/* Mobile Menu Button */}
@@ -121,7 +112,7 @@ const Navbar = () => {
 
       {/* Mobile Menu Content */}
       {isOpen && (
-        <div id="mobile-menu" className="md:hidden bg-black/90">
+        <div id="mobile-menu" className="md:hidden bg-black/90 animate-slideDown">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             {navItems.map((item) => (
               <Link

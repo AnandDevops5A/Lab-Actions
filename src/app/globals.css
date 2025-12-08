@@ -24,3 +24,82 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+@keyframes zoomLoop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.2); } /* zoom in to 20% */
+  100% { transform: scale(1); }   /* zoom out back */
+}
+
+.animate-zoomLoop {
+  animation: zoomLoop 25s ease-in-out infinite;
+}
+
+/* Hide scrollbar globally */
+html, body {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
+/* Neon Red Text Style */
+.text-neon-red {
+  color: #ff0055;
+  text-shadow: 0 0 10px rgba(255, 0, 85, 0.8), 0 0 20px rgba(255, 0, 85, 0.6);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.text-neon-red:hover {
+  text-shadow: 0 0 15px rgba(255, 0, 85, 1), 0 0 30px rgba(255, 0, 85, 0.8);
+  color: #ff3366;
+}
+
+/* Neon Red Border Styles */
+.border-neon-red {
+  border-color: #ff0055;
+}
+
+.border-l-neon-red {
+  border-left-color: #ff0055;
+  box-shadow: inset 2px 0 10px rgba(255, 0, 85, 0.4);
+}
+
+.border-r-neon-red {
+  border-right-color: #ff0055;
+  box-shadow: inset -2px 0 10px rgba(255, 0, 85, 0.4);
+}
+
+.hover\:border-l-neon-red:hover {
+  border-left-color: #ff0055;
+  box-shadow: inset 2px 0 15px rgba(255, 0, 85, 0.7);
+  transition: all 0.3s ease;
+}
+
+.hover\:border-r-neon-red:hover {
+  border-right-color: #ff0055;
+  box-shadow: inset -2px 0 15px rgba(255, 0, 85, 0.7);
+  transition: all 0.3s ease;
+}
+
+/* Skeleton Loading Animation */
+@keyframes skeleton-loading {
+  0% {
+    background-color: rgba(107, 114, 128, 0.3);
+  }
+  50% {
+    background-color: rgba(107, 114, 128, 0.6);
+  }
+  100% {
+    background-color: rgba(107, 114, 128, 0.3);
+  }
+}
+
+.animate-pulse {
+  animation: skeleton-loading 2s infinite;
+}
+
+
