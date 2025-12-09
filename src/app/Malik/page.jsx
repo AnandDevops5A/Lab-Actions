@@ -44,7 +44,7 @@ const AdminPage = () => {
     { id: 2, name: 'Spring Championship', participants: 180, prize: 75000, status: 'Upcoming', date: '2025-02-10' },
     { id: 3, name: 'Winter Cup 2024', participants: 420, prize: 150000, status: 'Completed', date: '2024-12-20' },
     { id: 4, name: 'Regional Qualifier', participants: 95, prize: 25000, status: 'Active', date: '2025-01-20' },
-    { id: 4, name: 'start month', participants: 105, prize: 35000, status: 'Active', date: '2025-02-15' },
+    { id: 5, name: 'start month', participants: 105, prize: 35000, status: 'Active', date: '2025-02-15' },
   ]);
 
   const [participants, setParticipants] = useState([
@@ -177,14 +177,14 @@ const AdminPage = () => {
     { id: 'overview', label: 'Overview', icon: '📊' },
     { id: 'tournaments', label: 'Tournaments', icon: '🏆' },
     { id: 'participants', label: 'Participants', icon: '👥' },
-    { id: 'revenue', label: 'Revenue Analytics', icon: '💹' },
+    { id: 'revenue', label: 'Revenue Analytics', icon: '💵' },
     { id: 'reports', label: 'Reports', icon: '📄' },
     { id: 'settings', label: 'Settings', icon: '⚙️' },
   ];
 
   // Skeleton Loader Component
   const SkeletonCard = () => (
-    <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg animate-pulse">
+    <div className="bg-linear-to-br from-gray-800 to-gray-900 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg animate-pulse">
       <div className="flex items-center justify-between mb-4">
         <div className="h-4 bg-gray-700 rounded w-24"></div>
         <div className="h-8 w-8 bg-gray-700 rounded"></div>
@@ -347,7 +347,7 @@ const AdminPage = () => {
               {/* Stats Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 {stats.map((stat, idx) => (
-                  <div key={idx} className="bg-gradient-to-br from-gray-800 to-gray-900 p-4 md:p-6 rounded-xl border border-gray-700 hover:border-orange-500 transition shadow-lg">
+                  <div key={idx} className="bg-linear-to-br from-gray-800 to-gray-900 p-4 md:p-6 rounded-xl border border-gray-700 hover:border-orange-500 transition shadow-lg">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-gray-400 text-xs md:text-sm font-semibold">{stat.label}</h3>
                       <span className="text-2xl md:text-3xl">{stat.icon}</span>
@@ -387,7 +387,7 @@ const AdminPage = () => {
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <h2 className="text-xl md:text-2xl font-bold">Tournament Management</h2>
-                <button className="bg-gradient-to-r from-orange-500 to-red-500 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg transition text-sm md:text-base">
+                <button className="bg-linear-to-r from-orange-500 to-red-500 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg transition text-sm md:text-base">
                   + New Tournament
                 </button>
               </div>
@@ -458,7 +458,7 @@ const AdminPage = () => {
                         <td className="px-3 md:px-6 py-3 md:py-4">
                           <div className="flex items-center space-x-1 md:space-x-2">
                             <div className="w-12 md:w-16 bg-gray-700 rounded-full h-2">
-                              <div className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full" style={{width: `${p.winRate}%`}}></div>
+                              <div className="bg-linear-to-r from-orange-500 to-red-500 h-2 rounded-full" style={{width: `${p.winRate}%`}}></div>
                             </div>
                             <span className="text-xs md:text-sm font-bold text-orange-400 whitespace-nowrap">{p.winRate}%</span>
                           </div>
@@ -544,7 +544,7 @@ const AdminPage = () => {
                   </div>
                 </div>
                 <div className="pt-4 border-t border-gray-700">
-                  <button className="bg-gradient-to-r from-orange-500 to-red-500 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg transition text-sm md:text-base">
+                  <button className="bg-linear-to-r from-orange-500 to-red-500 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg transition text-sm md:text-base">
                     Save Changes
                   </button>
                 </div>
