@@ -7,8 +7,8 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
-    { name: 'Tournaments', href: '#tournaments' },
-    { name: 'Leaderboard', href: '#leaderboard' },
+    { name: 'Amount', href: '/#amount' },
+    { name: 'leaderboard', href: '/' },
     { name: 'Admin', href: '/Malik' },
     { name: 'My Profile', href: '/player' },
     { name: 'Register', href: '/register' },
