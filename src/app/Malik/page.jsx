@@ -232,7 +232,7 @@ const AdminPage = () => {
               onClick={() => setActiveTab(item.id)}
               className={`w-full flex items-center space-x-3 px-6 py-3 rounded-lg transition-all duration-200 ${
                 activeTab === item.id
-                  ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
+                  ? 'bg-linear-to-r from-orange-500 to-red-500 text-white shadow-lg'
                   : 'text-gray-400 hover:text-white hover:bg-gray-800'
               }`}
             >
