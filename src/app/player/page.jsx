@@ -3,6 +3,7 @@
 import React from 'react';
 import profileBackImage from '../images/profile.png';
 import Avatar from '../images/avatar.png';
+import ChargeBorder from '../Components/ChargeBorder.jsx';
 // --- MOCK DATA for demonstration ---
 
 const mockPlayer = {
@@ -29,19 +30,26 @@ const mockMatchHistory = [
 // components/ProfileHeader.jsx
 
 const ProfileHeader = ({ player }) => (
+  <ChargeBorder 
+  color="#7cfc00 "
+  speed={1}
+  chaos={0.5}
+  thickness={2}
+  style={{ borderRadius: 14 }}
+>
   <div
-    className="relative h-48 sm:h-56 md:h-64 lg:h-72 bg-cover bg-center mt-16"
+    className="relative h-48 sm:h-56 md:h-64 lg:h-72 bg-cover bg-center mt-16 rounded-2xl overflow-hidden"
     style={{ backgroundImage: `url(${profileBackImage.src})` }}
   >
     {/* Semi-transparent overlay */}
-    <div className="absolute inset-0 bg-gray-900/70 backdrop-blur-sm"></div>
+    {/* <div className="absolute inset-0 bg-gray-900/70 backdrop-blur-sm rounded-2xl"></div> */}
 
-    <div className="relative p-4 sm:p-6 flex flex-col md:flex-row-reverse items-center justify-evenly h-full gap-6">
+    <div className="relative p-4 sm:p-6 flex flex-col md:flex-row-reverse items-center justify-evenly h-full gap-6 blur(4px)">
       {/* Player Avatar */}
       <img
         src={player.avatarUrl}
         alt={player.ign}
-        className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-full border-4 border-green-400 object-cover shadow-xl shadow-red-500/30"
+        className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-full border-2 border-green-400 object-cover shadow-xl shadow-gray-700/70"
       />
 
       {/* Player Info */}
@@ -55,6 +63,7 @@ const ProfileHeader = ({ player }) => (
       </div>
     </div>
   </div>
+</ChargeBorder>
 );
 
 
