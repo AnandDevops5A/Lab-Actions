@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
@@ -15,7 +16,7 @@ const Navbar = () => {
   ];
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastscrollX, setLastscrollX] = useState(0);
-  const [scrollTimeout, setScrollTimeout] = useState(null);
+  // {const [scrollTimeout, setScrollTimeout] = useState(null);}
 
  useEffect(() => {
   const handleScroll = () => {
@@ -53,7 +54,10 @@ const Navbar = () => {
             aria-label="BGMI Elite Home"
           >
             <div className="h-10 w-10 bg-linear-to-br from-red-600 via-orange-600 to-yellow-600 rounded-full flex items-center justify-center shadow-lg shadow-red-500/50">
-              <img src="/gun.svg" alt="Pearl Esports Logo" className="h-6 w-6 filter brightness-0 invert" />
+              <Image src="/gun.svg" alt="Pearl Esports Logo" 
+              width={40}
+              height={40}
+              className="h-6 w-6 filter brightness-0 invert" />
             </div>
             <span className="text-2xl font-extrabold bg-linear-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent tracking-wider">Gold_Pearl</span>
           </Link>
