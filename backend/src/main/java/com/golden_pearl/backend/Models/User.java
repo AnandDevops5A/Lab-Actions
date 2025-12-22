@@ -1,0 +1,36 @@
+package com.golden_pearl.backend.Models;
+
+import java.util.List;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Document(collection = "users")
+public class User {
+    
+    @Id
+    private String id;
+    private String username;
+    private String callSign;
+    private String email;
+    private String accessKey;
+    private Long contact;
+    private String joiningDate;
+    private Long investAmount;
+    private Long winAmount;
+    private Long withdrawAmount;
+    private Long balanceAmount;
+    private int totalPlay;
+    private int totalWin;
+    private int totallosses;
+    private List<Tournament> attainedTournaments;
+
+
+}
