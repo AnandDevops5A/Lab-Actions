@@ -1,0 +1,16 @@
+API Security Test Report
+========================
+
+Vulnerability (Kami): Authentication aur Authorization ki kami.
+
+Description:
+Hamaare testing ke dauraan, hamne paaya ki `/admin/data` API endpoint poori tarah se unprotected hai. Iska matlab hai ki koi bhi, bina kisi login ya permission ke, is endpoint ko call karke saare users aur tournaments ki jaankari haasil kar sakta hai.
+
+Yeh ek bahut hi gambhir security issue hai kyunki admin-level data publicly accessible hai.
+
+Risk (Khatra):
+- Sensitive user data (users ki list) leak ho sakti hai.
+- Koi bhi unauthorized person system ke data ko dekh sakta hai, jo data privacy ke khilaaf hai.
+
+Recommendation (Sujhaav):
+Is endpoint ko turant secure karna chahiye. Spring Security ka istemaal karke authentication aur authorization लागू karein. Access sirf un users ko milna chahiye jinke paas "ADMIN" role ho. Isse yeh sunishchit hoga ki sirf authorized admin hi is data ko access kar paaye.

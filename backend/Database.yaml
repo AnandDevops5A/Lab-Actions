@@ -1,4 +1,5 @@
 services:
+#main database service
   mongodb:
     image: 'mongo:6.0'
     container_name: mongodb
@@ -12,6 +13,7 @@ services:
       - 'mongo-data:/data/db'
     networks:
       - spring-boot-mongo-net
+# Datbase GUI service
   mongo-express:
     image: 'mongo-express:1.0.0'
     container_name: mongo-express
@@ -27,7 +29,16 @@ services:
       - mongodb
     networks:
       - spring-boot-mongo-net
- 
+# Redis service for caching
+  redis:
+    image: 'redis:7.2'
+    container_name: redis
+    restart: always
+    ports:
+      - '6379:6379'
+    networks:
+      - spring-boot-mongo-net
+
 volumes:
   mongo-data:
 
