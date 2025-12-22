@@ -28,7 +28,7 @@ const WinnerSection = dynamic(() =>
 );
 
 const ContactPage = dynamic(() => 
-  import('./HeroSection'), 
+  import('./ContactPage'), 
   {
     loading: () => <h2 className='text-center text-emerald-500 m-36'>Hangon please...</h2>, // Optional: A fallback UI while loading
     ssr: false, // Optional: Set to false if the component must ONLY run on the client
