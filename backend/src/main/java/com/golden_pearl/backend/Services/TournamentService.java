@@ -1,10 +1,12 @@
 package com.golden_pearl.backend.Services;
+import com.golden_pearl.backend.common.General;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
+
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
+
 import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.Repository.TournamentRepository;
 import com.golden_pearl.backend.errors.ResourceNotFoundException;
@@ -13,16 +15,15 @@ import com.golden_pearl.backend.errors.ResourceNotFoundException;
 public class TournamentService {
 
     private final TournamentRepository tournamentRepository;
+    private final General general= new General();
 
-    public TournamentService(TournamentRepository tournamentRepository) {
+    public TournamentService(TournamentRepository tournamentRepository ) {
         this.tournamentRepository = tournamentRepository;
+        
     }
 
     //get current dateTime in yyyyMMddHHmm format
-    public long getCurrentDateTime() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
-        return Long.parseLong(LocalDateTime.now().format(formatter));
-    }
+   
 
     public List<Tournament> getAllTournaments() {
         return tournamentRepository.findAll();
@@ -34,7 +35,7 @@ public class TournamentService {
         return tournamentRepository.save(tournamentDetails);
     }
 
-    @CacheEvict(value = "adminData", allEntries = true)
+    // @CacheEvict(value = "adminData", allEntries = true)
     public Tournament getTournamentById(String id) {
         return tournamentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tournament not found with id: " + id));
@@ -45,7 +46,7 @@ public class TournamentService {
         tournamentRepository.deleteById(id);
     }
 
-    @CacheEvict(value = "adminData", allEntries = true)
+    @CacheEvict(value = "adminData",allEntries=true)
     public Tournament updateTournament(String id, Tournament tournamentDetails) {
 
         Tournament existingTournament = getTournamentById(id);
@@ -60,15 +61,15 @@ public class TournamentService {
 
     public List<Tournament> getCompletedTournaments() {
 
-        return tournamentRepository.findByDateTimeLessThan(getCurrentDateTime());
+        return tournamentRepository.findByDateTimeLessThan(general.getCurrentDateTime());
     }
 
     public List<Tournament> getUpcomingTournaments() {
 
-        return tournamentRepository.findByDateTimeGreaterThan(getCurrentDateTime());
+        return tournamentRepository.findByDateTimeGreaterThan(general.getCurrentDateTime());
     }
 
     public Tournament getLastTournament(){
-        return tournamentRepository.findFirstByDateTimeLessThan(getCurrentDateTime());
+        return tournamentRepository.findFirstByDateTimeLessThan(general.getCurrentDateTime());
     }
 }

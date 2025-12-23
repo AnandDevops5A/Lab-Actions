@@ -1,6 +1,9 @@
 package com.golden_pearl.backend.Services;
 
+import java.util.List;
+
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -8,20 +11,18 @@ import org.springframework.stereotype.Service;
 import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.Models.UserAuth;
 import com.golden_pearl.backend.Repository.UserRepository;
+import com.golden_pearl.backend.common.General;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
+    private final General general = new General();
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    @CacheEvict(value = "adminData", allEntries = true)
-    public User addUser(User user) {
-        return userRepository.save(user);
-    }
 
     // verify user by callsign and accessKey or contact and accessKey
     public ResponseEntity<User> getUser(UserAuth userAuth) {
@@ -30,7 +31,8 @@ public class UserService {
         Long contact = userAuth.getContact();
         String accessKey = userAuth.getAccessKey();
 
-        // Input validation: accessKey is mandatory, and either callsign or contact must be present.
+        // Input validation: accessKey is mandatory, and either callsign or contact must
+        // be present.
         if (accessKey == null || (callsign == null && contact == null)) {
             return ResponseEntity.badRequest().build(); // 400 Bad Request
         }
@@ -53,7 +55,21 @@ public class UserService {
         if (user == null) {
             return ResponseEntity.badRequest().build();
         } else {
+            user.setJoiningDate(general.getCurrentDateTime());
             return ResponseEntity.ok(userRepository.save(user));
         }
+    }
+
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return ResponseEntity.ok(users);
+    }
+    
+    @CacheEvict(value = "adminData", allEntries=true)
+    public ResponseEntity<User> updateUser(User user) {
+        if (user.getId() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(userRepository.save(user));
     }
 }

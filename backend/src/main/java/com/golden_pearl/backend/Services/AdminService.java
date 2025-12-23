@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class AdminService {
@@ -22,8 +23,18 @@ public class AdminService {
     @Cacheable(value = "adminData")
     public Map<String, Object> getAllData() {
         Map<String, Object> response = new HashMap<>();
-        response.put("users", userRepository.findAll());
-        response.put("tournaments", tournamentRepository.findAll());
+
+        CompletableFuture<?> usersFuture = CompletableFuture.supplyAsync(userRepository::findAll);
+        CompletableFuture<?> tournamentsFuture = CompletableFuture.supplyAsync(tournamentRepository::findAll);
+
+        CompletableFuture.allOf(usersFuture, tournamentsFuture).join();
+
+        try {
+            response.put("users", usersFuture.get());
+            response.put("tournaments", tournamentsFuture.get());
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching admin data", e);
+        }
         return response;
     }
 }
