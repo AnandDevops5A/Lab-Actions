@@ -3,8 +3,6 @@ package com.golden_pearl.backend.Repository;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import com.golden_pearl.backend.Models.User;
-import java.util.List;
-
 
 public interface UserRepository extends MongoRepository<User, String>{
     

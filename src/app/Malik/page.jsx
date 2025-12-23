@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react';
-import { Bar, Line, Pie, Doughnut } from 'react-chartjs-2';
+import { Bar, Line, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,6 +14,7 @@ import {
   LineElement,
   Filler,
 } from 'chart.js';
+import dynamic from 'next/dynamic';
 
 ChartJS.register(
   CategoryScale,
@@ -28,12 +29,23 @@ ChartJS.register(
   Filler
 );
 
+const AddTournament = dynamic(() =>
+  import('./AddTournament'),
+  {
+    loading: () => <h2 className='text-center text-emerald-500 m-auto'>Hangon please...</h2>, // Optional: A fallback UI while loading
+     // Optional: Set to false if the component must ONLY run on the client
+  }
+);
+
 const AdminPage = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('tournaments');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [showAddTournamentForm , setAddTournamentForm] = useState(true)
 
   useEffect(() => {
+    if (window.innerWidth < 640)
+      setSidebarOpen(!sidebarOpen)
     setIsLoading(true);
     const timer = setTimeout(() => setIsLoading(false), 2000);
     return () => clearTimeout(timer);
@@ -217,24 +229,28 @@ const AdminPage = () => {
   return (
     <div className="flex min-h-screen bg-gray-900 text-white">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-gray-950 shadow-2xl transition-all duration-300 fixed left-0 top-16 h-[calc(100vh-4rem)] border-r border-gray-800 z-40 overflow-y-auto md:top-0 md:h-screen`}>
+      <div className={`
+        ${sidebarOpen ? 'w-64' : 'w-16'} 
+         bg-gray-950 shadow-2xl transition-all duration-300 fixed left-0 top-16 
+           h-[calc(100vh-4rem)] border-r border-gray-800 z-40 overflow-y-auto 
+           md:top-0 md:h-screen
+          `}>
         <div className="p-6 border-b border-gray-800 flex items-center justify-between">
           {sidebarOpen && <h2 className="text-xl font-bold bg-linear-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">Admin Panel</h2>}
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-xl hover:text-orange-500 transition hover:scale-104 hover:cursor-pointer">
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-xl hover:text-orange-500 transition hover:scale-104 hover:cursor-pointer ">
             {sidebarOpen ? '⬅️' : '☰'}
           </button>
         </div>
-        
-        <nav className="mt-8 space-y-2">
+
+        <nav className="mt-8 space-y-1">
           {menuItems.map(item => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center space-x-3 px-6 py-3 rounded-lg transition-all duration-200 ${
-                activeTab === item.id
-                  ? 'bg-linear-to-r from-orange-500 to-red-500 text-white shadow-lg'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800'
-              }`}
+              className={`w-full flex items-center align-middle space-x-3 px-5 py-3 rounded-lg transition-all duration-200 ${activeTab === item.id
+                ? 'bg-linear-to-r from-orange-500 to-red-500 text-white shadow-lg'
+                : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                }`}
             >
               <span className="text-xl">{item.icon}</span>
               {sidebarOpen && <span className="font-medium">{item.label}</span>}
@@ -254,12 +270,12 @@ const AdminPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className={`flex-1 ${sidebarOpen ? 'md:ml-64' : 'md:ml-16'} transition-all duration-300 ml-0 w-full pt-15`}>
+      <div className={`flex-1 ${sidebarOpen ? 'md:ml-64' : 'md:ml-16 '} transition-all duration-300 w-full pt-15 pl-16 sm:pl-0`}>
         {/* Header */}
         <div className="bg-gray-950 border-b border-gray-800 p-4 md:p-6  top-0 z-30">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>
-              <h1 className="text-xl md:text-3xl font-bold text-white mb-1">Tournament Management Dashboard</h1>
+              <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-white mb-1">Tournament Management Dashboard</h1>
               <p className="text-gray-400 text-xs md:text-sm">Welcome back! Here's your tournament overview</p>
             </div>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:space-x-4">
@@ -272,7 +288,7 @@ const AdminPage = () => {
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-2 sm:p-6 ">
           {isLoading ? (
             <>
               {activeTab === 'overview' && (
@@ -342,215 +358,215 @@ const AdminPage = () => {
             </>
           ) : (
             <>
-          {activeTab === 'overview' && (
-            <div className="space-y-8">
-              {/* Stats Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                {stats.map((stat, idx) => (
-                  <div key={idx} className="bg-linear-to-br from-gray-800 to-gray-900 p-4 md:p-6 rounded-xl border border-gray-700 hover:border-orange-500 transition shadow-lg">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-gray-400 text-xs md:text-sm font-semibold">{stat.label}</h3>
-                      <span className="text-2xl md:text-3xl">{stat.icon}</span>
-                    </div>
-                    <p className="text-2xl md:text-3xl font-bold text-white">{stat.value}</p>
-                    <p className="text-green-400 text-xs mt-2">↑ 12% from last month</p>
+              {activeTab === 'overview' && (
+                <div className="space-y-8">
+                  {/* Stats Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                    {stats.map((stat, idx) => (
+                      <div key={idx} className="bg-linear-to-br from-gray-800 to-gray-900 p-4 md:p-6 rounded-xl border border-gray-700 hover:border-orange-500 transition shadow-lg">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-gray-400 text-xs md:text-sm font-semibold">{stat.label}</h3>
+                          <span className="text-2xl md:text-3xl">{stat.icon}</span>
+                        </div>
+                        <p className="text-2xl md:text-3xl font-bold text-white">{stat.value}</p>
+                        <p className="text-green-400 text-xs mt-2">↑ 12% from last month</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
 
-              {/* Charts Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-                <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg">
-                  <h2 className="text-lg md:text-xl font-bold mb-4 text-white">Tournament Participants Distribution</h2>
-                  <Bar data={tournamentData} options={chartOptions} />
-                </div>
-                <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg">
-                  <h2 className="text-lg md:text-xl font-bold mb-4 text-white">Participant Status</h2>
-                  <Doughnut data={participantDistribution} options={chartOptions} />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-                <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg">
-                  <h2 className="text-lg md:text-xl font-bold mb-4 text-white">Revenue Trends</h2>
-                  <Line data={revenueData} options={chartOptions} />
-                </div>
-                <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg">
-                  <h2 className="text-lg md:text-xl font-bold mb-4 text-white">Monthly Registrations</h2>
-                  <Bar data={registrationData} options={chartOptions} />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'tournaments' && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                <h2 className="text-xl md:text-2xl font-bold">Tournament Management</h2>
-                <button className="bg-linear-to-r from-orange-500 to-red-500 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg transition text-sm md:text-base">
-                  + New Tournament
-                </button>
-              </div>
-              <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-x-auto shadow-lg">
-                <table className="w-full text-xs md:text-sm">
-                  <thead className="bg-gray-900 border-b border-gray-700">
-                    <tr>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300">Tournament Name</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300">Participants</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300 hidden sm:table-cell">Prize Pool</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300">Status</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300 hidden md:table-cell">Date</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300 hidden lg:table-cell">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tournaments.map((t, idx) => (
-                      <tr key={t.id} className={idx % 2 === 0 ? 'bg-gray-750' : 'bg-gray-800'}>
-                        <td className="px-3 md:px-6 py-3 md:py-4 font-semibold text-white">{t.name}</td>
-                        <td className="px-3 md:px-6 py-3 md:py-4 text-gray-300">{t.participants}</td>
-                        <td className="px-3 md:px-6 py-3 md:py-4 font-bold text-green-400 hidden sm:table-cell">${t.prize.toLocaleString()}</td>
-                        <td className="px-3 md:px-6 py-3 md:py-4">
-                          <span className={`px-2 md:px-3 py-1 rounded-full text-xs font-bold ${
-                            t.status === 'Active' ? 'bg-green-500/20 text-green-400' :
-                            t.status === 'Upcoming' ? 'bg-blue-500/20 text-blue-400' :
-                            'bg-gray-500/20 text-gray-400'
-                          }`}>
-                            {t.status}
-                          </span>
-                        </td>
-                        <td className="px-3 md:px-6 py-3 md:py-4 text-gray-300 hidden md:table-cell text-xs md:text-sm">{t.date}</td>
-                        <td className="px-3 md:px-6 py-3 md:py-4 space-x-1 md:space-x-2 hidden lg:table-cell">
-                          <button className="text-blue-400 hover:text-blue-300 font-bold text-xs md:text-sm">Edit</button>
-                          <button className="text-red-400 hover:text-red-300 font-bold text-xs md:text-sm">Delete</button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'participants' && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                <h2 className="text-xl md:text-2xl font-bold">Participant Management</h2>
-                <input type="text" placeholder="Search participants..." className="bg-gray-800 border border-gray-700 rounded px-3 md:px-4 py-2 text-white text-xs md:text-sm focus:border-orange-500 outline-none w-full sm:w-auto" />
-              </div>
-              <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-x-auto shadow-lg">
-                <table className="w-full text-xs md:text-sm">
-                  <thead className="bg-gray-900 border-b border-gray-700">
-                    <tr>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300">Name</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300 hidden sm:table-cell">Email</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300">Tournaments</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300">Win Rate</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300 hidden md:table-cell">Status</th>
-                      <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300 hidden lg:table-cell">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {participants.map((p, idx) => (
-                      <tr key={p.id} className={idx % 2 === 0 ? 'bg-gray-750' : 'bg-gray-800'}>
-                        <td className="px-3 md:px-6 py-3 md:py-4 font-semibold text-white">{p.name}</td>
-                        <td className="px-3 md:px-6 py-3 md:py-4 text-gray-300 hidden sm:table-cell">{p.email}</td>
-                        <td className="px-3 md:px-6 py-3 md:py-4 text-gray-300">{p.tournaments}</td>
-                        <td className="px-3 md:px-6 py-3 md:py-4">
-                          <div className="flex items-center space-x-1 md:space-x-2">
-                            <div className="w-12 md:w-16 bg-gray-700 rounded-full h-2">
-                              <div className="bg-linear-to-r from-orange-500 to-red-500 h-2 rounded-full" style={{width: `${p.winRate}%`}}></div>
-                            </div>
-                            <span className="text-xs md:text-sm font-bold text-orange-400 whitespace-nowrap">{p.winRate}%</span>
-                          </div>
-                        </td>
-                        <td className="px-3 md:px-6 py-3 md:py-4 hidden md:table-cell">
-                          <span className={`px-2 md:px-3 py-1 rounded-full text-xs font-bold ${
-                            p.status === 'Active' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                          }`}>
-                            {p.status}
-                          </span>
-                        </td>
-                        <td className="px-3 md:px-6 py-3 md:py-4 space-x-1 md:space-x-2 hidden lg:table-cell">
-                          <button className="text-blue-400 hover:text-blue-300 font-bold text-xs md:text-sm">View</button>
-                          <button className="text-red-400 hover:text-red-300 font-bold text-xs md:text-sm">Ban</button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'revenue' && (
-            <div className="space-y-6">
-              <h2 className="text-xl md:text-2xl font-bold">Revenue Analytics</h2>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-                <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg">
-                  <h3 className="text-lg md:text-xl font-bold mb-4 text-white">Monthly Revenue</h3>
-                  <Line data={revenueData} options={chartOptions} />
-                </div>
-                <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg">
-                  <h3 className="text-lg md:text-xl font-bold mb-4 text-white">Registration Growth</h3>
-                  <Bar data={registrationData} options={chartOptions} />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'reports' && (
-            <div className="space-y-6">
-              <h2 className="text-xl md:text-2xl font-bold">Reports & Analytics</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-                <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 hover:border-orange-500 transition cursor-pointer shadow-lg">
-                  <h3 className="text-base md:text-lg font-bold mb-2">Tournament Performance</h3>
-                  <p className="text-gray-400 mb-4 text-xs md:text-sm">Detailed analysis of all tournaments</p>
-                  <button className="text-orange-500 font-bold hover:text-orange-400 text-sm">Generate Report →</button>
-                </div>
-                <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 hover:border-orange-500 transition cursor-pointer shadow-lg">
-                  <h3 className="text-base md:text-lg font-bold mb-2">Player Statistics</h3>
-                  <p className="text-gray-400 mb-4 text-xs md:text-sm">In-depth player performance metrics</p>
-                  <button className="text-orange-500 font-bold hover:text-orange-400 text-sm">Generate Report →</button>
-                </div>
-                <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 hover:border-orange-500 transition cursor-pointer shadow-lg">
-                  <h3 className="text-base md:text-lg font-bold mb-2">Financial Summary</h3>
-                  <p className="text-gray-400 mb-4 text-xs md:text-sm">Complete revenue and expense breakdown</p>
-                  <button className="text-orange-500 font-bold hover:text-orange-400 text-sm">Generate Report →</button>
-                </div>
-                <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 hover:border-orange-500 transition cursor-pointer shadow-lg">
-                  <h3 className="text-base md:text-lg font-bold mb-2">User Engagement</h3>
-                  <p className="text-gray-400 mb-4 text-xs md:text-sm">Participant activity and engagement data</p>
-                  <button className="text-orange-500 font-bold hover:text-orange-400 text-sm">Generate Report →</button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'settings' && (
-            <div className="space-y-6">
-              <h2 className="text-xl md:text-2xl font-bold">Settings & Configuration</h2>
-              <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg space-y-6">
-                <div>
-                  <h3 className="text-base md:text-lg font-bold mb-4">General Settings</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs md:text-sm font-bold mb-2">Platform Name</label>
-                      <input type="text" defaultValue="Gold_Pearl Tournament" className="w-full bg-gray-900 border border-gray-700 rounded px-3 md:px-4 py-2 text-white text-xs md:text-sm focus:border-orange-500 outline-none" />
+                  {/* Charts Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+                    <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg">
+                      <h2 className="text-lg md:text-xl font-bold mb-4 text-white">Tournament Participants Distribution</h2>
+                      <Bar data={tournamentData} options={chartOptions} />
                     </div>
-                    <div>
-                      <label className="block text-xs md:text-sm font-bold mb-2">Admin Email</label>
-                      <input type="email" defaultValue="admin@tournament.com" className="w-full bg-gray-900 border border-gray-700 rounded px-3 md:px-4 py-2 text-white text-xs md:text-sm focus:border-orange-500 outline-none" />
+                    <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg">
+                      <h2 className="text-lg md:text-xl font-bold mb-4 text-white">Participant Status</h2>
+                      <Doughnut data={participantDistribution} options={chartOptions} />
+                    </div>
+                    {/* </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6"> */}
+                    <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg">
+                      <h2 className="text-lg md:text-xl font-bold mb-4 text-white">Revenue Trends</h2>
+                      <Line data={revenueData} options={chartOptions} />
+                    </div>
+                    <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg">
+                      <h2 className="text-lg md:text-xl font-bold mb-4 text-white">Monthly Registrations</h2>
+                      <Bar data={registrationData} options={chartOptions} />
                     </div>
                   </div>
                 </div>
-                <div className="pt-4 border-t border-gray-700">
-                  <button className="bg-linear-to-r from-orange-500 to-red-500 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg transition text-sm md:text-base">
-                    Save Changes
-                  </button>
+              )}
+
+              {activeTab === 'tournaments' && (
+                <div className="space-y-6">
+                  {showAddTournamentForm ?<> <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                    <h2 className="text-xl md:text-2xl font-bold">Tournament Management</h2>
+                    <button className="bg-linear-to-r from-orange-500 to-red-500 px-4 md:px-6 py-2 rounded-lg
+                     font-bold hover:shadow-lg transition text-sm md:text-base" onClick={()=> setAddTournamentForm(!AddTournament)}>
+                      + New Tournament
+                    </button>
+                  </div>
+                  <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-x-auto shadow-lg">
+                    <table className="w-full text-xs md:text-sm">
+                      <thead className="bg-gray-900 border-b border-gray-700">
+                        <tr>
+                          <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300">Tournament Name</th>
+                          <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300">Participants</th>
+                          <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300 hidden sm:table-cell">Prize Pool</th>
+                          <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300">Status</th>
+                          <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300 hidden md:table-cell">Date</th>
+                          <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300 hidden lg:table-cell">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {tournaments.map((t, idx) => (
+                          <tr key={t.id} className={idx % 2 === 0 ? 'bg-gray-750' : 'bg-gray-800'}>
+                            <td className="px-3 md:px-6 py-3 md:py-4 font-semibold text-white">{t.name}</td>
+                            <td className="px-3 md:px-6 py-3 md:py-4 text-gray-300">{t.participants}</td>
+                            <td className="px-3 md:px-6 py-3 md:py-4 font-bold text-green-400 hidden sm:table-cell">${t.prize.toLocaleString()}</td>
+                            <td className="px-3 md:px-6 py-3 md:py-4">
+                              <span className={`px-2 md:px-3 py-1 rounded-full text-xs font-bold ${t.status === 'Active' ? 'bg-green-500/20 text-green-400' :
+                                t.status === 'Upcoming' ? 'bg-blue-500/20 text-blue-400' :
+                                  'bg-gray-500/20 text-gray-400'
+                                }`}>
+                                {t.status}
+                              </span>
+                            </td>
+                            <td className="px-3 md:px-6 py-3 md:py-4 text-gray-300 hidden md:table-cell text-xs md:text-sm">{t.date}</td>
+                            <td className="px-3 md:px-6 py-3 md:py-4 space-x-1 md:space-x-2 hidden lg:table-cell">
+                              <button className="text-blue-400 hover:text-blue-300 font-bold text-xs md:text-sm">Edit</button>
+                              <button className="text-red-400 hover:text-red-300 font-bold text-xs md:text-sm">Delete</button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div></>:
+                  <AddTournament onClose={setAddTournamentForm}/> }
                 </div>
-              </div>
-            </div>
-          )}
+              )}
+
+              {activeTab === 'participants' && (
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                    <h2 className="text-xl md:text-2xl font-bold">Participant Management</h2>
+                    <input type="text" placeholder="Search participants..." className="bg-gray-800 border border-gray-700 rounded px-3 md:px-4 py-2 text-white text-xs md:text-sm focus:border-orange-500 outline-none w-full sm:w-auto" />
+                  </div>
+                  <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-x-auto shadow-lg">
+                    <table className="w-full text-xs md:text-sm">
+                      <thead className="bg-gray-900 border-b border-gray-700">
+                        <tr>
+                          <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300">Name</th>
+                          <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300 hidden sm:table-cell">Email</th>
+                          <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300">Tournaments</th>
+                          <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300">Win Rate</th>
+                          <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300 hidden md:table-cell">Status</th>
+                          <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300 hidden lg:table-cell">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {participants.map((p, idx) => (
+                          <tr key={p.id} className={idx % 2 === 0 ? 'bg-gray-750' : 'bg-gray-800'}>
+                            <td className="px-3 md:px-6 py-3 md:py-4 font-semibold text-white">{p.name}</td>
+                            <td className="px-3 md:px-6 py-3 md:py-4 text-gray-300 hidden sm:table-cell">{p.email}</td>
+                            <td className="px-3 md:px-6 py-3 md:py-4 text-gray-300">{p.tournaments}</td>
+                            <td className="px-3 md:px-6 py-3 md:py-4">
+                              <div className="flex items-center space-x-1 md:space-x-2">
+                                <div className="w-12 md:w-16 bg-gray-700 rounded-full h-2">
+                                  <div className="bg-linear-to-r from-orange-500 to-red-500 h-2 rounded-full" style={{ width: `${p.winRate}%` }}></div>
+                                </div>
+                                <span className="text-xs md:text-sm font-bold text-orange-400 whitespace-nowrap">{p.winRate}%</span>
+                              </div>
+                            </td>
+                            <td className="px-3 md:px-6 py-3 md:py-4 hidden md:table-cell">
+                              <span className={`px-2 md:px-3 py-1 rounded-full text-xs font-bold ${p.status === 'Active' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                                }`}>
+                                {p.status}
+                              </span>
+                            </td>
+                            <td className="px-3 md:px-6 py-3 md:py-4 space-x-1 md:space-x-2 hidden lg:table-cell">
+                              <button className="text-blue-400 hover:text-blue-300 font-bold text-xs md:text-sm">View</button>
+                              <button className="text-red-400 hover:text-red-300 font-bold text-xs md:text-sm">Ban</button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'revenue' && (
+                <div className="space-y-6">
+                  <h2 className="text-xl md:text-2xl font-bold">Revenue Analytics</h2>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                    <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg">
+                      <h3 className="text-lg md:text-xl font-bold mb-4 text-white">Monthly Revenue</h3>
+                      <Line data={revenueData} options={chartOptions} />
+                    </div>
+                    <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg">
+                      <h3 className="text-lg md:text-xl font-bold mb-4 text-white">Registration Growth</h3>
+                      <Bar data={registrationData} options={chartOptions} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'reports' && (
+                <div className="space-y-6">
+                  <h2 className="text-xl md:text-2xl font-bold">Reports & Analytics</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                    <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 hover:border-orange-500 transition cursor-pointer shadow-lg">
+                      <h3 className="text-base md:text-lg font-bold mb-2">Tournament Performance</h3>
+                      <p className="text-gray-400 mb-4 text-xs md:text-sm">Detailed analysis of all tournaments</p>
+                      <button className="text-orange-500 font-bold hover:text-orange-400 text-sm">Generate Report →</button>
+                    </div>
+                    <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 hover:border-orange-500 transition cursor-pointer shadow-lg">
+                      <h3 className="text-base md:text-lg font-bold mb-2">Player Statistics</h3>
+                      <p className="text-gray-400 mb-4 text-xs md:text-sm">In-depth player performance metrics</p>
+                      <button className="text-orange-500 font-bold hover:text-orange-400 text-sm">Generate Report →</button>
+                    </div>
+                    <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 hover:border-orange-500 transition cursor-pointer shadow-lg">
+                      <h3 className="text-base md:text-lg font-bold mb-2">Financial Summary</h3>
+                      <p className="text-gray-400 mb-4 text-xs md:text-sm">Complete revenue and expense breakdown</p>
+                      <button className="text-orange-500 font-bold hover:text-orange-400 text-sm">Generate Report →</button>
+                    </div>
+                    <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 hover:border-orange-500 transition cursor-pointer shadow-lg">
+                      <h3 className="text-base md:text-lg font-bold mb-2">User Engagement</h3>
+                      <p className="text-gray-400 mb-4 text-xs md:text-sm">Participant activity and engagement data</p>
+                      <button className="text-orange-500 font-bold hover:text-orange-400 text-sm">Generate Report →</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'settings' && (
+                <div className="space-y-6">
+                  <h2 className="text-xl md:text-2xl font-bold">Settings & Configuration</h2>
+                  <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg space-y-6">
+                    <div>
+                      <h3 className="text-base md:text-lg font-bold mb-4">General Settings</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-xs md:text-sm font-bold mb-2">Platform Name</label>
+                          <input type="text" defaultValue="Gold_Pearl Tournament" className="w-full bg-gray-900 border border-gray-700 rounded px-3 md:px-4 py-2 text-white text-xs md:text-sm focus:border-orange-500 outline-none" />
+                        </div>
+                        <div>
+                          <label className="block text-xs md:text-sm font-bold mb-2">Admin Email</label>
+                          <input type="email" defaultValue="admin@tournament.com" className="w-full bg-gray-900 border border-gray-700 rounded px-3 md:px-4 py-2 text-white text-xs md:text-sm focus:border-orange-500 outline-none" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="pt-4 border-t border-gray-700">
+                      <button className="bg-linear-to-r from-orange-500 to-red-500 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg transition text-sm md:text-base">
+                        Save Changes
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
