@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 import image2 from '../images/image2.jpg';
+import Test from './Test';
 
 
 const Stats = () => {
@@ -9,7 +10,7 @@ const Stats = () => {
     <section id="leaderboard" className="py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             
-            <div className="order-2 lg:order-1">
+            <div className="">
               <h2 className="text-4xl font-bold mb-6 text-neon-red uppercase">
                 Global Domination Starts Here
               </h2>
@@ -29,7 +30,7 @@ const Stats = () => {
             </div>
             
             {/* Image block for visual appeal - uses Next.js Image */}
-            <div className="order-1 lg:order-2 rounded-xl overflow-hidden shadow-2xl shadow-gray-700/50">
+            {/* <div className="order-1 lg:order-2 rounded-xl overflow-hidden shadow-2xl shadow-gray-700/50">
               <Image
                 src={image2}
                 alt="BGMI Leaderboard and Stats Panel"
@@ -39,8 +40,8 @@ const Stats = () => {
                 className="w-full h-auto"
                 loading="lazy"
               />
-            </div>
-            
+            </div> */}
+            <Test/>
           </div>
         </section>
   )
