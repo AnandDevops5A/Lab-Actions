@@ -6,7 +6,7 @@ const Overview = ({tournaments, participants, revenue,tournamentData,
      const stats = [
     { label: 'Total Tournaments', value: tournaments.length, color: 'from-blue-500 to-cyan-500', icon: '🏆' },
     { label: 'Active Participants', value: participants.filter(p => p.status === 'Active').length, color: 'from-purple-500 to-pink-500', icon: '👥' },
-    { label: 'Total Revenue', value: `$${revenue.reduce((sum, r) => sum + r.amount, 0).toLocaleString()}`, color: 'from-green-500 to-emerald-500', icon: '💰' },
+    { label: 'Total Revenue', value: `₹${revenue.reduce((sum, r) => sum + r.amount, 0).toLocaleString()}`, color: 'from-green-500 to-emerald-500', icon: '💰' },
     { label: 'Avg Win Rate', value: '64.2%', color: 'from-orange-500 to-red-500', icon: '📈' },
   ];
 
@@ -15,8 +15,8 @@ const Overview = ({tournaments, participants, revenue,tournamentData,
     datasets: [
       {
         data: [
-          participants.filter(p => p.status === 'Active').length,
-          participants.filter(p => p.status === 'Inactive').length,
+          participants.filter(p => p.active === true).length,
+          participants.filter(p => p.active === false).length,
         ],
         backgroundColor: [
           'rgba(76, 175, 80, 0.7)',

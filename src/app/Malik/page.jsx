@@ -15,17 +15,15 @@ import {
 } from "chart.js";
 import dynamic from "next/dynamic";
 import Overview from "./Overview";
-import {
-  SkeletonCard,
-  SkeletonChart,
-  SkeletonTable,
-} from "../skeleton/Skeleton";
 import Tournament from "./Tournament";
 import Participants from "./Participants";
 import Revenue from "./Revenue";
 import Report from "./Report";
 import Settings from "./Settings";
 import Sidebar from "./Sidebar";
+import AdminPageLoading from "./AdminPageLoading";
+import { useSWRBackendAPI } from "../Library/API";
+import CyberpunkError from "../Components/CyberpunkError";
 
 ChartJS.register(
   CategoryScale,
@@ -41,18 +39,50 @@ ChartJS.register(
 );
 
 const AdminPage = () => {
-  const [activeTab, setActiveTab] = useState("tournaments");
+  const [activeTab, setActiveTab] = useState("participants");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(true)
+
+  function transformTournaments(tournaments) {
+    if (!tournaments || !Array.isArray(tournaments)) return [];
+    return tournaments.map((t) => {
+      const dtStr = t.dateTime ? t.dateTime.toString() : "";
+      if (dtStr.length < 12) return { ...t, date: "N/A", time: "N/A" };
+      // ensure it's a string // Extract parts
+      const year = dtStr.substring(0, 4);
+      const month = dtStr.substring(4, 6);
+      const day = dtStr.substring(6, 8);
+      const hour = dtStr.substring(8, 10);
+      const minute = dtStr.substring(10, 12);
+      // Format date and time
+      const date = `${day}-${month}-${year}`;
+      // e.g. "2025-12-20"
+      const time = `${hour}:${minute}`;
+      // e.g. "07:00"
+      return { ...t, date, time };
+    });
+  }
+
+  const { result, error, isLoading } = useSWRBackendAPI(
+    "admin/data", //endpoint
+    "GET", //method
+    null, //data
+    10000 //revalidate
+  );
 
   useEffect(() => {
-    console.log("useEffect called");
-    fetchTournaments();
-    // hideside in mobile screen default
-    if (window.innerWidth < 640) setSidebarOpen(!sidebarOpen);
-    setIsLoading(true);
-    const timer = setTimeout(() => setIsLoading(false), 1000);
-    return () => clearTimeout(timer);
+    if (result) {
+      console.log(result);
+      console.log(transformTournaments(result.users));
+      setTournaments(transformTournaments(result.tournaments));
+      setParticipants(result.users);
+      // setRevenue(result.revenue);
+    }
+  }, [result]);
+  
+
+  useEffect(() => {
+    if (window.innerWidth < 640) setSidebarOpen((prev) => !prev);
   }, [activeTab]);
 
   const [tournaments, setTournaments] = useState([
@@ -97,48 +127,6 @@ const AdminPage = () => {
       date: "2025-02-15",
     },
   ]);
-
-  //mofify time and date into seprat field
-  function transformTournaments(tournaments) {
-    return tournaments.map((t) => {
-      const dtStr = t.dateTime.toString();
-      // ensure it's a string // Extract parts
-      const year = dtStr.substring(0, 4);
-      const month = dtStr.substring(4, 6);
-      const day = dtStr.substring(6, 8);
-      const hour = dtStr.substring(8, 10);
-      const minute = dtStr.substring(10, 12);
-      // Format date and time
-      const date = `${day}-${month}-${year}`;
-      // e.g. "2025-12-20"
-      const time = `${hour}:${minute}`;
-      // e.g. "07:00"
-      return { ...t, date, time };
-    });
-  }
-  async function fetchTournaments() {
-    try {
-      setIsLoading(true);
-
-      const response = await fetch("http://localhost:8082/tournament/all");
-      const data = await response.json();
-
-      console.log("Before transformation:", data);
-
-      const transformedData = transformTournaments(data);
-
-      console.log("After transformation:", transformedData);
-
-      // Update state with transformed data
-      setTournaments(transformedData);
-    } catch (error) {
-      console.error("Error fetching tournaments:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  // setTournaments(data);
 
   const [participants, setParticipants] = useState([
     {
@@ -278,12 +266,13 @@ const AdminPage = () => {
     { id: "overview", label: "Overview", icon: "📊" },
     { id: "tournaments", label: "Tournaments", icon: "🏆" },
     { id: "participants", label: "Participants", icon: "👥" },
-    { id: "revenue", label: "Revenue Analytics", icon: "💵" },
+    { id: "revenue", label: "Accounts Analysis", icon: "💰" },
     { id: "reports", label: "Reports", icon: "📄" },
     { id: "settings", label: "Settings", icon: "⚙️" },
   ];
 
-  // Skeleton Loader Component
+  // console.log(result);
+  if (error) return <CyberpunkError message={"failed to load"} />;
 
   return (
     <div className="flex min-h-screen bg-gray-900 text-white">
@@ -327,76 +316,7 @@ const AdminPage = () => {
         {/* Content */}
         <div className="p-2 sm:p-6 ">
           {isLoading ? (
-            <>
-              {activeTab === "overview" && (
-                <div className="space-y-8">
-                  {/* Skeleton Stats Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                    {[...Array(4)].map((_, i) => (
-                      <SkeletonCard key={i} />
-                    ))}
-                  </div>
-                  {/* Skeleton Charts */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-                    <SkeletonChart />
-                    <SkeletonChart />
-                  </div>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-                    <SkeletonChart />
-                    <SkeletonChart />
-                  </div>
-                </div>
-              )}
-
-              {(activeTab === "tournaments" ||
-                activeTab === "participants") && (
-                <div className="space-y-6">
-                  <div className="h-8 bg-gray-700 rounded w-48 animate-pulse"></div>
-                  <SkeletonTable />
-                </div>
-              )}
-
-              {activeTab === "revenue" && (
-                <div className="space-y-6">
-                  <div className="h-8 bg-gray-700 rounded w-48 animate-pulse"></div>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-                    <SkeletonChart />
-                    <SkeletonChart />
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "reports" && (
-                <div className="space-y-6">
-                  <div className="h-8 bg-gray-700 rounded w-48 animate-pulse"></div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-                    {[...Array(4)].map((_, i) => (
-                      <div
-                        key={i}
-                        className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg animate-pulse"
-                      >
-                        <div className="h-5 bg-gray-700 rounded w-32 mb-2"></div>
-                        <div className="h-4 bg-gray-700 rounded w-full mb-4"></div>
-                        <div className="h-4 bg-gray-700 rounded w-24"></div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "settings" && (
-                <div className="space-y-6">
-                  <div className="h-8 bg-gray-700 rounded w-48 animate-pulse"></div>
-                  <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg animate-pulse">
-                    <div className="space-y-4">
-                      <div className="h-6 bg-gray-700 rounded w-40 mb-4"></div>
-                      <div className="h-10 bg-gray-700 rounded mb-4"></div>
-                      <div className="h-10 bg-gray-700 rounded"></div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </>
+            <AdminPageLoading activeTab={activeTab} />
           ) : (
             <>
               {activeTab === "overview" && (

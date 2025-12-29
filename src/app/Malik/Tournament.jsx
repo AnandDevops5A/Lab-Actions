@@ -1,11 +1,59 @@
-'use client'
+"use client";
 import React, { useState } from "react";
 import AddTournamentForm from "./AddTournament";
+import { useSWRBackendAPI } from "../Library/API";
+import CyberpunkError from "../Components/CyberpunkError";
+import { SkeletonTable } from "../skeleton/Skeleton";
 
-const Tournament = ({ tournaments }) => {
+  const Tournament =  ({tournaments}) => {
   const [showAddTournamentForm, setAddTournamentForm] = useState(true);
+  function transformTournaments(tournaments) {
+    if (!tournaments || !Array.isArray(tournaments)) return [];
+    return tournaments.map((t) => {
+      const dtStr = t.dateTime ? t.dateTime.toString() : "";
+      if (dtStr.length < 12) return { ...t, date: "N/A", time: "N/A" };
+      // ensure it's a string // Extract parts
+      const year = dtStr.substring(0, 4);
+      const month = dtStr.substring(4, 6);
+      const day = dtStr.substring(6, 8);
+      const hour = dtStr.substring(8, 10);
+      const minute = dtStr.substring(10, 12);
+      // Format date and time
+      const date = `${day}-${month}-${year}`;
+      // e.g. "2025-12-20"
+      const time = `${hour}:${minute}`;
+      // e.g. "07:00"
+      return { ...t, date, time };
+    });
+  }
 
-  return (
+  //use swr 
+  // const { result, error, isLoading } =  useSWRBackendAPI(
+  //   "tournament/all", //endpoint
+  //   "GET", //method
+  //   null, //data
+  //   0 //revalidate
+  // );
+  // const tournaments = transformTournaments(result);
+  // console.log(tournaments);
+  // if (error) return <CyberpunkError message={"failed to load"}/>;
+  // if (isLoading)
+  //   return (
+  //     <div className="space-y-6">
+  //       <div className="h-8 bg-gray-700 rounded w-48 animate-pulse"></div>
+  //       <SkeletonTable />
+  //     </div>
+  //   );
+
+  //use fetch method
+  // const users = await useFetchBackendAPI("users");
+  // if (error) return <CyberpunkError message={"failed to load"} />;
+  
+
+
+    return (
+      
+
     <div className="space-y-6">
       {showAddTournamentForm ? (
         <>
@@ -15,7 +63,7 @@ const Tournament = ({ tournaments }) => {
               Tournament Management
             </h2>
             <button
-              className="bg-linear-to-r from-orange-500 to-red-500 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg transition text-sm md:text-base"
+              className="bg-linear-to-r from-orange-500 to-red-500 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg transition text-sm md:text-base cursor-pointer hover:scale-102"
               onClick={() => setAddTournamentForm(!showAddTournamentForm)}
             >
               + New Tournament
@@ -32,12 +80,12 @@ const Tournament = ({ tournaments }) => {
                     Tournament Name
                   </th>
                   <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300">
-                   Prize Pool
+                    Prize Pool
                   </th>
                   <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300 hidden sm:table-cell">
-                     Plateform
+                    Plateform
                   </th>
-                  
+
                   <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300 hidden md:table-cell">
                     Date
                   </th>
@@ -49,7 +97,7 @@ const Tournament = ({ tournaments }) => {
               <tbody>
                 {tournaments.map((t, idx) => (
                   <tr
-                    key={idx}
+                    key={t.id || idx}
                     className={idx % 2 === 0 ? "bg-gray-750" : "bg-gray-800"}
                   >
                     <td className="px-3 md:px-6 py-3 md:py-4 font-semibold text-white">
@@ -59,7 +107,7 @@ const Tournament = ({ tournaments }) => {
                       {t.tournamentName}
                     </td>
                     <td className="px-3 md:px-6 py-3 md:py-4 font-bold text-green-400  sm:table-cell">
-                     ₹ {t.prizePool}
+                      ₹ {t.prizePool}
                     </td>
                     {/* <td className="px-3 md:px-6 py-3 md:py-4">
                       <span

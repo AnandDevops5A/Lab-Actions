@@ -23,6 +23,7 @@ public class AdminService {
     @Cacheable(value = "adminData")
     public Map<String, Object> getAllData() {
         Map<String, Object> response = new HashMap<>();
+        System.out.println("Database hit by 1");
 
         CompletableFuture<?> usersFuture = CompletableFuture.supplyAsync(userRepository::findAll);
         CompletableFuture<?> tournamentsFuture = CompletableFuture.supplyAsync(tournamentRepository::findAll);

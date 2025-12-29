@@ -15,7 +15,7 @@ const AddTournamentForm = ({ onClose }) => {
                     {/* --- CROSS BUTTON (Top Right) --- */}
                     <button
                         onClick={() => onClose(true)}
-                        className="absolute top-0 right-0 bg-pink-600 p-2 text-black hover:bg-cyan-400 transition-colors z-50 group"
+                        className="absolute top-0 right-0 bg-pink-600 p-2 text-black hover:bg-cyan-400 transition-colors z-50 group cursor-pointer"
                         style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 20% 100%)' }}
                     >
                         <X size={24} className="group-hover:rotate-90 transition-transform" />

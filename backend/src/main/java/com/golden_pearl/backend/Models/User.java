@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,8 +14,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "users")
+@Builder
 public class User {
-    
+
     @Id
     private String id;
     private String username;
@@ -30,7 +32,8 @@ public class User {
     private int totalPlay;
     private int totalWin;
     private int totallosses;
+    @Builder.Default
+    private boolean active = true;
     private List<Tournament> attainedTournaments;
-
 
 }

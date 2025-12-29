@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
-
+@CrossOrigin("http://localhost:8082/")
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -43,5 +43,9 @@ public class UserController {
     @GetMapping("/all")
     public ResponseEntity<java.util.List<User>> getAllUsers() {        
         return userService.getAllUsers();
-    }   
+    } 
+    
+    
+
+    
 }
