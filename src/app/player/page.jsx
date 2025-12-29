@@ -3,35 +3,36 @@
 import React from "react";
 import Avatar from "../images/avatar.png";
 import dynamic from "next/dynamic";
+import { SkeletonCard, SkeletonChart, SkeletonTable } from "../skeleton/Skeleton";
 
 const mockPlayer = {
   ign: "SHADOW_LORD_07",
   bgmiId: "1234567890",
   teamName: "Inferno Squad",
   avatarUrl: Avatar.src, // Placeholder URL
-  totalKills: 345,
-  kdRatio: 4.87,
+  totalWin: 345,
+  winRatio: 4.87,
   matchesPlayed: 71,
-  avgRank: 6.2,
+  avgRank: 6,
 };
 
 const DynamicAchievement = dynamic(() => import("./Achievement.jsx"), {
   loading: () => (
-    <h2 className="text-center mt-2 text-amber-200">loading...</h2>
+    <SkeletonCard/>
   ),
   ssr: false,
 });
 
 const DynamicPlayerStats = dynamic(() => import("./PlayerStats.jsx"), {
   loading: () => (
-    <h2 className="text-center mt-2 text-amber-200">loading...</h2>
+    <SkeletonChart/>
   ),
   ssr: false,
 });
 
 const DynamicPlayerHeader = dynamic(() => import("./ProfileHeader.jsx"), {
   loading: () => (
-    <h2 className="text-center mt-2 text-amber-200">loading...</h2>
+    <SkeletonTable/>
   ),
   ssr: false,
 });
