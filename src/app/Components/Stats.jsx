@@ -1,9 +1,8 @@
-import Image from 'next/image'
+// import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
-import image2 from '../images/image2.jpg';
-import Test from './Test';
-
+// import image2 from '../images/image2.jpg';
+import Rank from './Rank';
 
 const Stats = () => {
   return (
@@ -29,7 +28,6 @@ const Stats = () => {
               </Link>
             </div>
             
-            {/* Image block for visual appeal - uses Next.js Image */}
             {/* <div className="order-1 lg:order-2 rounded-xl overflow-hidden shadow-2xl shadow-gray-700/50">
               <Image
                 src={image2}
@@ -41,7 +39,7 @@ const Stats = () => {
                 loading="lazy"
               />
             </div> */}
-            <Test/>
+            <Rank/>
           </div>
         </section>
   )

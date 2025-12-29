@@ -10,10 +10,11 @@ const mockPlayer = {
   bgmiId: "1234567890",
   teamName: "Inferno Squad",
   avatarUrl: Avatar.src, // Placeholder URL
-  totalWin: 345,
+  totalWin: 32,
   winRatio: 4.87,
-  matchesPlayed: 71,
+  matchesPlayed: 37,
   avgRank: 6,
+  clanRank: 4,
 };
 
 const DynamicAchievement = dynamic(() => import("./Achievement.jsx"), {

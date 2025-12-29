@@ -33,6 +33,7 @@ export default function RootLayout({ children }) {
           {/* 1. Navigation Bar 
                 // components/Navbar.jsx*/}
           <Navbar/>
+          
           <MatchJoiningForm />
           {children}
         </body>

@@ -1,4 +1,3 @@
-import { Suspense } from 'react';
 import Main from './Components/Main';
 
 
@@ -17,13 +16,14 @@ export const metadata = {
 
 
 
+
 // Main Page Component
 export default function LandingPage() {
 
 
   return (
-    <Suspense fallback=<div>Loading.....</div>>
+   
    <Main/>
-   </Suspense>
+  
   );
 }

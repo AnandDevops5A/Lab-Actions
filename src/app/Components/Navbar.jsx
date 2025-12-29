@@ -2,13 +2,14 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
-    { name: 'Amount', href: '/#amount' },
+    // { name: 'Amount', href: '/#amount' },
     { name: 'leaderboard', href: '/' },
     { name: 'Admin', href: '/Malik' },
     { name: 'My Profile', href: '/player' },
@@ -18,134 +19,145 @@ const Navbar = () => {
   const [lastscrollX, setLastscrollX] = useState(0);
   // {const [scrollTimeout, setScrollTimeout] = useState(null);}
 
- useEffect(() => {
-  const handleScroll = () => {
-    const currentScrollY = window.scrollY;
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
 
-    if (currentScrollY > lastscrollX && currentScrollY > 50) {
-      // scrolling down → hide navbar
-      setShowNavbar(false);
-    } else {
-      // scrolling up → show navbar
-      setShowNavbar(true);
+      if (currentScrollY > lastscrollX && currentScrollY > 50) {
+        // scrolling down → hide navbar
+        setShowNavbar(false);
+      } else {
+        // scrolling up → show navbar
+        setShowNavbar(true);
+      }
+
+      setLastscrollX(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastscrollX]);
+  const searchParams = useSearchParams();
+  const scrollTarget = searchParams.get('scroll');
+
+  useEffect(() => {
+    if (scrollTarget === 'leaderboard') {
+      const timer = setTimeout(() => {
+        if (typeof window !== "undefined") {
+          const element = document.getElementById('leaderboard');
+          if (element) {
+            const yOffset = 60; 
+            const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            window.scrollTo({
+              top: y,
+              behavior: 'smooth'
+            });
+          }
+        }
+      }, 300);
+      return () => clearTimeout(timer);
     }
+  }, [scrollTarget]);
 
-    setLastscrollX(currentScrollY);
-  };
-
-  window.addEventListener('scroll', handleScroll, { passive: true });
-  return () => window.removeEventListener('scroll', handleScroll);
-}, [lastscrollX]);
 
   return (
-    showNavbar ? 
+    showNavbar ?
       <nav
- className={`bg-black/80 backdrop-blur-sm fixed w-full z-50 shadow-lg border-b border-neon-blue/20 transition-all duration-300 ease-out animate-navbarSlideIn ${
-    showNavbar ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
-  }`}      role="navigation"
-      aria-label="Main Navigation"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo/Platform Name */}
-          <Link
-            href="/"
-            className="shrink-0 flex items-center space-x-2"
-            aria-label="BGMI Elite Home"
-          >
-            <div className="h-10 w-10 bg-linear-to-br from-red-600 via-orange-600 to-yellow-600 rounded-full flex items-center justify-center shadow-lg shadow-red-500/50">
-              <Image src="/gun.svg" alt="Pearl Esports Logo" 
-              width={40}
-              height={40}
-              className="h-6 w-6 filter brightness-0 invert" />
-            </div>
-            <span className="text-2xl font-extrabold bg-linear-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent tracking-wider">Gold_Pearl</span>
-          </Link>
-
-          {/* Desktop Nav Links */}
-          <div className="hidden md:flex md:space-x-8 items-center">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-gray-300 hover:text-neon-red px-3 py-2 text-sm font-medium transition duration-200 border-l-2 border-r-2 border-transparent hover:border-l-neon-red hover:border-r-neon-red"
-              >
-                {item.name}
-              </Link>
-            ))}
-
-            
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-neon-red"
-              aria-controls="mobile-menu"
-              aria-expanded={isOpen}
+        className={`bg-black/80 backdrop-blur-sm fixed w-full z-50 shadow-lg border-b border-neon-blue/20 transition-all duration-300 ease-out animate-navbarSlideIn ${showNavbar ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+          }`} role="navigation"
+        aria-label="Main Navigation"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo/Platform Name */}
+            <Link
+              href="/"
+              className="shrink-0 flex items-center space-x-2"
+              aria-label="BGMI Elite Home"
             >
-              <svg
-                className="h-6 w-6"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                {isOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                )}
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
+              <div className="h-10 w-10 bg-linear-to-br from-red-600 via-orange-600 to-yellow-600 rounded-full flex items-center justify-center shadow-lg shadow-red-500/50">
+                <Image src="/gun.svg" alt="Pearl Esports Logo"
+                  width={40}
+                  height={40}
+                  className="h-6 w-6 filter brightness-0 invert" />
+              </div>
+              <span className="text-2xl font-extrabold bg-linear-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent tracking-wider">Gold_Pearl</span>
+            </Link>
 
-      {/* Mobile Menu Content */}
-      {isOpen && (
-        <div id="mobile-menu" className="md:hidden bg-black/90 animate-slideDown">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={() => setIsOpen(false)}
-                className="block text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+            {/* Desktop Nav Links */}
+            <div className="hidden md:flex md:space-x-8 items-center">
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.name === "leaderboard" ? "/?scroll=leaderboard" : item.href}
+className={`text-gray-300 hover:text-neon-red px-3 py-2 text-sm font-medium transition duration-200 border-l-2 border-r-2 border-transparent hover:border-l-neon-red hover:border-r-neon-red ${
+  item.name !== "leaderboard" ? "focus:cursor-none" : ""
+}`}                >
+                  {item.name}
+                </Link>
+              ))}
+
+
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-neon-red"
+                aria-controls="mobile-menu"
+                aria-expanded={isOpen}
               >
-                {item.name}
-              </Link>
-            ))}
-            <div className="flex flex-col space-y-3 pt-4 px-3">
-              <Link
-                href="/login"
-                className="text-white border border-neon-blue hover:bg-neon-blue/20 px-4 py-2 rounded text-base font-semibold transition duration-200"
-              >
-                Login
-              </Link>
-              <Link
-                href="/signup"
-                className="bg-neon-red hover:bg-neon-red/80 text-white px-4 py-2 rounded text-base font-bold transition duration-200 shadow-neon-red/50 shadow-md"
-              >
-                Sign Up
-              </Link>
+                <svg
+                  className="h-6 w-6"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  {isOpen ? (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  ) : (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  )}
+                </svg>
+              </button>
             </div>
           </div>
         </div>
-      )}
-    </nav> : null
+
+        {/* Mobile Menu Content */}
+        {
+          isOpen && (
+            <div id="mobile-menu" className="md:hidden bg-black/90 animate-slideDown">
+              <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    onClick={() => setIsOpen(false)}
+                    className="block text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+                
+              </div>
+            </div>
+          )
+        }
+      </nav > : null
   );
 };
 

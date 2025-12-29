@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import reloadingGunAsset from "../images/image.jpg";
+import TypingWrapper from "./TypingAnimation";
 
 const HeroSection = () => {
   const { tournamentStatus, registerForTournament } = useState("false");
@@ -38,14 +39,15 @@ const HeroSection = () => {
             <span className="inline-block ml-4 text-cyan-400">FPS</span>
           </h1>
         ) : (
-          <h1 className="text-7xl md:text-6xl font-black mb-4 tracking-tight text-white drop-shadow-2xl leading-tight">
-            Comming <span className="text-red-500">Soon</span> . .
+          <h1 className="text-7xl md:text-6xl font-black mb-4 tracking-tight text-white drop-shadow-2xl leading-tight animate-bounce">
+            Comming <span className="text-red-500 ">Soon</span> . .
           </h1>
         )}
 
         <p className="text-xl md:text-2xl text-gray-200 mb-8 max-w-2xl mx-auto drop-shadow-lg">
+          <TypingWrapper>
           Convert skill to Bounty💰. Compete in **official tournaments**, climb
-          the ranks, and earn your legacy.
+          the ranks, and earn your legacy.</TypingWrapper>
         </p>
 
         {/* Primary Call to Action */}

@@ -31,13 +31,7 @@ export default function Leaderboard() {
         {/* Scrollable List */}
         <div
           className="
-            max-h-[360px]
-            overflow-y-auto
-            divide-y divide-cyan-500/20
-            scrollbar-thin
-            scrollbar-thumb-cyan-500/60
-            scrollbar-track-black/40
-          "
+            max-h-[360px] overflow-y-auto divide-y divide-cyan-500/20 scrollbar-thin scrollbar-thumb-cyan-500/60 scrollbar-track-black/40"
         >
           {leaderboardData.map((player, index) => {
             const isTopThree = index < 3;
@@ -46,25 +40,23 @@ export default function Leaderboard() {
               <div
                 key={player.id}
                 className={`flex items-center justify-between p-4 transition-all
-                ${
-                  isTopThree
+                ${isTopThree
                     ? "bg-cyan-500/5 shadow-[inset_0_0_20px_rgba(0,255,255,0.3)]"
                     : "hover:bg-cyan-500/10"
-                }`}
+                  }`}
               >
                 {/* Rank */}
                 <div className="flex items-center gap-4">
                   <span
                     className={`text-lg font-bold w-8 text-center
-                    ${
-                      index === 0
+                    ${index === 0
                         ? "text-amber-600"
                         : index === 1
-                        ? "text-zinc-300"
-                        : index === 2
-                        ? "text-yellow-300"
-                        : "text-cyan-400"
-                    }`}
+                          ? "text-zinc-300"
+                          : index === 2
+                            ? "text-yellow-300"
+                            : "text-cyan-400"
+                      }`}
                   >
                     #{index + 1}
                   </span>
