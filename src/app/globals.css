@@ -3,14 +3,20 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --neon-green: #ff2bdc;
+  --neon-blue: #00eaff;
+  --neon-green: #39ff14;
+  --cyber-bg: #0a0a0f;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+
+
+.neon-shadow {
+  box-shadow: 0 0 15px rgba(0, 234, 255, 0.6);
 }
+
+
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -34,15 +40,8 @@ body {
   animation: zoomLoop 25s ease-in-out infinite;
 }
 
-/* Hide scrollbar globally */
-html, body {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;     /* Firefox */
-}
 
-html::-webkit-scrollbar, body::-webkit-scrollbar {
-  display: none;  /* Chrome, Safari and Opera */
-}
+
 
 /* Neon Red Text Style */
 .text-neon-red {

@@ -160,7 +160,7 @@ export default function MatchJoiningForm() {
 								>
 									<span className="absolute inset-0 opacity-30 blur-xl" style={{ background: 'linear-gradient(90deg,#00fff0, #ff0055, #9b59ff)' }} />
 
-									<span className="relative z-10 flex items-center gap-3">
+									<span className="relative  flex items-center gap-3">
 										{submitting ? (
 											<svg
 												className="w-5 h-5 animate-spin"

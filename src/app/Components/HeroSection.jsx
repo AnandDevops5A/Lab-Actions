@@ -30,7 +30,7 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-black/3 z-0"></div>
 
       {/* Hero Content */}
-      <div className="relative z-10 text-center max-w-4xl px-4">
+      <div className="relative  text-center max-w-4xl px-4">
         {/* Updated H1 to be clean and punchy */}
 
         {tournamentStatus ? (

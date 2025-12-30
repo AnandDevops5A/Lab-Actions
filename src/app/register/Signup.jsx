@@ -171,7 +171,7 @@ export default function Signup({ onSwitch, onSubmit }) {
         <div className="pt-2">
           <button type="submit" disabled={loading} className="relative w-full inline-flex items-center justify-center overflow-hidden rounded-lg px-6 py-3 font-extrabold text-lg transition-transform duration-150 transform bg-gradient-to-r from-[#00E5FF] via-[#FF0055] to-[#9b59ff] text-black shadow-lg">
             {loading ? <svg className="w-5 h-5 animate-spin mr-3" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="rgba(0,0,0,0.2)" strokeWidth="4" /><path d="M4 12a8 8 0 018-8" stroke="rgba(0,0,0,0.6)" strokeWidth="4" strokeLinecap="round" /></svg> : null}
-            <span className="z-10 text-white focus:pointer-events-none">{loading ? 'Registering...' : 'Create Team'}</span>
+            <span className=" text-white focus:pointer-events-none">{loading ? 'Registering...' : 'Create Team'}</span>
           </button>
         </div>
 

@@ -7,18 +7,33 @@ const Footer=()=>{
 
     return(
         
-        <div className="bg-black border-t border-gray-800/50 py-10">
-          <div className="max-w-7xl mx-auto px-4 text-center text-gray-400">
-            <div className="flex justify-center space-x-6 mb-4">
-              <Link href="/privacy" className="hover:text-neon-blue transition">Privacy Policy</Link>
-              <Link href="/terms" className="hover:text-neon-blue transition">Terms of Service</Link>
-              <Link href="/contact" className="hover:text-neon-blue transition">Contact Support</Link>
-            </div>
-            <p className="text-sm">
-              &copy; {new Date().getFullYear()} BGMI Elite Platform. All rights reserved. BGMI is a registered trademark of Krafton, Inc.
-            </p>
+        <footer className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-10 pb-5">
+        <div className="rounded-xl border border-white/10 bg-black/40 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-gray-400">
+            © {new Date().getFullYear()} CyberTournaments. Community-powered, player-first.
+          </p>
+          <div className="flex items-center gap-3">
+            <a
+              href="#"
+              className="text-xs text-gray-300 hover:text-cyan-400 transition-colors"
+            >
+              Guidelines
+            </a>
+            <a
+              href="#"
+              className="text-xs text-gray-300 hover:text-green-400 transition-colors"
+            >
+              Privacy
+            </a>
+            <a
+              href="#"
+              className="text-xs text-gray-300 hover:text-cyan-400 transition-colors"
+            >
+              Contact
+            </a>
           </div>
         </div>
+      </footer>
 
     );
 }

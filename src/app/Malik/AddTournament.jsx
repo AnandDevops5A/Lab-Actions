@@ -74,7 +74,7 @@ const AddTournamentForm = ({ onClose }) => {
                         {/* Submit Button */}
                         <button className="w-full bg-cyan-500  text-black font-black py-4 uppercase 
             tracking-[0.2em] relative overflow-hidden group transition-all rounded-lg hover:scale-3d">
-                            <span className="relative z-10">Add➕ </span>
+                            <span className="relative ">Add➕ </span>
                             {/* Glitch Overlay effect */}
                             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                         </button>

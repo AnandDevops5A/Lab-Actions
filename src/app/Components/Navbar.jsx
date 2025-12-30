@@ -9,7 +9,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
-    // { name: 'Amount', href: '/#amount' },
+    { name: 'Review', href: '/review' },
     { name: 'leaderboard', href: '/' },
     { name: 'Admin', href: '/Malik' },
     { name: 'My Profile', href: '/player' },
@@ -46,7 +46,7 @@ const Navbar = () => {
         if (typeof window !== "undefined") {
           const element = document.getElementById('leaderboard');
           if (element) {
-            const yOffset = 60; 
+            const yOffset = 60;
             const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
             window.scrollTo({
               top: y,
@@ -63,7 +63,7 @@ const Navbar = () => {
   return (
     showNavbar ?
       <nav
-        className={`bg-black/80 backdrop-blur-sm fixed w-full z-50 shadow-lg border-b border-neon-blue/20 transition-all duration-300 ease-out animate-navbarSlideIn ${showNavbar ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+        className={` bg-black/80 backdrop-blur-sm fixed w-full z-50 shadow-lg border-b border-neon-blue/20 transition-all duration-300 ease-out animate-navbarSlideIn ${showNavbar ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
           }`} role="navigation"
         aria-label="Main Navigation"
       >
@@ -90,9 +90,8 @@ const Navbar = () => {
                 <Link
                   key={item.name}
                   href={item.name === "leaderboard" ? "/?scroll=leaderboard" : item.href}
-className={`text-gray-300 hover:text-neon-red px-3 py-2 text-sm font-medium transition duration-200 border-l-2 border-r-2 border-transparent hover:border-l-neon-red hover:border-r-neon-red ${
-  item.name !== "leaderboard" ? "focus:cursor-none" : ""
-}`}                >
+                  className={`text-gray-300 hover:text-neon-red px-3 py-2 text-sm font-medium transition duration-200 border-l-2 border-r-2 border-transparent hover:border-l-neon-red hover:border-r-neon-red ${item.name !== "leaderboard" ? "focus:cursor-none" : ""
+                    }`}                >
                   {item.name}
                 </Link>
               ))}
@@ -152,7 +151,7 @@ className={`text-gray-300 hover:text-neon-red px-3 py-2 text-sm font-medium tran
                     {item.name}
                   </Link>
                 ))}
-                
+
               </div>
             </div>
           )

@@ -53,6 +53,7 @@ const Stats = dynamic(() =>
   }
 );
 
+
 const Footer = dynamic(() =>
   import('./Footer.jsx'),
   {
@@ -81,12 +82,13 @@ const Main = () => {
         <Stats />
 
 
+
         {/*6. contact section*/}
         <ContactPage />
 
 
         {/* 6. footer section Section (Engaging Data) */}
-        <Footer />
+       
       </main>
 
     </div>

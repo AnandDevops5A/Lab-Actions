@@ -26,7 +26,7 @@ export default function Page() {
 
 			<div className="absolute inset-0 bg-black/30 z-0"></div>
 
-			<div className="w-full max-w-md mx-auto relative z-10 top-10">
+			<div className="w-full max-w-md mx-auto relative  top-10">
 				<div className={`relative w-full neon-glow-frame bg-black/30 transition-all 
           duration-500 ease-in-out rounded-xl ${isLogin ? 'min-h-[420px] p-3' : 'min-h-[500px]'}`}>
 					<div className="relative w-full overflow-visible">

@@ -98,7 +98,7 @@ export default function Login({ onSwitch, onSubmit }) {
 		// 						<path d="M4 12a8 8 0 018-8" stroke="rgba(0,0,0,0.6)" strokeWidth="4" strokeLinecap="round" />
 		// 					</svg>
 		// 				) : null}
-		// 				<span className="z-10 text-white">{loading ? 'Signing in...' : 'Sign In'}</span>
+		// 				<span className=" text-white">{loading ? 'Signing in...' : 'Sign In'}</span>
 		// 			</button>
 		// 		</div>
 
@@ -186,7 +186,7 @@ export default function Login({ onSwitch, onSubmit }) {
                         <path d="M4 12a8 8 0 018-8" stroke="rgba(0,0,0,0.6)" strokeWidth="4" strokeLinecap="round" />
                     </svg>
                 ) : null}
-                <span className="z-10 text-white">{loading ? 'Signing in...' : 'Sign In'}</span>
+                <span className=" text-white">{loading ? 'Signing in...' : 'Sign In'}</span>
             </button>
         </div>
 
