@@ -10,7 +10,7 @@ const Navbar = () => {
 
   const navItems = [
     { name: 'Review', href: '/review' },
-    { name: 'leaderboard', href: '/' },
+    { name: 'leaderboard', href: '/Leaderboard' },
     { name: 'Admin', href: '/Malik' },
     { name: 'My Profile', href: '/player' },
     { name: 'Register', href: '/register' },
