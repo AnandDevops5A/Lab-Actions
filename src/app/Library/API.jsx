@@ -1,5 +1,7 @@
 import useSWR from "swr";
 
+const BASE_URL = "http://localhost:8082";
+
 // Generic fetcher function
 const fetcher = async (url, method = "GET", data = null) => {
   const options = {
@@ -19,7 +21,7 @@ const fetcher = async (url, method = "GET", data = null) => {
 
 // Custom SWR hook
 export const useSWRBackendAPI = (endpoint, method = "GET", data = null, refreshInterval = 0) => {
-  const url = `http://localhost:8082/${endpoint}`;
+  const url = `${BASE_URL}/${endpoint}`;
 
   const { data: result, error, isLoading, mutate } = useSWR(
     [url, method, data], // key (unique per request)
@@ -42,7 +44,7 @@ export async function useFetchBackendAPI(
 ) {
   if (!endpoint) throw new Error("Endpoint is required");
 
-  const url = `http://localhost:8082/${endpoint}`;
+  const url = `${BASE_URL}/${endpoint}`;
 
   const options = {
     method,
@@ -55,7 +57,6 @@ export async function useFetchBackendAPI(
 
   try {
     const response = await fetch(url, options);
-
     if (!response.ok) {
       const errorDetails = await response.text().catch(() => "");
       throw new Error(

@@ -11,7 +11,7 @@ export default function Page() {
 	const isLogin = mode === 'login';
 
 	return (
-		<div className="min-h-screen flex items-center justify-center p-4 antialiased relative bg-[radial-gradient(ellipse_at_top_left,_#001219_0%,_#000000_60%)]">
+		<div className="min-h-screen flex items-center justify-center p-4 antialiased relative bg-[radial-gradient(ellipse_at_top_left,#001219_0%,#000000_60%)]">
 			<style>{`
 				@keyframes glow-pulse { 0%,100%{box-shadow:0 0 15px rgba(0,229,255,0.6),0 0 5px rgba(255,65,112,0.6);} 50%{box-shadow:0 0 25px rgba(0,229,255,0.8),0 0 10px rgba(255,65,112,0.8);} }
 				.neon-glow-frame { animation: glow-pulse 5s infinite alternate; border:2px solid; border-image: linear-gradient(to right,#00E5FF,#FF4170) 1; border-radius:1rem }

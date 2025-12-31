@@ -82,18 +82,9 @@ const AdminPage = () => {
       setTournaments(transformTournaments(result.tournaments));
       setParticipants(result.users);
       // setRevenue(result.revenue);
-      return;
+    
     }
-    else {
-      Swal.fire({
-  icon: "error",
-  title: "Server Error",
-  text: "Backend server is not responding!",
-  footer: '<a href="/">back</a>'
-});
-return;
-    }
-  }, []);
+  }, [result]);
 
 
   useEffect(() => {
@@ -335,8 +326,8 @@ return;
         {/* Content */}
         <div className="p-2 sm:p-6 ">
 
-        
-          {error ?(isLoading ? (
+
+          {error ? (isLoading ? (
             <AdminPageLoading activeTab={activeTab} />
           ) : (
             <>
@@ -372,7 +363,7 @@ return;
 
               {activeTab === "settings" && <Settings />}
             </>
-          )): null}
+          )) : null}
         </div>
       </div>
     </div>

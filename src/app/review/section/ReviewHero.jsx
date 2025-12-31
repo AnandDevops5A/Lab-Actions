@@ -30,10 +30,10 @@ const ReviewHero = ({setFilters,reviews,tournaments,filters}) => {
                     <span className="text-gray-400"> avg rating</span>
                   </div>
                 </div>
-                <div className="inline-flex items-center gap-2 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-2">
-                  <span className="h-2 w-2 rounded-full bg-red-400 animate-ping" />
+                <div className="inline-flex items-center gap-2 rounded-xl border border-green-500/40 bg-green-500/10 px-4 py-2">
+                  <span className="h-2 w-2 rounded-full bg-green-400 animate-ping" />
                   <span className="text-sm">
-                    <span className="font-semibold text-red-300">{reviews.length}</span>{' '}
+                    <span className="font-semibold text-green-300">{reviews.length}</span>{' '}
                     <span className="text-gray-400">reviews</span>
                   </span>
                 </div>
@@ -72,7 +72,7 @@ const ReviewHero = ({setFilters,reviews,tournaments,filters}) => {
                     onChange={(e) =>
                       setFilters((f) => ({ ...f, minRating: Number(e.target.value) }))
                     }
-                    className="mt-1 w-full accent-red-500"
+                    className="mt-1 w-full accent-blue-500"
                   />
                   <div className="mt-1 text-xs text-gray-400">
                     {filters.minRating}+
