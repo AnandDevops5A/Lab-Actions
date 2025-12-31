@@ -24,6 +24,7 @@ import Sidebar from "./Sidebar";
 import AdminPageLoading from "./AdminPageLoading";
 import { useSWRBackendAPI } from "../Library/API";
 import CyberpunkError from "../Components/CyberpunkError";
+import Swal from "sweetalert2";
 
 ChartJS.register(
   CategoryScale,
@@ -63,6 +64,7 @@ const AdminPage = () => {
     });
   }
 
+  //send request to backend to get tournaments and participants data
   const { result, error, isLoading } = useSWRBackendAPI(
     "admin/data", //endpoint
     "GET", //method
@@ -70,16 +72,29 @@ const AdminPage = () => {
     10000 //revalidate
   );
 
+  // populate data once fetched
   useEffect(() => {
+
+    console.log("Fetched admin data:", result);
     if (result) {
       console.log(result);
       console.log(transformTournaments(result.users));
       setTournaments(transformTournaments(result.tournaments));
       setParticipants(result.users);
       // setRevenue(result.revenue);
+      return;
     }
-  }, [result]);
-  
+    else {
+      Swal.fire({
+  icon: "error",
+  title: "Server Error",
+  text: "Backend server is not responding!",
+  footer: '<a href="/">back</a>'
+});
+return;
+    }
+  }, []);
+
 
   useEffect(() => {
     if (window.innerWidth < 640) setSidebarOpen((prev) => !prev);
@@ -272,7 +287,12 @@ const AdminPage = () => {
   ];
 
   // console.log(result);
-  if (error) return <CyberpunkError message={"failed to load"} />;
+  if (error) return (Swal.fire({
+    icon: "error",
+    title: "Oops...",
+    text: "Something went wrong!",
+    footer: '<a href="/">Go to home</a>'
+  }));
 
   return (
     <div className="flex min-h-screen bg-gray-900 text-white">
@@ -286,9 +306,8 @@ const AdminPage = () => {
       />
       {/* Main Content */}
       <div
-        className={`flex-1 ${
-          sidebarOpen ? "md:ml-64" : "md:ml-16 "
-        } transition-all duration-300 w-full pt-15 pl-16 sm:pl-0`}
+        className={`flex-1 ${sidebarOpen ? "md:ml-64" : "md:ml-16 "
+          } transition-all duration-300 w-full pt-15 pl-16 sm:pl-0`}
       >
         {/* Header */}
         <div className="bg-gray-950 border-b border-gray-800 p-4 md:p-6  top-0 z-30">
@@ -315,7 +334,9 @@ const AdminPage = () => {
 
         {/* Content */}
         <div className="p-2 sm:p-6 ">
-          {isLoading ? (
+
+        
+          {error ?(isLoading ? (
             <AdminPageLoading activeTab={activeTab} />
           ) : (
             <>
@@ -351,7 +372,7 @@ const AdminPage = () => {
 
               {activeTab === "settings" && <Settings />}
             </>
-          )}
+          )): null}
         </div>
       </div>
     </div>
