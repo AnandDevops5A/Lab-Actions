@@ -23,8 +23,6 @@ import Settings from "./Settings";
 import Sidebar from "./Sidebar";
 import AdminPageLoading from "./AdminPageLoading";
 import { useSWRBackendAPI } from "../Library/API";
-import CyberpunkError from "../Components/CyberpunkError";
-import Swal from "sweetalert2";
 
 ChartJS.register(
   CategoryScale,
@@ -69,112 +67,317 @@ const AdminPage = () => {
     "admin/data", //endpoint
     "GET", //method
     null, //data
-    10000 //revalidate
+    0 //revalidate 
   );
 
   // populate data once fetched
   useEffect(() => {
+    if (window.innerWidth < 640) setSidebarOpen((prev) => !prev);
 
-    console.log("Fetched admin data:", result);
-    if (result) {
-      console.log(result);
-      console.log(transformTournaments(result.users));
+    // console.log("Fetched admin data:", result);
+    if (result && !error) {
+      console.log("Result fetched....");
+      // console.log(transformTournaments(result.users));
       setTournaments(transformTournaments(result.tournaments));
       setParticipants(result.users);
       // setRevenue(result.revenue);
-    
+
     }
   }, [result]);
 
 
   useEffect(() => {
-    if (window.innerWidth < 640) setSidebarOpen((prev) => !prev);
+
   }, [activeTab]);
 
   const [tournaments, setTournaments] = useState([
     {
       id: 1,
-      name: "BGMI Elite Series",
-      participants: 250,
-      prize: 50000,
-      status: "Active",
-      date: "2025-01-15",
+      tournamentName: "Dummy Series 1",
+      prizePool: 50000,
+      dateTime: 202501151800,
+      entryFee: 50,
+      platform: "PC"
     },
+
+
     {
       id: 2,
-      name: "Spring Championship",
-      participants: 180,
-      prize: 75000,
-      status: "Upcoming",
-      date: "2025-02-10",
+      tournamentName: "Dummy Series 2",
+      prizePool: 60000,
+      dateTime: 202502101900,
+      entryFee: 75,
+      platform: "Mobile"
     },
     {
       id: 3,
-      name: "Winter Cup 2024",
-      participants: 420,
-      prize: 150000,
-      status: "Completed",
-      date: "2024-12-20",
+      tournamentName: "Championship Clash",
+      prizePool: 75000,
+      active: false,
+      dateTime: 202503051700,
+      entryFee: 100,
+      platform: "PC"
     },
     {
       id: 4,
-      name: "Regional Qualifier",
-      participants: 95,
-      prize: 25000,
-      status: "Active",
-      date: "2025-01-20",
+      tournamentName: "Battle Royale Cup",
+      prizePool: 40000,
+      dateTime: 202504201830,
+      entryFee: 60,
+      platform: "Console"
     },
     {
       id: 5,
-      name: "start month",
-      participants: 105,
-      prize: 35000,
-      status: "Active",
-      date: "2025-02-15",
+      tournamentName: "Legends Invitational",
+      prizePool: 90000,
+      dateTime: 202505151600,
+      entryFee: 120,
+      platform: "PC"
     },
-  ]);
+    {
+      id: 6,
+      tournamentName: "Pro Gamer League",
+      prizePool: 55000,
+      active: false,
+      dateTime: 202506101930,
+      entryFee: 80,
+      platform: "Mobile"
+    },
+    {
+      id: 7,
+      tournamentName: "Ultimate Showdown",
+      prizePool: 100000,
+      dateTime: 202507251700,
+      entryFee: 150,
+      platform: "Console"
+    },
+    {
+      id: 8,
+      tournamentName: "Arena Masters",
+      prizePool: 30000,
+      dateTime: 202508121830,
+      entryFee: 40,
+      platform: "PC"
+    },
+    {
+      id: 9,
+      tournamentName: "Victory Cup",
+      prizePool: 65000,
+      active: false,
+      dateTime: 202509051900,
+      entryFee: 90,
+      platform: "Mobile"
+    },
+    {
+      id: 10,
+      tournamentName: "Elite Gamers Series",
+      prizePool: 85000,
+      dateTime: 202510151800,
+      entryFee: 110,
+      platform: "PC"
+    },
+    {
+      id: 11,
+      tournamentName: "Grand Finals",
+      prizePool: 120000,
+      dateTime: 202511201930,
+      entryFee: 200,
+      platform: "Console"
+    }
+  ]
+  );
 
   const [participants, setParticipants] = useState([
     {
       id: 1,
-      name: "John Doe",
+      username: "John Doe",
       email: "john@example.com",
-      tournaments: 5,
-      winRate: 65,
-      status: "Active",
+      callSign: "JD123",
+      contact: 1234567890,
+      accessKey: "AK987654321",
+      joiningDate: 20230510,
+      investAmount: 1000,
+      winAmount: 500,
+      withdrawAmount: 200,
+      balanceAmount: 1300,
+      totalPlay: 50,
+      totalWin: 30,
+      totallosses: 20,
+      active: true,
     },
+
     {
       id: 2,
-      name: "Jane Doe",
-      email: "jane@example.com",
-      tournaments: 3,
-      winRate: 72,
-      status: "Active",
+      username: "Alice Smith",
+      email: "alice@example.com",
+      callSign: "AS456",
+      contact: 9876543210,
+      accessKey: "AK123456789",
+      joiningDate: 20230615,
+      investAmount: 1500,
+      winAmount: 700,
+      withdrawAmount: 300,
+      balanceAmount: 1900,
+      totalPlay: 60,
+      totalWin: 35,
+      totallosses: 25,
+      active: true,
     },
     {
       id: 3,
-      name: "Bob Smith",
+      username: "Bob Johnson",
       email: "bob@example.com",
-      tournaments: 2,
-      winRate: 48,
-      status: "Inactive",
+      callSign: "BJ789",
+      contact: 9123456780,
+      accessKey: "AK246813579",
+      joiningDate: 20230720,
+      investAmount: 2000,
+      winAmount: 1200,
+      withdrawAmount: 500,
+      balanceAmount: 2700,
+      totalPlay: 80,
+      totalWin: 50,
+      totallosses: 30,
+      active: true,
     },
     {
       id: 4,
-      name: "Alex Johnson",
-      email: "alex@example.com",
-      tournaments: 8,
-      winRate: 78,
-      status: "Active",
+      username: "Charlie Brown",
+      email: "charlie@example.com",
+      callSign: "CB321",
+      contact: 9988776655,
+      accessKey: "AK564738291",
+      joiningDate: 20230805,
+      investAmount: 800,
+      winAmount: 400,
+      withdrawAmount: 100,
+      balanceAmount: 1100,
+      totalPlay: 40,
+      totalWin: 20,
+      totallosses: 20,
+      active: true,
     },
     {
       id: 5,
-      name: "Sarah Williams",
-      email: "sarah@example.com",
-      tournaments: 4,
-      winRate: 58,
-      status: "Active",
+      username: "Diana Prince",
+      email: "diana@example.com",
+      callSign: "DP654",
+      contact: 8765432109,
+      accessKey: "AK987123654",
+      joiningDate: 20230912,
+      investAmount: 2500,
+      winAmount: 1500,
+      withdrawAmount: 600,
+      balanceAmount: 3400,
+      totalPlay: 90,
+      totalWin: 55,
+      totallosses: 35,
+      active: true,
     },
+    {
+      id: 6,
+      username: "Ethan Hunt",
+      email: "ethan@example.com",
+      callSign: "EH987",
+      contact: 7654321098,
+      accessKey: "AK192837465",
+      joiningDate: 20231001,
+      investAmount: 1200,
+      winAmount: 800,
+      withdrawAmount: 400,
+      balanceAmount: 1600,
+      totalPlay: 55,
+      totalWin: 32,
+      totallosses: 23,
+      active: true,
+    },
+    {
+      id: 7,
+      username: "Fiona Green",
+      email: "fiona@example.com",
+      callSign: "FG741",
+      contact: 6543210987,
+      accessKey: "AK111222333",
+      joiningDate: 20231118,
+      investAmount: 1800,
+      winAmount: 900,
+      withdrawAmount: 350,
+      balanceAmount: 2350,
+      totalPlay: 70,
+      totalWin: 40,
+      totallosses: 30,
+      active: true,
+    },
+    {
+      id: 8,
+      username: "George King",
+      email: "george@example.com",
+      callSign: "GK852",
+      contact: 5432109876,
+      accessKey: "AK444555666",
+      joiningDate: 20231225,
+      investAmount: 2200,
+      winAmount: 1100,
+      withdrawAmount: 500,
+      balanceAmount: 2800,
+      totalPlay: 75,
+      totalWin: 45,
+      totallosses: 30,
+      active: true,
+    },
+    {
+      id: 9,
+      username: "Hannah Lee",
+      email: "hannah@example.com",
+      callSign: "HL963",
+      contact: 4321098765,
+      accessKey: "AK777888999",
+      joiningDate: 20240110,
+      investAmount: 900,
+      winAmount: 450,
+      withdrawAmount: 200,
+      balanceAmount: 1150,
+      totalPlay: 45,
+      totalWin: 25,
+      totallosses: 20,
+      active: true,
+    },
+    {
+      id: 10,
+      username: "Ian Scott",
+      email: "ian@example.com",
+      callSign: "IS159",
+      contact: 3210987654,
+      accessKey: "AK000111222",
+      joiningDate: 20240214,
+      investAmount: 3000,
+      winAmount: 2000,
+      withdrawAmount: 800,
+      balanceAmount: 4200,
+      totalPlay: 100,
+      totalWin: 65,
+      totallosses: 35,
+      active: true,
+    },
+    {
+      id: 11,
+      username: "Julia Adams",
+      email: "julia@example.com",
+      callSign: "JA753",
+      contact: 2109876543,
+      accessKey: "AK333444555",
+      joiningDate: 20240305,
+      investAmount: 1600,
+      winAmount: 700,
+      withdrawAmount: 300,
+      balanceAmount: 2000,
+      totalPlay: 65,
+      totalWin: 38,
+      totallosses: 27,
+      active: true,
+    }
+
+
   ]);
 
   const [revenue, setRevenue] = useState([
@@ -278,12 +481,7 @@ const AdminPage = () => {
   ];
 
   // console.log(result);
-  if (error) return (Swal.fire({
-    icon: "error",
-    title: "Oops...",
-    text: "Something went wrong!",
-    footer: '<a href="/">Go to home</a>'
-  }));
+
 
   return (
     <div className="flex min-h-screen bg-gray-900 text-white">
@@ -327,7 +525,7 @@ const AdminPage = () => {
         <div className="p-2 sm:p-6 ">
 
 
-          {error ? (isLoading ? (
+          {isLoading ? (
             <AdminPageLoading activeTab={activeTab} />
           ) : (
             <>
@@ -363,7 +561,7 @@ const AdminPage = () => {
 
               {activeTab === "settings" && <Settings />}
             </>
-          )) : null}
+          )}
         </div>
       </div>
     </div>

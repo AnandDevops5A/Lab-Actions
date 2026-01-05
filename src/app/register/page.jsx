@@ -31,8 +31,8 @@ export default function Page() {
           duration-500 ease-in-out rounded-xl ${isLogin ? 'min-h-[420px] p-3' : 'min-h-[500px]'}`}>
 					<div className="relative w-full overflow-visible">
 						<div className={`absolute top-0 w-full forms-viewport ${isLogin ? 'form-visible' : 'form-hidden-left'}`}>
-							<Suspense fallback={<SkeletonChart />}>
-								<Login onSwitch={(m) => setMode(m)} /></Suspense>
+
+							<Login onSwitch={(m) => setMode(m)} />
 						</div>
 						<div className={`absolute top-0 w-full forms-viewport ${!isLogin ? 'form-visible' : 'form-hidden-right'}`}>
 							<Suspense fallback={<SkeletonChart />}>

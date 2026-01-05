@@ -11,7 +11,7 @@ export function validatePassword(password) {
         errors.push("at least one number");
     }
     if (!/[^A-Za-z0-9$]/.test(password)) {
-        errors.push("at least one special symbol (excluding $)");
+        errors.push("at least one special symbol { except $ }");
     }
     if (password.length < 8) {
         errors.push("minimum length of 8 characters");

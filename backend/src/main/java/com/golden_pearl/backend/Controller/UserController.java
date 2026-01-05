@@ -26,6 +26,7 @@ public class UserController {
 
     @PostMapping("/verify")
     public ResponseEntity<User> verifyUser(@RequestBody UserAuth userAuth) {
+        System.err.println("Received user auth data: " + userAuth);
         return userService.getUser(userAuth);
     }
     

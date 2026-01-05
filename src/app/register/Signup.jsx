@@ -1,10 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { Users, UserPlus, Phone, Lock, Eye, EyeOff, Check, Router } from "lucide-react";
-import Swal from "sweetalert2";
+import { Users, UserPlus, Phone, Lock, Eye, EyeOff, Check } from "lucide-react";
 import { useFetchBackendAPI } from "../Library/API";
 import { validatePassword } from "./PasswordCheck";
+import { useRouter } from "next/navigation";
+import { errorMessage, successMessage } from "../Library/Alert";
+import { getCache, setCache } from "../Library/ActionRedis";
+
 
 // ✅ Constants outside component
 const COUNTRIES = [
@@ -35,12 +38,13 @@ function InputField({ id, icon: Icon, type = "text", value, onChange, placeholde
   );
 }
 
-export default function Signup({ onSwitch, onSubmit }) {
+export default function Signup({ onSwitch }) {
+  const Router = useRouter();
   const [form, setForm] = useState({
-    name: "",
-    playerId: "",
+    username: "",
+    callSign: "",
     contact: "",
-    password: "",
+    accessKey: "",
     confirm: "",
   });
   const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
@@ -52,15 +56,31 @@ export default function Signup({ onSwitch, onSubmit }) {
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const validateForm = () => {
-    const { name, playerId, contact, password, confirm } = form;
-    if (!name.trim() || !playerId.trim() || !contact.trim() || !password) return "Please fill all fields.";
-    const paswordValidation = validatePassword(password);
+    const { username, callSign, contact, accessKey, confirm } = form;
+    if (!username.trim() || !callSign.trim() || !contact.trim() || !accessKey) return "Please fill all fields.";
+    const paswordValidation = validatePassword(accessKey);
     if (!paswordValidation.valid) return paswordValidation.message;
-    if (password !== confirm) return "Passwords do not match.";
+    if (accessKey !== confirm) return "Passwords do not match.";
     const combined = `${selectedCountry.code}${contact.trim()}`;
     if (!/^\+[0-9]{11,15}$/.test(combined)) return "Enter a valid contact number.";
     return null;
   };
+
+  async function onSubmit(payload){
+    // console.log("Submitting payload:", payload);
+   const res=await useFetchBackendAPI("users/register",{ method: "POST", data : payload} );
+  const status= await setCache("activeUser", res);
+  if(!status.status){
+    errorMessage("Error caching user data");
+  }
+  else{
+    const data = await getCache("activeUser");
+    console.log("Cached Data:", data);
+  }
+
+   console.log("Data found", res);
+   return {ok:true};
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -71,35 +91,31 @@ export default function Signup({ onSwitch, onSubmit }) {
     setLoading(true);
     try {
       const payload = {
-        name: form.name.trim(),
-        playerId: form.playerId.trim(),
+        username: form.username.trim(),
+        callSign: form.callSign.trim(),
         contact: `${selectedCountry.code}${form.contact.trim()}`,
-        password: form.password,
+        password: form.accessKey,
       };
 
-      console.log("Submitting payload:", payload);
+      // console.log("Submitting payload:", payload);
 
-      const res = onSubmit ? await onSubmit(payload) : { ok: true };
+      const res =await onSubmit(payload);
       if (!res.ok) {
-        setError(res.message || "Registration failed");
+        errorMessage(res.message || "Server Error");
       } else {
         setSuccess(true);
         //success popup
-        Swal.fire({
-          title: "Success!",
-          text: "SuccessFully Registered...",
-          icon: "success"
-        });
+       successMessage("Succesfully Registered...")
       }
     } catch (err) {
-      setError(err?.message || "Unexpected error.");
+      // setError(err?.message || "Unexpected error.");
+      errorMessage(err?.message || "Unexpected error.")
     } finally {
       setLoading(false);
       //rediect to profile page after 2 seconds
       if (success) {
-        setTimeout(() => {
-          Router.push("/player");
-        }, 2000);
+        // Router.push("/player");
+
       }
     }
   }
@@ -107,8 +123,8 @@ export default function Signup({ onSwitch, onSubmit }) {
   return (
     <div className="w-full">
       <form onSubmit={handleSubmit} className="space-y-4 p-4" aria-live="polite">
-        <InputField id="name" icon={Users} value={form.name} onChange={handleChange} placeholder="Aapka Name" />
-        <InputField id="playerId" icon={UserPlus} value={form.playerId} onChange={handleChange} placeholder="Player ID" />
+        <InputField id="username" icon={Users} value={form.username} onChange={handleChange} placeholder="Aapka Name" />
+        <InputField id="callSign" icon={UserPlus} value={form.callSign} onChange={handleChange} placeholder="Call Sign" />
 
         {/* Contact field with country select */}
         <div className="relative group gap-1">
@@ -123,12 +139,12 @@ export default function Signup({ onSwitch, onSubmit }) {
             {COUNTRIES.map((c) => (
               <option key={c.code} value={c.code} className="bg-black text-white">{`${c.emoji} ${c.code}`}</option>
             ))}
-            
+
           </select>
           <input
             id="contact"
             type="number"
-            name="contact" 
+            name="contact"
             value={form.contact}
             onChange={handleChange}
             placeholder="Local number"
@@ -138,10 +154,10 @@ export default function Signup({ onSwitch, onSubmit }) {
 
         {/* Password */}
         <InputField
-          id="password"
+          id="accessKey"
           icon={Lock}
           type={showPwd ? "text" : "password"}
-          value={form.password}
+          value={form.accessKey}
           onChange={handleChange}
           placeholder="Set Access Key"
           extraClass="pr-12"
@@ -171,13 +187,13 @@ export default function Signup({ onSwitch, onSubmit }) {
         </div>
 
         {/* Submit */}
-        <button type="submit" disabled={loading} className="w-full rounded-lg px-6 py-3 font-extrabold text-lg bg-gradient-to-r from-[#00E5FF] via-[#FF0055] to-[#9b59ff] text-black shadow-lg">
-          {loading ? "Registering..." : "Submit"}
+        <button type="submit" disabled={loading} className="w-full rounded-lg px-6 py-3 font-extrabold text-lg bg-linear-to-r from-[#00E5FF] via-[#FF0055] to-[#9b59ff] text-black shadow-lg cursor-pointer">
+          {loading ? "Please wait..." : "Submit"}
         </button>
 
         <p className="mt-4 text-sm text-gray-300 text-center">
           Already have an account?{" "}
-          <button type="button" onClick={() => onSwitch?.("login")} className="text-[#00E5FF] font-semibold hover:text-[#00B8E6] transition-colors">
+          <button type="button" onClick={() => onSwitch?.("login")} className="text-[#00E5FF] font-semibold hover:text-[#00B8E6] transition-colors cursor-pointer">
             Back to Login
           </button>
         </p>

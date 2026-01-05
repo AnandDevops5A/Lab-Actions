@@ -20,11 +20,12 @@ public class User {
     @Id
     private String id;
     private String username;
+    private String playerId;
     private String callSign;
     private String email;
     private String accessKey;
     private Long contact;
-    private String joiningDate;
+    private Long joiningDate;
     private Long investAmount;
     private Long winAmount;
     private Long withdrawAmount;

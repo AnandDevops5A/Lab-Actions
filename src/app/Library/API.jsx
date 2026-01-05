@@ -45,6 +45,8 @@ export async function useFetchBackendAPI(
   if (!endpoint) throw new Error("Endpoint is required");
 
   const url = `${BASE_URL}/${endpoint}`;
+  // console.log(url,method)
+  // console.log(data)
 
   const options = {
     method,
