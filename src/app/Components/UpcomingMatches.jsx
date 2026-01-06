@@ -16,7 +16,7 @@ const UpcomingMatches = () => {
               🔥 Upcoming Tournaments
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {upcomingTournaments.map((tournament, index) => (
                 <div key={index} className="bg-gray-950 p-6 rounded-xl border border-gray-700 hover:border-neon-red transition duration-300 shadow-xl">
                   <h3 className="text-3xl font-extrabold text-white mb-2">{tournament.name}</h3>

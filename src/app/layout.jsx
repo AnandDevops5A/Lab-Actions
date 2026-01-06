@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "./Components/Navbar";
 import Footer from "./Components/Footer";
 import MatchJoiningForm from "./Components/matchJoiningForm";
+import { UserProvider } from "./Library/ContextAPI";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,25 +22,28 @@ export const metadata = {
 };
 
 
-  
+
 
 export default function RootLayout({ children }) {
-    
- 
+
+
   return (
     <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased` }
-        >
-          {/* 1. Navigation Bar 
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        {/* 1. Navigation Bar 
                 // components/Navbar.jsx*/}
-          <Navbar/>
-          
+        {/* use context api for user data */}
+        <UserProvider>
+          <Navbar />
+
           <MatchJoiningForm />
           {children}
 
-           <Footer />
-        </body>
+          <Footer />
+        </UserProvider>
+      </body>
     </html>
   );
 

@@ -4,6 +4,7 @@ import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.Models.UserAuth;
 import com.golden_pearl.backend.Services.UserService;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,8 +27,8 @@ public class UserController {
 
     @PostMapping("/verify")
     public ResponseEntity<User> verifyUser(@RequestBody UserAuth userAuth) {
-        System.err.println("Received user auth data: " + userAuth);
-        return userService.getUser(userAuth);
+        // System.err.println("Received user auth data: " + userAuth);
+        return userService.getUser(userAuth);  
     }
     
     @PostMapping("/register")

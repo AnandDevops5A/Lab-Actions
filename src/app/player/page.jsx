@@ -4,6 +4,9 @@ import React from "react";
 import Avatar from "../images/avatar.png";
 import dynamic from "next/dynamic";
 import { SkeletonCard, SkeletonChart, SkeletonTable } from "../skeleton/Skeleton";
+import { use } from "react";
+import { UserContext } from "../Library/ContextAPI";
+import { useEffect } from "react";
 
 const mockPlayer = {
   ign: "SHADOW_LORD_07",
@@ -19,28 +22,38 @@ const mockPlayer = {
 
 const DynamicAchievement = dynamic(() => import("./Achievement.jsx"), {
   loading: () => (
-    <SkeletonCard/>
+    <SkeletonCard />
   ),
   ssr: false,
 });
 
 const DynamicPlayerStats = dynamic(() => import("./PlayerStats.jsx"), {
   loading: () => (
-    <SkeletonChart/>
+    <SkeletonChart />
   ),
   ssr: false,
 });
 
 const DynamicPlayerHeader = dynamic(() => import("./ProfileHeader.jsx"), {
   loading: () => (
-    <SkeletonTable/>
+    <SkeletonTable />
   ),
   ssr: false,
 });
 
 const PlayerProfile = () => {
-  const player = mockPlayer;
-
+  //get user from context
+  const { user, getUserFromContext } = use(UserContext);
+  //set default avatar if not present
+  useEffect(() => {
+    if (!user) { 
+      getUserFromContext(); }
+    else if (user && !user.avatarUrl) { user.avatarUrl = Avatar.src; }
+    
+    // console.log("User context has been updated:", user);
+  }, [user]);
+  const player = user || mockPlayer;
+  // console.log("player data:", player);
   return (
     <div className="min-h-screen bg-gray-900 text-white p-4 md:p-10">
       {/* 1. Header & Quick Stats (Top Section) */}

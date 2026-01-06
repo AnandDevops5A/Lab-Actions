@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class UserAuth {
-    private String callSign;
     private Long contact;
     private String accessKey;
 }

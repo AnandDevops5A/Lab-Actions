@@ -83,14 +83,15 @@ const AdminPage = () => {
       // setRevenue(result.revenue);
 
     }
+    else{
+      setParticipants(dummyParticipants);
+      setTournaments(dummyTournaments);
+      // setRevenue(dummyRevenue);
+    }
   }, [result]);
 
 
-  useEffect(() => {
-
-  }, [activeTab]);
-
-  const [tournaments, setTournaments] = useState([
+const dummyTournaments =  [
     {
       id: 1,
       tournamentName: "Dummy Series 1",
@@ -185,9 +186,8 @@ const AdminPage = () => {
       platform: "Console"
     }
   ]
-  );
 
-  const [participants, setParticipants] = useState([
+  const dummyParticipants =  [
     {
       id: 1,
       username: "John Doe",
@@ -378,7 +378,10 @@ const AdminPage = () => {
     }
 
 
-  ]);
+  ]
+  const [tournaments, setTournaments] = useState();
+
+  const [participants, setParticipants] = useState();
 
   const [revenue, setRevenue] = useState([
     { month: "Jan", amount: 45000, registrations: 250 },

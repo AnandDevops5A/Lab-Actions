@@ -66,12 +66,12 @@ export async function useFetchBackendAPI(
       );
     }
 
-    return await response.json();
+    return { data: await response.json(), status: response.status };
   } catch (error) {
     console.error(`[BackendAPI] ${method} ${url} →`, error);
-    throw error; // rethrow so caller can handle it
+    return { error: error.message , status: error.status || 500}}; // rethrow so caller can handle it
   }
-}
+
 
 
 

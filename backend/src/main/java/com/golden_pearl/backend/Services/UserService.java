@@ -27,21 +27,18 @@ public class UserService {
     // verify user by callsign and accessKey or contact and accessKey
     public ResponseEntity<User> getUser(UserAuth userAuth) {
         User user;
-        String callsign = userAuth.getCallSign();
         Long contact = userAuth.getContact();
         String accessKey = userAuth.getAccessKey();
 
         // Input validation: accessKey is mandatory, and either callsign or contact must
         // be present.
-        if (accessKey == null || (callsign == null && contact == null)) {
+        if (accessKey == null || contact == null) {
             return ResponseEntity.badRequest().build(); // 400 Bad Request
         }
 
-        if (callsign != null) {
-            user = userRepository.findByCallSignAndAccessKey(callsign, accessKey);
-        } else { // contact must not be null here because of the validation above
+      // contact must not be null here because of the validation above
             user = userRepository.findByContactAndAccessKey(contact, accessKey);
-        }
+        
 
         if (user != null) {
             return ResponseEntity.ok(user); // 200 OK with user data

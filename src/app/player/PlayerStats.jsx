@@ -3,48 +3,62 @@ import React from 'react'
 
 // components/PlayerStats.jsx
 
+//reuseable stat box with neon glow effect
+const StatsNeonBox = ({ title, value, color }) => {
+    // Tailwind CSS requires full class names to be present, not dynamically constructed.
+    const colorVariants = {
+        green: {
+            border: "border-green-500/70",
+            text: "text-green-400",
+        },
+        red: {
+            border: "border-red-500/70",
+            text: "text-red-400",
+        },
+    };
+
+    const selectedColor = colorVariants[color] || { border: "border-gray-500/70", text: "text-gray-400" };
+
+    return (
+        <div className={`p-4 bg-gray-700 rounded-lg text-center border ${selectedColor.border}`}>
+            <p className="text-xs uppercase text-gray-400 font-medium">{title}</p>
+            <p className={`text-4xl font-extrabold ${selectedColor.text} [text-shadow:0_0_8px_#F87171]`}>
+                {value}
+            </p>
+        </div>
+    );
+};
+//reuseable stat box simple
+const StatsSimpleBox = ({ title, value }) => {
+    return (<div className="p-4 bg-gray-700 rounded-lg text-center">
+        <p className="text-xs uppercase text-gray-400 font-medium">{title}</p>
+        <p className="text-3xl font-extrabold text-white">
+            {value}
+        </p>
+    </div>)
+}
+
+
 const PlayerStats = ({ player }) => (
     <div className="bg-gray-800 p-6 rounded-xl border border-red-700/50 shadow-lg shadow-gray-700/50">
         <h2 className="text-2xl font-bold uppercase mb-6 border-b-2 border-red-500 pb-2">Tournament Stats</h2>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-            
-            {/* Stat Card 1: Kills (Focus Metric with Neon Glow) */}
-            <div className="p-4 bg-gray-700 rounded-lg text-center border border-green-500/70">
-                <p className="text-xs uppercase text-gray-400 font-medium">Total Win</p>
-                <p className="text-4xl font-extrabold text-green-400 [text-shadow:0_0_8px_#F87171]">
-                    {player.totalWin}
-                </p>
-            </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
 
-            {/* Stat Card 2: K/D Ratio */}
-            <div className="p-4 bg-gray-700 rounded-lg text-center">
-                <p className="text-xs uppercase text-gray-400 font-medium">Win Ratio</p>
-                <p className="text-4xl font-extrabold text-white">
-                    {player.winRatio.toFixed(2)}
-                </p>
-            </div>
+            {/* Stat Card 1: Total withdraw (Focus Metric with Neon Glow) */}
+            <StatsNeonBox title="Withdraw" value={`₹ ${player.balanceAmount}` || 'N/A'}  color="green" />
+
+            {/* Stat Card 2:Total Win */}
+            <StatsSimpleBox title="Wins" value={player.totalWin || 'N/A'} />
 
             {/* Stat Card 3: Matches Played */}
-            <div className="p-4 bg-gray-700 rounded-lg text-center">
-                <p className="text-xs uppercase text-gray-400 font-medium">Matches</p>
-                <p className="text-4xl font-extrabold text-white">
-                    {player.matchesPlayed}
-                </p>
-            </div>
+            <StatsSimpleBox title="Total Play" value={player.totalPlay} />
+            {/* Stat Card 2: K/D Ratio */}
+            <StatsSimpleBox title="Win Ratio" value={player.totalPlay > 0 ? `${((player.totalWin / player.totalPlay) * 100).toFixed(1)}%` : '0.0%'} />
 
-            {/* Stat Card 4: Avg Rank */}
-            <div className="p-4 bg-gray-700 rounded-lg text-center">
-                <p className="text-xs uppercase text-gray-400 font-medium">Rank</p>
-                <p className="text-4xl font-extrabold text-white">
-                    {player.avgRank.toFixed(1)}
-                </p>
-            </div>
-            <div className="p-4 bg-gray-700 rounded-lg text-center">
-                <p className="text-xs uppercase text-gray-400 font-medium">Clan Rank</p>
-                <p className="text-4xl font-extrabold text-white">
-                    {player.clanRank}
-                </p>
-            </div>
+            {/* Stat Card 5: Invest */}
+            <StatsSimpleBox title="Invest" value={`₹ ${player.investAmount}` || 'N/A'} />
+            {/* Stat Card 6: Total Loose (Focus Metric with Neon Glow) */}
+            <StatsNeonBox title="Total Loose" value={player.totallosses} color="red" />
 
         </div>
     </div>

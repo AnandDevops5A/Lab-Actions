@@ -1,8 +1,8 @@
 "use server";
 
-import client from "./Redis.jsx";
+ import Redis from "ioredis";
 
-
+const client = new Redis();
 
 export const setCache = async (key, value, ttl = 3600) => {
 
@@ -21,7 +21,7 @@ export const setCache = async (key, value, ttl = 3600) => {
 export const UpdateCache = async (key, value, ttl = 3600) => {
 
     try {
-        await client.set(key, JSON.stringify(value), "XX", ttl);
+        await client.set(key, JSON.stringify(value), "EX", ttl, "XX");
         return { status: true };
     }
 
@@ -42,4 +42,16 @@ export const getCache = async (key) => {
     } catch (error) {
         console.error("Error getting cache:", error);
         return { status: false, error: error.message };
-    }}
+    }
+}
+
+export const deleteCache = async (key) => {
+
+    try {
+        await client.del(key);
+        return { status: true };
+    } catch (error) {
+        // console.error("Error deleting cache:", error);
+        return { status: false, error: error.message };
+    }
+}

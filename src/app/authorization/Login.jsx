@@ -3,34 +3,53 @@
 
 import React, { useState } from 'react';
 import { Hash, Lock, Eye, EyeOff } from 'lucide-react';
-import { errorMessage } from '../Library/Alert';
+import { errorMessage, successMessage } from '../Library/Alert';
 import { useFetchBackendAPI } from "../Library/API";
 import { getCache, setCache, UpdateCache } from "../Library/ActionRedis";
+import { useContext } from 'react';
+import { UserContext } from '../Library/ContextAPI';
+import { useRouter } from 'next/navigation';
 
-export default function Login({ onSwitch}) {
+export default function Login({ onSwitch }) {
 	const [contact, setcontact] = useState('');
 	const [accessKey, setaccessKey] = useState('');
 	const [showPwd, setShowPwd] = useState(false);
 	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState('');
+	// const [error, setError] = useState('');
+	const { setUser } = useContext(UserContext);
+	const router = useRouter();
 
-	
+	//verify context data saved or not
+	// useEffect(() => {
+	// 	console.log("User context has been updated:", user);
+	//   }, [user]);
 
-async function onSubmit(payload){
-	// console.log("Submitting payload:", payload);
-   const res=await useFetchBackendAPI("users/verify",{ method: "POST", data : payload} );
-  const status= await setCache("activeUser", res);
-  if(!status.status){
-	errorMessage("Error caching user data");
-  }
-  else{
-	const data = await UpdateCache("activeUser");
-	console.log("Cached Data:", data);
-  }
 
-   console.log("Data found", res);
-   return {ok:true};
-  }
+
+
+	async function onSubmit(payload) {
+		// console.log("Submitting payload:", payload);
+		const res = await useFetchBackendAPI("users/verify", { method: "POST", data: payload });
+		//    console.log("Response from backend:", res);
+		//    console.log("Before set context is :" , user);
+		if (res.status === 200 && res.data) {
+			const status = await setCache("currentUser", res.data, 3600);
+			if (!status.status) {
+				errorMessage("Error caching user data");
+				const res = await UpdateCache("currentUser", res.data, 3600);
+				if (!res.status) {
+					errorMessage("Error updating user data");
+				} else {
+					console.log("User data updated in cache");
+				}
+			}
+
+			else setUser(res.data);
+
+			//    console.log("after set context is :" , user);
+		}
+		return res;
+	}
 
 	async function handleSubmit(e) {
 		e.preventDefault();
@@ -38,20 +57,29 @@ async function onSubmit(payload){
 			errorMessage('Please enter both Player ID and accessKey.');
 			return;
 		}
-		console.log("contact,accessKey",contact,accessKey)
+		console.log("contact,accessKey", contact, accessKey)
 		setLoading(true);
-		let result=null;
+		let result = null;
 		try {
 			const payload = { contact: contact.trim(), accessKey };
-			 result = await onSubmit(payload);
-			if (result && result.ok === false) {
-				setError(result.message || 'Login failed.');
+			result = await onSubmit(payload);
+			if (result.status === 200 && result.data) {
+				successMessage(result.message || 'Login successful.');
+			}
+			else if (result.status === 500) {
+				errorMessage('Invalid Player ID or accessKey.');
+			}
+			else {
+				errorMessage(result.message || 'Server error. Please try again later.');
 			}
 		} catch (err) {
-			setError(err?.message || 'Unexpected error.');
+			errorMessage(err?.message || 'Unexpected error.');
 		} finally {
 			setLoading(false);
 			console.log("Login user: ", result);
+			//rediect to player dashboard
+			if (result && result.status === 200 && result.data)
+				router.push("/player");
 		}
 	}
 
@@ -97,9 +125,9 @@ async function onSubmit(payload){
 						value={accessKey}
 						onChange={(e) => setaccessKey(e.target.value)}
 						placeholder="Secure Access Key"
-						type={showPwd ? 'text' : 'accessKey'}
+						type={showPwd ? 'text' : 'password'}
 						className="w-full bg-transparent border-b border-[#00E5FF]/10 py-3 pl-12 pr-12 text-white placeholder-gray-400 focus:outline-none focus:border-[#FF4170] transition-colors"
-						autoComplete="current-accessKey"
+						autoComplete="current-password"
 					/>
 
 					<button
@@ -112,10 +140,10 @@ async function onSubmit(payload){
 					</button>
 				</div>
 
-				{/* Error Message */}
+				{/* Error Message
 				<div role="status" aria-live="polite" className="min-h-5">
 					{error ? <p id="login-error" className="text-sm text-red-400">{error}</p> : null}
-				</div>
+				</div> */}
 
 				{/* Submit Button */}
 				<div className="pt-2">
@@ -124,7 +152,7 @@ async function onSubmit(payload){
 						disabled={loading}
 						className="relative w-full inline-flex items-center justify-center overflow-hidden rounded-lg px-6 py-3 font-extrabold text-lg transition-transform duration-150 transform
                          bg-linear-to-r from-[#00E5FF] via-[#FF0055] to-[#9b59ff] text-black shadow-lg cursor-pointer"
-					
+
 					>
 						{loading ? (
 							<svg className="w-5 h-5 animate-spin mr-3" viewBox="0 0 24 24" fill="none">

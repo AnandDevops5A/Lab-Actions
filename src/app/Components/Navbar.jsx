@@ -3,17 +3,21 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useContext } from 'react';
 import { useState, useEffect } from 'react';
+import { UserContext } from '../Library/ContextAPI';
+import { successMessage } from '../Library/Alert';
+import { LogoutButton } from './LogoutButton';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, getUserFromContext } = useContext(UserContext);
 
   const navItems = [
     { name: 'Review', href: '/review' },
     { name: 'leaderboard', href: '/Leaderboard' },
     { name: 'Admin', href: '/Malik' },
-    { name: 'My Profile', href: '/player' },
-    { name: 'Register', href: '/register' },
+    { name: user ?'My Profile':'Register', href: user ? '/player' : '/authorization' }
   ];
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastscrollX, setLastscrollX] = useState(0);
@@ -39,6 +43,7 @@ const Navbar = () => {
   }, [lastscrollX]);
   const searchParams = useSearchParams();
   const scrollTarget = searchParams.get('scroll');
+  
 
   useEffect(() => {
     if (scrollTarget === 'leaderboard') {
@@ -58,6 +63,17 @@ const Navbar = () => {
       return () => clearTimeout(timer);
     }
   }, [scrollTarget]);
+
+  useEffect(() => {
+    // By chance if user refresh page
+    // On component mount, check if user data is in context; if not, try to get from cache
+    const fetchUserData = async () => {
+      if (!user) {
+         await getUserFromContext();
+      }
+    };
+    fetchUserData();
+  }, [user]);
 
 
   return (
@@ -95,7 +111,8 @@ const Navbar = () => {
                   {item.name}
                 </Link>
               ))}
-
+              {/* logout button cyberpunk style */}
+              {user ? <LogoutButton /> : null}
 
             </div>
 
@@ -151,6 +168,8 @@ const Navbar = () => {
                     {item.name}
                   </Link>
                 ))}
+                {/* logout button for side style cyber punk */}
+                {user ? <LogoutButton /> : null}
 
               </div>
             </div>

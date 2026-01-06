@@ -27,7 +27,7 @@ const ProfileHeader = ({ player }) => (
       {/* Player Avatar */}
       <Image
         src={player.avatarUrl}
-        alt={player.ign}
+        alt={player.username}
         // Set the base width and height based on the largest possible size (lg:w-40/h-40)
         width={80}
         height={80}
@@ -55,13 +55,13 @@ const ProfileHeader = ({ player }) => (
               wrap-break-word
             "
         >
-          {player.ign}
+          {player.username}
         </h1>
 
         <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 mt-2">
           Team:{" "}
-          <span className="font-semibold text-white">{player.teamName}</span>{" "}
-          | Player ID: {player.bgmiId}
+          <span className="font-semibold text-white">{player.teamName || "N/A"}</span>{" "}
+          | Player ID: {player.playerId|| "N/A"}
         </p>
       </div>
     </div>
