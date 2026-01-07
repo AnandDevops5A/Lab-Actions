@@ -4,9 +4,9 @@ import contactImage from "../images/contact.png"; // Make sure to have an approp
 
 export default function ContactPage() {
   return (
-    <div className="min-h-[80vh] flex flex-col  md:flex-row ">
+    <div className="min-h-[80vh] flex flex-col  md:flex-row">
       {/* Left Side with Background Image */}
-        <div className="md:w-1/2 w-full h-44 md:h-auto bg-cover bg-center lg:m-3 border-cyan-300 border rounded shadow-amber-300"
+        <div className="autoblur md:w-1/2 w-full h-44 md:h-auto bg-cover bg-center lg:m-3 border-cyan-300 border rounded shadow-amber-300 imagereveal"
         style={{
           backgroundImage: `url(${contactImage.src})`, // replace with your photo
         }}
@@ -20,13 +20,13 @@ export default function ContactPage() {
       </div>
 
       {/* Right Side with Contact Form */}
-      <div className="md:w-1/2 w-full bg-black text-white flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-lg">
-          <h1 className="text-4xl md:text-5xl font-extrabold uppercase tracking-widest text-red-600 mb-8">
+      <div className="autoshow md:w-1/2 w-full bg-black text-white flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-lg ">
+          <h1 className="autoblur text-4xl md:text-5xl font-extrabold uppercase tracking-widest text-red-600 mb-8">
             Contact Us
           </h1>
 
-          <form className="space-y-6">
+          <form className="space-y-6 autoshow">
             <div>
               <label className="block text-sm font-bold uppercase mb-2">
                 Name

@@ -13,7 +13,7 @@ const HeroSection = () => {
   return (
     <section
       className="relative h-[97vh] flex items-center justify-center pt-10 overflow-hidden"
-      id="hero"
+      id="hero" 
     >
       {/* 🔫 New Background Visual (GIF/Video) */}
       <Image
@@ -34,7 +34,7 @@ const HeroSection = () => {
         {/* Updated H1 to be clean and punchy */}
 
         {tournamentStatus ? (
-          <h1 className="text-7xl md:text-6xl font-black mb-4 tracking-tight text-white drop-shadow-2xl leading-tight">
+          <h1 className=" text-7xl md:text-6xl font-black mb-4 tracking-tight text-white drop-shadow-2xl leading-tight">
             The <span className="text-red-500">WAR</span> on
             <span className="inline-block ml-4 text-cyan-400">FPS</span>
           </h1>

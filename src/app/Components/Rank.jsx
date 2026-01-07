@@ -15,7 +15,7 @@ const leaderboardData = [
 
 export default function Leaderboard() {
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
+    <div className="autoshow min-h-screen bg-black flex items-center justify-center p-4">
       <div className="w-full max-w-3xl rounded-xl border border-cyan-500/40 bg-gradient-to-br from-black via-zinc-900 to-black shadow-[0_0_30px_rgba(0,255,255,0.25)]">
 
         {/* Header */}

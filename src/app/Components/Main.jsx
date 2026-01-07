@@ -25,6 +25,16 @@ const UpcomingMatches = dynamic(() =>
     ssr: false, // Optional: Set to false if the component must ONLY run on the client
   }
 );
+const Upcoming = dynamic(() =>
+  import('./Upcoming'),
+  {
+    loading: () => {
+      <div className='gap-4'>
+      <SkeletonCard /><SkeletonCard /><SkeletonCard /></div>
+    },
+    ssr: false, // Optional: Set to false if the component must ONLY run on the client
+  }
+);
 
 const WinnerSection = dynamic(() =>
   import('./Winner'),
@@ -73,7 +83,8 @@ const Main = () => {
 
         {/* 3. Upcoming Tournaments Section */}
 
-        <UpcomingMatches />
+        {/* <UpcomingMatches /> */}
+        <Upcoming/>
 
         {/*4. Winner section*/}
         <WinnerSection />
