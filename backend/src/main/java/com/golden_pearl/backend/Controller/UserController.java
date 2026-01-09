@@ -1,10 +1,11 @@
 package com.golden_pearl.backend.Controller;
 
+import java.util.List;
+
 import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.Models.UserAuth;
 import com.golden_pearl.backend.Services.UserService;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,10 +44,21 @@ public class UserController {
         return userService.updateUser(user);
     }
     @GetMapping("/all")
-    public ResponseEntity<java.util.List<User>> getAllUsers() {        
+    public ResponseEntity<List<User>> getAllUsers() {        
         return userService.getAllUsers();
     } 
     
+    //testing purpose
+    @GetMapping("/test")    
+    public String testEndpoint() {
+        return "UserController is working!";
+    }
+    //save all user
+    @PostMapping("/saveAll")
+    public ResponseEntity<List<User>> saveAllUsers(@RequestBody List<User> users) {
+        // System.out.println("Received users data: " + users);
+        return userService.saveAllUsers(users);
+    }
     
 
     

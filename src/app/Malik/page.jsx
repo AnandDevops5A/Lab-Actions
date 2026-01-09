@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -38,7 +38,7 @@ ChartJS.register(
 );
 
 const AdminPage = () => {
-  const [activeTab, setActiveTab] = useState("participants");
+  const [activeTab, setActiveTab] = useState("tournaments");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   // const [isLoading, setIsLoading] = useState(true)
 
@@ -67,40 +67,38 @@ const AdminPage = () => {
     "admin/data", //endpoint
     "GET", //method
     null, //data
-    0 //revalidate 
+    0 //revalidate
   );
 
+  useLayoutEffect(() => {
+    if (window.innerWidth < 640) setSidebarOpen((prev) => !prev);
+  }, []);
   // populate data once fetched
   useEffect(() => {
-    if (window.innerWidth < 640) setSidebarOpen((prev) => !prev);
-
     // console.log("Fetched admin data:", result);
     if (result && !error) {
-      console.log("Result fetched....");
-      // console.log(transformTournaments(result.users));
+      // console.log("Result fetched....");
+      console.log(transformTournaments(result.tournaments));
       setTournaments(transformTournaments(result.tournaments));
       setParticipants(result.users);
       // setRevenue(result.revenue);
-
-    }
-    else{
+    } else {
       setParticipants(dummyParticipants);
       setTournaments(dummyTournaments);
       // setRevenue(dummyRevenue);
     }
   }, [result]);
 
-
-const dummyTournaments =  [
+  const dummyTournaments = [
     {
       id: 1,
       tournamentName: "Dummy Series 1",
       prizePool: 50000,
       dateTime: 202501151800,
       entryFee: 50,
-      platform: "PC"
+      platform: "PC",
+      participants: 67,
     },
-
 
     {
       id: 2,
@@ -108,7 +106,8 @@ const dummyTournaments =  [
       prizePool: 60000,
       dateTime: 202502101900,
       entryFee: 75,
-      platform: "Mobile"
+      platform: "Mobile",
+      participants: 67,
     },
     {
       id: 3,
@@ -117,7 +116,8 @@ const dummyTournaments =  [
       active: false,
       dateTime: 202503051700,
       entryFee: 100,
-      platform: "PC"
+      platform: "PC",
+      participants: 90,
     },
     {
       id: 4,
@@ -125,7 +125,8 @@ const dummyTournaments =  [
       prizePool: 40000,
       dateTime: 202504201830,
       entryFee: 60,
-      platform: "Console"
+      platform: "Console",
+      participants: 56,
     },
     {
       id: 5,
@@ -133,7 +134,8 @@ const dummyTournaments =  [
       prizePool: 90000,
       dateTime: 202505151600,
       entryFee: 120,
-      platform: "PC"
+      platform: "PC",
+      participants: 67,
     },
     {
       id: 6,
@@ -142,7 +144,8 @@ const dummyTournaments =  [
       active: false,
       dateTime: 202506101930,
       entryFee: 80,
-      platform: "Mobile"
+      platform: "Mobile",
+      participants: 90,
     },
     {
       id: 7,
@@ -150,7 +153,8 @@ const dummyTournaments =  [
       prizePool: 100000,
       dateTime: 202507251700,
       entryFee: 150,
-      platform: "Console"
+      platform: "Console",
+      participants: 87,
     },
     {
       id: 8,
@@ -158,7 +162,8 @@ const dummyTournaments =  [
       prizePool: 30000,
       dateTime: 202508121830,
       entryFee: 40,
-      platform: "PC"
+      platform: "PC",
+      participants: 37,
     },
     {
       id: 9,
@@ -167,7 +172,8 @@ const dummyTournaments =  [
       active: false,
       dateTime: 202509051900,
       entryFee: 90,
-      platform: "Mobile"
+      platform: "Mobile",
+      participants: 35,
     },
     {
       id: 10,
@@ -175,7 +181,8 @@ const dummyTournaments =  [
       prizePool: 85000,
       dateTime: 202510151800,
       entryFee: 110,
-      platform: "PC"
+      platform: "PC",
+      participants: 70,
     },
     {
       id: 11,
@@ -183,11 +190,12 @@ const dummyTournaments =  [
       prizePool: 120000,
       dateTime: 202511201930,
       entryFee: 200,
-      platform: "Console"
-    }
-  ]
+      platform: "Console",
+      participants: 50,
+    },
+  ];
 
-  const dummyParticipants =  [
+  const dummyParticipants = [
     {
       id: 1,
       username: "John Doe",
@@ -203,7 +211,7 @@ const dummyTournaments =  [
       totalPlay: 50,
       totalWin: 30,
       totallosses: 20,
-      active: true,
+      active:  false,
     },
 
     {
@@ -223,6 +231,7 @@ const dummyTournaments =  [
       totallosses: 25,
       active: true,
     },
+
     {
       id: 3,
       username: "Bob Johnson",
@@ -272,7 +281,7 @@ const dummyTournaments =  [
       totalPlay: 90,
       totalWin: 55,
       totallosses: 35,
-      active: true,
+      active: false,
     },
     {
       id: 6,
@@ -323,7 +332,7 @@ const dummyTournaments =  [
       totalPlay: 75,
       totalWin: 45,
       totallosses: 30,
-      active: true,
+      active: false,
     },
     {
       id: 9,
@@ -375,10 +384,8 @@ const dummyTournaments =  [
       totalWin: 38,
       totallosses: 27,
       active: true,
-    }
-
-
-  ]
+    },
+  ];
   const [tournaments, setTournaments] = useState();
 
   const [participants, setParticipants] = useState();
@@ -393,30 +400,30 @@ const dummyTournaments =  [
   ]);
 
   // Statistics Cards Data
-
-  const tournamentData = {
-    labels: tournaments.map((t) => t.name),
-    datasets: [
-      {
-        label: "Participants",
-        data: tournaments.map((t) => t.participants),
-        backgroundColor: [
-          "rgba(255, 99, 132, 0.6)",
-          "rgba(54, 162, 235, 0.6)",
-          "rgba(75, 192, 192, 0.6)",
-          "rgba(255, 206, 86, 0.6)",
-        ],
-        borderColor: [
-          "rgba(255, 99, 132, 1)",
-          "rgba(54, 162, 235, 1)",
-          "rgba(75, 192, 192, 1)",
-          "rgba(255, 206, 86, 1)",
-        ],
-        borderWidth: 2,
-        borderRadius: 8,
-      },
-    ],
-  };
+ // const tournamentData = {
+  //   labels: tournaments.map((t) => t.tournamentName),
+  //   datasets: [
+  //     {
+  //       label: "Participants",
+  //       data: tournaments.map((t) => t.participants),
+  //       backgroundColor: [
+  //         "rgba(255, 99, 132, 0.6)",
+  //         "rgba(54, 162, 235, 0.6)",
+  //         "rgba(75, 192, 192, 0.6)",
+  //         "rgba(255, 206, 86, 0.6)",
+  //       ],
+  //       borderColor: [
+  //         "rgba(255, 99, 132, 1)",
+  //         "rgba(54, 162, 235, 1)",
+  //         "rgba(75, 192, 192, 1)",
+  //         "rgba(255, 206, 86, 1)",
+  //       ],
+  //       borderWidth: 2,
+  //       borderRadius: 8,
+  //     },
+  //   ],
+  // };
+ 
 
   const revenueData = {
     labels: revenue.map((r) => r.month),
@@ -485,7 +492,6 @@ const dummyTournaments =  [
 
   // console.log(result);
 
-
   return (
     <div className="flex min-h-screen bg-gray-900 text-white">
       {/* Sidebar */}
@@ -498,8 +504,9 @@ const dummyTournaments =  [
       />
       {/* Main Content */}
       <div
-        className={`flex-1 ${sidebarOpen ? "md:ml-64" : "md:ml-16 "
-          } transition-all duration-300 w-full pt-15 pl-16 sm:pl-0`}
+        className={`flex-1 ${
+          sidebarOpen ? "md:ml-64" : "md:ml-16 "
+        } transition-all duration-300 w-full pt-15 pl-16 sm:pl-0`}
       >
         {/* Header */}
         <div className="bg-gray-950 border-b border-gray-800 p-4 md:p-6  top-0 z-30">
@@ -526,8 +533,6 @@ const dummyTournaments =  [
 
         {/* Content */}
         <div className="p-2 sm:p-6 ">
-
-
           {isLoading ? (
             <AdminPageLoading activeTab={activeTab} />
           ) : (
@@ -537,7 +542,7 @@ const dummyTournaments =  [
                   tournaments={tournaments}
                   participants={participants}
                   revenue={revenue}
-                  tournamentData={tournamentData}
+                  // tournamentData={tournamentData}
                   chartOptions={chartOptions}
                   revenueData={revenueData}
                   registrationData={registrationData}

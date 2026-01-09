@@ -74,4 +74,10 @@ public class TournamentController {
         return ResponseEntity.ok(tournamentService.getLastTournament());
     }
 
+    @RequestMapping(path = "/saveAll", method = RequestMethod.POST)
+    public ResponseEntity<List<Tournament>> saveAllTournaments(@RequestBody List<Tournament> tournaments) {
+        List<Tournament> savedTournaments = tournamentService.saveAllTournaments(tournaments);
+        return ResponseEntity.status(201).body(savedTournaments);
+    }
+
 }

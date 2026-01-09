@@ -48,11 +48,11 @@ const Overview = ({tournaments, participants, revenue,tournamentData,
 
                   {/* Charts Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-                    <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg">
+                    <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg ">
                       <h2 className="text-lg md:text-xl font-bold mb-4 text-white">Tournament Participants Distribution</h2>
-                      <Bar data={tournamentData} options={chartOptions} />
+                      {/* <Bar data={tournamentData} options={chartOptions} /> */}
                     </div>
-                    <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg">
+                    <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg  ">
                       <h2 className="text-lg md:text-xl font-bold mb-4 text-white">Participant Status</h2>
                       <Doughnut data={participantDistribution} options={chartOptions} />
                     </div>

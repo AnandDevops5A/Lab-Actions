@@ -69,4 +69,16 @@ public class UserService {
         }
         return ResponseEntity.ok(userRepository.save(user));
     }
+    @CacheEvict(value = "adminData", allEntries = true)
+    public ResponseEntity<List<User>> saveAllUsers(List<User> users) {
+        if (users == null || users.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        } else {
+            for (User user : users) {
+                user.setJoiningDate(general.getCurrentDateTime());
+            }
+            List<User> savedUsers = userRepository.saveAll(users);
+            return ResponseEntity.ok(savedUsers);
+        }
+    }
 }

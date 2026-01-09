@@ -72,4 +72,12 @@ public class TournamentService {
     public Tournament getLastTournament(){
         return tournamentRepository.findFirstByDateTimeLessThan(general.getCurrentDateTime());
     }
+    //save all tournaments
+    @CacheEvict(value = "adminData", allEntries = true) 
+    public List<Tournament> saveAllTournaments(List<Tournament> tournaments) {
+        if (tournaments == null || tournaments.isEmpty()) {
+            throw new IllegalArgumentException("Tournament list cannot be null or empty");
+        }
+        return tournamentRepository.saveAll(tournaments);
+    }
 }
