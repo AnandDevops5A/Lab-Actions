@@ -4,10 +4,10 @@ import { StarRating } from '../StartRating'
 
 
 
-const Reviews = ({ filtered,TournamentBadge}) => {
+const Reviews = ({ filtered,TournamentBadge,isDarkMode}) => {
   return (
-     <section id="reviews" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16 ">
-        <div className="flex items-center justify-between mb-4">
+     <section id="reviews" className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16 ${isDarkMode ? "bg-black/40" : "bg-blue-200/50"} `}>
+        <div className="flex items-center justify-between mb-4 ">
           <h3 className="text-xl font-semibold">Recent reviews</h3>
           <span className="text-xs text-gray-400">
             {filtered.length} result{filtered.length !== 1 ? 's' : ''}
@@ -18,7 +18,8 @@ const Reviews = ({ filtered,TournamentBadge}) => {
           {filtered.map((r) => (
             <article
               key={r.id}
-              className="group relative rounded-xl border border-white/10 bg-linear-to-b from-gray-900/50 to-black/50 p-5 shadow-[0_0_20px_rgba(34,211,238,0.08)] transition-transform hover:-translate-y-0.5"
+              className={`group relative rounded-xl border border-white/10 bg-linear-to-b  p-5 shadow-[0_0_20px_rgba(34,211,238,0.08)] transition-transform hover:-translate-y-0.5 
+                ${isDarkMode ? "from-gray-900/50 to-black/50" : "from-blue-50 to-gray-100"} `}
             >
               <div className= "absolute inset-px rounded-xl ring-1 ring-white/10 pointer-events-none" />
               <div className="flex items-start justify-between">
@@ -59,24 +60,16 @@ const Reviews = ({ filtered,TournamentBadge}) => {
               )}
 
               <div className="mt-5 flex items-center justify-between">
-                <button className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 py-1.5 text-sm text-cyan-300 hover:bg-cyan-500/20 transition-colors">
-                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M12 4v16M4 12h16"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  Upvote
+                <button className={`inline-flex items-center rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 py-1.5 text-sm text-cyan-300 hover:bg-cyan-500/20 transition-colors`}>
+                  ❤️ Helpful
                 </button>
-                <button className="text-xs text-gray-400 hover:text-red-400 transition-colors">
+                <button className="text-xs text-gray-400 hover:text-red-400 transition-colors p-1 rounded">
                   Report
                 </button>
               </div>
 
               {/* Glow border on hover */}
-              <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity blur-xl bg-gradient-to-r from-red-500/15 via-cyan-500/15 to-red-500/15 pointer-events-none" />
+              <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity blur-xl bg-linear-to-r from-red-500/15 via-cyan-500/15 to-red-500/15 pointer-events-none" />
             </article>
           ))}
 

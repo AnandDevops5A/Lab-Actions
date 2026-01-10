@@ -23,7 +23,7 @@ export default function ReviewsPage() {
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white font-mono">
       {/* Header */}
       <header className="py-12 text-center">
-        <h1 className="text-5xl md:text-6xl font-extrabold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 drop-shadow-lg">
+        <h1 className="text-5xl md:text-6xl font-extrabold tracking-widest text-transparent bg-clip-text bg-linear-to-r from-pink-500 via-purple-500 to-cyan-500 drop-shadow-lg">
           ⚡ Tournament Reviews ⚡
         </h1>
         <p className="mt-4 text-lg text-gray-400 uppercase tracking-wider">
@@ -55,7 +55,7 @@ export default function ReviewsPage() {
       <div className="text-center mt-12">
         <button
           onClick={() => setShowForm(!showForm)}
-          className="px-8 py-3 bg-gradient-to-r from-pink-600 via-purple-600 to-cyan-600 text-white rounded-lg font-bold uppercase tracking-wider shadow-lg hover:opacity-90 transition transform hover:scale-105"
+          className="px-8 py-3 bg-linear-to-r from-pink-600 via-purple-600 to-cyan-600 text-white rounded-lg font-bold uppercase tracking-wider shadow-lg hover:opacity-90 transition transform hover:scale-105"
         >
           {showForm ? "Close Form" : "Add Review"}
         </button>
@@ -76,7 +76,7 @@ export default function ReviewsPage() {
             />
             <button
               type="submit"
-              className="w-full py-3 bg-gradient-to-r from-pink-600 via-purple-600 to-cyan-600 text-white rounded-md font-bold uppercase tracking-wider hover:opacity-90 transition transform hover:scale-105"
+              className="w-full py-3 bg-linear-to-r from-pink-600 via-purple-600 to-cyan-600 text-white rounded-md font-bold uppercase tracking-wider hover:opacity-90 transition transform hover:scale-105"
             >
               Submit Review
             </button>

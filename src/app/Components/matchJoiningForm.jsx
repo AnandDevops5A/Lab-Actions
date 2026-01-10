@@ -50,8 +50,8 @@ export default function MatchJoiningForm() {
 				<div className="neon-modal-animate transform transition-all duration-400 scale-100 -translate-y-2">
 					<div className="relative bg-gradient-to-br from-neutral-900/95 to-neutral-800/95 border border-[#00fff0]/10 rounded-2xl p-6 neon-glow">
 						{/* decorative neon accents */}
-						<span className="absolute -left-6 -top-6 w-24 h-1 bg-gradient-to-r from-[#00fff0] to-[#ff0055] opacity-80 blur-sm rotate-12"></span>
-						<span className="absolute -right-6 -bottom-6 w-24 h-1 bg-gradient-to-r from-[#9b59ff] to-[#ff0055] opacity-70 blur-sm -rotate-12"></span>
+						<span className="absolute -left-6 -top-6 w-24 h-1 bg-linear-to-r from-[#00fff0] to-[#ff0055] opacity-80 blur-sm rotate-12"></span>
+						<span className="absolute -right-6 -bottom-6 w-24 h-1 bg-linear-to-r from-[#9b59ff] to-[#ff0055] opacity-70 blur-sm -rotate-12"></span>
 								<div className="flex items-start justify-between gap-4">
 							<div>
 								<h3 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">

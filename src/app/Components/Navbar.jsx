@@ -8,10 +8,15 @@ import { useState, useEffect } from 'react';
 import { UserContext } from '../Library/ContextAPI';
 import { successMessage } from '../Library/Alert';
 import { LogoutButton } from './LogoutButton';
+import ThemeToggle from './ThemeToggle';
+import { ThemeContext } from '../Library/ThemeContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { user, getUserFromContext } = useContext(UserContext);
+  const themeContext = useContext(ThemeContext);
+  const { isDarkMode } = themeContext || { isDarkMode: true };
 
   const navItems = [
     { name: 'Review', href: '/review' },
@@ -79,7 +84,11 @@ const Navbar = () => {
   return (
     showNavbar ?
       <nav
-        className={` bg-black/80 backdrop-blur-sm fixed w-full z-50 shadow-lg border-b border-neon-blue/20 transition-all duration-300 ease-out animate-navbarSlideIn ${showNavbar ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+        className={`fixed w-full z-50 shadow-xl transition-all duration-300 ease-out backdrop-blur-md ${
+          isDarkMode
+            ? 'bg-gray-950/95 border-b border-gray-800/50 shadow-black/50'
+            : 'bg-white/95 border-b border-slate-200/50 shadow-slate-300/20'
+        } ${showNavbar ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
           }`} role="navigation"
         aria-label="Main Navigation"
       >
@@ -101,7 +110,7 @@ const Navbar = () => {
             </Link>
 
             {/* Desktop Nav Links */}
-            <div className="hidden md:flex md:space-x-8 items-center">
+            <div className="hidden md:flex md:space-x-8 items-center gap-4">
               {navItems.map((item) => (
                 <Link
                   key={item.name}
@@ -111,16 +120,23 @@ const Navbar = () => {
                   {item.name}
                 </Link>
               ))}
+              {/* Theme Toggle */}
+              <ThemeToggle />
               {/* logout button cyberpunk style */}
               {user ? <LogoutButton /> : null}
 
             </div>
 
             {/* Mobile Menu Button */}
-            <div className="md:hidden">
+            <div className="md:hidden flex items-center gap-3">
+              <ThemeToggle />
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-neon-red"
+                className={`inline-flex items-center justify-center p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-neon-red transition-colors ${
+                  isDarkMode
+                    ? 'text-gray-400 hover:text-white hover:bg-gray-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-blue-100'
+                }`}
                 aria-controls="mobile-menu"
                 aria-expanded={isOpen}
               >
@@ -156,14 +172,20 @@ const Navbar = () => {
         {/* Mobile Menu Content */}
         {
           isOpen && (
-            <div id="mobile-menu" className="md:hidden bg-black/90 animate-slideDown">
+            <div id="mobile-menu" className={`md:hidden animate-slideDown ${
+              isDarkMode ? 'bg-black/90' : 'bg-gray-50/95'
+            }`}>
               <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 {navItems.map((item) => (
                   <Link
                     key={item.name}
                     href={item.href}
                     onClick={() => setIsOpen(false)}
-                    className="block text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+                    className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                      isDarkMode
+                        ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                        : 'text-gray-700 hover:bg-blue-100 hover:text-gray-900'
+                    }`}
                   >
                     {item.name}
                   </Link>

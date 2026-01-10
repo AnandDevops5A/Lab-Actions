@@ -1,70 +1,264 @@
 "use client";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import reloadingGunAsset from "../images/image.jpg";
 import TypingWrapper from "./TypingAnimation";
+import { ThemeContext } from "../Library/ThemeContext";
 
 const HeroSection = () => {
-  const { tournamentStatus, registerForTournament } = useState("false");
+  const { tournamentStatus, registerForTournament } = useState(true);
+  const themeContext = useContext(ThemeContext);
+  const { isDarkMode } = themeContext || { isDarkMode: true };
 
   const buttonClasses =
     "flex flex-col sm:flex-row justify-center space-x-auto space-y-4 sm:space-y-0 gap-3";
 
   return (
     <section
-      className="relative h-[97vh] flex items-center justify-center pt-10 overflow-hidden"
-      id="hero" 
+      className={`relative h-[97vh] flex items-center justify-center pt-10 overflow-hidden transition-colors duration-300 ${
+        isDarkMode
+          ? "bg-linear-to-b from-gray-950 via-slate-950 to-gray-950"
+          : "bg-linear-to-b from-blue-300 via-blue-400 to-blue-500"
+      }`}
+      id="hero"
     >
-      {/* 🔫 New Background Visual (GIF/Video) */}
+      {/* Background Visual with Professional Effects */}
       <Image
         src={reloadingGunAsset}
         alt="Animated background showing a gun reloading"
         fill
         style={{ objectFit: "cover" }}
         priority={true}
-        // Increased opacity/saturation for better visibility, and a slightly darker tint
-        className="opacity-40 saturate-150 brightness-75 transition-all duration-700 ease-in-out  animate-zoomLoop"
+        className={`${
+          isDarkMode ? "opacity-40" : "opacity-30"
+        } saturate-125 brightness-${
+          isDarkMode ? "50" : "75"
+        } transition-all duration-700 ease-in-out animate-zoomLoop`}
       />
 
-      {/* Dark Overlay for better text readability */}
-      <div className="absolute inset-0 bg-black/3 z-0"></div>
+      {/* Professional Overlay with Theme-Aware Gradient */}
+      <div
+        className={`absolute inset-0 z-0 transition-colors duration-300 ${
+          isDarkMode
+            ? "bg-linear-to-b from-black/40 via-black/60 to-black/50"
+            : "bg-linear-to-b from-white/20 via-white/40 to-white/30"
+        }`}
+      ></div>
+
+      {/* Animated Accent Lights - Theme Aware */}
+      {isDarkMode ? (
+        <>
+          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl animate-pulse z-0"></div>
+          <div
+            className="absolute bottom-25 right-7 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-pulse z-0"
+            style={{ animationDelay: "1s" }}
+          ></div>
+        </>
+      ) : (
+        <>
+          <div className="absolute top-20 left-10 w-72 h-72  rounded-full blur-3xl  z-0"></div>
+          <div
+            className="absolute bottom-20 right-10 w-72 h-72  rounded-full blur-3xl  z-0"
+            style={{ animationDelay: "1s" }}
+          ></div>
+        </>
+      )}
 
       {/* Hero Content */}
-      <div className="relative  text-center max-w-4xl px-4">
-        {/* Updated H1 to be clean and punchy */}
-
+      <div className="relative text-center max-w-4xl px-4 z-10 animate-slideInUp">
+        {/* Professional H1 */}
         {tournamentStatus ? (
-          <h1 className=" text-7xl md:text-6xl font-black mb-4 tracking-tight text-white drop-shadow-2xl leading-tight">
-            The <span className="text-red-500">WAR</span> on
-            <span className="inline-block ml-4 text-cyan-400">FPS</span>
+          <h1
+            className={`text-6xl md:text-7xl lg:text-8xl font-black mb-6 tracking-tighter drop-shadow-2xl leading-tight hover-lift duration-500 transition-colors ${
+              isDarkMode ? "text-slate-200" : "text-slate-900"
+            }`}
+          >
+            The{" "}
+            <span
+              className={`font-black inline-block mx-2 ${
+                isDarkMode
+                  ? "bg-linear-to-r from-red-500 via-pink-500 to-red-500 bg-clip-text text-transparent animate-gradientFlow"
+                  : "bg-linear-to-r from-red-600 via-pink-600 to-red-600 bg-clip-text text-transparent animate-gradientFlow"
+              }`}
+            >
+              WAR
+            </span>{" "}
+            on
+            <span
+              className={`font-black inline-block ml-4 ${
+                isDarkMode
+                  ? "bg-linear-to-r from-cyan-400 via-blue-500 to-cyan-400 bg-clip-text text-transparent animate-gradientFlow"
+                  : "bg-linear-to-r from-blue-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent animate-gradientFlow"
+              }`}
+            >
+              FPS
+            </span>
           </h1>
         ) : (
-          <h1 className="text-7xl md:text-6xl font-black mb-4 tracking-tight text-white drop-shadow-2xl leading-tight animate-bounce">
-            Comming <span className="text-red-500 ">Soon</span> . .
+          <h1
+            className={`text-6xl md:text-7xl lg:text-8xl font-black mb-6 tracking-tighter drop-shadow-2xl leading-tight  transition-colors ${
+              isDarkMode ? "text-slate-200" : "text-slate-800"
+            }`}
+          >
+            Coming Soon{" "}
+            <span
+              className={`inline-block ${
+                isDarkMode
+                  ? "bg-linear-to-r from-red-500 to-pink-500 bg-clip-text text-transparent"
+                  : "bg-linear-to-r from-red-600 to-pink-600 bg-clip-text text-transparent"
+              }`}
+            >
+              🚀
+            </span>
           </h1>
         )}
 
-        <p className="text-xl md:text-2xl text-gray-200 mb-8 max-w-2xl mx-auto drop-shadow-lg ">
+        {/* Professional Subtitle */}
+        <div
+          className={`mb-4 text-sm md:text-base font-semibold tracking-widest uppercase ${
+            isDarkMode ? "text-cyan-400" : "text-blue-600"
+          }`}
+        >
+          Elite Tournament Platform
+        </div>
+
+        {/* Professional Description */}
+        <p
+          className={`text-lg md:text-xl lg:text-2xl mb-8 max-w-3xl mx-auto drop-shadow-lg font-light leading-relaxed transition-colors ${
+            isDarkMode ? "text-gray-200" : "text-slate-700"
+          }`}
+        >
           <TypingWrapper>
-          Convert skill to Bounty💰. Compete in **official tournaments**, climb
-          the ranks, and earn your legacy.</TypingWrapper>
+            Convert skill to Bounty💰. Compete in{" "}
+            <span
+              className={`font-semibold ${
+                isDarkMode ? "text-cyan-300" : "text-blue-600"
+              }`}
+            >
+              official tournaments
+            </span>
+            , climb the ranks, and earn your legacy.
+          </TypingWrapper>
         </p>
 
-        {/* Primary Call to Action */}
-        <div className={buttonClasses}>
+        {/* Stats Row - Professional Touch */}
+        <div
+          className={`grid grid-cols-3 gap-4 max-w-2xl mx-auto mb-10 p-6 rounded-2xl backdrop-blur-md border transition-all ${
+            isDarkMode
+              ? "bg-gray-900/40 border-gray-800/50"
+              : "bg-white/40 border-white/50"
+          }`}
+        >
+          <div className="text-center">
+            <div
+              className={`text-3xl font-black mb-2 ${
+                isDarkMode ? "text-cyan-400" : "text-blue-600"
+              }`}
+            >
+              1000+
+            </div>
+            <div
+              className={`text-xs font-medium tracking-widest uppercase ${
+                isDarkMode ? "text-gray-400" : "text-slate-600"
+              }`}
+            >
+              Players
+            </div>
+          </div>
+          <div
+            className="text-center border-l border-r border-opacity-20"
+            style={{
+              borderColor: isDarkMode
+                ? "rgba(255,255,255,0.1)"
+                : "rgba(0,0,0,0.1)",
+            }}
+          >
+            <div
+              className={`text-3xl font-black mb-2 ${
+                isDarkMode ? "text-purple-400" : "text-indigo-600"
+              }`}
+            >
+              50+
+            </div>
+            <div
+              className={`text-xs font-medium tracking-widest uppercase ${
+                isDarkMode ? "text-gray-400" : "text-slate-600"
+              }`}
+            >
+              Tournaments
+            </div>
+          </div>
+          <div className="text-center">
+            <div
+              className={`text-3xl font-black mb-2 ${
+                isDarkMode ? "text-pink-400" : "text-red-600"
+              }`}
+            >
+              10L+
+            </div>
+            <div
+              className={`text-xs font-medium tracking-widest uppercase ${
+                isDarkMode ? "text-gray-400" : "text-slate-600"
+              }`}
+            >
+              Prize Pool
+            </div>
+          </div>
+        </div>
+
+        {/* Professional Call to Action Buttons */}
+        <div className={`${buttonClasses} justify-center items-center`}>
           <button
             onClick={() => {
               document.dispatchEvent(new CustomEvent("openJoinForm"));
-              // keep the original behaviour of navigating to tournaments
               window.location.hash = "#tournaments";
             }}
-            className=" border bg-red-600 hover:bg-red-700 text-white text-md px-8 py-3 rounded-lg font-bold transition duration-300 shadow-2xl shadow-red-500/50 uppercase tracking-widest"
+            className={`group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold uppercase tracking-widest transition-all duration-300 hover-lift rounded-lg overflow-hidden ${
+              isDarkMode ? "hover:shadow-red-500/50" : "hover:shadow-red-400/50"
+            }`}
           >
-            Join Now 🐱‍👤
+            <div
+              className={`absolute inset-0 ${
+                isDarkMode
+                  ? "bg-linear-to-r from-red-600 to-red-700 shadow-lg shadow-red-500/50 group-hover:shadow-red-500/80"
+                  : "bg-linear-to-r from-red-500 to-red-600 shadow-md shadow-red-400/40 group-hover:shadow-red-400/60"
+              } transition-all duration-300 rounded-lg`}
+            ></div>
+            <span className="relative flex items-center gap-2 text-white font-bold">
+              Join Tournament 🎮
+            </span>
           </button>
-          <button className="border border-cyan-400 text-cyan-400 hover:bg-cyan-900/50 text-md px-10 py-3 rounded-lg font-bold transition duration-300 uppercase tracking-widest">
-            Watch Live 🖥️
+
+          <button
+            className={`group relative inline-flex items-center justify-center px-10 py-4 text-lg font-bold uppercase tracking-widest border-2 rounded-lg transition-all duration-300 hover-lift hover-glow ${
+              isDarkMode
+                ? "border-cyan-400 text-cyan-400 hover:bg-cyan-400/10"
+                : "border-blue-600 text-blue-600 hover:bg-blue-600/10"
+            }`}
+          >
+            Watch Tournament 🖥️
           </button>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div
+          className={`absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce transition-colors ${
+            isDarkMode ? "text-cyan-400" : "text-blue-600"
+          }`}
+        >
+          <svg
+            className="w-8 h-8"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 14l-7 7m0 0l-7-7m7 7V3"
+            />
+          </svg>
         </div>
       </div>
     </section>

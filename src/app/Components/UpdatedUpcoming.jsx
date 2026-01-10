@@ -135,7 +135,7 @@ const EscapeCards = () => {
                   <span
                     className="
                       absolute inset-0 -translate-x-full
-                      bg-gradient-to-r from-transparent via-white/60 to-transparent
+                      bg-linear-to-r from-transparent via-white/60 to-transparent
                       opacity-0
                       transition-all duration-400 ease-out
                       group-hover:translate-x-full group-hover:opacity-100

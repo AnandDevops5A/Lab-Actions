@@ -1,8 +1,9 @@
 'use client';
 import dynamic from 'next/dynamic';
-import React from 'react'
+import React, { useContext } from 'react'
 import image from '../images/image.jpg'
 import { SkeletonCard, SkeletonTable } from '../skeleton/Skeleton';
+import { ThemeContext } from '../Library/ThemeContext';
 
 
 const HeroSection = dynamic(() =>
@@ -66,36 +67,29 @@ const Footer = dynamic(() =>
   }
 );
 const Main = () => {
+  const themeContext = useContext(ThemeContext);
+  const { isDarkMode } = themeContext || { isDarkMode: true };
+
   return (
-    <div className="min-h-screen bg-gray-950 text-white font-sans antialiased ">
+    <div className={`min-h-screen font-sans antialiased transition-colors duration-300 ${
+      isDarkMode
+        ? 'bg-gray-950 text-white'
+        : 'bg-blue-50 text-gray-900'
+    }`}>
       <main>
-
         {/* 2. Hero Section (High Conversion Focus) */}
-    
         <HeroSection image1={image} />
-
         {/* 3. Upcoming Tournaments Section */}
-
         <UpcomingMatches />
-
         {/*4. Winner section*/}
         <WinnerSection />
-
         {/* 5. Leaderboard & Stats Section (Engaging Data) */}
         <Stats />
-
-
-
         {/*6. contact section*/}
         <ContactPage />
-
-
-        {/* 6. footer section Section (Engaging Data) */}
-       
       </main>
-
     </div>
-  )
+  );
 }
 
 export default Main

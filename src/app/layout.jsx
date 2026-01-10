@@ -5,6 +5,7 @@ import Navbar from "./Components/Navbar";
 import Footer from "./Components/Footer";
 import MatchJoiningForm from "./Components/matchJoiningForm";
 import { UserProvider } from "./Library/ContextAPI";
+import { ThemeProvider } from "./Library/ThemeContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,14 +36,18 @@ export default function RootLayout({ children }) {
         {/* 1. Navigation Bar 
                 // components/Navbar.jsx*/}
         {/* use context api for user data */}
-        <UserProvider>
-          <Navbar />
+        
+          <UserProvider>
+            <ThemeProvider>
+            <Navbar />
 
-          <MatchJoiningForm />
-          {children}
+            <MatchJoiningForm />
+            {children}
 
-          <Footer />
-        </UserProvider>
+            <Footer />
+            </ThemeProvider>
+          </UserProvider>
+        
       </body>
     </html>
   );

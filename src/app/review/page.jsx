@@ -1,11 +1,16 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import ReviewHero from './section/ReviewHero';
 import Reviews from './section/Reviews';
 import AddReview from './section/AddReview';
+import { ThemeContext } from '../Library/ThemeContext';
 
 export default function ReviewsPage() {
+
+const themeContext = useContext(ThemeContext);
+  const { isDarkMode } = themeContext || { isDarkMode: true };
+
   // Dummy tournaments and seed reviews
   const tournaments = [
     { id: 'neo-city-cup', name: 'Neo City Cup' },
@@ -73,8 +78,6 @@ export default function ReviewsPage() {
     tags: '',
   });
 
-  
-
   const filtered = useMemo(() => {
     let data = [...reviews];
     if (filters.tournamentId !== 'all') {
@@ -139,11 +142,10 @@ export default function ReviewsPage() {
       lg: 'h-8 w-8',
     };
     return (
-      <div className="flex items-center gap-1" aria-label={label}>
+      <div className="flex items-center gap-1 " aria-label={label}>
         {[1, 2, 3, 4, 5].map((n) => (
-          <button
+          <div
             key={n}
-            type="button"
             onClick={() => !readOnly && onChange?.(n)}
             className={`transition-transform ${readOnly ? 'cursor-default' : 'hover:scale-110'}`}
             aria-label={`${n} star${n > 1 ? 's' : ''}`}
@@ -161,7 +163,7 @@ export default function ReviewsPage() {
                 strokeWidth="1"
               />
             </svg>
-          </button>
+          </div>
         ))}
       </div>
     );
@@ -182,13 +184,13 @@ export default function ReviewsPage() {
       
 
       {/* Hero */}
-     <ReviewHero setFilters={setFilters} reviews={reviews} tournaments={tournaments} filters={filters}/>
+     <ReviewHero setFilters={setFilters} reviews={reviews} tournaments={tournaments} filters={filters} isDarkMode={isDarkMode}/>
 
       {/* Reviews list */}
-     <Reviews filtered={filtered} TournamentBadge={TournamentBadge}/>
+     <Reviews filtered={filtered} TournamentBadge={TournamentBadge} isDarkMode={isDarkMode}/>
 
       {/* Submit review */}
-      <AddReview form={form} setForm={setForm} tournaments={tournaments} submitReview={submitReview} StarRating={StarRating}/>
+      <AddReview form={form} setForm={setForm} tournaments={tournaments} submitReview={submitReview} StarRating={StarRating} isDarkMode={isDarkMode}/>
 
      
     </main>
