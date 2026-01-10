@@ -40,6 +40,8 @@ ChartJS.register(
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("tournaments");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [tournaments, setTournaments] = useState();
+  const [participants, setParticipants] = useState();
   // const [isLoading, setIsLoading] = useState(true)
 
   function transformTournaments(tournaments) {
@@ -67,7 +69,7 @@ const AdminPage = () => {
     "admin/data", //endpoint
     "GET", //method
     null, //data
-    0 //revalidate
+    10000 //revalidate in 10sec
   );
 
   useLayoutEffect(() => {
@@ -211,7 +213,7 @@ const AdminPage = () => {
       totalPlay: 50,
       totalWin: 30,
       totallosses: 20,
-      active:  false,
+      active: false,
     },
 
     {
@@ -386,9 +388,7 @@ const AdminPage = () => {
       active: true,
     },
   ];
-  const [tournaments, setTournaments] = useState();
 
-  const [participants, setParticipants] = useState();
 
   const [revenue, setRevenue] = useState([
     { month: "Jan", amount: 45000, registrations: 250 },
@@ -400,7 +400,7 @@ const AdminPage = () => {
   ]);
 
   // Statistics Cards Data
- // const tournamentData = {
+  // const tournamentData = {
   //   labels: tournaments.map((t) => t.tournamentName),
   //   datasets: [
   //     {
@@ -423,7 +423,7 @@ const AdminPage = () => {
   //     },
   //   ],
   // };
- 
+
 
   const revenueData = {
     labels: revenue.map((r) => r.month),
@@ -481,6 +481,7 @@ const AdminPage = () => {
     },
   };
 
+  // Sidebar menu items
   const menuItems = [
     { id: "overview", label: "Overview", icon: "📊" },
     { id: "tournaments", label: "Tournaments", icon: "🏆" },
@@ -504,9 +505,8 @@ const AdminPage = () => {
       />
       {/* Main Content */}
       <div
-        className={`flex-1 ${
-          sidebarOpen ? "md:ml-64" : "md:ml-16 "
-        } transition-all duration-300 w-full pt-15 pl-16 sm:pl-0`}
+        className={`flex-1 ${sidebarOpen ? "md:ml-64" : "md:ml-16 "
+          } transition-all duration-300 w-full pt-15 pl-16 sm:pl-0`}
       >
         {/* Header */}
         <div className="bg-gray-950 border-b border-gray-800 p-4 md:p-6  top-0 z-30">
@@ -566,7 +566,6 @@ const AdminPage = () => {
               )}
 
               {activeTab === "reports" && <Report />}
-
               {activeTab === "settings" && <Settings />}
             </>
           )}

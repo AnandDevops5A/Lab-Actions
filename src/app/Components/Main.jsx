@@ -15,6 +15,7 @@ const HeroSection = dynamic(() =>
   }
 );
 
+// const Herosection=React.lazy(()=>import('./HeroSection'))
 const UpcomingMatches = dynamic(() =>
   import('./UpcomingMatches'),
   {
@@ -25,16 +26,7 @@ const UpcomingMatches = dynamic(() =>
     ssr: false, // Optional: Set to false if the component must ONLY run on the client
   }
 );
-const Upcoming = dynamic(() =>
-  import('./Upcoming'),
-  {
-    loading: () => {
-      <div className='grid grid-cols-3 gap-4'>
-      <SkeletonCard /><SkeletonCard /><SkeletonCard /></div>
-    },
-    ssr: false, // Optional: Set to false if the component must ONLY run on the client
-  }
-);
+
 
 const WinnerSection = dynamic(() =>
   import('./Winner'),
@@ -79,12 +71,12 @@ const Main = () => {
       <main>
 
         {/* 2. Hero Section (High Conversion Focus) */}
+    
         <HeroSection image1={image} />
 
         {/* 3. Upcoming Tournaments Section */}
 
-        {/* <UpcomingMatches /> */}
-        <Upcoming/>
+        <UpcomingMatches />
 
         {/*4. Winner section*/}
         <WinnerSection />

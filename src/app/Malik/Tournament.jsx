@@ -1,16 +1,23 @@
 "use client";
-import React, { Suspense, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { SkeletonCard } from "../skeleton/Skeleton";
 
 const AddTournamentForm = React.lazy(() => import("./AddTournament")); 
 
 const Tournament = ({ tournaments }) => {
+  // const [tournamentData] = useState(tournaments);
   const [showAddTournamentForm, setAddTournamentForm] = useState(true);
   const date = new Date();
   const dateOnly =
     date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
   const currentTime = date.getHours() * 100 + date.getMinutes();
   const now = dateOnly * 10000 + currentTime;
+
+  //getting adminData from Cache
+  useEffect(() => {
+    console.log("tournament component mount....");
+  }, [tournaments]);
+
   return (
     <div className="space-y-6">
       {showAddTournamentForm ? (
@@ -27,7 +34,7 @@ const Tournament = ({ tournaments }) => {
               + New Tournament
             </button>
           </div>
-          <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-x-auto shadow-lg">
+          <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-x-auto shadow-lg h-[500px]">
             <table className="w-full text-xs md:text-sm">
               <thead className="bg-gray-900 border-b border-gray-700">
                 <tr>
@@ -59,7 +66,7 @@ const Tournament = ({ tournaments }) => {
                 </tr>
               </thead>
               <tbody>
-                {tournaments.map((t, idx) => (
+                {tournaments ?(tournaments.map((t, idx) => (
                   <tr
                     key={t.id || idx}
                     className={idx % 2 === 0 ? "bg-gray-750" : "bg-gray-800"}
@@ -77,7 +84,7 @@ const Tournament = ({ tournaments }) => {
                       <span
                         className={`px-2 md:px-3 py-1 rounded-full text-xs font-bold ${
                           t.dateTime > now
-                            ? " text-blue"
+                            ? " text-blue-400"
                             : " text-green-400 "
                         }`}
                       >
@@ -102,7 +109,9 @@ const Tournament = ({ tournaments }) => {
                       </button>
                     </td>
                   </tr>
-                ))}
+                ))): "No tournaments found"
+                
+                }
               </tbody>
             </table>
           </div>
