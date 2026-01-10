@@ -34,7 +34,7 @@ const WinnerSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Aggressive and Modern Headline */}
-        <div className="text-center mb-12 sm:mb-20 fadeup">
+        <div className="text-center mb-12 sm:mb-20  fadeup">
           <p className="text-sm font-extrabold  tracking-widest text-red-500">
             MENS💪 means BEAST😈
           </p>
@@ -53,7 +53,7 @@ const WinnerSection = () => {
               {/* Vibrant Corner Accent */}
               <span className={`absolute top-0 right-0 h-1/2 w-1/2 rounded-bl-full opacity-10 ${achievement.color.replace('text', 'bg')}`}></span>
               
-              <achievement.icon className={`w-12 h-12 mb-4 ${achievement.color}`} />
+                <achievement.icon className={`autorotate w-12 h-12 mb-4 ${achievement.color}`} />
               
               <p className="text-5xl font-extrabold text-white mb-2">
                 {achievement.stat}

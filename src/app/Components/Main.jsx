@@ -29,7 +29,7 @@ const Upcoming = dynamic(() =>
   import('./Upcoming'),
   {
     loading: () => {
-      <div className='gap-4'>
+      <div className='grid grid-cols-3 gap-4'>
       <SkeletonCard /><SkeletonCard /><SkeletonCard /></div>
     },
     ssr: false, // Optional: Set to false if the component must ONLY run on the client
@@ -75,7 +75,7 @@ const Footer = dynamic(() =>
 );
 const Main = () => {
   return (
-    <div className="min-h-screen bg-gray-950 text-white font-sans antialiased scrollbar-hide">
+    <div className="min-h-screen bg-gray-950 text-white font-sans antialiased ">
       <main>
 
         {/* 2. Hero Section (High Conversion Focus) */}

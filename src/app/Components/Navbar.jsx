@@ -105,7 +105,7 @@ const Navbar = () => {
               {navItems.map((item) => (
                 <Link
                   key={item.name}
-                  href={item.name === "leaderboard" ? "/?scroll=leaderboard" : item.href}
+                  href={item.name && !user === "leaderboard" ? "/?scroll=leaderboard" : item.href}
                   className={`text-gray-300 hover:text-neon-red px-3 py-2 text-sm font-medium transition duration-200 border-l-2 border-r-2 border-transparent hover:border-l-neon-red hover:border-r-neon-red ${item.name !== "leaderboard" ? "focus:cursor-none" : ""
                     }`}                >
                   {item.name}

@@ -394,29 +394,29 @@ const dummyTournaments =  [
 
   // Statistics Cards Data
 
-  const tournamentData = {
-    labels: tournaments.map((t) => t.name),
-    datasets: [
-      {
-        label: "Participants",
-        data: tournaments.map((t) => t.participants),
-        backgroundColor: [
-          "rgba(255, 99, 132, 0.6)",
-          "rgba(54, 162, 235, 0.6)",
-          "rgba(75, 192, 192, 0.6)",
-          "rgba(255, 206, 86, 0.6)",
-        ],
-        borderColor: [
-          "rgba(255, 99, 132, 1)",
-          "rgba(54, 162, 235, 1)",
-          "rgba(75, 192, 192, 1)",
-          "rgba(255, 206, 86, 1)",
-        ],
-        borderWidth: 2,
-        borderRadius: 8,
-      },
-    ],
-  };
+  // const tournamentData = {
+  //   labels: tournaments.map((t) => t.name),
+  //   datasets: [
+  //     {
+  //       label: "Participants",
+  //       data: tournaments.map((t) => t.participants),
+  //       backgroundColor: [
+  //         "rgba(255, 99, 132, 0.6)",
+  //         "rgba(54, 162, 235, 0.6)",
+  //         "rgba(75, 192, 192, 0.6)",
+  //         "rgba(255, 206, 86, 0.6)",
+  //       ],
+  //       borderColor: [
+  //         "rgba(255, 99, 132, 1)",
+  //         "rgba(54, 162, 235, 1)",
+  //         "rgba(75, 192, 192, 1)",
+  //         "rgba(255, 206, 86, 1)",
+  //       ],
+  //       borderWidth: 2,
+  //       borderRadius: 8,
+  //     },
+  //   ],
+  // };
 
   const revenueData = {
     labels: revenue.map((r) => r.month),
@@ -537,7 +537,7 @@ const dummyTournaments =  [
                   tournaments={tournaments}
                   participants={participants}
                   revenue={revenue}
-                  tournamentData={tournamentData}
+                  // tournamentData={tournamentData}
                   chartOptions={chartOptions}
                   revenueData={revenueData}
                   registrationData={registrationData}

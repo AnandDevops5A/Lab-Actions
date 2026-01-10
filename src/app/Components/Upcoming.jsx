@@ -34,14 +34,14 @@ const cards = [
 
 const EscapeCards = () => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#021311] text-white pt-10">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#021311] text-white pt-10 md:pt-0">
       {/* Title */}
-      <h1 className= "autoblur mb-10 text-4xl md:text-5xl lg:text-6xl font-extrabold  text-amber-300 drop-shadow-[0_0_30px_rgba(14,211,8,0.75)]">
+      <h1 className= "autoblur mb-10 text-[25px] md:text-4xl lg:text-5xl font-extrabold  text-amber-300 drop-shadow-[0_0_30px_rgba(14,211,8,0.75)]">
        ⚔ Upcoming Matches ⚔
       </h1>
 
       {/* Card grid */}
-      <div className="bg-[#020b0f]/80 rounded-3xl px-6 py-8 md:px-10 md:py-10 shadow-[0_0_60px_rgba(0,0,0,0.95)]">
+      <div className="bg-[#020b0f]/80 rounded-3xl px-6 py-8 md:p-10 shadow-[0_0_60px_rgba(0,0,0,0.95)]">
         <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-7 ">
           {cards.map((card) => (
             <article

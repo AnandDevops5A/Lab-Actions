@@ -44,7 +44,7 @@ const HeroSection = () => {
           </h1>
         )}
 
-        <p className="text-xl md:text-2xl text-gray-200 mb-8 max-w-2xl mx-auto drop-shadow-lg">
+        <p className="text-xl md:text-2xl text-gray-200 mb-8 max-w-2xl mx-auto drop-shadow-lg ">
           <TypingWrapper>
           Convert skill to Bounty💰. Compete in **official tournaments**, climb
           the ranks, and earn your legacy.</TypingWrapper>
@@ -58,11 +58,11 @@ const HeroSection = () => {
               // keep the original behaviour of navigating to tournaments
               window.location.hash = "#tournaments";
             }}
-            className="border bg-red-600 hover:bg-red-700 text-white text-lg px-10 py-3 rounded-lg font-bold transition duration-300 shadow-2xl shadow-red-500/50 uppercase tracking-widest"
+            className=" border bg-red-600 hover:bg-red-700 text-white text-md px-8 py-3 rounded-lg font-bold transition duration-300 shadow-2xl shadow-red-500/50 uppercase tracking-widest"
           >
             Join Now 🐱‍👤
           </button>
-          <button className="border border-cyan-400 text-cyan-400 hover:bg-cyan-900/50 text-lg px-10 py-3 rounded-lg font-bold transition duration-300 uppercase tracking-widest">
+          <button className="border border-cyan-400 text-cyan-400 hover:bg-cyan-900/50 text-md px-10 py-3 rounded-lg font-bold transition duration-300 uppercase tracking-widest">
             Watch Live 🖥️
           </button>
         </div>

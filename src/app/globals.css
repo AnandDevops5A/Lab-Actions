@@ -30,10 +30,22 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
 @keyframes zoomLoop {
-  0%   { transform: scale(1); }
-  50%  { transform: scale(1.2); } /* zoom in to 20% */
-  100% { transform: scale(1); }   /* zoom out back */
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  /* zoom in to 20% */
+  100% {
+    transform: scale(1);
+  }
+
+  /* zoom out back */
 }
 
 .animate-zoomLoop {
@@ -89,9 +101,11 @@ body {
   0% {
     background-color: rgba(107, 114, 128, 0.3);
   }
+
   50% {
     background-color: rgba(107, 114, 128, 0.6);
   }
+
   100% {
     background-color: rgba(107, 114, 128, 0.3);
   }
@@ -103,84 +117,118 @@ body {
 
 
 /* //fadeup animation */
-.fadeup{
+.fadeup {
   animation: fadeUp both;
   animation-timeline: view();
 }
-@keyframes fadeUp{
-  0%{
-    opacity:0;
+
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
     transform: translateY(10px) scale(0.5);
   }
-  40%{
-    opacity:1;
+
+  40% {
+    opacity: 1;
     transform: translateY(0px) scale(1);
   }
-  
+
 }
 
 /* image revaeal animation */
-.imagereveal{
+.imagereveal {
   animation: imageReveal both;
 }
 
-@keyframes imageReveal{
-  from{
+@keyframes imageReveal {
+  from {
     clip-path: inset(0% 0% 100% 0%);
     transform: scale(1.2);
   }
-  to{
+
+  to {
     clip-path: inset(0% 0% 0% 0%);
     transform: scale(1);
   }
-  
+
 }
 
-.autoshow{
+.autoshow {
   animation: text-appear both;
   animation-timeline: view();
   animation-range: entry 20% cover 100vh;
 }
-@keyframes text-appear{
-  from{
-    opacity:0;
+
+@keyframes text-appear {
+  from {
+    opacity: 0;
     transform: translateY(100px);
   }
-  to{
-    opacity:1;
+
+  to {
+    opacity: 1;
     transform: translateY(0px);
   }
-  
+
 }
 
-.autorotate{
+.autorotate {
   animation: autorotate;
   animation-timeline: view();
 }
 
-@keyframes autorotate{
-  0%{
+@keyframes autorotate {
+  0% {
     transform: rotate(360deg);
   }
-  60%{
+
+  60% {
     transform: rotate(0deg);
   }
 }
 
-.autoblur{
+.autoblur {
   animation: autoblurboth linear both;
   animation-timeline: view(30% auto);
 }
 
 @keyframes autoblurboth {
-  0%{
+  0% {
     filter: blur(10px);
   }
-  25%,35%{
+
+  25%,
+  35% {
     filter: blur(5px);
   }
-  60%{
+
+  60% {
     filter: blur(0px);
   }
-  
+
+}
+
+
+/* on load join button side from left */
+.join-button-side {
+  animation: joinButtonSide both;
+  animation-timeline: view();
+  animation-delay: 2s;
+}
+
+@keyframes joinButtonSide {
+  from {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: fade 1s ease-in-out;
 }
