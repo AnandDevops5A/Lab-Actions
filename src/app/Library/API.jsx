@@ -40,7 +40,7 @@ export const useSWRBackendAPI = (endpoint, method = "GET", data = null, refreshI
  // ✅ BackendAPI with revalidate support
 export async function useFetchBackendAPI(
   endpoint,
-  { method = "GET", data = null, revalidate = 0 } = {}
+  { method = "POST", data = null, revalidate = 0 } = {}
 ) {
   if (!endpoint) throw new Error("Endpoint is required");
 
@@ -66,7 +66,7 @@ export async function useFetchBackendAPI(
       );
     }
 
-    return { data: await response.json(), status: response.status };
+    return { data: await response.json(), status: response.status , ok: true };
   } catch (error) {
     console.error(`[BackendAPI] ${method} ${url} →`, error);
     return { error: error.message , status: error.status || 500}}; // rethrow so caller can handle it

@@ -24,8 +24,8 @@ public class Tournament {
     private Long dateTime;
     private int entryFee;
     private String platform;
-    private List <String> participants;
-    
+    private int participants;
+    private String description;
 
 
 }
