@@ -162,14 +162,17 @@ export default function Login({ onSwitch, isDarkMode }) {
           <button
             type="submit"
             disabled={loading}
-            className="relative w-full inline-flex items-center justify-center overflow-hidden rounded-lg px-6 py-3 font-extrabold text-lg transition-transform duration-150 transform
-                         bg-linear-to-r from-[#00E5FF] via-[#FF0055] to-[#9b59ff] text-black shadow-lg cursor-pointer"
+            aria-busy={loading}
+            className="btn relative w-full overflow-hidden rounded-lg px-6 py-3 font-extrabold text-lg 
+                         bg-linear-to-r from-[#00E5FF] via-[#FF0055] to-[#9b59ff] text-black shadow-lg 
+                         hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed focus:ring-2 focus:ring-offset-2 focus:ring-[#00E5FF] focus:ring-offset-gray-950"
           >
             {loading ? (
               <svg
                 className="w-5 h-5 animate-spin mr-3"
                 viewBox="0 0 24 24"
                 fill="none"
+                aria-hidden="true"
               >
                 <circle
                   cx="12"

@@ -3,8 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useContext } from 'react';
-import { useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useRef } from 'react';
+import gsap from 'gsap';
 import { UserContext } from '../Library/ContextAPI';
 import { successMessage } from '../Library/Alert';
 import { LogoutButton } from './LogoutButton';
@@ -17,6 +17,33 @@ const Navbar = () => {
   const { user, getUserFromContext } = useContext(UserContext);
   const themeContext = useContext(ThemeContext);
   const { isDarkMode } = themeContext || { isDarkMode: true };
+
+  // Animation refs
+  const navRef = useRef(null);
+  const mobileMenuRef = useRef(null);
+
+  // Entrance animation for navbar and staggered items
+  useEffect(() => {
+    if (!navRef.current) return;
+    const navNode = navRef.current;
+    gsap.from(navNode, { y: -24, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    const items = navNode.querySelectorAll('.nav-item');
+    if (items && items.length) {
+      gsap.from(items, { y: 8, opacity: 0, stagger: 0.08, duration: 0.45, delay: 0.12 });
+    }
+  }, []);
+
+  // Mobile menu open animation
+  useEffect(() => {
+    if (!mobileMenuRef.current) return;
+    if (isOpen) {
+      gsap.from(mobileMenuRef.current, { y: -8, opacity: 0, duration: 0.28, ease: 'power3.out' });
+      // Announce menu state for screen readers
+      mobileMenuRef.current.setAttribute('aria-hidden', 'false');
+    } else {
+      mobileMenuRef.current.setAttribute('aria-hidden', 'true');
+    }
+  }, [isOpen]);
 
   const navItems = [
     { name: 'Review', href: '/review' },
@@ -84,7 +111,8 @@ const Navbar = () => {
   return (
     showNavbar ?
       <nav
-        className={`fixed w-full z-50 shadow-xl transition-all duration-300 ease-out backdrop-blur-md ${
+        ref={navRef}
+        className={`animate-slideInUp fixed w-full z-50 shadow-xl transition-all duration-300 ease-out backdrop-blur-md ${
           isDarkMode
             ? 'bg-gray-950/95 border-b border-gray-800/50 shadow-black/50'
             : 'bg-white/95 border-b border-slate-200/50 shadow-slate-300/20'
@@ -110,14 +138,17 @@ const Navbar = () => {
             </Link>
 
             {/* Desktop Nav Links */}
-            <div className="hidden md:flex md:space-x-8 items-center gap-4">
-              {navItems.map((item) => (
+            <div className="hidden md:flex md:space-x-6 items-center gap-4">
+              {navItems.map((item, idx) => (
                 <Link
                   key={item.name}
                   href={item.name && !user === "leaderboard" ? "/?scroll=leaderboard" : item.href}
-                  className={`text-gray-300 hover:text-neon-red px-3 py-2 text-sm font-medium transition duration-200 border-l-2 border-r-2 border-transparent hover:border-l-neon-red hover:border-r-neon-red ${item.name !== "leaderboard" ? "focus:cursor-none" : ""
-                    }`}                >
-                  {item.name}
+                  className={`group ${idx % 2 === 0 ? "animate-slideInLeft" : "animate-slideInRight"} px-4 py-2 text-sm font-semibold transition-colors duration-200 text-gray-200/90 hover:text-white border-l-2 border-r-2 border-transparent hover:border-l-neon-red hover:border-r-neon-red ${item.name !== "leaderboard" ? "focus:cursor-none" : ""} nav-item`}
+                >
+                  <span className="relative inline-block">
+                    {item.name}
+                    <span className="absolute left-0 -bottom-1 h-0.5 w-full bg-linear-to-r from-red-400 to-yellow-400 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
+                  </span>
                 </Link>
               ))}
               {/* Theme Toggle */}
@@ -132,13 +163,14 @@ const Navbar = () => {
               <ThemeToggle />
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`inline-flex items-center justify-center p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-neon-red transition-colors ${
+                className={`inline-flex items-center justify-center p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-neon-red transition-colors will-change-transform ${
                   isDarkMode
                     ? 'text-gray-400 hover:text-white hover:bg-gray-700'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-blue-100'
                 }`}
                 aria-controls="mobile-menu"
                 aria-expanded={isOpen}
+                aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
               >
                 <svg
                   className="h-6 w-6"
@@ -171,23 +203,23 @@ const Navbar = () => {
 
         {/* Mobile Menu Content */}
         {
-          isOpen && (
-            <div id="mobile-menu" className={`md:hidden animate-slideDown ${
+            isOpen && (
+            <div id="mobile-menu" ref={mobileMenuRef} className={`md:hidden animate-slideDown ${
               isDarkMode ? 'bg-black/90' : 'bg-gray-50/95'
             }`}>
-              <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+              <div className="px-3 pt-3 pb-4 space-y-2 sm:px-4">
                 {navItems.map((item) => (
                   <Link
                     key={item.name}
                     href={item.href}
                     onClick={() => setIsOpen(false)}
-                    className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                    className={`block px-4 py-2 rounded-lg text-base font-medium transition-colors shadow-sm ${
                       isDarkMode
-                        ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                        : 'text-gray-700 hover:bg-blue-100 hover:text-gray-900'
+                        ? 'text-gray-200 hover:bg-gray-800 hover:text-white'
+                        : 'text-gray-800 hover:bg-blue-100 hover:text-gray-900'
                     }`}
                   >
-                    {item.name}
+                    <span className="inline-block">{item.name}</span>
                   </Link>
                 ))}
                 {/* logout button for side style cyber punk */}

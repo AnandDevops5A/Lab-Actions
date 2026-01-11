@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useLayoutEffect } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback, useMemo, useContext } from "react"; 
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -23,6 +23,7 @@ import Settings from "./Settings";
 import Sidebar from "./Sidebar";
 import AdminPageLoading from "./AdminPageLoading";
 import { useSWRBackendAPI } from "../Library/API";
+import { ThemeContext } from "../Library/ThemeContext";
 
 ChartJS.register(
   CategoryScale,
@@ -42,9 +43,10 @@ const AdminPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [tournaments, setTournaments] = useState();
   const [participants, setParticipants] = useState();
+  const { isDarkMode } = useContext(ThemeContext);
   // const [isLoading, setIsLoading] = useState(true)
 
-  function transformTournaments(tournaments) {
+  const transformTournaments = useCallback((tournaments) => {
     if (!tournaments || !Array.isArray(tournaments)) return [];
     return tournaments.map((t) => {
       const dtStr = t.dateTime ? t.dateTime.toString() : "";
@@ -62,7 +64,7 @@ const AdminPage = () => {
       // e.g. "07:00"
       return { ...t, date, time };
     });
-  }
+  }, []);
 
   //send request to backend to get tournaments and participants data
   const { result, error, isLoading } = useSWRBackendAPI(
@@ -91,7 +93,7 @@ const AdminPage = () => {
     }
   }, [result]);
 
-  const dummyTournaments = [
+  const dummyTournaments = useMemo(() => ([
     {
       id: 1,
       tournamentName: "Dummy Series 1",
@@ -195,9 +197,9 @@ const AdminPage = () => {
       platform: "Console",
       participants: 50,
     },
-  ];
+  ]), []);
 
-  const dummyParticipants = [
+  const dummyParticipants = useMemo(() => ([
     {
       id: 1,
       username: "John Doe",
@@ -387,7 +389,7 @@ const AdminPage = () => {
       totallosses: 27,
       active: true,
     },
-  ];
+  ]), []);
 
 
   const [revenue, setRevenue] = useState([
@@ -502,6 +504,7 @@ const AdminPage = () => {
         menuItems={menuItems}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        isDarkMode={isDarkMode}
       />
       {/* Main Content */}
       <div
@@ -524,9 +527,9 @@ const AdminPage = () => {
                 type="date"
                 className="bg-gray-800 border border-gray-700 rounded px-3 md:px-4 py-2 text-white text-xs md:text-sm"
               />
-              <button className="bg-linear-to-r from-orange-500 to-red-500 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg hover:shadow-orange-500/50 hover:scale-110 transition text-sm md:text-base">
+              <span className="bg-linear-to-r from-orange-500 to-red-500 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg hover:shadow-orange-500/50 hover:scale-110 transition text-sm md:text-base">
                 Export 📝
-              </button>
+              </span>
             </div>
           </div>
         </div>

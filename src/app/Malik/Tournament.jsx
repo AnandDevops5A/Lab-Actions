@@ -27,12 +27,12 @@ const Tournament = ({ tournaments }) => {
             <h2 className="text-xl md:text-2xl font-bold">
               Tournament Management
             </h2>
-            <button
-              className="bg-linear-to-r from-orange-500 to-red-500 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg transition text-sm md:text-base cursor-pointer hover:scale-102"
+            <span
+              className="bg-linear-to-br from-purple-500 to-green-500 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg transition text-sm md:text-base cursor-pointer hover:scale-105"
               onClick={() => setAddTournamentForm(!showAddTournamentForm)}
             >
               + New Tournament
-            </button>
+            </span>
           </div>
           <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-x-auto shadow-lg h-[500px]">
             <table className="w-full text-xs md:text-sm">

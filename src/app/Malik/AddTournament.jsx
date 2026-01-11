@@ -1,5 +1,5 @@
 "use client";
-import React, { use } from "react";
+import React from "react";
 import { X } from "lucide-react"; // Icon library for the cross button
 import { errorMessage, successMessage } from "../Library/Alert";
 import { useFetchBackendAPI } from "../Library/API";
@@ -90,7 +90,9 @@ const AddTournamentForm = ({ onClose }) => {
         <div className="bg-black p-5 sm:p-10 relative border border-cyan-900/50">
           {/* --- CROSS BUTTON (Top Right) --- */}
           <button
-            onClick={() => onClose(true)}
+            type="button"
+            onClick={() => onClose(false)}
+            aria-label="Close add tournament"
             className="absolute top-0 right-0 bg-pink-600 p-2 text-black hover:bg-cyan-400 transition-colors z-50 group cursor-pointer"
             style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 20% 100%)" }}
           >

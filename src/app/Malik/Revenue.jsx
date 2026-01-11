@@ -1,3 +1,4 @@
+"use client"
 import React from 'react'
 import { Bar, Line } from 'react-chartjs-2'
 

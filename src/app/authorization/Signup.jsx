@@ -187,7 +187,13 @@ export default function Signup({ onSwitch }) {
         </div>
 
         {/* Submit */}
-        <button type="submit" disabled={loading} className="w-full rounded-lg px-6 py-3 font-extrabold text-lg bg-linear-to-r from-[#00E5FF] via-[#FF0055] to-[#9b59ff] text-black shadow-lg cursor-pointer">
+        <button 
+          type="submit" 
+          disabled={loading} 
+          aria-busy={loading}
+          className="btn w-full rounded-lg px-6 py-3 font-extrabold text-lg bg-linear-to-r from-[#00E5FF] via-[#FF0055] to-[#9b59ff] text-black shadow-lg 
+                     hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed focus:ring-2 focus:ring-offset-2 focus:ring-[#00E5FF] focus:ring-offset-gray-950"
+        >
           {loading ? "Please wait..." : "Submit"}
         </button>
 

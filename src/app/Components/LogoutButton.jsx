@@ -7,7 +7,11 @@ export const LogoutButton = () => {
     return (
         <button
             onClick={logout}
-            className="ml-4 text-xs px-4 py-2 bg-neon-red text-amber-200 bg-green-400 font-bold rounded-lg hover:bg-red-600 transition duration-200 cursor-pointer hover:scale-105 "
+            aria-label="Logout from account"
+            className="btn ml-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg 
+                       hover:from-red-700 hover:to-red-800 hover:shadow-lg hover:shadow-red-500/50
+                       focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:ring-offset-gray-950
+                       transition-all duration-200 active:scale-95"
         >
             Logout
         </button>
