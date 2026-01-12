@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import com.golden_pearl.backend.Models.Tournament;
+import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.Services.TournamentService;
 
 import org.springframework.web.bind.annotation.RestController;
@@ -78,6 +80,11 @@ public class TournamentController {
     public ResponseEntity<List<Tournament>> saveAllTournaments(@RequestBody List<Tournament> tournaments) {
         List<Tournament> savedTournaments = tournamentService.saveAllTournaments(tournaments);
         return ResponseEntity.status(201).body(savedTournaments);
+    }
+
+    @GetMapping("/{tournamentId}/participants")
+    public ResponseEntity<List<User>> getParticipants(@PathVariable String tournamentId) {
+        return ResponseEntity.ok(tournamentService.getParticipants(tournamentId));
     }
 
 }

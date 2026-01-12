@@ -1,7 +1,9 @@
 package com.golden_pearl.backend.Models;
 
 
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
@@ -26,6 +28,9 @@ public class Tournament {
     private String platform;
     private int participants;
     private String description;
+    @DBRef
+    private List<User> participantsList;
+ 
 
 
 }

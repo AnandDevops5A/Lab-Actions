@@ -20,10 +20,11 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "Gold Pearl Esports - Elite Tournament",
   description: "Join the ultimate gaming tournament. Compete, win, and claim glory.",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
   keywords: "esports, tournament, gaming, BGMI, competitive",
   robots: "index, follow",
 };
+
+export const viewport = "width=device-width, initial-scale=1, maximum-scale=5";
 
 
 

@@ -54,7 +54,7 @@ export default function Login({ onSwitch, isDarkMode }) {
       errorMessage("Please enter both Player ID and accessKey.");
       return;
     }
-    console.log("contact,accessKey", contact, accessKey);
+    // console.log("contact,accessKey", contact, accessKey);
     setLoading(true);
     let result = null;
     try {
@@ -71,7 +71,7 @@ export default function Login({ onSwitch, isDarkMode }) {
       errorMessage(err?.message || "Unexpected error.");
     } finally {
       setLoading(false);
-      console.log("Login user: ", result);
+      // console.log("Login user: ", result);
       //rediect to player dashboard
       if (result && result.status === 200 && result.data)
         router.push("/player");

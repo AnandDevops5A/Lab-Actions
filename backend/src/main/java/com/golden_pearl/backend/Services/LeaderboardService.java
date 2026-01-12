@@ -1,119 +1,138 @@
 package com.golden_pearl.backend.Services;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.golden_pearl.backend.Models.LeaderBoard;
-import com.golden_pearl.backend.Models.LeaderboardEntry;
 import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.Models.User;
-import com.golden_pearl.backend.Repository.LeaderboardRepository;
+import com.golden_pearl.backend.Repository.LeaderBoardRepository;
 import com.golden_pearl.backend.Repository.TournamentRepository;
 import com.golden_pearl.backend.Repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-/**
- * Service class for managing leaderboards.
- * Contains logic for fetching, generating, and calculating leaderboard data.
- */
 @Service
-public class LeaderboardService {
+public class LeaderBoardService {
 
-    @Autowired
-    private LeaderboardRepository leaderboardRepository;
+    private final LeaderBoardRepository leaderBoardRepository;
+    private final UserRepository userRepository;
+    private final TournamentRepository tournamentRepository;
 
-    @Autowired
-    private UserRepository userRepository; // Assuming this repository exists
-
-    @Autowired
-    private TournamentRepository tournamentRepository; // Assuming this repository exists
-
-    /**
-     * Fetches the leaderboard for a specific tournament.
-     * @param tournamentId The ID of the tournament.
-     * @return An Optional of the LeaderBoard.
-     */
-    public Optional<LeaderBoard> getLeaderboardByTournament(String tournamentId) {
-        return leaderboardRepository.findByTournamentId(tournamentId);
+    public LeaderBoardService(LeaderBoardRepository leaderBoardRepository, UserRepository userRepository, TournamentRepository tournamentRepository) {
+        this.leaderBoardRepository = leaderBoardRepository;
+        this.userRepository = userRepository;
+        this.tournamentRepository = tournamentRepository;
     }
+
+    //get all leaderboard entries
+    public ResponseEntity<Page<LeaderBoard>> getAllLeaderBoard(Pageable pageable) {
+        return ResponseEntity.ok(leaderBoardRepository.findAll(pageable));
+    }
+
+    //register user for tournament
+    @Transactional
+    public ResponseEntity<String> registerUserForTournament(String tournamentId, String userId) {
+        LeaderBoard existingEntry = leaderBoardRepository.findByTournamentIdAndUserId(tournamentId, userId);
+        if (existingEntry != null) {
+            return ResponseEntity.ok("User already registered for this tournament");
+        }
+        try {
+            
+        
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        Tournament tournament = tournamentRepository.findById(tournamentId).orElseThrow(() -> new RuntimeException("Tournament not found"));
+
+        List<Tournament> playedTournaments = user.getPlayedTournaments();
+        if (playedTournaments == null) {
+            playedTournaments = new ArrayList<>();
+        }
+        playedTournaments.add(tournament);
+        user.setPlayedTournaments(playedTournaments);
+        userRepository.save(user);
+
+        List<User> participantsList = tournament.getParticipantsList();
+        if (participantsList == null) {
+            participantsList = new ArrayList<>();
+        }
+        participantsList.add(user);
+        tournament.setParticipantsList(participantsList);
+        tournament.setParticipants(participantsList.size());
+        tournamentRepository.save(tournament);
+
+        LeaderBoard leaderBoard = new LeaderBoard();
+        leaderBoard.setTournament(tournament);
+        leaderBoard.setUser(user);
+        leaderBoard.setScore(0);
+        leaderBoard.setRank(0);
+        // Initially rank is set to 0, it will be updated when scores are updated
+        leaderBoard = leaderBoardRepository.save(leaderBoard);
+        if (leaderBoard == null) {
+            return ResponseEntity.internalServerError().body("Failed to register user for tournament");
+        }
+        return ResponseEntity.ok("User registered successfully");
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
+        }
+    }
+
+
+
+    //get leaderboard by tournament id
+    public ResponseEntity<Page<LeaderBoard>> getLeaderBoardByTournamentId(String tournamentId, Pageable pageable) {
+        //it will return all leaderboard entries of a tournament
+        return ResponseEntity.ok(leaderBoardRepository.findByTournamentIdOrderByScoreDesc(tournamentId, pageable));
+    }
+
+    //get leaderboard by user id
+    public ResponseEntity<List<LeaderBoard>> getLeaderBoardByUserId(String userId) {
+        //it will return all leaderboard entries of a user
+        return ResponseEntity.ok(leaderBoardRepository.findByUserId(userId));
+    }
+
+    //get top n leaderboard entries by tournament id
+    public ResponseEntity<List<LeaderBoard>> getTopNLeaderBoardByTournamentId(String tournamentId, int n) {
+        Pageable pageable = PageRequest.of(0, n);
+        //it will return top n leaderboard entries of a tournament
+        return ResponseEntity.ok(leaderBoardRepository.findByTournamentIdOrderByRankAsc(tournamentId, pageable));
+    }
+
+    // Update score for a user in a tournament
+    @Transactional
+    public ResponseEntity<LeaderBoard> updateScore(String tournamentId, String userId, int score) {
+        LeaderBoard leaderBoard = leaderBoardRepository.findByTournamentIdAndUserId(tournamentId, userId);
+        if (leaderBoard == null) {
+            return ResponseEntity.notFound().build();
+        }
+        leaderBoard.setScore(score);
+        leaderBoardRepository.save(leaderBoard);
+
+        // Recalculate ranks for the entire tournament.
+        // For very large leaderboards, this should be done asynchronously.
+        recalculateRanks(tournamentId);
+
+        // Re-fetch the entity to return the updated rank
+        return ResponseEntity.ok(leaderBoardRepository.findByTournamentIdAndUserId(tournamentId, userId));
+    }
+
+    private void recalculateRanks(String tournamentId) {
+        // Fetch all entries for the tournament, sorted by score descending
+        List<LeaderBoard> rankedList = leaderBoardRepository.findByTournamentIdOrderByScoreDesc(tournamentId);
+
+        for (int i = 0; i < rankedList.size(); i++) {
+            rankedList.get(i).setRank(i + 1);
+        }
+
+        // Bulk save the updated ranks
+        leaderBoardRepository.saveAll(rankedList);
+    }
+
     
-    /**
-     * Constructs a global leaderboard based on overall player stats.
-     * @return A LeaderBoard object representing global rankings.
-     */
-    public LeaderBoard getGlobalLeaderboard() {
-        List<User> allUsers = userRepository.findAll();
-
-        // This logic assumes the User model has a `getWins()` method for overall wins.
-        List<LeaderboardEntry> globalRankings = allUsers.stream()
-                .sorted(Comparator.comparing(User::getWins).reversed())
-                .map(this::mapUserToLeaderboardEntry)
-                .collect(Collectors.toList());
-        
-        // Assign ranks to the sorted list.
-        AtomicInteger rank = new AtomicInteger(1);
-        globalRankings.forEach(entry -> entry.setRank(rank.getAndIncrement()));
-        
-        LeaderBoard globalLeaderboard = new LeaderBoard();
-        globalLeaderboard.setId("global"); // Static ID for the global leaderboard
-        globalLeaderboard.setRankings(globalRankings);
-        
-        return globalLeaderboard;
-    }
-
-    /**
-     * Generates (or updates) the leaderboard for a specific tournament.
-     * In a real-world scenario, this logic would be much more complex, likely
-     * involving aggregation pipelines to calculate tournament-specific stats.
-     * @param tournamentId The ID of the tournament.
-     * @return The generated or updated LeaderBoard.
-     */
-    public LeaderBoard generateTournamentLeaderboard(String tournamentId) {
-        Tournament tournament = tournamentRepository.findById(tournamentId)
-                .orElseThrow(() -> new RuntimeException("Tournament not found with id: " + tournamentId));
-
-        // DEMO LOGIC: This uses all users and their global stats. A real implementation
-        // should fetch only the tournament's participants and calculate their stats
-        // (wins, score) specifically for that tournament.
-        List<User> participants = userRepository.findAll(); 
-
-        AtomicInteger rank = new AtomicInteger(1);
-        List<LeaderboardEntry> rankings = participants.stream()
-                .sorted(Comparator.comparing(User::getWins).reversed()) // Should be tournament-specific wins
-                .map(user -> new LeaderboardEntry(
-                    user,
-                    rank.getAndIncrement(),
-                    user.getScore(), // Should be tournament-specific score
-                    user.getWins(),  // Should be tournament-specific wins
-                    calculateReward(rank.get() - 1)
-                ))
-                .collect(Collectors.toList());
-
-        // Find existing leaderboard to update it, or create a new one.
-        LeaderBoard leaderboard = leaderboardRepository.findByTournamentId(tournamentId)
-                .orElse(new LeaderBoard());
-        
-        leaderboard.setTournament(tournament);
-        leaderboard.setRankings(rankings);
-        
-        return leaderboardRepository.save(leaderboard);
-    }
-
-    private LeaderboardEntry mapUserToLeaderboardEntry(User user) {
-        // Assumes User has getScore() and getWins()
-        return new LeaderboardEntry(user, 0, user.getScore(), user.getWins(), 0);
-    }
-
-    // Example logic for calculating rewards based on rank.
-    private double calculateReward(int rank) {
-        if (rank == 1) return 10000;
-        if (rank == 2) return 5000;
-        if (rank == 3) return 2500;
-        if (rank <= 10) return 500;
-        return 100; // Participation reward
-    }
 }

@@ -28,7 +28,7 @@ export const useSWRBackendAPI = (endpoint, method = "GET", data = null, refreshI
     () => fetcher(url, method, data), // fetcher function
     {
       refreshInterval,        // ⏱ auto revalidate every X ms (e.g., 60000 = 60s)
-      revalidateOnFocus: false, // refetch when window regains focus
+      revalidateOnFocus: true, // refetch when window regains focus
       revalidateOnReconnect: false, // refetch when network reconnects
     }
   );

@@ -1,15 +1,13 @@
 "use client";
 import React, { Suspense, useEffect, useState } from "react";
 import { SkeletonCard } from "../skeleton/Skeleton";
-
 const AddTournamentForm = React.lazy(() => import("./AddTournament")); 
 
 const Tournament = ({ tournaments }) => {
   // const [tournamentData] = useState(tournaments);
-  const [showAddTournamentForm, setAddTournamentForm] = useState(true);
+  const [showAddTournamentForm, setShowAddTournamentForm] = useState(true);
   const date = new Date();
-  const dateOnly =
-    date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+  const dateOnly = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
   const currentTime = date.getHours() * 100 + date.getMinutes();
   const now = dateOnly * 10000 + currentTime;
 
@@ -29,14 +27,14 @@ const Tournament = ({ tournaments }) => {
             </h2>
             <span
               className="bg-linear-to-br from-purple-500 to-green-500 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg transition text-sm md:text-base cursor-pointer hover:scale-105"
-              onClick={() => setAddTournamentForm(!showAddTournamentForm)}
+              onClick={() => setShowAddTournamentForm(!showAddTournamentForm)}
             >
               + New Tournament
             </span>
           </div>
           <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-x-auto shadow-lg h-[500px]">
             <table className="w-full text-xs md:text-sm">
-              <thead className="bg-gray-900 border-b border-gray-700">
+              <thead className="bg-gray-900 border-b border-gray-700 sticky top-0">
                 <tr>
                   <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-gray-300">
                     Id
@@ -101,12 +99,12 @@ const Tournament = ({ tournaments }) => {
                       {t.time}
                     </td>
                     <td className="px-3 md:px-6 py-3 md:py-4 space-x-1 md:space-x-2 hidden lg:table-cell">
-                      <button className="text-blue-400 hover:text-blue-300 font-bold text-xs md:text-sm">
+                      <span className="text-blue-400 hover:text-blue-300 font-bold text-xs md:text-sm">
                         Edit
-                      </button>
-                      <button className="text-red-400 hover:text-red-300 font-bold text-xs md:text-sm">
+                      </span>
+                      <span className="text-red-400 hover:text-red-300 font-bold text-xs md:text-sm">
                         Delete
-                      </button>
+                      </span>
                     </td>
                   </tr>
                 ))): "No tournaments found"
@@ -118,7 +116,7 @@ const Tournament = ({ tournaments }) => {
         </>
       ) : (
         <Suspense fallback={<SkeletonCard />}>
-          <AddTournamentForm onClose={setAddTournamentForm} />
+          <AddTournamentForm onClose={setShowAddTournamentForm} />
         </Suspense>
       )}
     </div>

@@ -71,7 +71,7 @@ const AdminPage = () => {
     "admin/data", //endpoint
     "GET", //method
     null, //data
-    10000 //revalidate in 10sec
+    0 //revalidate in 10sec
   );
 
   useLayoutEffect(() => {

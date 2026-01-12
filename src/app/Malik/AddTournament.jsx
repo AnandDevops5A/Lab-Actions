@@ -91,14 +91,14 @@ const AddTournamentForm = ({ onClose }) => {
           {/* --- CROSS BUTTON (Top Right) --- */}
           <button
             type="button"
-            onClick={() => onClose(false)}
+            onClick={() => onClose(true)}
             aria-label="Close add tournament"
             className="absolute top-0 right-0 bg-pink-600 p-2 text-black hover:bg-cyan-400 transition-colors z-50 group cursor-pointer"
             style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 20% 100%)" }}
           >
             <X
               size={24}
-              className="group-hover:rotate-90 transition-transform"
+              className="group-hover:rotate-180 transition-transform"
             />
           </button>
 
@@ -107,7 +107,7 @@ const AddTournamentForm = ({ onClose }) => {
             <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter text-cyan-400 italic hover:text-amber-500 transition-colors">
               New Tournament{" "}
               <span className="text-pink-500 text-sm sm:text-lg animate-pulse">
-                [v2.077]
+                [v2.001]
               </span>
             </h2>
             <div className="h-1 w-20 bg-cyan-500 mt-2"></div>

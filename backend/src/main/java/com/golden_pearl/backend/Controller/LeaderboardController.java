@@ -1,59 +1,74 @@
 package com.golden_pearl.backend.Controller;
 
-import com.golden_pearl.backend.Models.LeaderBoard;
-import com.golden_pearl.backend.Services.LeaderboardService;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-/**
- * REST Controller for leaderboard-related endpoints.
- */
+import com.golden_pearl.backend.Models.LeaderBoard;
+import com.golden_pearl.backend.Services.LeaderBoardService;
+
 @RestController
-@RequestMapping("/api/leaderboards") // Plural form is a REST convention for resources
-@CrossOrigin(origins = "*") // Allows cross-origin requests, useful for development
-public class LeaderboardController {
+@RequestMapping("/leaderboard")
+public class LeaderBoardController {
 
-    @Autowired
-    private LeaderboardService leaderboardService;
+    private final LeaderBoardService leaderBoardService;
 
-    /**
-     * Retrieves the leaderboard for a specific tournament.
-     * @param tournamentId The UUID of the tournament.
-     * @return A ResponseEntity containing the LeaderBoard or 404 Not Found.
-     */
+    public LeaderBoardController(LeaderBoardService leaderBoardService) {
+        this.leaderBoardService = leaderBoardService;
+    }
+
+    // register user for tournament
+    @PostMapping("/register/{tournamentId}/{userId}")
+    public ResponseEntity<String> registerUserForTournament(@PathVariable String tournamentId,
+            @PathVariable String userId) {
+        return leaderBoardService.registerUserForTournament(tournamentId, userId);
+    }
+
+    // get all leaderboard entries
+    @GetMapping("/all")
+    public ResponseEntity<Page<LeaderBoard>> getAllLeaderBoard(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return leaderBoardService.getAllLeaderBoard(pageable);
+    }
+
+    // get leaderboard by tournament id
     @GetMapping("/tournament/{tournamentId}")
-    public ResponseEntity<LeaderBoard> getTournamentLeaderboard(@PathVariable String tournamentId) {
-        return leaderboardService.getLeaderboardByTournament(tournamentId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Page<LeaderBoard>> getLeaderBoardByTournamentId(@PathVariable String tournamentId,
+            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return leaderBoardService.getLeaderBoardByTournamentId(tournamentId, pageable);
     }
 
-    /**
-     * Retrieves the global leaderboard, aggregated from all player stats.
-     * @return A ResponseEntity containing the global LeaderBoard.
-     */
-    @GetMapping("/global")
-    public ResponseEntity<LeaderBoard> getGlobalLeaderboard() {
-        LeaderBoard globalLeaderboard = leaderboardService.getGlobalLeaderboard();
-        return ResponseEntity.ok(globalLeaderboard);
+    // get leaderboard by user id
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<LeaderBoard>> getLeaderBoardByUserId(@PathVariable String userId) {
+        return leaderBoardService.getLeaderBoardByUserId(userId);
     }
 
-    /**
-     * [ADMIN] Triggers the generation and saving of a tournament's leaderboard.
-     * In a production environment, this endpoint should be secured to be accessible
-     * only by administrators.
-     * @param tournamentId The UUID of the tournament to generate a leaderboard for.
-     * @return A ResponseEntity containing the newly generated or updated LeaderBoard.
-     */
-    @PostMapping("/tournament/{tournamentId}/generate")
-    public ResponseEntity<LeaderBoard> generateTournamentLeaderboard(@PathVariable String tournamentId) {
-        try {
-            LeaderBoard leaderboard = leaderboardService.generateTournamentLeaderboard(tournamentId);
-            return ResponseEntity.ok(leaderboard);
-        } catch (RuntimeException e) {
-            // This will catch the "Tournament not found" exception from the service
-            return ResponseEntity.notFound().build();
-        }
+    // get top n leaderboard entries by tournament id
+    @GetMapping("/top/{tournamentId}/{n}")
+    public ResponseEntity<List<LeaderBoard>> getTopNLeaderBoardByTournamentId(@PathVariable String tournamentId,
+            @PathVariable int n) {
+        return leaderBoardService.getTopNLeaderBoardByTournamentId(tournamentId, n);
     }
+
+    // update score
+    @PutMapping("/score/{tournamentId}/{userId}")
+    public ResponseEntity<LeaderBoard> updateScore(@PathVariable String tournamentId, @PathVariable String userId,
+            @RequestParam int score) {
+        return leaderBoardService.updateScore(tournamentId, userId, score);
+    }
+
 }
