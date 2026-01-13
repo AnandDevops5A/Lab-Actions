@@ -9,9 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.golden_pearl.backend.DRO.UserAuth;
 import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.Models.User;
-import com.golden_pearl.backend.Models.UserAuth;
 import com.golden_pearl.backend.Repository.TournamentRepository;
 import com.golden_pearl.backend.Repository.UserRepository;
 import com.golden_pearl.backend.common.General;
@@ -20,11 +20,19 @@ import com.golden_pearl.backend.common.General;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final TournamentRepository tournamentRepository;
     private final General general = new General();
 
     // constructor
-    public UserService(UserRepository userRepository) {
+
+    public UserService(UserRepository userRepository, TournamentRepository tournamentRepository) {
         this.userRepository = userRepository;
+        this.tournamentRepository = tournamentRepository;
+    }
+
+    // find user by id
+    public User findUserById(String id) {
+        return userRepository.findById(id).orElse(null);
     }
 
     // verify user by callsign and accessKey or contact and accessKey
@@ -89,6 +97,5 @@ public class UserService {
         }
     }
 
-
-    
+   
 }

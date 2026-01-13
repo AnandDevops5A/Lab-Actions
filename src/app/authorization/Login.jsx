@@ -71,7 +71,7 @@ export default function Login({ onSwitch, isDarkMode }) {
       errorMessage(err?.message || "Unexpected error.");
     } finally {
       setLoading(false);
-      // console.log("Login user: ", result);
+      console.log("Login user: ", result.data);
       //rediect to player dashboard
       if (result && result.status === 200 && result.data)
         router.push("/player");

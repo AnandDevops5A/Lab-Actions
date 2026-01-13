@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.PathVariable;
-
+import org.springframework.web.bind.annotation.PostMapping;
 import com.golden_pearl.backend.Models.Tournament;
-import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.Services.TournamentService;
-
 import org.springframework.web.bind.annotation.RestController;
+import com.golden_pearl.backend.Models.User;
+import com.golden_pearl.backend.Repository.UserRepository;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TournamentController {
 
     private final TournamentService tournamentService;
+
 
     public TournamentController(TournamentService tournamentService) {
         this.tournamentService = tournamentService;
@@ -42,37 +43,27 @@ public class TournamentController {
 
     @RequestMapping(path = "/update", method = RequestMethod.PUT)
     public ResponseEntity<Tournament> updateTournament(@RequestBody Tournament tournamentDetails) {
-        Tournament updatedTournament = tournamentService.updateTournament(tournamentDetails.getId(), tournamentDetails);
+        Tournament updatedTournament = tournamentService.updateTournament(tournamentDetails);
         return ResponseEntity.ok(updatedTournament);
     }
 
-    @GetMapping("/test")
-    public String getMethodName() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
-
-        long now = Long.parseLong(LocalDateTime.now().format(formatter));
-        System.out.println("Current time in yyyyMMddHHmm format: " + now);
-
-        return Long.toString(now);
-
-    }
 
     @RequestMapping(path = "/upcoming", method = RequestMethod.GET)
     public ResponseEntity<List<Tournament>> getUpcomingTournaments() {
-      
-        return ResponseEntity.ok( tournamentService.getUpcomingTournaments());
+
+        return ResponseEntity.ok(tournamentService.getUpcomingTournaments());
     }
 
     @RequestMapping(path = "/completed", method = RequestMethod.GET)
     public ResponseEntity<List<Tournament>> getCompletedTournaments() {
-        
+
         return ResponseEntity.ok(tournamentService.getCompletedTournaments());
     }
-    
-    //service for the user who not login or registered
+
+    // service for the user who not login or registered
     @RequestMapping(path = "/lastTournament", method = RequestMethod.GET)
     public ResponseEntity<Tournament> getLastTournaments() {
-        
+
         return ResponseEntity.ok(tournamentService.getLastTournament());
     }
 
@@ -82,9 +73,24 @@ public class TournamentController {
         return ResponseEntity.status(201).body(savedTournaments);
     }
 
+    // get participants of a tournament
     @GetMapping("/{tournamentId}/participants")
     public ResponseEntity<List<User>> getParticipants(@PathVariable String tournamentId) {
-        return ResponseEntity.ok(tournamentService.getParticipants(tournamentId));
+        return ResponseEntity.ok(null);
+    }
+
+    // get tournament by id
+    @GetMapping("/{tournamentId}")
+    public ResponseEntity<Tournament> getTournamentById(@PathVariable String tournamentId) {
+        return ResponseEntity.ok(tournamentService.getTournamentById(tournamentId));
+    }
+
+    
+    // register user for a tournament
+    @PostMapping("/register/{tournamentId}/user/{userId}")
+    public String registerUserForTournament(@PathVariable String tournamentId, @PathVariable String userId) {
+        return tournamentService.registerUserForTournament(tournamentId, userId);
+        
     }
 
 }

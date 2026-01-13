@@ -19,7 +19,7 @@ public class User {
     @Id
     private String id;
     private String username;
-    private String playerId;
+    private List<String> playerId;
     private String callSign;
     private String email;
     private String accessKey;
@@ -29,14 +29,12 @@ public class User {
     private Long winAmount;
     private Long withdrawAmount;
     private Long balanceAmount;
-    private int totalPlay;
-    private int totalWin;
-    private int totallosses;
+    private Integer totalPlay;
+    private Integer totalWin;
+    private Integer totallosses;
     @Builder.Default
     private boolean active = true;
-    //played tournaments
-    @DBRef
-    private List<Tournament> playedTournaments;
+    private List<String> playedTournaments;
 
 
 }

@@ -31,44 +31,9 @@ public class LeaderBoardController {
     @PostMapping("/register/{tournamentId}/{userId}")
     public ResponseEntity<String> registerUserForTournament(@PathVariable String tournamentId,
             @PathVariable String userId) {
+                System.out.println("Tournament ID: " + tournamentId + ", User ID: " + userId);
         return leaderBoardService.registerUserForTournament(tournamentId, userId);
     }
 
-    // get all leaderboard entries
-    @GetMapping("/all")
-    public ResponseEntity<Page<LeaderBoard>> getAllLeaderBoard(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return leaderBoardService.getAllLeaderBoard(pageable);
-    }
-
-    // get leaderboard by tournament id
-    @GetMapping("/tournament/{tournamentId}")
-    public ResponseEntity<Page<LeaderBoard>> getLeaderBoardByTournamentId(@PathVariable String tournamentId,
-            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return leaderBoardService.getLeaderBoardByTournamentId(tournamentId, pageable);
-    }
-
-    // get leaderboard by user id
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<LeaderBoard>> getLeaderBoardByUserId(@PathVariable String userId) {
-        return leaderBoardService.getLeaderBoardByUserId(userId);
-    }
-
-    // get top n leaderboard entries by tournament id
-    @GetMapping("/top/{tournamentId}/{n}")
-    public ResponseEntity<List<LeaderBoard>> getTopNLeaderBoardByTournamentId(@PathVariable String tournamentId,
-            @PathVariable int n) {
-        return leaderBoardService.getTopNLeaderBoardByTournamentId(tournamentId, n);
-    }
-
-    // update score
-    @PutMapping("/score/{tournamentId}/{userId}")
-    public ResponseEntity<LeaderBoard> updateScore(@PathVariable String tournamentId, @PathVariable String userId,
-            @RequestParam int score) {
-        return leaderBoardService.updateScore(tournamentId, userId, score);
-    }
 
 }

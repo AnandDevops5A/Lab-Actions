@@ -1,7 +1,8 @@
 package com.golden_pearl.backend.Models;
 
 
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
+import java.util.HashMap;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -22,15 +23,12 @@ public class Tournament {
     @Id
     private String id;
     private String tournamentName;
-    private int prizePool;
+    private Integer prizePool;
     private Long dateTime;
-    private int entryFee;
+    private Integer entryFee;
     private String platform;
-    private int participants;
     private String description;
-    @DBRef
-    private List<User> participantsList;
- 
-
+    private List<String> participantsList;
+    private HashMap<String, Integer> rankList;
 
 }

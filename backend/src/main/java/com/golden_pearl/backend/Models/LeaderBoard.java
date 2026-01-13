@@ -1,5 +1,7 @@
 package com.golden_pearl.backend.Models;
 
+import java.util.HashMap;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -16,12 +18,8 @@ public class LeaderBoard {
 
     @Id
     private String leaderboardId;
-    //tournament id
-    @DBRef
-    private Tournament tournament;
-    //user id
-    @DBRef
-    private User user;
+    private String userId;
+    private String tournamentId;
     //user score in tournament
     private Integer score;
     //rank of user in tournament

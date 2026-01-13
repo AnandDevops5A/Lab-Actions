@@ -2,8 +2,8 @@ package com.golden_pearl.backend.Controller;
 
 import java.util.List;
 
+import com.golden_pearl.backend.DRO.UserAuth;
 import com.golden_pearl.backend.Models.User;
-import com.golden_pearl.backend.Models.UserAuth;
 import com.golden_pearl.backend.Services.UserService;
 
 import org.springframework.http.ResponseEntity;
@@ -25,6 +25,12 @@ public class UserController {
 
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    //find user by id
+    @GetMapping("/{id}")
+    public User findUserById(@PathVariable String id) {
+        return userService.findUserById(id);
     }
 
     @PostMapping("/verify")
@@ -49,12 +55,7 @@ public class UserController {
         return userService.getAllUsers();
     } 
     
-    //testing purpose
-    @GetMapping("/test")    
-    public String testEndpoint() {
-        return "UserController is working!";
-    }
-    //save all user
+      //save all user
     @PostMapping("/saveAll")
     public ResponseEntity<List<User>> saveAllUsers(@RequestBody List<User> users) {
         // System.out.println("Received users data: " + users);
@@ -65,6 +66,14 @@ public class UserController {
     public ResponseEntity<User> joinTournament(@PathVariable String userId, @PathVariable String tournamentId) {
         return userService.joinTournament(userId, tournamentId);
     }
+
+
+     //testing purpose
+    @GetMapping("/test")    
+    public String testEndpoint() {
+        return "UserController is working!";
+    }
+ 
 
 
     

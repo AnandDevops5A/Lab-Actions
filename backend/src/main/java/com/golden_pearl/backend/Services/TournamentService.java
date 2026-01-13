@@ -1,27 +1,36 @@
 package com.golden_pearl.backend.Services;
 
+import java.util.ArrayList;
+
 import com.golden_pearl.backend.common.General;
 
 import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.Repository.TournamentRepository;
+import com.golden_pearl.backend.Repository.UserRepository;
 import com.golden_pearl.backend.errors.ResourceNotFoundException;
 
 @Service
 public class TournamentService {
 
     private final TournamentRepository tournamentRepository;
+    private final UserService UserService;
+    private final UserRepository userRepository;
     private final General general = new General();
 
     // constructor
-    public TournamentService(TournamentRepository tournamentRepository) {
+    public TournamentService(TournamentRepository tournamentRepository, UserService UserService,
+            UserRepository userRepository) {
+        this.userRepository = userRepository;
         this.tournamentRepository = tournamentRepository;
+        this.UserService = UserService;
 
     }
 
@@ -56,9 +65,10 @@ public class TournamentService {
 
     // update tournament by id
     @CacheEvict(value = "adminData", allEntries = true)
-    public Tournament updateTournament(String id, Tournament tournamentDetails) {
-
-        Tournament existingTournament = getTournamentById(id);
+    public Tournament updateTournament(Tournament tournamentDetails) {
+        if (tournamentDetails == null)
+            return null;
+        Tournament existingTournament = getTournamentById(tournamentDetails.getId());
         existingTournament.setTournamentName(tournamentDetails.getTournamentName());
         existingTournament.setPrizePool(tournamentDetails.getPrizePool());
         existingTournament.setDateTime(tournamentDetails.getDateTime());
@@ -94,8 +104,40 @@ public class TournamentService {
         return tournamentRepository.saveAll(tournaments);
     }
 
-    // get participants list
-    public List<User> getParticipants(String tournamentId) {
-        return getTournamentById(tournamentId).getParticipantsList();
+    // register user for a tournament
+    @CacheEvict(value = "adminData", allEntries = true)
+    public String registerUserForTournament(String tournamentId, String userId) {
+        User user = UserService.findUserById(userId);
+        Tournament tournament = getTournamentById(tournamentId);
+        if (user == null || tournament == null) {
+            return "User or tournament not found";
+        }
+        // Add tournament to user's played tournaments
+        List<String> playedTournaments = user.getPlayedTournaments();
+        if (playedTournaments == null) {
+            playedTournaments = new ArrayList<>();
+        }
+        if (playedTournaments.contains(tournamentId)) {
+            return "User already registered for this tournament";
+        }
+        playedTournaments.add(tournamentId);
+        user.setPlayedTournaments(playedTournaments);
+        userRepository.save(user);
+
+        // Add user to tournament's participants list
+        List<String> participantsList = tournament.getParticipantsList();
+        if (participantsList == null) {
+            participantsList = new ArrayList<>();
+        }
+        if (participantsList.contains(userId)) {
+            return "User already registered for this tournament";
+        }
+        participantsList.add(userId);
+        tournament.setParticipantsList(participantsList);
+        tournamentRepository.save(tournament);
+
+        return  user.getUsername() + " registered successfully for tournament";
+
     }
+
 }
