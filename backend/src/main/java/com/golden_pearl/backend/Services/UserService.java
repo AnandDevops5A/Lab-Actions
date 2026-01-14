@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.golden_pearl.backend.DRO.UserAuth;
-import com.golden_pearl.backend.Models.Tournament;
+import com.golden_pearl.backend.DRO.UserRegisterData;
 import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.Repository.TournamentRepository;
 import com.golden_pearl.backend.Repository.UserRepository;
@@ -20,14 +20,12 @@ import com.golden_pearl.backend.common.General;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final TournamentRepository tournamentRepository;
     private final General general = new General();
 
     // constructor
 
-    public UserService(UserRepository userRepository, TournamentRepository tournamentRepository) {
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.tournamentRepository = tournamentRepository;
     }
 
     // find user by id
@@ -59,13 +57,24 @@ public class UserService {
 
     // save user
     @CacheEvict(value = "adminData", allEntries = true)
-    public ResponseEntity<User> saveUser(User user) {
-        if (user == null) {
-            return ResponseEntity.badRequest().build();
-        } else {
-            user.setJoiningDate(general.getCurrentDateTime());
-            return ResponseEntity.ok(userRepository.save(user));
+    public ResponseEntity<User> saveUser(UserRegisterData user) {
+        // System.out.println(user);
+        // check data have enough data
+        if ((user == null) || (user.username() == null) ||
+                (user.callSign() == null) ||
+                (user.contact() == null) ||
+                (user.accessKey()) == null) {
+
+            return ResponseEntity.badRequest().body(null);
         }
+
+        else {
+            User readyUser = general.convertResponseToUser(user);
+            // System.out.println(readyUser);
+
+            return ResponseEntity.ok(userRepository.save(readyUser));
+        }
+
     }
 
     // get all users
@@ -97,5 +106,4 @@ public class UserService {
         }
     }
 
-   
 }

@@ -42,7 +42,7 @@ const StatsSimpleBox = ({ title, value }) => {
 const PlayerStats = ({ player }) => (
     <div className="bg-gray-800 p-6 rounded-xl border border-red-700/50 shadow-lg shadow-gray-700/50">
         <h2 className="text-2xl font-bold uppercase mb-6 border-b-2 border-red-500 pb-2">Tournament Stats</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+      {player.totalPlay<=0? ( <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
 
             {/* Stat Card 1: Total withdraw (Focus Metric with Neon Glow) */}
             <StatsNeonBox title="Withdraw" value={`₹ ${player.balanceAmount}` || 'N/A'}  color="green" />
@@ -59,8 +59,9 @@ const PlayerStats = ({ player }) => (
             <StatsSimpleBox title="Invest" value={`₹ ${player.investAmount}` || 'N/A'} />
             {/* Stat Card 6: Total Loose (Focus Metric with Neon Glow) */}
             <StatsNeonBox title="Total Loose" value={player.totallosses} color="red" />
-
-        </div>
+        </div>):<p className="text-gray-400 text-center">
+                    You haven't Played Any Matches Yet.<br/>
+                    No match history available.</p>}
     </div>
 );
 

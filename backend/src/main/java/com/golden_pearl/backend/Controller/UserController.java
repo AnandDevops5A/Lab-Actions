@@ -3,6 +3,7 @@ package com.golden_pearl.backend.Controller;
 import java.util.List;
 
 import com.golden_pearl.backend.DRO.UserAuth;
+import com.golden_pearl.backend.DRO.UserRegisterData;
 import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.Services.UserService;
 
@@ -27,7 +28,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    //find user by id
+    // find user by id
     @GetMapping("/{id}")
     public User findUserById(@PathVariable String id) {
         return userService.findUserById(id);
@@ -36,13 +37,14 @@ public class UserController {
     @PostMapping("/verify")
     public ResponseEntity<User> verifyUser(@RequestBody UserAuth userAuth) {
         // System.err.println("Received user auth data: " + userAuth);
-        return userService.getUser(userAuth);  
+        return userService.getUser(userAuth);
     }
-    
+
     @PostMapping("/register")
-    public ResponseEntity<User> saveUser(@RequestBody User user) {
+    public ResponseEntity<User> saveUser(@RequestBody UserRegisterData user) {
         // System.out.println("Received user data: " + user);
         return userService.saveUser(user);
+
     }
 
     @PutMapping("/update")
@@ -50,28 +52,23 @@ public class UserController {
         System.out.println("Received user data: " + user);
         return userService.updateUser(user);
     }
+
     @GetMapping("/all")
-    public ResponseEntity<List<User>> getAllUsers() {        
+    public ResponseEntity<List<User>> getAllUsers() {
         return userService.getAllUsers();
-    } 
-    
-      //save all user
+    }
+
+    // save all user
     @PostMapping("/saveAll")
     public ResponseEntity<List<User>> saveAllUsers(@RequestBody List<User> users) {
         // System.out.println("Received users data: " + users);
         return userService.saveAllUsers(users);
     }
 
-
-     //testing purpose
-    @GetMapping("/test")    
+    // testing purpose
+    @GetMapping("/test")
     public String testEndpoint() {
         return "UserController is working!";
     }
- 
 
-
-    
-
-    
 }

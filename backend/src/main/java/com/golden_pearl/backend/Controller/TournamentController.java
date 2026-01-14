@@ -20,6 +20,7 @@ import com.golden_pearl.backend.Services.TournamentService;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.golden_pearl.backend.DTO.ResponseUserData;
 import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.Repository.UserRepository;
 
@@ -100,9 +101,10 @@ public class TournamentController {
 
     //get all register userid for tournament
     @PostMapping("/getUsers/{tournamentId}")
-    public Object getAllRegisteredUsers(@PathVariable String tournamentId){
+    public ResponseEntity<?> getAllRegisteredUsers(@PathVariable String tournamentId){
         return tournamentService.getRegisterdUserForTournament(tournamentId);
     }
+  
     
     //update rank of user
     @PostMapping("/updateRank/{tId}/{uId}/{rank}")

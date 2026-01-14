@@ -7,12 +7,15 @@ import com.golden_pearl.backend.common.General;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import com.golden_pearl.backend.DTO.ResponseUserData;
 import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.Repository.TournamentRepository;
@@ -136,33 +139,43 @@ public class TournamentService {
 
     }
 
-    // get registered-user for tournament
-    public ResponseEntity<Object> getRegisterdUserForTournament(String tournamentId) {
+    // get registered-userId for tournament
+    public ResponseEntity<?> getRegisterdUserForTournament(String tournamentId) {
         Tournament tournament = getTournamentById(tournamentId);
         if (tournament == null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Tournament found..");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 
         HashMap<String, Integer> rankList = tournament.getRankList();
 
         if (rankList == null || rankList.isEmpty())
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No user found..");
-        return ResponseEntity.ok(rankList);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+
+        // // sort ranklist by rank(values)
+        List<String> sortedByRank = general.sortedByRank(rankList);
+        // System.out.println(sortedByRank);
+        List<User> users = userRepository.findAllById(rankList.keySet());
+        List<User> sortedUsers = general.sortUserByRank(users, sortedByRank);
+        // System.out.println(sortedUsers);
+
+        return ResponseEntity.ok(general.convertUserToResponseUserData(sortedUsers));
     }
 
     // update rank of registered user
-    public ResponseEntity<String> updateRank(String tournamentId, String userId,int rank) {
+    public ResponseEntity<String> updateRank(String tournamentId, String userId, int rank) {
         Tournament tournament = getTournamentById(tournamentId);
         User user = UserService.findUserById(userId);
-        if (user == null || tournament == null) 
+        if (user == null || tournament == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No data found..");
-        HashMap<String,Integer> rankList=tournament.getRankList();
-        if(!rankList.containsKey(userId))
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(user.getUsername()+" is not registerd for "+tournament.getTournamentName());
+        HashMap<String, Integer> rankList = tournament.getRankList();
+        if (!rankList.containsKey(userId))
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(user.getUsername() + " is not registerd for " + tournament.getTournamentName());
 
         rankList.put(userId, rank);
         tournament.setRankList(rankList);
         tournamentRepository.save(tournament);
-        return ResponseEntity.ok(user.getUsername()+" ranked updated to "+rankList.get(userId));
-        
+        return ResponseEntity.ok(user.getUsername() + " ranked updated to " + rankList.get(userId));
+
     }
+
 }
