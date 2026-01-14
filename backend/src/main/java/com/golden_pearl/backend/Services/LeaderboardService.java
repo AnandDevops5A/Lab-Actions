@@ -12,20 +12,20 @@ import org.springframework.transaction.annotation.Transactional;
 import com.golden_pearl.backend.Models.LeaderBoard;
 import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.Models.User;
-import com.golden_pearl.backend.Repository.LeaderBoardRepository;
+import com.golden_pearl.backend.Repository.LeaderboardRepository;
 import com.golden_pearl.backend.Repository.TournamentRepository;
 import com.golden_pearl.backend.Repository.UserRepository;
 
 @Service
-public class LeaderBoardService {
+public class LeaderboardService {
 
-    private final LeaderBoardRepository leaderBoardRepository;
+    private final LeaderboardRepository leaderboardRepository;
     private final UserRepository userRepository;
     private final TournamentRepository tournamentRepository;
 
-    public LeaderBoardService(LeaderBoardRepository leaderBoardRepository, UserRepository userRepository,
+    public LeaderboardService(LeaderboardRepository leaderboardRepository, UserRepository userRepository,
             TournamentRepository tournamentRepository) {
-        this.leaderBoardRepository = leaderBoardRepository;
+        this.leaderboardRepository = leaderboardRepository;
         this.userRepository = userRepository;
         this.tournamentRepository = tournamentRepository;
     }

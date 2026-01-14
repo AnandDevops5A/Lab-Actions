@@ -1,8 +1,10 @@
 package com.golden_pearl.backend.Controller;
 
+import java.rmi.server.UID;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -12,9 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+
 import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.Services.TournamentService;
+
 import org.springframework.web.bind.annotation.RestController;
+
 import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.Repository.UserRepository;
 
@@ -92,5 +97,18 @@ public class TournamentController {
         return tournamentService.registerUserForTournament(tournamentId, userId);
         
     }
+
+    //get all register userid for tournament
+    @PostMapping("/getUsers/{tournamentId}")
+    public Object getAllRegisteredUsers(@PathVariable String tournamentId){
+        return tournamentService.getRegisterdUserForTournament(tournamentId);
+    }
+    
+    //update rank of user
+    @PostMapping("/updateRank/{tId}/{uId}/{rank}")
+    public ResponseEntity<String> updateRank(@PathVariable String tId,@PathVariable String uId,@PathVariable int rank){
+        return tournamentService.updateRank(tId, uId, rank);
+    }
+
 
 }

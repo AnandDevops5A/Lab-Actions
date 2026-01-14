@@ -15,24 +15,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.golden_pearl.backend.Models.LeaderBoard;
-import com.golden_pearl.backend.Services.LeaderBoardService;
+import com.golden_pearl.backend.Services.LeaderboardService;
 
 @RestController
 @RequestMapping("/leaderboard")
-public class LeaderBoardController {
+public class LeaderboardController {
 
-    private final LeaderBoardService leaderBoardService;
+    private final LeaderboardService leaderboardService;
 
-    public LeaderBoardController(LeaderBoardService leaderBoardService) {
-        this.leaderBoardService = leaderBoardService;
+    public LeaderboardController(LeaderboardService leaderboardService) {
+        this.leaderboardService = leaderboardService;
     }
 
     // register user for tournament
     @PostMapping("/register/{tournamentId}/{userId}")
     public ResponseEntity<String> registerUserForTournament(@PathVariable String tournamentId,
             @PathVariable String userId) {
-                System.out.println("Tournament ID: " + tournamentId + ", User ID: " + userId);
-        return leaderBoardService.registerUserForTournament(tournamentId, userId);
+                // System.out.println("Tournament ID: " + tournamentId + ", User ID: " + userId);
+        return leaderboardService.registerUserForTournament(tournamentId, userId);
     }
 
 

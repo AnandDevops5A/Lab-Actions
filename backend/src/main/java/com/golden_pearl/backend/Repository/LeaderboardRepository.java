@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import com.golden_pearl.backend.Models.LeaderBoard;
 
-public interface LeaderBoardRepository extends MongoRepository<LeaderBoard, String> {
+public interface LeaderboardRepository extends MongoRepository<LeaderBoard, String> {
 
     // Find all entries for a specific tournament
     // List<LeaderBoard> findByTournamentId(String tournamentId);

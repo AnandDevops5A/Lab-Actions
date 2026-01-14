@@ -61,11 +61,6 @@ public class UserController {
         // System.out.println("Received users data: " + users);
         return userService.saveAllUsers(users);
     }
-    //join tournament
-    @PutMapping("/joinTournament/{userId}/{tournamentId}")
-    public ResponseEntity<User> joinTournament(@PathVariable String userId, @PathVariable String tournamentId) {
-        return userService.joinTournament(userId, tournamentId);
-    }
 
 
      //testing purpose
