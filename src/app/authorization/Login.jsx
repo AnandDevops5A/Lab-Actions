@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Hash, Lock, Eye, EyeOff } from "lucide-react";
+import { Lock, Eye, EyeOff,PhoneCall } from "lucide-react";
 import { errorMessage, successMessage } from "../Library/Alert";
 import { useFetchBackendAPI } from "../Library/API";
 import { getCache, setCache, UpdateCache } from "../Library/ActionRedis";
@@ -101,7 +101,7 @@ export default function Login({ onSwitch, isDarkMode }) {
       >
         {/* contact Input */}
         <div className="relative group">
-          <Hash
+          <PhoneCall
             className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#00E5FF] opacity-90"
             aria-hidden
           />

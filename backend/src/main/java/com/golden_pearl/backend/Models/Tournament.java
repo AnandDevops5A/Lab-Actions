@@ -4,7 +4,6 @@ package com.golden_pearl.backend.Models;
 import java.util.HashMap;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
@@ -28,7 +27,6 @@ public class Tournament {
     private Integer entryFee;
     private String platform;
     private String description;
-    private List<String> participantsList;
     private HashMap<String, Integer> rankList;
 
 }

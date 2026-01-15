@@ -53,7 +53,7 @@ public class UserController {
         return userService.updateUser(user);
     }
 
-    @GetMapping("/all")
+    @PostMapping("/all")
     public ResponseEntity<List<User>> getAllUsers() {
         return userService.getAllUsers();
     }
@@ -64,7 +64,6 @@ public class UserController {
         // System.out.println("Received users data: " + users);
         return userService.saveAllUsers(users);
     }
-
     // testing purpose
     @GetMapping("/test")
     public String testEndpoint() {

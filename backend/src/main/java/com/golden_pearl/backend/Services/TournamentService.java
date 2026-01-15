@@ -6,16 +6,11 @@ import java.util.HashMap;
 import com.golden_pearl.backend.common.General;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
-
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.golden_pearl.backend.DTO.ResponseUserData;
 import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.Repository.TournamentRepository;
@@ -79,7 +74,9 @@ public class TournamentService {
         existingTournament.setDateTime(tournamentDetails.getDateTime());
         existingTournament.setEntryFee(tournamentDetails.getEntryFee());
         existingTournament.setPlatform(tournamentDetails.getPlatform());
-        existingTournament.setParticipantsList(tournamentDetails.getParticipantsList());
+        existingTournament.setDescription(tournamentDetails.getDescription());
+        existingTournament.setRankList(tournamentDetails.getRankList());
+        
         return tournamentRepository.save(existingTournament);
     }
 
@@ -178,4 +175,14 @@ public class TournamentService {
 
     }
 
+    //tempory for testing
+    public Tournament settemprank(String id, HashMap<String ,Integer> ranklist ){
+        Tournament t=getTournamentById(id);
+       t.setRankList(ranklist);
+       
+      
+        return addTournament(t);
+    }
+
 }
+

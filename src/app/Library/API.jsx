@@ -65,8 +65,8 @@ export async function useFetchBackendAPI(
         `Request failed: ${response.status} ${response.statusText}\n${errorDetails}`
       );
     }
-
-    return { data: await response.json(), status: response.status , ok: true };
+    const respon=await response.json();
+    return { data:respon , status: response.status , ok: true };
   } catch (error) {
     console.error(`[BackendAPI] ${method} ${url} →`, error);
     return { error: error.message , status: error.status || 500}}; // rethrow so caller can handle it

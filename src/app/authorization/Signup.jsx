@@ -125,6 +125,7 @@ export default function Signup({ onSwitch }) {
         setSuccess(true);
         //success popup
         successMessage("Succesfully Registered...");
+         Router.push("/player");
       }
     } catch (err) {
       // setError(err?.message || "Unexpected error.");
@@ -132,9 +133,6 @@ export default function Signup({ onSwitch }) {
     } finally {
       setLoading(false);
       //rediect to profile page after 2 seconds
-      if (success) {
-        Router.push("/player");
-      }
     }
   }
 

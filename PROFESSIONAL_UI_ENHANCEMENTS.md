@@ -103,7 +103,7 @@ Your frontend has been transformed into a **professional, modern, and engaging**
 ## 🌓 Theme System
 
 ### Dark Mode (Production)
-- **Background**: `bg-gradient-to-br from-gray-950 via-slate-950 to-gray-950`
+- **Background**: `bg-linear-to-br from-gray-950 via-slate-950 to-gray-950`
 - **Text**: Pure white with professional contrast
 - **Shadows**: `shadow-black/50` for depth
 - **Borders**: `border-gray-800` with reduced opacity

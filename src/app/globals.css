@@ -441,7 +441,7 @@ html.light .gradient-accent {
 @keyframes fadeUp {
   0% {
     opacity: 0;
-    transform: translateY(10px) scale(0.95);
+    transform: translateY(10px) scale(0.5);
   }
   40% {
     opacity: 1;

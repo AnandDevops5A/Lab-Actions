@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useContext } from "react";
+import { ThemeContext } from "../Library/ThemeContext";
 
 const leaderboardData = [
   { id: 1, name: "NeonRogue", score: 9820, country: "JP" },
@@ -14,12 +15,27 @@ const leaderboardData = [
 ];
 
 export default function Leaderboard() {
-  return (
-    <div className="autoshow min-h-screen bg-black flex items-center justify-center p-4 ">
-      <div className="w-full max-w-3xl rounded-xl border border-cyan-500/40 bg-gradient-to-br from-black via-zinc-900 to-black shadow-[0_0_30px_rgba(0,255,255,0.25)]">
+  const { isDarkMode } = useContext(ThemeContext);
 
+  return (
+    <div
+      className={`fadeup min-h-[80vh] flex items-center justify-center p-4 rounded-2xl shadow-inner shadow-green-200 ${
+        isDarkMode ? "bg-slate-900" : "bg-gray-100"
+      }`}
+    >
+      <div
+        className={`w-full max-w-3xl rounded-xl border ${
+          isDarkMode
+            ? "border-cyan-500/40 bg-linear-to-br from-slate-900 via-zinc-900 to-slate-900 shadow-[0_0_30px_rgba(0,255,255,0.25)]"
+            : "border-blue-500/40 bg-linear-to-br from-white via-gray-100 to-white shadow-[0_0_30px_rgba(0,0,255,0.25)]"
+        }`}
+      >
         {/* Header */}
-        <div className="p-6 border-b border-cyan-500/30 text-center">
+        <div
+          className={`p-6 border-b text-center ${
+            isDarkMode ? "border-cyan-500/30" : "border-blue-500/30"
+          }`}
+        >
           <h1 className="text-2xl font-extrabold text-cyan-400 tracking-widest drop-shadow-[0_0_10px_rgba(0,255,255,0.8)]">
             TOURNAMENT LEADERBOARD
           </h1>
@@ -30,8 +46,11 @@ export default function Leaderboard() {
 
         {/* Scrollable List */}
         <div
-          className="
-            max-h-[360px] overflow-y-auto divide-y divide-cyan-500/20 scrollbar-thin scrollbar-thumb-cyan-500/60 scrollbar-track-black/40"
+          className={`max-h-[360px] overflow-y-auto divide-y scrollbar-thin ${
+            isDarkMode
+              ? "divide-cyan-500/20 scrollbar-thumb-cyan-500/60 scrollbar-track-black/40"
+              : "divide-blue-500/20 scrollbar-thumb-blue-500/60 scrollbar-track-gray-200/40"
+          }`}
         >
           {leaderboardData.map((player, index) => {
             const isTopThree = index < 3;
@@ -40,33 +59,51 @@ export default function Leaderboard() {
               <div
                 key={player.id}
                 className={`flex items-center justify-between p-4 transition-all
-                ${isTopThree
-                    ? "bg-cyan-500/5 shadow-[inset_0_0_20px_rgba(0,255,255,0.3)]"
-                    : "hover:bg-cyan-500/10"
-                  }`}
+                ${
+                  isTopThree
+                    ? isDarkMode
+                      ? "bg-cyan-500/5 shadow-[inset_0_0_20px_rgba(0,255,255,0.3)]"
+                      : "bg-blue-500/5 shadow-[inset_0_0_20px_rgba(0,0,255,0.3)]"
+                    : isDarkMode
+                    ? "hover:bg-cyan-500/10"
+                    : "hover:bg-blue-500/10"
+                }`}
               >
                 {/* Rank */}
-                <div className="flex items-center gap-4">
+                <div className="fadeup flex items-center gap-4">
                   <span
                     className={`text-lg font-bold w-8 text-center
-                    ${index === 0
+                    ${
+                      index === 0
                         ? "text-amber-600"
                         : index === 1
+                        ? isDarkMode
                           ? "text-zinc-300"
-                          : index === 2
-                            ? "text-yellow-300"
-                            : "text-cyan-400"
-                      }`}
+                          : "text-gray-700"
+                        : index === 2
+                        ? "text-yellow-300"
+                        : isDarkMode
+                        ? "text-cyan-400"
+                        : "text-blue-600"
+                    }`}
                   >
                     #{index + 1}
                   </span>
 
                   {/* Player Info */}
                   <div>
-                    <p className="text-cyan-300 font-semibold tracking-wide">
+                    <p
+                      className={`font-semibold tracking-wide ${
+                        isDarkMode ? "text-cyan-300" : "text-gray-800"
+                      }`}
+                    >
                       {player.name}
                     </p>
-                    <p className="text-xs text-cyan-500/60">
+                    <p
+                      className={`text-xs ${
+                        isDarkMode ? "text-cyan-500/60" : "text-gray-600/60"
+                      }`}
+                    >
                       {player.country}
                     </p>
                   </div>
@@ -74,10 +111,20 @@ export default function Leaderboard() {
 
                 {/* Score */}
                 <div className="text-right">
-                  <p className="text-xl font-mono text-cyan-400">
+                  <p
+                    className={`text-xl font-mono ${
+                      isDarkMode ? "text-cyan-400" : "text-blue-600"
+                    }`}
+                  >
                     {player.score.toLocaleString()}
                   </p>
-                  <p className="text-xs text-cyan-500/50">PTS</p>
+                  <p
+                    className={`text-xs ${
+                      isDarkMode ? "text-cyan-500/50" : "text-blue-500/50"
+                    }`}
+                  >
+                    PTS
+                  </p>
                 </div>
               </div>
             );
@@ -85,8 +132,16 @@ export default function Leaderboard() {
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-cyan-500/30 text-center">
-          <p className="text-xs text-cyan-500/50">
+        <div
+          className={`p-4 border-t text-center ${
+            isDarkMode ? "border-cyan-500/30" : "border-blue-500/30"
+          }`}
+        >
+          <p
+            className={`text-xs ${
+              isDarkMode ? "text-cyan-500/50" : "text-blue-500/50"
+            }`}
+          >
             SCROLL TO VIEW MORE PLAYERS
           </p>
         </div>

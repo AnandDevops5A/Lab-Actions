@@ -1,18 +1,15 @@
 package com.golden_pearl.backend.Services;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.golden_pearl.backend.DRO.UserAuth;
 import com.golden_pearl.backend.DRO.UserRegisterData;
 import com.golden_pearl.backend.Models.User;
-import com.golden_pearl.backend.Repository.TournamentRepository;
 import com.golden_pearl.backend.Repository.UserRepository;
 import com.golden_pearl.backend.common.General;
 
