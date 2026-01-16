@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
-    "@uidotdev/usehooks": "^2.4.1",
     "chart.js": "^4.5.1",
     "gsap": "^3.13.0",
     "ioredis": "^5.8.2",

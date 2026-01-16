@@ -1,32 +1,50 @@
 import { LeaderCard } from "./LeadeCard";
 
-export function TopThree({ players, isDarkMode }) {
+export function TopThree({ players, isDarkMode, selectedTournament, globalUsers }) {
   if (!players || players.length === 0) return null;
+
+  const getRank = (player, defaultRank) => {
+    return selectedTournament?.rankList?.[player._id || player.id] || defaultRank;
+  };
+
+  const getRanks = (player) => {
+    const globalRank = globalUsers?.findIndex((u) => (u._id || u.id) === (player._id || player.id)) + 1;
+    const tournamentRank = selectedTournament?.rankList?.[player._id || player.id];
+    return { globalRank, tournamentRank };
+  };
+
+  const tournamentName = selectedTournament?.tournamentName || (typeof selectedTournament === 'string' ? selectedTournament : undefined);
 
   // Render gracefully for 1,2 or 3 matches so search results are always visible
   if (players.length === 1) {
+    const { globalRank, tournamentRank } = getRanks(players[0]);
     return (
       <section className="flex justify-center items-end gap-10 mb-16">
-        <LeaderCard player={players[0]} position={1} isDarkMode={isDarkMode} />
+        <LeaderCard player={players[0]} rank={getRank(players[0], 1)} isDarkMode={isDarkMode} globalRank={globalRank} tournamentRank={tournamentRank} tournamentName={tournamentName} />
       </section>
     );
   }
 
   if (players.length === 2) {
+    const p1Ranks = getRanks(players[1]);
+    const p0Ranks = getRanks(players[0]);
     return (
       <section className="flex flex-col md:flex-row justify-center items-end gap-10 mb-16">
-        <LeaderCard player={players[1]} position={2} isDarkMode={isDarkMode} />
-        <LeaderCard player={players[0]} position={1} isDarkMode={isDarkMode} />
+        <LeaderCard player={players[1]} rank={getRank(players[1], 2)} isDarkMode={isDarkMode} globalRank={p1Ranks.globalRank} tournamentRank={p1Ranks.tournamentRank} tournamentName={tournamentName} />
+        <LeaderCard player={players[0]} rank={getRank(players[0], 1)} isDarkMode={isDarkMode} globalRank={p0Ranks.globalRank} tournamentRank={p0Ranks.tournamentRank} tournamentName={tournamentName} />
       </section>
     );
   }
 
   // 3 or more: show top three with center-first layout
+  const p1Ranks = getRanks(players[1]);
+  const p0Ranks = getRanks(players[0]);
+  const p2Ranks = getRanks(players[2]);
   return (
     <section className="flex flex-col md:flex-row justify-center items-end gap-10 mb-16">
-      <LeaderCard player={players[1]} position={2} isDarkMode={isDarkMode} />
-      <LeaderCard player={players[0]} position={1} isDarkMode={isDarkMode} />
-      <LeaderCard player={players[2]} position={3} isDarkMode={isDarkMode} />
+      <LeaderCard player={players[1]} rank={getRank(players[1], 2)} isDarkMode={isDarkMode} globalRank={p1Ranks.globalRank} tournamentRank={p1Ranks.tournamentRank} tournamentName={tournamentName} />
+      <LeaderCard player={players[0]} rank={getRank(players[0], 1)} isDarkMode={isDarkMode} globalRank={p0Ranks.globalRank} tournamentRank={p0Ranks.tournamentRank} tournamentName={tournamentName} />
+      <LeaderCard player={players[2]} rank={getRank(players[2], 3)} isDarkMode={isDarkMode} globalRank={p2Ranks.globalRank} tournamentRank={p2Ranks.tournamentRank} tournamentName={tournamentName} />
     </section>
   );
 }

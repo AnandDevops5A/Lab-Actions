@@ -2,15 +2,18 @@
 export function PlayerCard({
   player,
   rank,
+  globalRank,
+  tournamentRank,
   searchTerm,
   loggedInUser,
   isDarkMode,
+  selectedTournament
 }) {
   const isSearched =
     searchTerm &&
-    player.name.toLowerCase().includes(searchTerm.toLowerCase());
+    (player.username || "").toLowerCase().includes(searchTerm.toLowerCase());
 
-  const isYou = player.name === loggedInUser;
+  const isYou = player.username === loggedInUser;
 
   // Theme-aware colors
   const bgColor = isDarkMode ? "bg-slate-900" : "bg-slate-100";
@@ -83,35 +86,45 @@ export function PlayerCard({
       {/* Avatar */}
       <div className={`w-16 h-16 border-2 ${avatarBorderColor} mb-4 overflow-hidden rounded-full`}>
         <img
-          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`}
-          alt={player.name}
+          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.username}`}
+          alt={player.username}
           className="w-full h-full object-cover rounded-full transition-transform duration-500 ease-out group-hover:scale-105 motion-safe:group-hover:scale-105"
         />
       </div>
 
       {/* Name */}
       <h3 className={`text-lg font-black tracking-widest mb-1 ${nameColor}`}>
-        {player.name}
+        {player.username}
       </h3>
 
       {/* Meta */}
-      <p className={`text-[10px] tracking-[0.3em] ${metaColor} uppercase mb-4`}>
-        {player.rank} · {player.tournament}
-      </p>
+      <div className="mb-4">
+        <p className={`text-[10px] tracking-[0.3em] ${metaColor} uppercase mb-1`}>
+          {player.rank} · {selectedTournament?.tournamentName || "Global"}
+        </p>
+        <div className={`flex gap-3 text-[10px] font-bold ${metaColor} opacity-80`}>
+         {globalRank && <span>🥷 {player.playedTournaments.length}</span>}
+          {tournamentRank && <span>🏆 #{tournamentRank}</span>}
+        </div>
+      </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-3 text-sm text-center">
         <div>
           <p className={`text-xs ${statLabelColor} uppercase`}>Wins</p>
           <p className={`text-2xl font-black ${statValueColor}`}>
-            {player.wins}
+            {player.wins || 0}
           </p>
+        </div>
+         <div>
+          <p className={`text-xs uppercase ${statLabelColor}`}>🌐</p>
+          <p className={`text-2xl font-black ${statValueColor}`}>#{globalRank}</p>
         </div>
 
         <div className="text-right">
           <p className={`text-xs ${rewardLabelColor} uppercase`}>Reward</p>
           <p className={`text-xl font-black ${rewardValueColor}`}>
-            ${player.reward.toLocaleString()}
+           ₹{player.reward.toLocaleString()}
           </p>
         </div>
       </div>

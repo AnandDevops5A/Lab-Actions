@@ -1,178 +1,172 @@
 "use client";
-import React, {
-  useState,
-  useMemo,
-  useContext,
-  useLayoutEffect,
-  useEffect,
-} from "react";
+import React, { useState, useMemo, useContext, useEffect } from "react";
 import { ThemeContext } from "../Library/ThemeContext";
 import { TopThree } from "./components/TopThree";
 import { PlayerCard } from "./components/PlayerCard";
 import { useFetchBackendAPI } from "../Library/API";
 
-const DummyPlayerForLeaderbored = [
-  {
-    id: 1,
-    name: "NIGHT_RUNNER",
-    wins: 84,
-    reward: 250000,
-    tournament: "Global",
-    rank: "LEGEND",
-  },
-  {
-    id: 2,
-    name: "NEON_SAMURAI",
-    wins: 87,
-    reward: 195000,
-    tournament: "Global",
-    rank: "ELITE",
-  },
-  {
-    id: 3,
-    name: "CYBER_WOLF",
-    wins: 72,
-    reward: 160000,
-    tournament: "Tokyo Grid",
-    rank: "ELITE",
-  },
-  {
-    id: 4,
-    name: "GLITCH_WITCH",
-    wins: 68,
-    reward: 120000,
-    tournament: "Tokyo Grid",
-    rank: "PRO",
-  },
-  {
-    id: 5,
-    name: "DATA_PHANTOM",
-    wins: 65,
-    reward: 105500,
-    tournament: "Neo Europe",
-    rank: "PRO",
-  },
-  {
-    id: 6,
-    name: "VOID_WALKER",
-    wins: 60,
-    reward: 90000,
-    tournament: "Neo Europe",
-    rank: "VETERAN",
-  },
-  {
-    id: 7,
-    name: "SYNTH_WAVE",
-    wins: 58,
-    reward: 82500,
-    tournament: "Global",
-    rank: "VETERAN",
-  },
-  {
-    id: 8,
-    name: "IRON_GIANT",
-    wins: 55,
-    reward: 75000,
-    tournament: "Mars League",
-    rank: "VETERAN",
-  },
-  {
-    id: 9,
-    name: "ZERO_COOL",
-    wins: 51,
-    reward: 68000,
-    tournament: "Mars League",
-    rank: "EXPERT",
-  },
-  {
-    id: 10,
-    name: "ACID_BURN",
-    wins: 94,
-    reward: 60000,
-    tournament: "Global",
-    rank: "EXPERT",
-  },
-  {
-    id: 11,
-    name: "CHROME_HEART",
-    wins: 45,
-    reward: 52000,
-    tournament: "Tokyo Grid",
-    rank: "ADVANCED",
-  },
-  {
-    id: 12,
-    name: "PIXEL_RONIN",
-    wins: 42,
-    reward: 48000,
-    tournament: "Neo Europe",
-    rank: "ADVANCED",
-  },
-  {
-    id: 13,
-    name: "NET_VULTURE",
-    wins: 40,
-    reward: 45000,
-    tournament: "Global",
-    rank: "ADVANCED",
-  },
-  {
-    id: 14,
-    name: "LASER_FANG",
-    wins: 38,
-    reward: 39500,
-    tournament: "Mars League",
-    rank: "RISING",
-  },
-  {
-    id: 15,
-    name: "SOLAR_FLARE",
-    wins: 35,
-    reward: 36000,
-    tournament: "Tokyo Grid",
-    rank: "RISING",
-  },
-  {
-    id: 16,
-    name: "BINARY_SOUL",
-    wins: 32,
-    reward: 32500,
-    tournament: "Neo Europe",
-    rank: "RISING",
-  },
-  {
-    id: 17,
-    name: "TECHNO_MAGE",
-    wins: 28,
-    reward: 28000,
-    tournament: "Global",
-    rank: "ROOKIE",
-  },
-  {
-    id: 18,
-    name: "SHADOW_LINK",
-    wins: 25,
-    reward: 24000,
-    tournament: "Mars League",
-    rank: "ROOKIE",
-  },
-  {
-    id: 19,
-    name: "VAPOR_TRAIL",
-    wins: 22,
-    reward: 21000,
-    tournament: "Tokyo Grid",
-    rank: "ROOKIE",
-  },
-  {
-    id: 20,
-    name: "SYSTEM_ERR",
-    wins: 18,
-    reward: 18000,
-    tournament: "Neo Europe",
-    rank: "NOVICE",
-  },
-];
+// const DummyPlayerForLeaderbored = [
+//   {
+//     id: 1,
+//     name: "NIGHT_RUNNER",
+//     wins: 84,
+//     reward: 250000,
+//     tournament: "Global",
+//     rank: "LEGEND",
+//   },
+//   {
+//     id: 2,
+//     name: "NEON_SAMURAI",
+//     wins: 87,
+//     reward: 195000,
+//     tournament: "Global",
+//     rank: "ELITE",
+//   },
+//   {
+//     id: 3,
+//     name: "CYBER_WOLF",
+//     wins: 72,
+//     reward: 160000,
+//     tournament: "Tokyo Grid",
+//     rank: "ELITE",
+//   },
+//   {
+//     id: 4,
+//     name: "GLITCH_WITCH",
+//     wins: 68,
+//     reward: 120000,
+//     tournament: "Tokyo Grid",
+//     rank: "PRO",
+//   },
+//   {
+//     id: 5,
+//     name: "DATA_PHANTOM",
+//     wins: 65,
+//     reward: 105500,
+//     tournament: "Neo Europe",
+//     rank: "PRO",
+//   },
+//   {
+//     id: 6,
+//     name: "VOID_WALKER",
+//     wins: 60,
+//     reward: 90000,
+//     tournament: "Neo Europe",
+//     rank: "VETERAN",
+//   },
+//   {
+//     id: 7,
+//     name: "SYNTH_WAVE",
+//     wins: 58,
+//     reward: 82500,
+//     tournament: "Global",
+//     rank: "VETERAN",
+//   },
+//   {
+//     id: 8,
+//     name: "IRON_GIANT",
+//     wins: 55,
+//     reward: 75000,
+//     tournament: "Mars League",
+//     rank: "VETERAN",
+//   },
+//   {
+//     id: 9,
+//     name: "ZERO_COOL",
+//     wins: 51,
+//     reward: 68000,
+//     tournament: "Mars League",
+//     rank: "EXPERT",
+//   },
+//   {
+//     id: 10,
+//     name: "ACID_BURN",
+//     wins: 94,
+//     reward: 60000,
+//     tournament: "Global",
+//     rank: "EXPERT",
+//   },
+//   {
+//     id: 11,
+//     name: "CHROME_HEART",
+//     wins: 45,
+//     reward: 52000,
+//     tournament: "Tokyo Grid",
+//     rank: "ADVANCED",
+//   },
+//   {
+//     id: 12,
+//     name: "PIXEL_RONIN",
+//     wins: 42,
+//     reward: 48000,
+//     tournament: "Neo Europe",
+//     rank: "ADVANCED",
+//   },
+//   {
+//     id: 13,
+//     name: "NET_VULTURE",
+//     wins: 40,
+//     reward: 45000,
+//     tournament: "Global",
+//     rank: "ADVANCED",
+//   },
+//   {
+//     id: 14,
+//     name: "LASER_FANG",
+//     wins: 38,
+//     reward: 39500,
+//     tournament: "Mars League",
+//     rank: "RISING",
+//   },
+//   {
+//     id: 15,
+//     name: "SOLAR_FLARE",
+//     wins: 35,
+//     reward: 36000,
+//     tournament: "Tokyo Grid",
+//     rank: "RISING",
+//   },
+//   {
+//     id: 16,
+//     name: "BINARY_SOUL",
+//     wins: 32,
+//     reward: 32500,
+//     tournament: "Neo Europe",
+//     rank: "RISING",
+//   },
+//   {
+//     id: 17,
+//     name: "TECHNO_MAGE",
+//     wins: 28,
+//     reward: 28000,
+//     tournament: "Global",
+//     rank: "ROOKIE",
+//   },
+//   {
+//     id: 18,
+//     name: "SHADOW_LINK",
+//     wins: 25,
+//     reward: 24000,
+//     tournament: "Mars League",
+//     rank: "ROOKIE",
+//   },
+//   {
+//     id: 19,
+//     name: "VAPOR_TRAIL",
+//     wins: 22,
+//     reward: 21000,
+//     tournament: "Tokyo Grid",
+//     rank: "ROOKIE",
+//   },
+//   {
+//     id: 20,
+//     name: "SYSTEM_ERR",
+//     wins: 18,
+//     reward: 18000,
+//     tournament: "Neo Europe",
+//     rank: "NOVICE",
+//   },
+// ];
 
 const DummyTournamentforLeaderboard = [
   "Global",
@@ -185,59 +179,139 @@ export default function Leaderboard() {
   const [search, setSearch] = useState("");
   const [tournament, setTournament] = useState("Global");
   const [sortBy, setSortBy] = useState("wins");
+  const [loading, setLoading] = useState(false);
+  const [dropdown, setDropdown] = useState(0);
 
   const themeContext = useContext(ThemeContext);
   const isDarkMode = themeContext?.isDarkMode ?? true;
-  const [playedUser, setPlayedUser] = useState();
-  const [unPlayedUser, setUnPlayedUser] = useState();
+  const [users, setUsers] = useState([]);
+  const [AllTournament, setAllTournament] = useState();
+
   //GET DATA FROM BACKEND
   async function getData() {
     const res = await useFetchBackendAPI("users/all");
     // console.log(res.data);
-    //filter  played and unplayed user
     const data = res.data;
+    //filter  played and unplayed user
     const played = data.filter((d) => d.playedTournaments != null);
+    //define reward
+
+    // setUsers(played);
     const unplayed = data.filter((d) => d.playedTournaments == null);
 
-    // setPlayedUser(played);
-    // setUnPlayedUser(unplayed);
-    let ids = played.flatMap(u => u.playedTournaments);
-    let listoftournaments=Array.from(new Set(ids));
-    
+    let ids = played.flatMap((u) => u.playedTournaments);
+    let listoftournaments = Array.from(new Set(ids));
+    const tournamentData = await useFetchBackendAPI(
+      "tournament/getTournament",
+      {
+        method: "POST",
+        data: listoftournaments,
+      }
+    );
+    console.log("tournament fetch success");
+    const tournaments = tournamentData.data || [];
+    // console.log(tournaments);
+    setAllTournament(tournaments);
 
- 
-      const responsedata = await useFetchBackendAPI("tournament/getTournament", {
-           method: "POST",
-           data: listoftournaments,
-         });
-         console.log("fetch success",responsedata.data);
-         
+    const rewardMap = { 1: 500, 2: 200, 3: 100 };
+    //calculate rewards
+    const userStats = {};
+
+    tournaments.forEach((tournament) => {
+      Object.entries(tournament.rankList || {}).forEach(([userId, rank]) => {
+        const reward = rewardMap[rank] || 0;
+
+        if (!userStats[userId]) {
+          userStats[userId] = { reward: 0, wins: 0 };
+        }
+
+        userStats[userId].reward += reward;
+        if (rank == 1) {
+          userStats[userId].wins += 1;
+        }
+      });
+    });
+    // console.log(userRewards);
+    //merge reward to user
+    const usersWithStats = played.map((user) => {
+      const userId = user._id || user.id;
+      return {
+        ...user,
+        reward: userStats[userId]?.reward || 0,
+        wins: userStats[userId]?.wins || 0,
+      };
+    });
+    const leaderboard = [...usersWithStats].sort((a, b) => {
+      if (b.reward !== a.reward) return b.reward - a.reward;
+      return b.wins - a.wins; // tie-breaker by wins
+    });
+    // console.log(leaderboard);
+    setUsers(leaderboard);
+    setLoading(false);
   }
 
- 
-
-
+  //get data from backend
   useEffect(() => {
-
-      getData();
-
-    
+    let ignore = false;
+    //disable dropdown
+    setLoading(true);
+    if (ignore) return;
+    getData();
+    //  fetchTournament();
+    //   fetchUsers();
+    return () => {
+      ignore = true;
+    }; // cleanup
   }, []);
 
-  const filteredPlayers = useMemo(() => {
-    return DummyPlayerForLeaderbored.filter((p) =>
-      tournament === "Global" ? true : p.tournament === tournament
-    )
-      .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
-      .sort((a, b) =>
-        sortBy === "wins" ? b.wins - a.wins : b.reward - a.reward
-      );
-  }, [search, tournament, sortBy]);
+  const filterPlayers = useMemo(() => {
+    if (!users) return [];
 
-  const topThree = filteredPlayers.slice(0, 3);
-  const restPlayer = filteredPlayers.slice(3);
+    let result = users.filter((p) =>
+      (p.username || "").toLowerCase().includes(search.toLowerCase())
+    );
+
+    if (dropdown != 0) {
+      const selectedTournament = AllTournament?.find(
+        (t) => (t.id || t) == dropdown
+      );
+      if (selectedTournament?.rankList) {
+        result = result.filter((u) =>
+          Object.prototype.hasOwnProperty.call(
+            selectedTournament.rankList,
+            u._id || u.id
+          )
+        );
+        result.sort((a, b) => {
+          const rankA = selectedTournament.rankList[a._id || a.id];
+          const rankB = selectedTournament.rankList[b._id || b.id];
+          return rankA - rankB;
+        });
+        return result;
+      }
+      result = result.filter((u) =>
+        u.playedTournaments?.some((t) => t == dropdown)
+      );
+    }
+
+    if (sortBy === "reward") {
+      result.sort((a, b) => b.reward - a.reward);
+    } else {
+      result.sort((a, b) => (b.wins || 0) - (a.wins || 0));
+    }
+
+    return result;
+  }, [search, dropdown, users, sortBy, AllTournament]);
+
+  const topThree = filterPlayers.slice(0, 3);
+  const restPlayer = filterPlayers.slice(3);
   //user from contextapi
-  const loggedInUser = "DATA_PHANTOM";
+  const loggedInUser = "Anand Raj";
+
+  const selectedTournament =
+    dropdown != 0 && AllTournament
+      ? AllTournament.find((t) => (t.id || t) == dropdown)
+      : "Global";
 
   const bgColor = isDarkMode ? "bg-neutral-900" : "bg-slate-50";
   const textColor = isDarkMode ? "text-green-400" : "text-slate-700";
@@ -286,6 +360,7 @@ export default function Leaderboard() {
             : "bg-slate-100 border border-slate-300 shadow-lg"
         } p-4`}
       >
+        {/* //search player */}
         <input
           placeholder="SEARCH PLAYER"
           value={search}
@@ -296,27 +371,35 @@ export default function Leaderboard() {
               : "bg-slate-100 border border-slate-400 text-slate-700 focus:border-blue-500"
           } px-3 py-2 tracking-widest focus:outline-none transition-colors`}
         />
-
+        {/* //dropdown for tournamnet */}
         <select
-          value={tournament}
-          onChange={(e) => setTournament(e.target.value)}
+          value={dropdown}
+          onChange={(e) => setDropdown(e.target.value)}
+          disabled={loading}
           className={`${
             isDarkMode
               ? "bg-slate-900 border border-red-500/40 text-red-300 focus:border-yellow-400"
               : "bg-slate-100 border border-slate-400 text-slate-700 focus:border-blue-500"
           } px-3 py-2 tracking-widest focus:outline-none transition-colors`}
         >
-          {DummyTournamentforLeaderboard.map((t) => (
+          <option
+            key={0}
+            value={0}
+            className={isDarkMode ? "bg-slate-900" : "bg-slate-100"}
+          >
+            Global
+          </option>
+          {(AllTournament || DummyTournamentforLeaderboard).map((t, index) => (
             <option
-              key={t}
-              value={t}
+              key={index + 1}
+              value={t.id || t}
               className={isDarkMode ? "bg-slate-900" : "bg-slate-100"}
             >
-              {t.toUpperCase()}
+              {t.tournamentName || t}
             </option>
           ))}
         </select>
-
+        {/* //dropdown for reward and win */}
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
@@ -329,30 +412,46 @@ export default function Leaderboard() {
           <option value="wins">SORT BY WINS</option>
           <option value="reward">SORT BY REWARD</option>
         </select>
-
         <div
           className={`flex items-center justify-center text-xs tracking-[0.3em] ${
             isDarkMode ? "text-green-600" : "text-slate-600"
           }`}
         >
-          RESULTS: {filteredPlayers.length}
+          RESULTS: {filterPlayers?.length}
         </div>
       </section>
 
       {/* Top Three Players */}
-      <TopThree players={topThree} isDarkMode={isDarkMode} />
+      <TopThree
+        players={topThree}
+        isDarkMode={isDarkMode}
+        selectedTournament={selectedTournament}
+        globalUsers={users}
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-9">
-        {restPlayer.map((player, index) => (
-          <PlayerCard
-            key={player.id}
-            player={player}
-            rank={index + 4}
-            searchTerm={search}
-            loggedInUser={loggedInUser}
-            isDarkMode={isDarkMode}
-          />
-        ))}
+        {restPlayer.map((player, index) => {
+          const globalRank =
+            users.findIndex(
+              (u) => (u._id || u.id) === (player._id || player.id)
+            ) + 1;
+          const tournamentRank =
+            selectedTournament?.rankList?.[player._id || player.id];
+
+          return (
+            <PlayerCard
+              key={player._id || player.id}
+              player={player}
+              rank={tournamentRank || globalRank}
+              globalRank={globalRank}
+              tournamentRank={tournamentRank}
+              searchTerm={search}
+              loggedInUser={loggedInUser}
+              isDarkMode={isDarkMode}
+               selectedTournament={selectedTournament}
+            />
+          );
+        })}
       </div>
 
       <footer

@@ -38,7 +38,7 @@ public class TournamentController {
         this.tournamentService = tournamentService;
     }
 
-    @RequestMapping(path = "/all", method = RequestMethod.GET)
+    @RequestMapping(path = "/all", method = RequestMethod.POST)
     public ResponseEntity<List<Tournament>> getAllTournaments() {
         return ResponseEntity.ok(tournamentService.getAllTournaments());
     }
