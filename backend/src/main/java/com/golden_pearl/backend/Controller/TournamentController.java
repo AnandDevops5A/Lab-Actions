@@ -113,9 +113,10 @@ public class TournamentController {
 
     //find all tournament by list ⏱️(pending)
     @PostMapping("/getTournament")
-    public List<Tournament> getTournamentsbyids(@RequestBody Object tournamentIds){
+    public List<Tournament> getTournamentsbyids(@RequestBody List<String> tournamentIds){
         System.out.println(tournamentIds);
-        return null;
+        return tournamentService.getTournamentsbyids(tournamentIds);
+        // return null;
     }
 
     //tempory just for testing

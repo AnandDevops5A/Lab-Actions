@@ -188,8 +188,8 @@ export default function Leaderboard() {
 
   const themeContext = useContext(ThemeContext);
   const isDarkMode = themeContext?.isDarkMode ?? true;
-  const [playedUser, setPlayedUser] = useState([]);
-  const [unPlayedUser, setUnPlayedUser] = useState([]);
+  const [playedUser, setPlayedUser] = useState();
+  const [unPlayedUser, setUnPlayedUser] = useState();
   //GET DATA FROM BACKEND
   async function getData() {
     const res = await useFetchBackendAPI("users/all");
@@ -199,29 +199,29 @@ export default function Leaderboard() {
     const played = data.filter((d) => d.playedTournaments != null);
     const unplayed = data.filter((d) => d.playedTournaments == null);
 
-    setPlayedUser(played);
-    setUnPlayedUser(unplayed);
-
-    // console.log(played);
-    // console.log(unplayed);
-    // let playedTournaments = played.flatMap(u => u.playedTournaments);
-    let playedTournaments =[];
-    for(let user of played){
-      playedTournaments=playedTournaments.concat(user.playedTournaments);
-    }
+    // setPlayedUser(played);
+    // setUnPlayedUser(unplayed);
+    let ids = played.flatMap(u => u.playedTournaments);
+    let listoftournaments=Array.from(new Set(ids));
     
-    console.log(playedTournaments);
-    const tournamentSet=new Set(playedTournaments)
-    // console.log(playedTournaments);
-    console.log(tournamentSet.length);
-      // const restou = await useFetchBackendAPI("tournament/getTournament", {
-      //      method: "POST",
-      //      data: tournamentSet,
-      //    });
-      //    console.log(restou);
+
+ 
+      const responsedata = await useFetchBackendAPI("tournament/getTournament", {
+           method: "POST",
+           data: listoftournaments,
+         });
+         console.log("fetch success",responsedata.data);
+         
   }
-  useLayoutEffect(() => {
-    getData();
+
+ 
+
+
+  useEffect(() => {
+
+      getData();
+
+    
   }, []);
 
   const filteredPlayers = useMemo(() => {

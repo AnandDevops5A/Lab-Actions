@@ -20,7 +20,7 @@ export default function TypingWrapper({ children, speed = 50 }) {
     }, speed);
 
     return () => clearInterval(timer);
-  }, [text, speed]);
+  });
 
   return (
     <>

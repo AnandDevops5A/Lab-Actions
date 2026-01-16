@@ -184,5 +184,9 @@ public class TournamentService {
         return addTournament(t);
     }
 
+    public List<Tournament> getTournamentsbyids(List<String> tournamentIds) {
+        return tournamentRepository.findAllById(tournamentIds);
+    }
+
 }
 

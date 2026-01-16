@@ -52,14 +52,13 @@ const Navbar = () => {
     { name: user ?'My Profile':'Register', href: user ? '/player' : '/authorization' }
   ];
   const [showNavbar, setShowNavbar] = useState(true);
-  const [lastscrollX, setLastscrollX] = useState(0);
-  // {const [scrollTimeout, setScrollTimeout] = useState(null);}
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
-      if (currentScrollY > lastscrollX && currentScrollY > 50) {
+      if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
         // scrolling down → hide navbar
         setShowNavbar(false);
       } else {
@@ -67,12 +66,12 @@ const Navbar = () => {
         setShowNavbar(true);
       }
 
-      setLastscrollX(currentScrollY);
+      lastScrollY.current = currentScrollY;
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastscrollX]);
+  }, []);
   const searchParams = useSearchParams();
   const scrollTarget = searchParams.get('scroll');
   
@@ -105,7 +104,12 @@ const Navbar = () => {
       }
     };
     fetchUserData();
+    return () => {
+      setMounted(false);
+    };
   }, [user]);
+
+ 
 
 
   return (

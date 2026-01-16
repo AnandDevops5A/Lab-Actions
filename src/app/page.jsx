@@ -1,4 +1,6 @@
-import Main from './Components/Main';
+// import Main from './Components/Main';
+
+import dynamic from 'next/dynamic';
 
 
 // SEO Metadata (Next.js 13+ App Router)
@@ -13,6 +15,12 @@ export const metadata = {
     type: 'website',
   },
 };
+ 
+
+const Main = dynamic(() => import('./Components/Main'), {
+  loading: () => {<p>Loading...</p>},   // Optional fallback UI
+                           // Optional: disable server-side rendering
+})
 
 
 

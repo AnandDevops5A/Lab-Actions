@@ -6,7 +6,7 @@ import TypingWrapper from "./TypingAnimation";
 import { ThemeContext } from "../Library/ThemeContext";
 
 const HeroSection = () => {
-  const { tournamentStatus, registerForTournament } = useState(true);
+  const [tournamentStatus, settournamentStatus] = useState(false);
   const themeContext = useContext(ThemeContext);
   const { isDarkMode } = themeContext || { isDarkMode: true };
 
@@ -27,8 +27,11 @@ const HeroSection = () => {
         src={reloadingGunAsset}
         alt="Animated background showing a gun reloading"
         fill
+        sizes="100vw"
         style={{ objectFit: "cover" }}
-        priority={true}
+        priority
+        quality={70}
+        placeholder="blur"
         className={`${
           isDarkMode ? "opacity-40" : "opacity-30"
         } saturate-125 brightness-${
@@ -96,7 +99,7 @@ const HeroSection = () => {
           </h1>
         ) : (
           <h1
-            className={`text-6xl md:text-7xl lg:text-8xl font-black mb-6 tracking-tighter drop-shadow-2xl leading-tight  transition-colors ${
+            className={`text-6xl md:text-7xl lg:text-[90px] font-black mb-6 tracking-tighter drop-shadow-2xl leading-tight  transition-colors ${
               isDarkMode ? "text-slate-200" : "text-slate-800"
             }`}
           >
@@ -124,11 +127,11 @@ const HeroSection = () => {
 
         {/* Professional Description */}
         <p
-          className={`text-lg md:text-xl lg:text-2xl mb-8 max-w-3xl mx-auto drop-shadow-lg font-light leading-relaxed transition-colors ${
+          className={`animate-slideInDown text-lg md:text-xl lg:text-2xl mb-8 max-w-3xl mx-auto drop-shadow-lg font-light leading-relaxed transition-colors ${
             isDarkMode ? "text-gray-200" : "text-slate-700"
           }`}
         >
-          <TypingWrapper>
+          {/* <TypingWrapper> */}
             Convert skill to Bounty💰. Compete in{" "}
             <span
               className={`font-semibold ${
@@ -138,7 +141,7 @@ const HeroSection = () => {
               official tournaments
             </span>
             , climb the ranks, and earn your legacy.
-          </TypingWrapper>
+          {/* </TypingWrapper> */}
         </p>
 
         {/* Stats Row - Professional Touch */}

@@ -4,29 +4,32 @@ import React, { useContext } from 'react'
 import image from '../images/image.jpg'
 import { SkeletonCard, SkeletonTable } from '../skeleton/Skeleton';
 import { ThemeContext } from '../Library/ThemeContext';
+import HeroSection from './HeroSection';
+import UpcomingMatches from './UpcomingMatches';
 
 
-const HeroSection = dynamic(() =>
-  import('./HeroSection'),
-  {
-    loading: () =>
-      <SkeletonTable />
-    // ssr: false, 
-    // Optional: Set to false if the component must ONLY run on the client
-  }
-);
 
-// const Herosection=React.lazy(()=>import('./HeroSection'))
-const UpcomingMatches = dynamic(() =>
-  import('./UpcomingMatches'),
-  {
-    loading: () => {
-      <div className='gap-4'>
-      <SkeletonCard /><SkeletonCard /><SkeletonCard /></div>
-    },
-    ssr: false, // Optional: Set to false if the component must ONLY run on the client
-  }
-);
+// const HeroSection = dynamic(() =>
+//   import('./HeroSection'),
+//   {
+//     loading: () =>
+//       <SkeletonTable />
+//     // ssr: false, 
+//     // Optional: Set to false if the component must ONLY run on the client
+//   }
+// );
+
+// // const Herosection=React.lazy(()=>import('./HeroSection'))
+// const UpcomingMatches = dynamic(() =>
+//   import('./UpcomingMatches'),
+//   {
+//     loading: () => {
+//       <div className='gap-4'>
+//       <SkeletonCard /><SkeletonCard /><SkeletonCard /></div>
+//     },
+//     ssr: false, // Optional: Set to false if the component must ONLY run on the client
+//   }
+// );
 
 
 const WinnerSection = dynamic(() =>
@@ -57,15 +60,15 @@ const Stats = dynamic(() =>
 );
 
 
-const Footer = dynamic(() =>
-  import('./Footer.jsx'),
-  {
-    loading: () => <SkeletonTable />, 
-    ssr: false
-    // Optional: A fallback UI while loading
-    // Optional: Set to false if the component must ONLY run on the client
-  }
-);
+// const Footer = dynamic(() =>
+//   import('./Footer.jsx'),
+//   {
+//     loading: () => <SkeletonTable />, 
+//     ssr: false
+//     // Optional: A fallback UI while loading
+//     // Optional: Set to false if the component must ONLY run on the client
+//   }
+// );
 const Main = () => {
   const themeContext = useContext(ThemeContext);
   const { isDarkMode } = themeContext || { isDarkMode: true };

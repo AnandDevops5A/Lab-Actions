@@ -39,7 +39,7 @@ const WinnerSection = () => {
             MENS💪 means BEAST😈
           </p>
           <h2 className="mt-2 text-5xl sm:text-6xl md:text-7xl font-extrabold text-white leading-tight autoblur">
-            We Don't Just Compete. <p className="text-red-500">We Conquer.</p>
+            We Don&apos;t Just Compete. <p className="text-red-500">We Conquer.</p>
           </h2>
         </div>
 
