@@ -24,13 +24,11 @@ public class User {
     private String accessKey;
     private Long contact;
     private Long joiningDate;
-    private Long investAmount;
-    private Long winAmount;
-    private Long withdrawAmount;
-    private Long balanceAmount;
-    private Integer totalPlay;
+    private Integer investAmount;
+    private Integer winAmount=0;
+    private Integer withdrawAmount;
+    private Integer balanceAmount;
     private Integer totalWin;
-    private Integer totallosses;
     @Builder.Default
     private boolean active = true;
     private List<String> playedTournaments;

@@ -9,15 +9,15 @@ const DynamicChargeborder = dynamic(
 );
 
 const ProfileHeader = ({ player }) => (
-  // <DynamicChargeborder
-  //   color="#7cfc00 "
-  //   speed={1}
-  //   chaos={0.5}
-  //   thickness={2}
-  //   style={{ borderRadius: 14 }}
-  // >
+  <DynamicChargeborder
+    color="#7cfc00 "
+    speed={0.3}
+    chaos={0.5}
+    thickness={2}
+    style={{ borderRadius: 14 }}
+  >
   <div
-    className="relative h-48 sm:h-56 md:h-64 lg:h-72 bg-cover bg-center mt-16 rounded-2xl overflow-hidden"
+    className="relative h-48 sm:h-56 md:h-64 lg:h-72 bg-cover bg-center mt-16 rounded-2xl overflow-hidden "
     style={{ backgroundImage: `url(${profileBackImage.src})` }}
   >
     {/* Semi-transparent overlay */}
@@ -25,21 +25,19 @@ const ProfileHeader = ({ player }) => (
 
     <div className="relative p-4 sm:p-6 flex flex-col md:flex-row-reverse items-center justify-evenly h-full gap-6 blur(4px)">
       {/* Player Avatar */}
-      <Image
-        src={player.avatarUrl}
+      <img
+        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.username}`}
         alt={player.username}
         // Set the base width and height based on the largest possible size (lg:w-40/h-40)
-        width={80}
-        height={80}
-        // Apply the Tailwind classes for styling, responsiveness, and border/shadow.
-        // NOTE: 'object-cover' is handled by the 'style' prop in newer Next.js versions.
-        className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-full border-2 border-green-400 shadow-xl shadow-gray-700/70"
+        // width={80}
+        // height={80}
+        className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-full border-2 border-green-400 shadow-xl shadow-slate-900"
         // Use the 'style' prop for CSS properties that affect layout or object fitting
         style={{
           objectFit: "cover", // Equivalent to the 'object-cover' class
         }}
         // Optional: Add 'priority' if this avatar is critical for the LCP
-        priority={true}
+        loading="lazy"
       />
 
       {/* Player Info */}
@@ -66,7 +64,7 @@ const ProfileHeader = ({ player }) => (
       </div>
     </div>
   </div>
-  // </DynamicChargeborder>
+   </DynamicChargeborder>
 );
 
 export default ProfileHeader;

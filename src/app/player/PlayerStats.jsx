@@ -27,7 +27,7 @@ const StatsNeonBox = ({ title, value, color }) => {
     >
       <p className="text-xs uppercase text-gray-400 font-medium">{title}</p>
       <p
-        className={`text-4xl font-extrabold ${selectedColor.text} [text-shadow:0_0_8px_#F87171]`}
+        className={`text-[24px] md:text-3xl font-extrabold ${selectedColor.text} [text-shadow:0_0_8px_#F87171]`}
       >
         {value}
       </p>
@@ -39,7 +39,7 @@ const StatsSimpleBox = ({ title, value }) => {
   return (
     <div className="p-4 bg-gray-700 rounded-lg text-center">
       <p className="text-xs uppercase text-gray-400 font-medium">{title}</p>
-      <p className="text-3xl font-extrabold text-white">{value}</p>
+      <p className="text-xl md:text-3xl font-extrabold text-white">{value}</p>
     </div>
   );
 };
@@ -54,21 +54,21 @@ const PlayerStats = ({ player }) => (
         {/* Stat Card 1: Total withdraw (Focus Metric with Neon Glow) */}
         <StatsNeonBox
           title="Withdraw"
-          value={`₹ ${player.balanceAmount}` || "N/A"}
+          value={`₹ ${player.reward}` || "N/A"}
           color="green"
         />
 
         {/* Stat Card 2:Total Win */}
-        <StatsSimpleBox title="Wins" value={player.totalWin || "N/A"} />
+        <StatsSimpleBox title="Wins" value={player.win || "N/A"} />
 
         {/* Stat Card 3: Matches Played */}
-        <StatsSimpleBox title="Total Play" value={player.totalPlay} />
+        <StatsSimpleBox title="Total Play" value={player.playedTournaments.length || "N/A"} />
         {/* Stat Card 2: K/D Ratio */}
         <StatsSimpleBox
           title="Win Ratio"
           value={
             player.totalPlay > 0
-              ? `${((player.totalWin / player.totalPlay) * 100).toFixed(1)}%`
+              ? `${((player.totalWin / player.totalPlay) * 100).toFixed(0)} %`
               : "0.0%"
           }
         />
@@ -81,7 +81,7 @@ const PlayerStats = ({ player }) => (
         {/* Stat Card 6: Total Loose (Focus Metric with Neon Glow) */}
         <StatsNeonBox
           title="Total Loose"
-          value={player.totallosses}
+          value={player.playedTournaments.length - player.win || "N/A"}
           color="red"
         />
       </div>

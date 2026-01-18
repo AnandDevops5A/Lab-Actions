@@ -62,9 +62,11 @@ export default function Login({ onSwitch, isDarkMode }) {
       result = await onSubmit(payload);
       if (result.status === 200 && result.data) {
         successMessage(result.message || "Login successful.");
-      } else if (result.status === 401) {
+      } else if (result.status === 500) {
+       
         errorMessage("Invalid Player ID or accessKey.");
       } else {
+         console.log(result.status);
         errorMessage(result.message || "Server error. Please try again later.");
       }
     } catch (err) {

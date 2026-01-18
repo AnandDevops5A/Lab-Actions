@@ -20,7 +20,7 @@ export function TopThree({ players, isDarkMode, selectedTournament, globalUsers 
     const { globalRank, tournamentRank } = getRanks(players[0]);
     return (
       <section className="flex justify-center items-end gap-10 mb-16">
-        <LeaderCard player={players[0]} rank={getRank(players[0], 1)} isDarkMode={isDarkMode} globalRank={globalRank} tournamentRank={tournamentRank} tournamentName={tournamentName} />
+        <LeaderCard player={players[0]} rank={getRank(players[0], 1)} isDarkMode={isDarkMode} globalRank={globalRank} tournamentRank={tournamentRank} tournamentName={tournamentName} selectedTournament={selectedTournament} />
       </section>
     );
   }
@@ -30,8 +30,8 @@ export function TopThree({ players, isDarkMode, selectedTournament, globalUsers 
     const p0Ranks = getRanks(players[0]);
     return (
       <section className="flex flex-col md:flex-row justify-center items-end gap-10 mb-16">
-        <LeaderCard player={players[1]} rank={getRank(players[1], 2)} isDarkMode={isDarkMode} globalRank={p1Ranks.globalRank} tournamentRank={p1Ranks.tournamentRank} tournamentName={tournamentName} />
-        <LeaderCard player={players[0]} rank={getRank(players[0], 1)} isDarkMode={isDarkMode} globalRank={p0Ranks.globalRank} tournamentRank={p0Ranks.tournamentRank} tournamentName={tournamentName} />
+        <LeaderCard player={players[1]} rank={getRank(players[1], 2)} isDarkMode={isDarkMode} globalRank={p1Ranks.globalRank} tournamentRank={p1Ranks.tournamentRank} tournamentName={tournamentName} selectedTournament={selectedTournament} />
+        <LeaderCard player={players[0]} rank={getRank(players[0], 1)} isDarkMode={isDarkMode} globalRank={p0Ranks.globalRank} tournamentRank={p0Ranks.tournamentRank} tournamentName={tournamentName} selectedTournament={selectedTournament} />
       </section>
     );
   }
@@ -42,9 +42,9 @@ export function TopThree({ players, isDarkMode, selectedTournament, globalUsers 
   const p2Ranks = getRanks(players[2]);
   return (
     <section className="flex flex-col md:flex-row justify-center items-end gap-10 mb-16">
-      <LeaderCard player={players[1]} rank={getRank(players[1], 2)} isDarkMode={isDarkMode} globalRank={p1Ranks.globalRank} tournamentRank={p1Ranks.tournamentRank} tournamentName={tournamentName} />
-      <LeaderCard player={players[0]} rank={getRank(players[0], 1)} isDarkMode={isDarkMode} globalRank={p0Ranks.globalRank} tournamentRank={p0Ranks.tournamentRank} tournamentName={tournamentName} />
-      <LeaderCard player={players[2]} rank={getRank(players[2], 3)} isDarkMode={isDarkMode} globalRank={p2Ranks.globalRank} tournamentRank={p2Ranks.tournamentRank} tournamentName={tournamentName} />
+      <LeaderCard player={players[1]} rank={getRank(players[1], 2)} isDarkMode={isDarkMode} globalRank={p1Ranks.globalRank} tournamentRank={p1Ranks.tournamentRank} tournamentName={tournamentName} selectedTournament={selectedTournament} />
+      <LeaderCard player={players[0]} rank={getRank(players[0], 1)} isDarkMode={isDarkMode} globalRank={p0Ranks.globalRank} tournamentRank={p0Ranks.tournamentRank} tournamentName={tournamentName} selectedTournament={selectedTournament} />
+      <LeaderCard player={players[2]} rank={getRank(players[2], 3)} isDarkMode={isDarkMode} globalRank={p2Ranks.globalRank} tournamentRank={p2Ranks.tournamentRank} tournamentName={tournamentName} selectedTournament={selectedTournament} />
     </section>
   );
 }

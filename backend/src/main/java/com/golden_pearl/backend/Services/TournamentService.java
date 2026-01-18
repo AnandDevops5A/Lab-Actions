@@ -34,8 +34,6 @@ public class TournamentService {
 
     }
 
-    // get current dateTime in yyyyMMddHHmm format
-
     // get all tournaments
     public List<Tournament> getAllTournaments() {
         return tournamentRepository.findAll();
@@ -76,7 +74,7 @@ public class TournamentService {
         existingTournament.setPlatform(tournamentDetails.getPlatform());
         existingTournament.setDescription(tournamentDetails.getDescription());
         existingTournament.setRankList(tournamentDetails.getRankList());
-        
+
         return tournamentRepository.save(existingTournament);
     }
 
@@ -107,6 +105,7 @@ public class TournamentService {
     // register user for a tournament
     // @CacheEvict(value = "adminData", allEntries = true)
     public String registerUserForTournament(String tournamentId, String userId) {
+        // Check if user and tournament exist
         User user = UserService.findUserById(userId);
         Tournament tournament = getTournamentById(tournamentId);
         if (user == null || tournament == null) {
@@ -124,14 +123,19 @@ public class TournamentService {
         user.setPlayedTournaments(playedTournaments);
         userRepository.save(user);
 
-        // join participants by add user in hashmap
+        // join participants by add user in rank-list and invest-list
+        HashMap<String ,Integer> newFieid= new HashMap<String, Integer>();
         HashMap<String, Integer> existingRankList = tournament.getRankList();
+        HashMap<String, Integer> existingInvest = tournament.getInvest();
         if (existingRankList == null)
-            existingRankList = new HashMap<String, Integer>();
+            existingRankList = newFieid;
+        if (existingInvest == null)
+            existingInvest = newFieid;
         existingRankList.put(user.getId(), 0);
+        existingInvest.put(user.getId(), 0);
         tournament.setRankList(existingRankList);
+        tournament.setInvest(existingInvest);
         tournamentRepository.save(tournament);
-
         return user.getUsername() + " registered successfully for tournament";
 
     }
@@ -159,6 +163,7 @@ public class TournamentService {
 
     // update rank of registered user
     public ResponseEntity<String> updateRank(String tournamentId, String userId, int rank) {
+
         Tournament tournament = getTournamentById(tournamentId);
         User user = UserService.findUserById(userId);
         if (user == null || tournament == null)
@@ -167,7 +172,9 @@ public class TournamentService {
         if (!rankList.containsKey(userId))
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(user.getUsername() + " is not registerd for " + tournament.getTournamentName());
-
+        if(rankList.values().contains(rank)){
+             return ResponseEntity.ok("Someone sitting already at this rank...");
+        }
         rankList.put(userId, rank);
         tournament.setRankList(rankList);
         tournamentRepository.save(tournament);
@@ -175,12 +182,11 @@ public class TournamentService {
 
     }
 
-    //tempory for testing
-    public Tournament settemprank(String id, HashMap<String ,Integer> ranklist ){
-        Tournament t=getTournamentById(id);
-       t.setRankList(ranklist);
-       
-      
+    // tempory for testing
+    public Tournament settemprank(String id, HashMap<String, Integer> ranklist) {
+        Tournament t = getTournamentById(id);
+        t.setRankList(ranklist);
+
         return addTournament(t);
     }
 
@@ -189,4 +195,3 @@ public class TournamentService {
     }
 
 }
-

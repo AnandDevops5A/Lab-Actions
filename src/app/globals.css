@@ -259,7 +259,7 @@ html.light h6 {
   @apply text-slate-900 font-semibold;
 }
 
-html.light input,
+/* html.light input,
 html.light textarea,
 html.light select {
   @apply bg-slate-50 text-slate-900 border-slate-300 rounded-lg transition-all duration-200 focus:bg-white;
@@ -269,7 +269,7 @@ html.light input:focus,
 html.light textarea:focus,
 html.light select:focus {
   @apply border-blue-500 ring-2 ring-blue-200 bg-white shadow-md;
-}
+} */
 
 html.light .placeholder {
   @apply placeholder-slate-400;
@@ -314,7 +314,7 @@ html.dark section {
   @apply bg-gray-900/50 text-white shadow-lg shadow-black/30 border border-gray-800 backdrop-blur-sm;
 }
 
-html.dark input,
+/* html.dark input,
 html.dark textarea,
 html.dark select {
   @apply bg-gray-800 text-white border-gray-700 rounded-lg transition-all duration-200;
@@ -324,7 +324,7 @@ html.dark input:focus,
 html.dark textarea:focus,
 html.dark select:focus {
   @apply border-blue-500 ring-2 ring-blue-500/50 bg-gray-700 shadow-lg shadow-blue-500/20;
-}
+} */
 
 html.dark .placeholder {
   @apply placeholder-gray-500;

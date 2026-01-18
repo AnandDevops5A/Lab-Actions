@@ -1,12 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useContext, useState, useEffect, useMemo } from "react";
 import Avatar from "../images/avatar.png";
 import dynamic from "next/dynamic";
 import { SkeletonCard, SkeletonChart, SkeletonTable } from "../skeleton/Skeleton";
-import { use } from "react";
 import { UserContext } from "../Library/ContextAPI";
-import { useEffect } from "react";
+import { useFetchBackendAPI } from "../Library/API";
+import { useRouter } from "next/navigation";
+import { calulateWinAndReward } from "../Library/common";
 
 const mockPlayer = {
   ign: "SHADOW_LORD_07",
@@ -39,21 +40,51 @@ const DynamicPlayerHeader = dynamic(() => import("./ProfileHeader.jsx"), {
     <SkeletonTable />
   ),
   ssr: false,
+
 });
 
 const PlayerProfile = () => {
   //get user from context
-  const { user, getUserFromContext } = use(UserContext);
-  //set default avatar if not present
+  const { user } = useContext(UserContext);
+  const [matchHistory, setMatchHistory] = useState(null);
+  const router=useRouter();
+
   useEffect(() => {
-    if (!user) { 
-      getUserFromContext(); }
-    else if (user && !user.avatarUrl) { user.avatarUrl = Avatar.src; }
-    
-    // console.log("User context has been updated:", user);
+    if (!user) {
+      router.push("/");
+    }
+  }, [user, router]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (user?.playedTournaments?.length > 0) {
+        const response = await useFetchBackendAPI("tournament/getTournament", {
+          method: "POST",
+          data: user.playedTournaments,
+        });
+        if (response.data) setMatchHistory(response.data);
+      }
+
+    };
+    if (user) fetchData();
   }, [user]);
-  const player = user || mockPlayer;
-  // console.log("player data:", player);
+
+  if (!user) return null;
+
+  const userStats = useMemo(() => {
+    if (!matchHistory) return { reward: 0, wins: 0 };
+    const stats = calulateWinAndReward(matchHistory);
+    return stats.get(user.id) || { reward: 0, wins: 0 };
+  }, [matchHistory, user.id]);
+
+  const player = useMemo(() => user ? { ...user,
+     avatarUrl: user.avatarUrl || Avatar.src ,
+     reward: userStats.reward,
+     win: userStats.wins,
+     totalWin: userStats.wins,
+     totalPlay: user.playedTournaments?.length || 0
+    } : mockPlayer, [user, userStats]);
+
   return (
     <div className="min-h-screen bg-gray-900 text-white p-4 md:p-10">
       {/* 1. Header & Quick Stats (Top Section) */}
@@ -68,7 +99,7 @@ const PlayerProfile = () => {
 
         {/* Right Column (Match History) - Takes 1/3 space on large screens */}
         <div className="lg:col-span-1">
-          <DynamicAchievement />
+         { <DynamicAchievement matchHistory={matchHistory} userId={user.id} />}
         </div>
       </div>
     </div>

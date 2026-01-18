@@ -11,16 +11,16 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Document(collection = "leaderboard")
+@Document(collection = "tournament_user")
 public class LeaderBoard {
 
     @Id
-    private String leaderboardId;
+    private String id;
+    // private String tournamentId;
     private String userId;
-    private String tournamentId;
-    //user score in tournament
-    private Integer score;
-    //rank of user in tournament
     private Integer rank;
+    private Integer investAmount;
+    private Integer winAmount;
+   
 
 }

@@ -136,9 +136,11 @@ const Navbar = () => {
                 <Image src="/gun.svg" alt="Pearl Esports Logo"
                   width={40}
                   height={40}
-                  className="h-6 w-6 filter brightness-0 invert" />
+                  className="h-6 w-6 filter brightness-0 invert" 
+                  loading='eager'
+                  />
               </div>
-              <span className="text-2xl font-extrabold bg-linear-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent tracking-wider">Gold_Pearl</span>
+              <span className="text-2xl font-extrabold bg-linear-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent tracking-wider">WardPath</span>
             </Link>
 
             {/* Desktop Nav Links */}
