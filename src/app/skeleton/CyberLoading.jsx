@@ -4,7 +4,7 @@ import React from "react";
 
 const CyberLoading = () => {
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gray-950 text-white">
+    <div className="fixed inset-0 flex flex-col items-center justify-center bg-gray-950 text-slate-100">
       {/* Hexagon/Cyber Shape Container */}
       <div className="relative w-32 h-32 flex items-center justify-center">
         {/* Outer Rotating Ring */}

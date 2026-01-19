@@ -14,10 +14,10 @@
   --anim-fast: 180ms;
   --anim-medium: 320ms;
   --anim-slow: 600ms;
-  --easing-default: cubic-bezier(0.2,0.9,0.2,1);
+  --easing-default: cubic-bezier(0.2, 0.9, 0.2, 1);
   /* Gradient token (helper) */
-  --grad-primary: linear-gradient(90deg,#3b82f6 0%,#6366f1 50%,#8b5cf6 100%);
-  
+  --grad-primary: linear-gradient(90deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%);
+
   /* Leaderboard Colors (Dark Mode) */
   --lb-primary-text: #fff;
   --lb-secondary-text: #22d3ee;
@@ -47,7 +47,10 @@ html.light {
 
 /* ==================== SMOOTH TRANSITIONS ==================== */
 * {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
 }
 
 /* Reduced motion: respect user preference */
@@ -126,7 +129,8 @@ html.light {
 }
 
 @keyframes glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
   }
   50% {
@@ -181,7 +185,7 @@ html.light a {
   @apply text-blue-600 hover:text-purple-700 transition-colors duration-200;
 }
 
-html.light button {
+/* html.light button {
   @apply bg-gradient-to-r from-green-500 via-yellow-500 to-red-600 
        text-black hover:from-red-600 hover:to-blue-600 
        transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5;
@@ -190,7 +194,7 @@ html.light button {
 
 html.light button:focus {
   @apply ring-2 ring-blue-400 ring-offset-2;
-}
+} */
 
 html.light nav {
   @apply bg-blue-100/95 border-b border-slate-200 shadow-sm backdrop-blur-md;
@@ -250,7 +254,7 @@ html.light .hover\:bg-gray-700:hover {
   @apply hover:bg-slate-100;
 }
 
-html.light h1, 
+html.light h1,
 html.light h2,
 html.light h3,
 html.light h4,
@@ -288,13 +292,13 @@ html.dark a {
   @apply text-blue-400 hover:text-blue-300 transition-colors duration-200;
 }
 
-html.dark button {
+/* html.dark button {
   @apply bg-linear-to-r from-pink-600 to-indigo-600 text-white hover:from-indigo-700 hover:to-pink-800 transition-all duration-200 shadow-lg hover:shadow-blue-500/50 hover:-translate-y-0.5;
 }
 
 html.dark button:focus {
   @apply ring-2 ring-red-500 ring-offset-2 ring-offset-gray-950;
-}
+} */
 
 html.dark nav {
   @apply bg-gray-950/95 border-b border-gray-800 shadow-lg shadow-black/50 backdrop-blur-md;
@@ -377,14 +381,18 @@ html.light .gradient-accent {
 /* ==================== NEON RED TEXT STYLE ==================== */
 .text-neon-red {
   color: #ff0055;
-  text-shadow: 0 0 10px rgba(255, 0, 85, 0.8), 0 0 20px rgba(255, 0, 85, 0.6);
+  text-shadow:
+    0 0 10px rgba(255, 0, 85, 0.8),
+    0 0 20px rgba(255, 0, 85, 0.6);
   font-weight: 600;
   letter-spacing: 0.5px;
   transition: all 0.3s ease;
 }
 
 .text-neon-red:hover {
-  text-shadow: 0 0 15px rgba(255, 0, 85, 1), 0 0 30px rgba(255, 0, 85, 0.8);
+  text-shadow:
+    0 0 15px rgba(255, 0, 85, 1),
+    0 0 30px rgba(255, 0, 85, 0.8);
   color: #ff3366;
 }
 
@@ -504,7 +512,8 @@ html.light .gradient-accent {
   0% {
     filter: blur(10px);
   }
-  25%, 35% {
+  25%,
+  35% {
     filter: blur(5px);
   }
   60% {
@@ -598,12 +607,18 @@ html.light .backdrop-glass {
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
   font-weight: 600;
-  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
 }
 
-.btn:active { transform: translateY(1px) }
+.btn:active {
+  transform: translateY(1px);
+}
 
-.nav-link, .nav-item {
+.nav-link,
+.nav-item {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -612,13 +627,16 @@ html.light .backdrop-glass {
   text-decoration: none;
 }
 
-.nav-link:hover, .nav-item:hover { transform: translateY(-2px) }
+.nav-link:hover,
+.nav-item:hover {
+  transform: translateY(-2px);
+}
 
 .card {
   padding: 1rem;
   border-radius: 0.75rem;
-  background: rgba(255,255,255,0.03);
-  box-shadow: 0 6px 20px rgba(2,6,23,0.6);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: 0 6px 20px rgba(2, 6, 23, 0.6);
 }
 
 /* ==================== PROFESSIONAL SCROLLBAR ==================== */
@@ -676,12 +694,14 @@ html.light ::-webkit-scrollbar-thumb:active {
 
 /* Firefox scrollbar */
 * {
-  scrollbar-color: linear-gradient(180deg, #3b82f6 0%, #8b5cf6 100%) rgba(15, 23, 42, 0.5);
+  scrollbar-color: linear-gradient(180deg, #3b82f6 0%, #8b5cf6 100%)
+    rgba(15, 23, 42, 0.5);
   scrollbar-width: thin;
 }
 
 html.light {
-  scrollbar-color: linear-gradient(180deg, #0284c7 0%, #7c3aed 100%) rgba(226, 232, 240, 0.6);
+  scrollbar-color: linear-gradient(180deg, #0284c7 0%, #7c3aed 100%)
+    rgba(226, 232, 240, 0.6);
 }
 
 /* Smooth scrolling */
@@ -698,4 +718,12 @@ html {
   }
 }
 
-/* stylelint-enable */
+/* //noscroollbar */
+.no-scrollbar {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}

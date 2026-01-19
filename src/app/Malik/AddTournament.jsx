@@ -85,15 +85,15 @@ const AddTournamentForm = ({ onClose }) => {
   return (
     <div className="min-h-screen bg-[#050505] flex items-center justify-center  md:p-3 font-mono">
       {/* Main Container - Responsive Widths */}
-      <div className="relative w-full max-w-sm sm:max-w-xl md:max-w-3xl lg:max-w-4xl p-0.5 bg-linear-to-br from-cyan-500 via-transparent to-pink-500 shadow-[0_0_30px_rgba(6,182,212,0.3)]">
+      <div className="relative w-full max-w-sm sm:max-w-xl md:max-w-3xl lg:max-w-4xl p-0.5 bg-linear-to-br from-green-500 via-transparent to-emerald-500 shadow-[0_0_30px_rgba(34,197,94,0.3)]">
         {/* The "Cyber-Box" */}
-        <div className="bg-black p-5 sm:p-10 relative border border-cyan-900/50">
+        <div className="bg-black p-5 sm:p-10 relative border border-green-900/50">
           {/* --- CROSS BUTTON (Top Right) --- */}
           <button
             type="button"
             onClick={() => onClose(true)}
             aria-label="Close add tournament"
-            className="absolute top-0 right-0 bg-pink-600 p-2 text-black hover:bg-cyan-400 transition-colors z-50 group cursor-pointer"
+            className="absolute top-0 right-0 bg-red-600 p-2 text-white hover:bg-green-400 hover:text-black transition-colors z-50 group cursor-pointer"
             style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 20% 100%)" }}
           >
             <X
@@ -104,25 +104,25 @@ const AddTournamentForm = ({ onClose }) => {
 
           {/* Header Section */}
           <div className="mb-8">
-            <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter text-cyan-400 italic hover:text-amber-500 transition-colors">
+            <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter text-green-400 italic hover:text-emerald-300 transition-colors">
               New Tournament{" "}
-              <span className="text-pink-500 text-sm sm:text-lg animate-pulse">
+              <span className="text-emerald-500 text-sm sm:text-lg animate-pulse">
                 [v2.001]
               </span>
             </h2>
-            <div className="h-1 w-20 bg-cyan-500 mt-2"></div>
+            <div className="h-1 w-20 bg-green-500 mt-2"></div>
           </div>
 
           <form className="space-y-6" onSubmit={formAction}>
             {/* Tournament Name - Full Width */}
             <div className="group">
-              <label className="text-xs text-pink-500 uppercase font-bold tracking-widest mb-2 block">
+              <label className="text-xs text-emerald-500 uppercase font-bold tracking-widest mb-2 block">
                 {">"} Tournament_Name
               </label>
               <input
                 type="text"
                 name="tornamentName"
-                className="w-full bg-gray-900/50 border border-gray-800 focus:border-cyan-500 p-3 outline-none text-cyan-300 placeholder:text-gray-700 transition-all"
+                className="w-full bg-gray-900/50 border border-gray-800 focus:border-green-500 p-3 outline-none text-green-300 placeholder:text-gray-700 transition-all"
                 placeholder="NEON_STRIKE_CHAMPIONSHIP"
               />
             </div>
@@ -133,9 +133,9 @@ const AddTournamentForm = ({ onClose }) => {
               {inputBoxes.map((box, idx) => (
                 <div
                   key={idx}
-                  className="bg-gray-900/30 border border-cyan-900 p-3 group hover:border-purple-500  transition-colors"
+                  className="bg-gray-900/30 border border-green-900 p-3 group hover:border-emerald-500  transition-colors"
                 >
-                  <label className="text-[10px] text-cyan-500 uppercase mb-1 block">
+                  <label className="text-[10px] text-green-500 uppercase mb-1 block">
                     {box.label}
                   </label>
                   <input
@@ -150,12 +150,12 @@ const AddTournamentForm = ({ onClose }) => {
 
             {/* Description Area */}
             <div>
-              <label className="text-xs text-pink-500 uppercase font-bold mb-2 block">
+              <label className="text-xs text-emerald-500 uppercase font-bold mb-2 block">
                 {">"} Logic_Brief
               </label>
               <textarea
                 name="description"
-                className="w-full bg-gray-900/50 border border-gray-800 focus:border-cyan-500 p-3 h-24 outline-none text-cyan-300 transition-all"
+                className="w-full bg-gray-900/50 border border-gray-800 focus:border-green-500 p-3 h-24 outline-none text-green-300 transition-all"
                 placeholder="Input rules and regulations..."
               />
             </div>
@@ -163,7 +163,7 @@ const AddTournamentForm = ({ onClose }) => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-amber-500  text-black font-black py-4 uppercase 
+              className="w-full bg-green-600 hover:bg-green-500 text-white font-black py-4 uppercase 
             tracking-[0.2em] relative overflow-hidden group transition-all rounded-lg "
             >
               <span className="relative ">Add ➕ </span>

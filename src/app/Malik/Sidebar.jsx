@@ -22,7 +22,7 @@ const Sidebar = ({
         ${sidebarOpen ? "w-64" : "w-16"} 
             bg-gray-950 shadow-2xl transition duration-900 fixed left-0 top-16 
               h-[calc(100vh-4rem)] border-r border-gray-800 z-50 overflow-y-auto 
-           md:top-0 md:h-screen
+           md:top-0 md:h-screen no-scrollbar 
           `}
     >
       <div className="p-4 border-b border-gray-800 flex items-center justify-between sticky top-0 z-50 bg-gray-950">

@@ -24,6 +24,7 @@ import Sidebar from "./Sidebar";
 import AdminPageLoading from "./AdminPageLoading";
 import { useSWRBackendAPI } from "../Library/API";
 import { ThemeContext } from "../Library/ThemeContext";
+import CyberLoading from "../skeleton/CyberLoading";
 
 ChartJS.register(
   CategoryScale,
@@ -82,7 +83,7 @@ const AdminPage = () => {
     // console.log("Fetched admin data:", result);
     if (result && !error) {
       // console.log("Result fetched....");
-      console.log(transformTournaments(result.tournaments));
+      // console.log(transformTournaments(result.tournaments));
       setTournaments(transformTournaments(result.tournaments));
       setParticipants(result.users);
       // setRevenue(result.revenue);
@@ -537,7 +538,8 @@ const AdminPage = () => {
         {/* Content */}
         <div className="p-2 sm:p-6 ">
           {isLoading ? (
-            <AdminPageLoading activeTab={activeTab} />
+            // <AdminPageLoading activeTab={activeTab} />
+            <CyberLoading/>
           ) : (
             <>
               {activeTab === "overview" && (
