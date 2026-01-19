@@ -1,17 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, memo, useContext } from "react";
 import { Lock, Eye, EyeOff,PhoneCall } from "lucide-react";
 import { errorMessage, successMessage } from "../Library/Alert";
 import { useFetchBackendAPI } from "../Library/API";
 import { getCache, setCache, UpdateCache } from "../Library/ActionRedis";
-import { useContext } from "react";
 import { UserContext } from "../Library/ContextAPI";
 import { useRouter } from "next/navigation";
 
-export default function Login({ onSwitch, isDarkMode }) {
-  const [contact, setcontact] = useState("");
-  const [accessKey, setaccessKey] = useState("");
+const Login = memo(({ onSwitch, isDarkMode }) => {
+  const contactRef = useRef(null);
+  const accessKeyRef = useRef(null);
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   // const [error, setError] = useState('');
@@ -50,11 +49,13 @@ export default function Login({ onSwitch, isDarkMode }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    const contact = contactRef.current?.value || "";
+    const accessKey = accessKeyRef.current?.value || "";
+
     if (!contact.trim() || !accessKey) {
       errorMessage("Please enter both Player ID and accessKey.");
       return;
     }
-    // console.log("contact,accessKey", contact, accessKey);
     setLoading(true);
     let result = null;
     try {
@@ -113,8 +114,7 @@ export default function Login({ onSwitch, isDarkMode }) {
           <input
             id="contact"
             name="contact"
-            value={contact}
-            onChange={(e) => setcontact(e.target.value)}
+            ref={contactRef}
             placeholder="Player ID or Contact"
             className="w-full bg-transparent border-b border-[#00E5FF]/10 py-3 pl-12 pr-4 text-white placeholder-gray-400 focus:outline-none focus:border-[#FF4170] transition-colors"
             autoComplete="username"
@@ -133,15 +133,15 @@ export default function Login({ onSwitch, isDarkMode }) {
           <input
             id="accessKey"
             name="accessKey"
-            value={accessKey}
-            onChange={(e) => setaccessKey(e.target.value)}
+            ref={accessKeyRef}
             placeholder="Secure Access Key"
             type={showPwd ? "text" : "password"}
             className="w-full bg-transparent border-b border-[#00E5FF]/10 py-3 pl-12 pr-12 text-white placeholder-gray-400 focus:outline-none focus:border-[#FF4170] transition-colors"
             autoComplete="current-password"
           />
 
-          <a
+          <span
+            // type="button"
             onClick={() => setShowPwd((s) => !s)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-1"
             aria-label={showPwd ? "Hide accessKey" : "Show accessKey"}
@@ -151,7 +151,7 @@ export default function Login({ onSwitch, isDarkMode }) {
             ) : (
               <Eye className="w-5 h-5" />
             )}
-          </a>
+          </span>
         </div>
 
         {/* Error Message
@@ -200,15 +200,18 @@ export default function Login({ onSwitch, isDarkMode }) {
         {/* Switch to Signup */}
         <p className="mt-4 text-sm text-gray-300 text-center">
           New here?{" "}
-          <a
-            
+          <span
+            // type="button"
             onClick={() => onSwitch?.("signup")}
             className="text-[#00E5FF] font-semibold hover:text-[#00B8E6] transition-colors inline-flex items-center gap-2 cursor-pointer"
           >
             Create Team
-          </a>
+          </span>
         </p>
       </form>
     </div>
   );
-}
+});
+
+Login.displayName = "Login";
+export default Login;

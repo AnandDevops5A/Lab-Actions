@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useRef, memo } from "react";
 import { Users, UserPlus, Phone, Lock, Eye, EyeOff, Check } from "lucide-react";
 import { useFetchBackendAPI } from "../Library/API";
 import { validatePassword } from "./PasswordCheck";
@@ -24,8 +24,7 @@ function InputField({
   id,
   icon: Icon,
   type = "text",
-  value,
-  onChange,
+  inputRef,
   placeholder,
   extraClass = "",
 }) {
@@ -42,8 +41,7 @@ function InputField({
         id={id}
         name={id}
         type={type}
-        value={value}
-        onChange={onChange}
+        ref={inputRef}
         placeholder={placeholder}
         className={`w-full bg-transparent border-b border-[#00E5FF]/10 py-3 pl-12 pr-4 text-white placeholder-gray-400 focus:outline-none focus:border-[#FF4170] transition-colors ${extraClass}`}
       />
@@ -51,33 +49,36 @@ function InputField({
   );
 }
 
-export default function Signup({ onSwitch }) {
+const Signup = memo(({ onSwitch }) => {
   const Router = useRouter();
   const { setUser } = useContext(UserContext);
-  const [form, setForm] = useState({
-    username: "",
-    callSign: "",
-    contact: "",
-    accessKey: "",
-    confirm: "",
-  });
-  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
+
+  const usernameRef = useRef(null);
+  const callSignRef = useRef(null);
+  const contactRef = useRef(null);
+  const accessKeyRef = useRef(null);
+  const confirmRef = useRef(null);
+  const countryRef = useRef(null);
+
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
-
   const validateForm = () => {
-    const { username, callSign, contact, accessKey, confirm } = form;
+    const username = usernameRef.current?.value || "";
+    const callSign = callSignRef.current?.value || "";
+    const contact = contactRef.current?.value || "";
+    const accessKey = accessKeyRef.current?.value || "";
+    const confirm = confirmRef.current?.value || "";
+    const countryCode = countryRef.current?.value || COUNTRIES[0].code;
+
     if (!username.trim() || !callSign.trim() || !contact.trim() || !accessKey)
       return "Please fill all fields.";
     const paswordValidation = validatePassword(accessKey);
     if (!paswordValidation.valid) return paswordValidation.message;
     if (accessKey !== confirm) return "Passwords do not match.";
-    const combined = `${selectedCountry.code}${contact.trim()}`;
+    const combined = `${countryCode}${contact.trim()}`;
     if (!/^\+[0-9]{11,15}$/.test(combined))
       return "Enter a valid contact number.";
     return null;
@@ -110,10 +111,10 @@ export default function Signup({ onSwitch }) {
     setLoading(true);
     try {
       const payload = {
-        username: form.username.trim(),
-        callSign: form.callSign.trim(),
-        contact: `${selectedCountry.code}${form.contact.trim()}`,
-        accessKey: form.accessKey,
+        username: usernameRef.current.value.trim(),
+        callSign: callSignRef.current.value.trim(),
+        contact: `${countryRef.current.value}${contactRef.current.value.trim()}`,
+        accessKey: accessKeyRef.current.value,
       };
 
       // console.log("Submitting payload:", payload);
@@ -146,15 +147,13 @@ export default function Signup({ onSwitch }) {
         <InputField
           id="username"
           icon={Users}
-          value={form.username}
-          onChange={handleChange}
+          inputRef={usernameRef}
           placeholder="Aapka Name"
         />
         <InputField
           id="callSign"
           icon={UserPlus}
-          value={form.callSign}
-          onChange={handleChange}
+          inputRef={callSignRef}
           placeholder="Call Sign"
         />
 
@@ -166,12 +165,8 @@ export default function Signup({ onSwitch }) {
           />
           <select
             aria-label="Country code"
-            value={selectedCountry.code}
-            onChange={(e) =>
-              setSelectedCountry(
-                COUNTRIES.find((c) => c.code === e.target.value)
-              )
-            }
+            ref={countryRef}
+            defaultValue={COUNTRIES[0].code}
             className="absolute left-10 top-1/2 -translate-y-1/2 bg-transparent text-white text-sm pl-2 pr-6 py-1 rounded-md focus:outline-none focus:border-[#00E5FF]/30"
             disabled //only indian number are allowed
           >
@@ -187,8 +182,7 @@ export default function Signup({ onSwitch }) {
             id="contact"
             type="number"
             name="contact"
-            value={form.contact}
-            onChange={handleChange}
+            ref={contactRef}
             placeholder="Local number"
             className="w-full bg-transparent border-b border-[#00E5FF]/10 py-3 pl-36 pr-4 text-white placeholder-gray-400 focus:outline-none focus:border-[#FF4170] transition-colors"
           />
@@ -199,8 +193,7 @@ export default function Signup({ onSwitch }) {
           id="accessKey"
           icon={Lock}
           type={showPwd ? "text" : "password"}
-          value={form.accessKey}
-          onChange={handleChange}
+          inputRef={accessKeyRef}
           placeholder="Set Access Key"
           extraClass="pr-12"
         />
@@ -220,8 +213,7 @@ export default function Signup({ onSwitch }) {
           id="confirm"
           icon={Lock}
           type={showPwd ? "text" : "password"}
-          value={form.confirm}
-          onChange={handleChange}
+          inputRef={confirmRef}
           placeholder="Confirm Access Key"
         />
 
@@ -266,4 +258,7 @@ export default function Signup({ onSwitch }) {
       </form>
     </div>
   );
-}
+});
+
+Signup.displayName = "Signup";
+export default Signup;
