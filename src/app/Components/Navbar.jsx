@@ -99,15 +99,17 @@ const Navbar = () => {
     // By chance if user refresh page
     // On component mount, check if user data is in context; if not, try to get from cache
     const fetchUserData = async () => {
+      console.log("Navbar mounted, checking user context.");
       if (!user) {
          await getUserFromContext();
+         console.log("Fetched user data and save to context");
       }
     };
     fetchUserData();
     return () => {
       setMounted(false);
     };
-  }, [user]);
+  }, [getUserFromContext, user]);
 
  
 

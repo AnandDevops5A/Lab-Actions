@@ -30,7 +30,7 @@ const HeroSection = () => {
         sizes="100vw"
         style={{ objectFit: "cover" }}
         priority
-        quality={70}
+        quality={75}
         placeholder="blur"
         className={`${
           isDarkMode ? "opacity-40" : "opacity-30"

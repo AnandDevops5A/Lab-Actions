@@ -1,6 +1,8 @@
 // import Main from './Components/Main';
 
 import dynamic from 'next/dynamic';
+import CyberLoading from './skeleton/CyberLoading';
+
 
 
 // SEO Metadata (Next.js 13+ App Router)
@@ -18,20 +20,13 @@ export const metadata = {
  
 
 const Main = dynamic(() => import('./Components/Main'), {
-  loading: () => {<p>Loading...</p>},   // Optional fallback UI
+  loading: () => <CyberLoading />,   // Optional fallback UI
                            // Optional: disable server-side rendering
 })
 
-
-
-
 // Main Page Component
 export default function LandingPage() {
-
-
   return (
-   
-   <Main/>
-  
+    <Main />
   );
 }

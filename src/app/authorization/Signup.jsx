@@ -90,16 +90,18 @@ const Signup = memo(({ onSwitch }) => {
       method: "POST",
       data: payload,
     });
-    const status = await setCache("activeUser", res.data);
-    //set to context userdata
-    setUser(res.data);
-    if (!status.status) {
-      errorMessage("Error caching user data");
-    } else {
-    }
 
-    console.log("Data found", res.data);
-    return { ok: true };
+    if (res.status === 200 && res.data) {
+      const status = await setCache("activeUser", res.data);
+      //set to context userdata
+      setUser(res.data);
+      if (!status.status) {
+        errorMessage("Error caching user data");
+      }
+      console.log("Data found", res.data);
+      return { ok: true };
+    }
+    return { ok: false, message: res.message };
   }
 
   async function handleSubmit(e) {

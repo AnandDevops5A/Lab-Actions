@@ -73,11 +73,11 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
     } catch (err) {
       errorMessage(err?.message || "Unexpected error.");
     } finally {
-      setLoading(false);
-      console.log("Login user: ", result.data);
       //rediect to player dashboard
       if (result && result.status === 200 && result.data)
         router.push("/player");
+      setLoading(false);
+      // console.log("Login user: ", result.data);
     }
   }
 
