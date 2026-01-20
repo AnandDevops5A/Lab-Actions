@@ -1,14 +1,16 @@
 'use client';
 
-import { useContext, useMemo, useState } from 'react';
-import ReviewHero from './section/ReviewHero';
-import Reviews from './section/Reviews';
-import AddReview from './section/AddReview';
+import { lazy, Suspense, useContext, useMemo, useState } from 'react';
+const AddReview = lazy(() => import("./section/AddReview"));
+const Reviews = lazy(() => import("./section/Reviews"));
+const ReviewHero = lazy(() => import("./section/ReviewHero"));
+
 import { ThemeContext } from '../Library/ThemeContext';
+import CyberLoading from '../skeleton/CyberLoading';
 
 export default function ReviewsPage() {
 
-const themeContext = useContext(ThemeContext);
+  const themeContext = useContext(ThemeContext);
   const { isDarkMode } = themeContext || { isDarkMode: true };
 
   // Dummy tournaments and seed reviews
@@ -58,7 +60,7 @@ const themeContext = useContext(ThemeContext);
       rating: 2,
       comment:
         'Great plateform but low reward. Could use better reward for winner next time.',
-      tags: ['Ranking', 'Crowd','rewards'],
+      tags: ['Ranking', 'Crowd', 'rewards'],
       createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
     },
   ]);
@@ -151,11 +153,10 @@ const themeContext = useContext(ThemeContext);
             aria-label={`${n} star${n > 1 ? 's' : ''}`}
           >
             <svg
-              className={`${sizes[size]} ${
-                n <= value
+              className={`${sizes[size]} ${n <= value
                   ? 'fill-red-500 drop-shadow-[0_0_6px_rgba(217,70,239,0.8)]'
                   : 'fill-transparent'
-              } stroke-red-400`}
+                } stroke-red-400`}
               viewBox="0 0 24 24"
             >
               <path
@@ -178,21 +179,31 @@ const themeContext = useContext(ThemeContext);
       </span>
     );
   }
+  const inputClasses = `mt-1 w-full rounded-lg border border-white/10 ${
+    isDarkMode ? "bg-black/60" : "bg-gray-200/50"
+  } px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
+    isDarkMode ? "focus:ring-cyan-500/60" : "focus:ring-red-500/60"
+  }`;
 
   return (
     <main className="min-h-screen bg-black text-gray-100  overflow-hidden">
-      
+
 
       {/* Hero */}
-     <ReviewHero setFilters={setFilters} reviews={reviews} tournaments={tournaments} filters={filters} isDarkMode={isDarkMode}/>
+      <Suspense fallback={<CyberLoading />}>
+        <ReviewHero setFilters={setFilters} reviews={reviews} tournaments={tournaments} filters={filters} isDarkMode={isDarkMode} inputClasses={inputClasses}/>
+      </Suspense>
 
       {/* Reviews list */}
-     <Reviews filtered={filtered} TournamentBadge={TournamentBadge} isDarkMode={isDarkMode}/>
+      <Suspense fallback={<CyberLoading />}>
+        <Reviews filtered={filtered} TournamentBadge={TournamentBadge} isDarkMode={isDarkMode} />
+      </Suspense>
 
       {/* Submit review */}
-      <AddReview form={form} setForm={setForm} tournaments={tournaments} submitReview={submitReview} StarRating={StarRating} isDarkMode={isDarkMode}/>
+      <Suspense fallback={<CyberLoading />}>
+        <AddReview form={form} setForm={setForm} tournaments={tournaments} submitReview={submitReview} StarRating={StarRating} isDarkMode={isDarkMode} inputClasses={inputClasses} />
+      </Suspense>
 
-     
     </main>
   );
 }

@@ -8,12 +8,14 @@ const ReviewHero = ({
   tournaments,
   filters,
   isDarkMode,
+  inputClasses
 }) => {
   const avgRating = useMemo(() => {
     if (!reviews.length) return 0;
     const sum = reviews.reduce((s, r) => s + r.rating, 0);
     return (sum / reviews.length).toFixed(1);
   }, [reviews]);
+  
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-8  mt-16 p-4 ">
       <div
@@ -61,7 +63,7 @@ const ReviewHero = ({
               <div>
                 <label className="text-xs text-gray-400">Tournament</label>
                 <select
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/60"
+                  className={`${inputClasses}`}
                   value={filters.tournamentId}
                   onChange={(e) =>
                     setFilters((f) => ({ ...f, tournamentId: e.target.value }))
@@ -98,7 +100,7 @@ const ReviewHero = ({
               <div>
                 <label className="text-xs text-gray-400">Sort by</label>
                 <select
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/60"
+                  className={`${inputClasses}`}
                   value={filters.sort}
                   onChange={(e) =>
                     setFilters((f) => ({ ...f, sort: e.target.value }))
@@ -118,7 +120,7 @@ const ReviewHero = ({
                   onChange={(e) =>
                     setFilters((f) => ({ ...f, search: e.target.value }))
                   }
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/60"
+                  className={`${inputClasses}`}
                 />
               </div>
             </div>

@@ -83,7 +83,7 @@ const formAction = async (e) => {
 };
 const AddTournamentForm = ({ onClose }) => {
   return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center  md:p-3 font-mono">
+    <div className="max-h-screen bg-[#050505] flex items-center justify-center  md:p-3 font-mono">
       {/* Main Container - Responsive Widths */}
       <div className="relative w-full max-w-sm sm:max-w-xl md:max-w-3xl lg:max-w-4xl p-0.5 bg-linear-to-br from-green-500 via-transparent to-emerald-500 shadow-[0_0_30px_rgba(34,197,94,0.3)]">
         {/* The "Cyber-Box" */}
@@ -149,16 +149,20 @@ const AddTournamentForm = ({ onClose }) => {
             </div>
 
             {/* Description Area */}
-            <div>
-              <label className="text-xs text-emerald-500 uppercase font-bold mb-2 block">
-                {">"} Logic_Brief
-              </label>
+            <details className="group">
+              <summary
+                className="cursor-pointer text-xs text-emerald-500 uppercase font-bold mb-2 flex items-center gap-2"
+              >
+                <span className="text-emerald-500">▼</span>
+                <span className="text-emerald-500">Add Description</span>
+              
+              </summary>
               <textarea
                 name="description"
                 className="w-full bg-gray-900/50 border border-gray-800 focus:border-green-500 p-3 h-24 outline-none text-green-300 transition-all"
                 placeholder="Input rules and regulations..."
               />
-            </div>
+            </details>
 
             {/* Submit Button */}
             <button

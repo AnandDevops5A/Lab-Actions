@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useLayoutEffect, useCallback, useMemo, useContext } from "react"; 
+import { useState, useEffect, useLayoutEffect, useCallback, useMemo, useContext, Suspense, lazy } from "react"; 
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -20,11 +20,11 @@ import Participants from "./Participants";
 import Revenue from "./Revenue";
 import Report from "./Report";
 import Settings from "./Settings";
-import Sidebar from "./Sidebar";
-import AdminPageLoading from "./AdminPageLoading";
 import { useSWRBackendAPI } from "../Library/API";
 import { ThemeContext } from "../Library/ThemeContext";
 import CyberLoading from "../skeleton/CyberLoading";
+const Sidebar = lazy(() => import("./Sidebar"));
+
 
 ChartJS.register(
   CategoryScale,
@@ -499,6 +499,7 @@ const AdminPage = () => {
   return (
     <div className="flex min-h-screen bg-gray-900 text-white">
       {/* Sidebar */}
+      <Suspense fallback={<CyberLoading />}>
       <Sidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
@@ -506,7 +507,7 @@ const AdminPage = () => {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         isDarkMode={isDarkMode}
-      />
+      /></Suspense>
       {/* Main Content */}
       <div
         className={`flex-1 ${sidebarOpen ? "md:ml-64" : "md:ml-16 "

@@ -7,6 +7,7 @@ const AddReview = ({
   submitReview,
   StarRating,
   isDarkMode,
+  inputClasses
 }) => {
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 p-7 ">
@@ -54,7 +55,7 @@ const AddReview = ({
                     setForm((f) => ({ ...f, name: e.target.value }))
                   }
                   placeholder="Your display name"
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/60"
+                  className={`${inputClasses}`}
                   required
                 />
               </div>
@@ -65,7 +66,8 @@ const AddReview = ({
                   onChange={(e) =>
                     setForm((f) => ({ ...f, tournamentId: e.target.value }))
                   }
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/60"
+                  className={`${inputClasses}`}
+                  required
                 >
                   {tournaments.map((t) => (
                     <option key={t.id} value={t.id}>
@@ -97,7 +99,7 @@ const AddReview = ({
                 }
                 placeholder="What stood out? Be specific."
                 rows={4}
-                className="mt-1 w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/60"
+                className={`${inputClasses}`}
                 required
               />
             </div>
@@ -113,7 +115,7 @@ const AddReview = ({
                   setForm((f) => ({ ...f, tags: e.target.value }))
                 }
                 placeholder="Logistics, Production, Bracket"
-                className="mt-1 w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/60"
+                className={`${inputClasses}`}
               />
             </div>
 

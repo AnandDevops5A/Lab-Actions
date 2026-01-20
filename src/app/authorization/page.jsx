@@ -2,10 +2,12 @@
 
 import React, { lazy, Suspense, useContext, useState, useCallback } from "react";
 import { SkeletonChart } from "../skeleton/Skeleton";
-import Login from "./Login.jsx";
+// import Login from "./Login.jsx";
 import { ThemeContext } from "../Library/ThemeContext";
+import CyberLoading from "../skeleton/CyberLoading";
 
 const Signup = lazy(() => import("./Signup"));
+const Login = lazy(() => import("./Login"));
 
 // Extract styles to avoid re-allocation on every render
 const INLINE_STYLES = `
@@ -67,7 +69,10 @@ export default function Page() {
                 isLogin ? "form-visible" : "form-hidden-left"
               }`}
             >
-              <Login onSwitch={handleSwitch} isDarkMode={isDarkMode} />
+              <Suspense fallback={<CyberLoading />}>
+                  <Login onSwitch={handleSwitch} isDarkMode={isDarkMode} />
+                </Suspense>
+              {/* <Login onSwitch={handleSwitch} isDarkMode={isDarkMode} /> */}
             </div>
             <div
               className={`absolute top-0 w-full forms-viewport ${
@@ -76,7 +81,7 @@ export default function Page() {
             >
               {/* Only render Suspense/Signup if user has navigated to it, saving initial bandwidth */}
               {(signupLoaded || !isLogin) && (
-                <Suspense fallback={<SkeletonChart />}>
+                <Suspense fallback={<CyberLoading />}>
                   <Signup onSwitch={handleSwitch} />
                 </Suspense>
               )}

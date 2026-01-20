@@ -142,7 +142,8 @@ const Navbar = () => {
                   loading='eager'
                   />
               </div>
-              <span className="text-2xl font-extrabold bg-linear-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent tracking-wider">WardPath</span>
+              <span className="text-2xl font-extrabold bg-linear-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent tracking-wider">
+                WarPath</span>
             </Link>
 
             {/* Desktop Nav Links */}

@@ -1,10 +1,9 @@
 "use client";
 import React, { Suspense, useContext, useMemo, useRef, useState } from "react";
 import { ThemeContext } from "../Library/ThemeContext";
-// import Table from "./Table";
-import { SkeletonCard } from "../skeleton/Skeleton";
+// import { SkeletonCard } from "../skeleton/Skeleton";
 import CyberLoading from "../skeleton/CyberLoading";
-const ViewParticipation = React.lazy(() => import("./AddTournament")); 
+const ViewParticipation = React.lazy(() => import("./ViewParticipation")); 
 const Table = React.lazy(() => import("./Table")); 
 
 const Participants = ({ participants = [] }) => {

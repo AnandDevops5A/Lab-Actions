@@ -112,7 +112,10 @@ export default function Leaderboard() {
                 {/* Score */}
                 <div className="text-right">
                   <p
-                    className={`text-xl font-mono ${
+                    className={`text-sm font-bold tracking-wide ${
+                      isDarkMode ? "text-cyan-400" : "text-blue-400"
+                    }
+                      md:text-xl font-mono ${
                       isDarkMode ? "text-cyan-400" : "text-blue-600"
                     }`}
                   >
