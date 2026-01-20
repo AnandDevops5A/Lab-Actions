@@ -2,10 +2,10 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./Components/Navbar";
-import Footer from "./Components/Footer";
 import MatchJoiningForm from "./Components/matchJoiningForm";
 import { UserProvider } from "./Library/ContextAPI";
 import { ThemeProvider } from "./Library/ThemeContext";
+import NoConnection from "./Components/NoConnection";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,12 +40,12 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-950 text-white`}
       >
+        <NoConnection/>
         <UserProvider>
           <ThemeProvider>
             <Navbar />
-            <MatchJoiningForm />
+            {/* <MatchJoiningForm /> */}
             <main>{children}</main>
-            <Footer />
           </ThemeProvider>
         </UserProvider>
       </body>

@@ -1,9 +1,20 @@
 "use client";
-import React, { Suspense, useEffect, useState, useContext } from "react";
+import React, {useState, useContext } from "react";
 import { ThemeContext } from "../Library/ThemeContext";
 import CyberLoading from "../skeleton/CyberLoading";
-const AddTournamentForm = React.lazy(() => import("./AddTournament")); 
-const Table = React.lazy(() => import("./Table")); 
+import dynamic from "next/dynamic";
+
+
+const Table = dynamic(() => import('./Table'), {
+  loading: () =>( <CyberLoading/>),
+  ssr: false, // optional: disable SSR
+});
+
+const AddTournamentForm = dynamic(() => import('./AddTournament'), {
+  loading: () => <CyberLoading/>,
+  ssr: false, // optional: disable SSR
+});
+
 
 
 const Tournament = ({ tournaments }) => {
@@ -15,10 +26,6 @@ const Tournament = ({ tournaments }) => {
   const currentTime = date.getHours() * 100 + date.getMinutes();
   const now = dateOnly * 10000 + currentTime;
 
-  // //getting adminData from Cache
-  // useEffect(() => {
-  //   console.log("tournament component mount....");
-  // }, [tournaments]);
 
   const highlightText = isDarkMode ? "text-green-300" : "text-green-600";
 
@@ -56,8 +63,8 @@ const Tournament = ({ tournaments }) => {
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
             t.dateTime > now
               ? isDarkMode
-                ? "bg-green-500/10 text-green-400 border-green-500/20"
-                : "bg-green-100 text-green-800 border-green-200"
+                ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                : "bg-amber-100 text-amber-800 border-amber-200"
               : isDarkMode
               ? "bg-green-500/10 text-green-400 border-green-500/20"
               : "bg-green-100 text-green-800 border-green-200"
@@ -65,9 +72,10 @@ const Tournament = ({ tournaments }) => {
         >
           <span
             className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-              t.dateTime > now ? "bg-green-400" : "bg-green-400"
+              t.dateTime > now ? "bg-amber-400" : "bg-green-400"
             }`}
           ></span>
+         
           {t.dateTime > now ? "UPCOMING" : "COMPLETED"}
         </span>
       ),
@@ -127,7 +135,7 @@ const Tournament = ({ tournaments }) => {
   return (
     <div className="font-mono">
       {showAddTournamentForm ? (
-        <Suspense fallback={<CyberLoading />}>
+      
         <Table
           title="Tournament_Explore"
           // subtitle="// SYSTEM_READY"
@@ -154,11 +162,9 @@ const Tournament = ({ tournaments }) => {
             </button>
           }
         />
-        </Suspense>
+
       ) : (
-        <Suspense fallback={<CyberLoading/>}>
           <AddTournamentForm onClose={setShowAddTournamentForm} />
-        </Suspense>
       )}
     </div>
   );

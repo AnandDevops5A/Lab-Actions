@@ -1,11 +1,17 @@
 "use client";
 import React, { Suspense, useContext, useMemo, useRef, useState } from "react";
 import { ThemeContext } from "../Library/ThemeContext";
-// import { SkeletonCard } from "../skeleton/Skeleton";
 import CyberLoading from "../skeleton/CyberLoading";
-const ViewParticipation = React.lazy(() => import("./ViewParticipation")); 
-const Table = React.lazy(() => import("./Table")); 
+import dynamic from "next/dynamic";
 
+const ViewParticipation = dynamic(() => import('./ViewParticipation'), {
+  loading: () =>( <CyberLoading/>),
+  ssr: false, // optional: disable SSR
+});
+const Table = dynamic(() => import('./Table'), {
+  loading: () =>( <CyberLoading/>),
+  ssr: false, // optional: disable SSR
+});
 const Participants = ({ participants = [] }) => {
   const { isDarkMode } = useContext(ThemeContext);
   const [selectedParticipant, setSelectedParticipant] = useState(null);
@@ -158,7 +164,6 @@ const Participants = ({ participants = [] }) => {
 
   return (
     <>
-    <Suspense fallback={<CyberLoading />}>
       <Table
         title="Participant_Examine"
         // subtitle="// ACCESSING SECURE RECORDS..."
@@ -187,13 +192,12 @@ const Participants = ({ participants = [] }) => {
             />
           </div>
         }
-      /></Suspense>
+      />
       {selectedParticipant && (
-        <Suspense fallback={<CyberLoading />}>
         <ViewParticipation
           data={selectedParticipant}
           onClose={() => setSelectedParticipant(null)}
-        /></Suspense>
+        />
       )}
     </>
   );

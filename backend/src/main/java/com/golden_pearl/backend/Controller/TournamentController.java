@@ -25,6 +25,7 @@ import com.golden_pearl.backend.Services.TournamentService;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.golden_pearl.backend.DRO.TournamentReceiveData;
 import com.golden_pearl.backend.Models.User;
 
 @CrossOrigin(origins = "http://localhost:3000")
@@ -44,8 +45,15 @@ public class TournamentController {
     }
 
     @RequestMapping(path = "/add", method = RequestMethod.POST)
-    public ResponseEntity<Tournament> addTournament(@RequestBody Tournament tournamentDetails) {
-        Tournament savedTournament = tournamentService.addTournament(tournamentDetails);
+    public ResponseEntity<Tournament> addTournament(@RequestBody TournamentReceiveData tournamentDetails) {
+       Tournament readyTournament = new Tournament();
+        readyTournament.setTournamentName(tournamentDetails.tournamentName());
+        readyTournament.setPrizePool(tournamentDetails.prizePool());
+        readyTournament.setDateTime(tournamentDetails.dateTime());
+        readyTournament.setSlot(tournamentDetails.slot());
+        readyTournament.setPlatform(tournamentDetails.platform());
+        readyTournament.setDescription(tournamentDetails.description());
+        Tournament savedTournament = tournamentService.addTournament(readyTournament);
         return ResponseEntity.status(201).body(savedTournament);
     }
 
@@ -111,7 +119,7 @@ public class TournamentController {
         return tournamentService.updateRank(tId, uId, rank);
     }
 
-    //find all tournament by list ⏱️(pending)
+    //find all tournament by list 
     @PostMapping("/getTournament")
     public List<Tournament> getTournamentsbyids(@RequestBody List<String> tournamentIds){
         System.out.println(tournamentIds);

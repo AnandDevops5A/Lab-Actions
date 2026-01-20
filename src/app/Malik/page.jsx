@@ -15,15 +15,37 @@ import {
 } from "chart.js";
 import dynamic from "next/dynamic";
 import Overview from "./Overview";
-import Tournament from "./Tournament";
-import Participants from "./Participants";
-import Revenue from "./Revenue";
-import Report from "./Report";
-import Settings from "./Settings";
 import { useSWRBackendAPI } from "../Library/API";
 import { ThemeContext } from "../Library/ThemeContext";
 import CyberLoading from "../skeleton/CyberLoading";
-const Sidebar = lazy(() => import("./Sidebar"));
+import { transformTournaments } from "../Library/common";
+
+const Sidebar = dynamic(() => import('./Sidebar'), {
+  loading: () =>( <CyberLoading/>),
+  ssr: false, // optional: disable SSR
+});
+const Settings = dynamic(() => import('./Settings'), {
+  loading: () =>( <CyberLoading/>),
+  ssr: false, // optional: disable SSR
+});
+const Report = dynamic(() => import('./Report'), {
+  loading: () =>( <CyberLoading/>),
+  ssr: false, // optional: disable SSR
+});
+const Revenue = dynamic(() => import('./Revenue'), {
+  loading: () =>( <CyberLoading/>),
+  ssr: false, // optional: disable SSR
+});
+const Tournament = dynamic(() => import('./Tournament'), {
+  loading: () =>( <CyberLoading/>),
+  ssr: false, // optional: disable SSR
+});
+const Participants = dynamic(() => import('./Participants'), {
+  loading: () =>( <CyberLoading/>),
+  ssr: false, // optional: disable SSR
+});
+
+
 
 
 ChartJS.register(
@@ -40,32 +62,14 @@ ChartJS.register(
 );
 
 const AdminPage = () => {
-  const [activeTab, setActiveTab] = useState("tournaments");
+  const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [tournaments, setTournaments] = useState();
   const [participants, setParticipants] = useState();
   const { isDarkMode } = useContext(ThemeContext);
   // const [isLoading, setIsLoading] = useState(true)
 
-  const transformTournaments = useCallback((tournaments) => {
-    if (!tournaments || !Array.isArray(tournaments)) return [];
-    return tournaments.map((t) => {
-      const dtStr = t.dateTime ? t.dateTime.toString() : "";
-      if (dtStr.length < 12) return { ...t, date: "N/A", time: "N/A" };
-      // ensure it's a string // Extract parts
-      const year = dtStr.substring(0, 4);
-      const month = dtStr.substring(4, 6);
-      const day = dtStr.substring(6, 8);
-      const hour = dtStr.substring(8, 10);
-      const minute = dtStr.substring(10, 12);
-      // Format date and time
-      const date = `${day}-${month}-${year}`;
-      // e.g. "2025-12-20"
-      const time = `${hour}:${minute}`;
-      // e.g. "07:00"
-      return { ...t, date, time };
-    });
-  }, []);
+
 
   //send request to backend to get tournaments and participants data
   const { result, error, isLoading } = useSWRBackendAPI(
@@ -87,6 +91,7 @@ const AdminPage = () => {
       setTournaments(transformTournaments(result.tournaments));
       setParticipants(result.users);
       // setRevenue(result.revenue);
+      console.log(tournaments);
     } else {
       setParticipants(dummyParticipants);
       setTournaments(dummyTournaments);
@@ -403,29 +408,29 @@ const AdminPage = () => {
   ]);
 
   // Statistics Cards Data
-  // const tournamentData = {
-  //   labels: tournaments.map((t) => t.tournamentName),
-  //   datasets: [
-  //     {
-  //       label: "Participants",
-  //       data: tournaments.map((t) => t.participants),
-  //       backgroundColor: [
-  //         "rgba(255, 99, 132, 0.6)",
-  //         "rgba(54, 162, 235, 0.6)",
-  //         "rgba(75, 192, 192, 0.6)",
-  //         "rgba(255, 206, 86, 0.6)",
-  //       ],
-  //       borderColor: [
-  //         "rgba(255, 99, 132, 1)",
-  //         "rgba(54, 162, 235, 1)",
-  //         "rgba(75, 192, 192, 1)",
-  //         "rgba(255, 206, 86, 1)",
-  //       ],
-  //       borderWidth: 2,
-  //       borderRadius: 8,
-  //     },
-  //   ],
-  // };
+  const tournamentData = {
+    labels: (tournaments || []).map((t) => t.tournamentName),
+    datasets: [
+      {
+        label: "Participants",
+        data: (tournaments || []).map((t) => t.rankList ? Object.keys(t.rankList).length : (t.participants || 0)),
+        backgroundColor: [
+          "rgba(255, 99, 132, 0.6)",
+          "rgba(54, 162, 235, 0.6)",
+          "rgba(75, 192, 192, 0.6)",
+          "rgba(255, 206, 86, 0.6)",
+        ],
+        borderColor: [
+          "rgba(255, 99, 132, 1)",
+          "rgba(54, 162, 235, 1)",
+          "rgba(75, 192, 192, 1)",
+          "rgba(255, 206, 86, 1)",
+        ],
+        borderWidth: 2,
+        borderRadius: 8,
+      },
+    ],
+  };
 
 
   const revenueData = {
@@ -548,7 +553,7 @@ const AdminPage = () => {
                   tournaments={tournaments}
                   participants={participants}
                   revenue={revenue}
-                  // tournamentData={tournamentData}
+                  tournamentData={tournamentData}
                   chartOptions={chartOptions}
                   revenueData={revenueData}
                   registrationData={registrationData}

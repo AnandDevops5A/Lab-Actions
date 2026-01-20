@@ -7,7 +7,7 @@ const Overview = ({
   tournaments,
   participants,
   revenue,
-  // tournamentData,
+  tournamentData,
   chartOptions,
   revenueData,
   registrationData,
@@ -110,7 +110,7 @@ const Overview = ({
           <h2 className="text-lg md:text-xl font-bold mb-4 text-white">
             Tournament Participants Distribution
           </h2>
-          {/* <Bar data={tournamentData} options={chartOptions} /> */}
+          <Bar data={tournamentData} options={chartOptions} />
         </div>
         <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-inner inset-1  ">
           <h2 className="text-lg md:text-xl font-bold mb-4 text-white">

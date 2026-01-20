@@ -4,23 +4,30 @@ import { useState, useContext } from "react";
 import reloadingGunAsset from "../images/image.jpg";
 import TypingWrapper from "./TypingAnimation";
 import { ThemeContext } from "../Library/ThemeContext";
+import dynamic from 'next/dynamic'; 
+import CyberLoading from "../skeleton/CyberLoading";
+const MatchJoiningForm = dynamic(() => import('./matchJoiningForm'), {
+  loading: () =>( <CyberLoading />),
+  ssr: false, // optional: disable SSR
+});
 
 const HeroSection = () => {
   const [tournamentStatus, settournamentStatus] = useState(false);
   const themeContext = useContext(ThemeContext);
   const { isDarkMode } = themeContext || { isDarkMode: true };
+  const [showForm , setShowForm] = useState(false)
 
   const buttonClasses =
     "flex flex-col sm:flex-row justify-center space-x-auto space-y-4 sm:space-y-0 gap-3";
 
   return (
-    <section
-      className={`relative h-[97vh] flex items-center justify-center pt-10 overflow-hidden transition-colors duration-300 ${isDarkMode
+      <section className={`relative  h-[97vh] flex items-center justify-center pt-10 overflow-hidden transition-colors duration-300 ${isDarkMode
         ? "bg-linear-to-b from-gray-950 via-slate-950 to-gray-950"
         : "bg-linear-to-b from-blue-300 via-blue-400 to-blue-500"
         }`}
       id="hero"
     >
+      {showForm && <MatchJoiningForm open={showForm} setOpen={setShowForm} />}
       {/* Background Visual with Professional Effects */}
       <Image
         src={reloadingGunAsset}
@@ -66,7 +73,7 @@ const HeroSection = () => {
       {/* Hero Content */}
       <div className="relative text-center max-w-4xl px-4 z-10 animate-slideInUp">
         {/* Professional H1 */}
-        {!tournamentStatus ? (
+        {tournamentStatus ? (
         <h1
   className={`text-6xl md:text-7xl lg:text-8xl font-black mb-6 tracking-tighter drop-shadow-2xl leading-tight hover-lift duration-500 transition-colors ${
     isDarkMode ? "text-slate-200" : "text-slate-900"
@@ -189,8 +196,7 @@ const HeroSection = () => {
         <div className={`${buttonClasses} justify-center items-center`}>
           <button
             onClick={() => {
-              document.dispatchEvent(new CustomEvent("openJoinForm"));
-              window.location.hash = "#tournaments";
+              setShowForm(true);
             }}
             className={`group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold uppercase tracking-widest transition-all duration-300 hover-lift rounded-lg overflow-hidden ${isDarkMode ? "hover:shadow-red-500/50" : "hover:shadow-red-400/50"
               }`}
@@ -237,7 +243,7 @@ const HeroSection = () => {
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
 export default HeroSection;

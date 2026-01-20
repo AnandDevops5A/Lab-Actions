@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useContext, useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { UserContext } from '../Library/ContextAPI';
@@ -53,6 +53,8 @@ const Navbar = () => {
   ];
   const [showNavbar, setShowNavbar] = useState(true);
   const lastScrollY = useRef(0);
+  const Router=useRouter();
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -88,6 +90,9 @@ const Navbar = () => {
               top: y,
               behavior: 'smooth'
             });
+            setTimeout(()=>{
+              Router.replace("/", { scroll: false });
+            },1000)
           }
         }
       }, 300);
@@ -118,7 +123,7 @@ const Navbar = () => {
     showNavbar ?
       <nav
         ref={navRef}
-        className={`animate-slideInUp fixed w-full z-50 shadow-xl transition-all duration-300 ease-out backdrop-blur-md ${
+        className={`animate-slideInUp top-0 fixed w-full z-50 shadow-xl transition-all duration-300 ease-out backdrop-blur-md ${
           isDarkMode
             ? 'bg-gray-950/95 border-b border-gray-800/50 shadow-black/50'
             : 'bg-white/95 border-b border-slate-200/50 shadow-slate-300/20'
@@ -151,7 +156,7 @@ const Navbar = () => {
               {navItems.map((item, idx) => (
                 <Link
                   key={item.name}
-                  href={item.name && !user === "leaderboard" ? "/?scroll=leaderboard" : item.href}
+                  href={!user  && item.name === "leaderboard" ? "/?scroll=leaderboard" : item.href}
                   className={`group ${idx % 2 === 0 ? "animate-slideInLeft" : "animate-slideInRight"} px-4 py-2 text-sm font-semibold transition-colors duration-200 text-gray-200/90 hover:text-white border-l-2 border-r-2 border-transparent hover:border-l-neon-red hover:border-r-neon-red ${item.name !== "leaderboard" ? "focus:cursor-none" : ""} nav-item`}
                 >
                   <span className="relative inline-block">

@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,6 +18,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Tournament {
     
     @Id
@@ -25,11 +27,12 @@ public class Tournament {
     private Integer prizePool;
     private Long dateTime;
     private Integer entryFee;
+    private Integer slot=50;
     private String platform;
     private String description;
     private HashMap<String, Integer> rankList;
     private HashMap<String, Integer> invest;
-    @DBRef
+    @DBRef(lazy=true)
     private List<LeaderBoard> leaderBoard;
 
 

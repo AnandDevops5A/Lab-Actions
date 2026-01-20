@@ -6,7 +6,7 @@ import { useFetchBackendAPI } from "../Library/API";
 
 const inputBoxes = [
   { label: "Prize", type: "number", placeholder: "500", name: "prizePool" },
-  { label: "Slots", type: "number", placeholder: "50", name: "participants" },
+  { label: "Slots", type: "number", placeholder: "50", name: "slot" },
   {
     label: "plateform",
     type: "text",
@@ -24,7 +24,7 @@ const formAction = async (e) => {
   const formData = new FormData(e.target);
   const tornamentName = formData.get("tornamentName");
   const prizePool = formData.get("prizePool");
-  const participants = formData.get("participants");
+  const slot = formData.get("slot");
   const plateform = formData.get("plateform");
   const time = formData.get("time");
   const date = formData.get("date");
@@ -43,7 +43,7 @@ const formAction = async (e) => {
   const data = {
     tournamentName: tornamentName,
     prizePool: parseInt(prizePool),
-    participants: parseInt(participants),
+    slot: parseInt(slot),
     platform: plateform,
     dateTime: parseInt(dateTime),
     description: description,
@@ -53,7 +53,7 @@ const formAction = async (e) => {
   if (
     !tornamentName ||
     !prizePool ||
-    !participants ||
+    !slot ||
     !plateform ||
     !time ||
     !date
@@ -61,7 +61,7 @@ const formAction = async (e) => {
     errorMessage("All required fields");
     return;
   }
-
+// console.log(data);
   // Submit data to backend
   try {
     // TODO: Replace with your API endpoint
@@ -71,8 +71,10 @@ const formAction = async (e) => {
     });
     if (response.ok) {
       successMessage("Tournament created successfully!");
-      console.log(response);
+      // console.log(response);
       // Reset form or redirect
+      e.target.reset();
+
     } else {
       errorMessage("Failed to create tournament");
     }
@@ -80,6 +82,7 @@ const formAction = async (e) => {
     console.error("Error submitting form:", error);
     errorMessage("Internal Server Error");
   }
+
 };
 const AddTournamentForm = ({ onClose }) => {
   return (

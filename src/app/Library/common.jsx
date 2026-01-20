@@ -1,3 +1,4 @@
+
 export  function calulateWinAndReward(tournamentList){
     const rewardMap = { 1: 500, 2: 200, 3: 100 };
     //calculate rewards
@@ -25,4 +26,24 @@ export  function calulateWinAndReward(tournamentList){
     }
     return userStats;
   }
+
+  export   const transformTournaments = (tournaments) => {
+      if (!tournaments || !Array.isArray(tournaments)) return [];
+      return tournaments.map((t) => {
+        const dtStr = t.dateTime ? t.dateTime.toString() : "";
+        if (dtStr.length < 12) return { ...t, date: "N/A", time: "N/A" };
+        // ensure it's a string // Extract parts
+        const year = dtStr.substring(0, 4);
+        const month = dtStr.substring(4, 6);
+        const day = dtStr.substring(6, 8);
+        const hour = dtStr.substring(8, 10);
+        const minute = dtStr.substring(10, 12);
+        // Format date and time
+        const date = `${day}-${month}-${year}`;
+        // e.g. "2025-12-20"
+        const time = `${hour}:${minute}`;
+        // e.g. "07:00"
+        return { ...t, date, time };
+      });
+    };
   
