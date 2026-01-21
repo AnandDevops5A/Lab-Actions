@@ -45,7 +45,7 @@ public class TournamentController {
     }
 
     @RequestMapping(path = "/add", method = RequestMethod.POST)
-    public ResponseEntity<Tournament> addTournament(@RequestBody TournamentReceiveData tournamentDetails) {
+    public ResponseEntity<List<Tournament>> addTournament(@RequestBody TournamentReceiveData tournamentDetails) {
        Tournament readyTournament = new Tournament();
         readyTournament.setTournamentName(tournamentDetails.tournamentName());
         readyTournament.setPrizePool(tournamentDetails.prizePool());
@@ -53,9 +53,18 @@ public class TournamentController {
         readyTournament.setSlot(tournamentDetails.slot());
         readyTournament.setPlatform(tournamentDetails.platform());
         readyTournament.setDescription(tournamentDetails.description());
-        Tournament savedTournament = tournamentService.addTournament(readyTournament);
-        return ResponseEntity.status(201).body(savedTournament);
+        List<Tournament> returnUpcoming = tournamentService.addTournament(readyTournament);
+        return ResponseEntity.status(201).body(returnUpcoming);
     }
+
+//delete tournament by id
+    @RequestMapping(path = "/delete/{tournamentId}", method = RequestMethod.DELETE)
+    public ResponseEntity<String> deleteTournament(@PathVariable String tournamentId) {
+        // System.out.println("Deleting tournament with ID: " + tournamentId);
+        tournamentService.deleteTournamentById(tournamentId);
+        return ResponseEntity.ok("Tournament deleted successfully");
+    }
+
 
     @RequestMapping(path = "/update", method = RequestMethod.PUT)
     public ResponseEntity<Tournament> updateTournament(@RequestBody Tournament tournamentDetails) {

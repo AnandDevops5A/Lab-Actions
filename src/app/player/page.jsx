@@ -56,6 +56,7 @@ const PlayerProfile = () => {
   }, [user, router]);
 
   useEffect(() => {
+    let i = true;
     const fetchData = async () => {
       if (user?.playedTournaments?.length > 0) {
         const response = await useFetchBackendAPI("tournament/getTournament", {
@@ -66,7 +67,12 @@ const PlayerProfile = () => {
       }
 
     };
-    if (user) fetchData();
+    if (user)
+       fetchData();
+      
+    return () => {
+      i = false;
+    };
   }, [user]);
 
   if (!user) return null;

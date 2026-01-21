@@ -1,3 +1,6 @@
+import { getCache, setCache, UpdateCache } from "./ActionRedis";
+import { errorMessage } from "./Alert";
+import { useFetchBackendAPI } from "./API";
 
 export  function calulateWinAndReward(tournamentList){
     const rewardMap = { 1: 500, 2: 200, 3: 100 };
@@ -46,4 +49,41 @@ export  function calulateWinAndReward(tournamentList){
         return { ...t, date, time };
       });
     };
-  
+
+    export const setUpcomingTournamentCache = async () => {
+          const data = await getCache("upcomingTournament");
+      
+          if (data.length > 0 ) {
+            // successMessage("Cache hit")
+            // setUpcomingTournament(data);
+            return;
+          }
+          const response = await useFetchBackendAPI("tournament/upcoming", {
+            method: "GET",
+          });
+          console.log("upcoming tournament fetch..");
+          if (!response.ok) {
+            errorMessage("Something went wrong");
+            return;
+          }
+         else if(response.data?.length===0){
+              // setUpcomingTournament([]);
+              return;
+            }
+          //
+          const cachingStatus = await setCache(
+            "upcomingTournament",
+            response?.data,
+          );
+          if (!cachingStatus.status) {
+            const againCaching = await UpdateCache(
+              "upcomingTournament",
+              response?.data,
+            );
+            if (!againCaching.status) {
+              errorMessage("Something went wrong");
+            }
+          }
+          // setUpcomingTournament(response?.data);
+          // console.log(response?.data);
+        };

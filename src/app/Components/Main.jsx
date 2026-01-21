@@ -9,6 +9,7 @@ import UpcomingMatches from "./UpcomingMatches";
 import { useFetchBackendAPI } from "../Library/API";
 import { errorMessage, successMessage } from "../Library/Alert";
 import { getCache, setCache, UpdateCache } from "../Library/ActionRedis";
+import { setUpcomingTournamentCache } from "../Library/common";
 
 const WinnerSection = dynamic(() => import("./Winner"), {
   loading: () => <SkeletonTable />, // Optional: A fallback UI while loading
@@ -40,44 +41,11 @@ const Main = () => {
   const themeContext = useContext(ThemeContext);
   const { isDarkMode } = themeContext || { isDarkMode: true };
 
-  const [upcomingTournament, setUpcomingTournament] = useState(null);
+  // const [upcomingTournament, setUpcomingTournament] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
-    
-
-    const fetchTournaments = async () => {
-const data=await getCache("upcomingTournament");
-if( data.status!==false){
-  // successMessage("Cache hit")
-  setUpcomingTournament(data);
-  return;
-}
-      const response = await useFetchBackendAPI("tournament/upcoming", {
-        method: "GET",
-      });
-      if (!response.ok) {
-        errorMessage("Something went wrong");
-        return;
-      }
-      // 
-      const cachingStatus = await setCache(
-        "upcomingTournament",
-        response?.data,
-      );
-      if (!cachingStatus.status) {
-        const againCaching = await UpdateCache(
-          "upcomingTournament",
-          response?.data,
-        );
-        if (!againCaching.status) {
-          errorMessage("Something went wrong");
-        }
-      }
-      setUpcomingTournament(response?.data);
-      // console.log(response?.data);
-    };
-    fetchTournaments();
+    setUpcomingTournamentCache();
     return () => {
       isMounted = false;
     };
@@ -91,9 +59,9 @@ if( data.status!==false){
     >
       <main>
         {/* 2. Hero Section (High Conversion Focus) */}
-        <HeroSection image1={image} upcomingTournament={upcomingTournament} />
+        <HeroSection image1={image} />
         {/* 3. Upcoming Tournaments Section */}
-        <UpcomingMatches upcomingTournament={upcomingTournament} />
+        <UpcomingMatches />
         {/*4. Winner section*/}
         <WinnerSection />
         {/* 5. Leaderboard & Stats Section (Engaging Data) */}

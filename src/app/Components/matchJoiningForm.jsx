@@ -1,12 +1,28 @@
 "use client";
 
-import { useState, useEffect, useLayoutEffect } from "react";
-import { callSignSVG, gameIdSVG, tournamentSVG, emailSVG } from "./svg";
+import { useState, useEffect, useLayoutEffect, use } from "react";
+import {
+  callSignSVG,
+  gameIdSVG,
+  tournamentSVG,
+  tempEmailSVG,
+  emailSVG,
+} from "./svg";
 import { getCache } from "../Library/ActionRedis";
-import { errorMessage, successMessage } from "../Library/Alert";
+import { errorMessage, simpleMessage, successMessage } from "../Library/Alert";
+import { useFetchBackendAPI } from "../Library/API";
+import { UserContext } from "../Library/ContextAPI";
 
 //reuseable input field
-const ReUseableInput = ({ title, name, color, placeholder, svg, value, onChange }) => {
+const ReUseableInput = ({
+  title,
+  name,
+  color,
+  placeholder,
+  svg,
+  value,
+  onChange,
+}) => {
   return (
     <label className="flex flex-col ">
       <span className="text-xs text-gray-300 mb-1">{title}</span>
@@ -26,7 +42,15 @@ const ReUseableInput = ({ title, name, color, placeholder, svg, value, onChange 
   );
 };
 //REUSEABLE DROPDOWN
-const ReUseableDropdown = ({ title, name, value, onChange, options, color, svg }) => {
+const ReUseableDropdown = ({
+  title,
+  name,
+  value,
+  onChange,
+  options,
+  color,
+  svg,
+}) => {
   return (
     <label className="flex flex-col">
       <span className="text-xs text-gray-300 mb-1">{title}</span>
@@ -39,7 +63,7 @@ const ReUseableDropdown = ({ title, name, value, onChange, options, color, svg }
           required
           className={`w-full bg-transparent border-2 rounded-md px-3 pl-10 py-2 text-white placeholder-gray-400 focus:outline-none neon-input transition-colors duration-200 border-${color}/10 appearance-none`}
         >
-          <option value=""  className="bg-gray-900 text-white">
+          <option value="" className="bg-gray-900 text-white">
             Select {title}
           </option>
           {options?.map((opt, idx) => (
@@ -53,43 +77,59 @@ const ReUseableDropdown = ({ title, name, value, onChange, options, color, svg }
   );
 };
 
-export default function MatchJoiningForm({ open: controlledOpen, setOpen: controlledSetOpen }) {
+export default function MatchJoiningForm({
+  open: controlledOpen,
+  setOpen: controlledSetOpen,
+}) {
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = controlledSetOpen || setInternalOpen;
+  const { user } = use(UserContext);
   const [form, setForm] = useState({
-    callsign: "",
-    email: "",
+    userId: user ? user.id : "",
+    transactionId: "",
+    tempEmail: user ? user.email : "",
     gameId: "",
-    tournament: "",
+    tournamentId: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [match,setMatch]=useState(null);
+  const [match, setMatch] = useState(null);
 
-useEffect(()=>{
-	// console.log("useeffect of match history");
-	let i=true;
-	const fetchData=async()=>{
-		const data = await getCache("upcomingTournament");
-		// console.log(data);
-        if(i && data && data.status !== false){
-             setMatch(data);
-        }
-	}
-	fetchData();
-	console.log(match);
-	return ()=>{ i=false};
-},[])
+  useLayoutEffect(() => {
+    // console.log("useeffect of match history");
+    let i = true;
+    const fetchData = async () => {
+      const data = await getCache("upcomingTournament");
 
+      console.log("before",data);
+      if ( data && data.status !== false) {
+        // filter out user already registered tournaments
+        const response = await useFetchBackendAPI("leaderboard/user/"+user.id, {
+          method: "POST",
+        });
+        const joinedTournaments = response.data;
+        const joinedTournamentsIds = joinedTournaments.map((t) => t.tournamentId);
+        console.log("joinedTournamentsIds",joinedTournamentsIds);
+        const filteredData = data.filter(
+          (d) => !joinedTournamentsIds.includes(d.id)
+        );
+        console.log("response of user joined tournaments",response.data);
+        // const filteredData = data.filter((d) => d.userId != user.id);
+        console.log("after",filteredData);
+        setMatch(filteredData);
+      }
+    };
+    if(i)
+    fetchData();
+    console.log(match);
+    return () => {
+      i = false;
+    };
+  }, [user]);
 
-
-
-
-  
-
-// const upcomingTournament=await getCache("upcomingTournament");
-//   console.log(upcomingTournament);
+  // const upcomingTournament=await getCache("upcomingTournament");
+  //   console.log(upcomingTournament);
 
   function handleChange(e) {
     setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
@@ -98,14 +138,38 @@ useEffect(()=>{
   async function handleSubmit(e) {
     e.preventDefault();
     setSubmitting(true);
+    console.log(form);
     // simulate network
-	console.log(form);
+    const response = await useFetchBackendAPI("leaderboard/register", {
+      method: "POST",
+      data: form,
+    });
+    console.log(response.status);
+    console.log(response.data);
+    if (response.status !== 200) {
+      errorMessage("Error", response.data || "Failed to join tournament");
+      setSubmitting(false);
+      return;
+    } else if (response.status == 409) {
+      simpleMessage(
+        "ALREADY REGISTERED",
+        response.data || "Already registered for this tournament",
+      );
+      setSubmitting(false);
+      return;
+    } else {
+      successMessage(
+        "Success",
+        response.data || "Successfully joined tournament",
+      );
+    }
+
     setSubmitting(false);
     setSuccess(true);
     setTimeout(() => {
       setSuccess(false);
       setOpen(false);
-    //   setForm({ callsign: "", email: "", gameId: "", tournament: "" });
+      setForm({ callsign: "", tempEmail: "", gameId: "", tournament: "" });
     }, 1200);
   }
 
@@ -137,7 +201,7 @@ useEffect(()=>{
               <button
                 aria-label="close"
                 onClick={() => setOpen(false)}
-                className= "  text-[#00fff0] hover:text-white p-2 rounded-md transition border border-transparent hover:border-[#00fff0]/30 cursor-pointer"
+                className="  text-[#00fff0] hover:text-white p-2 rounded-md transition border border-transparent hover:border-[#00fff0]/30 cursor-pointer"
               >
                 ✕
               </button>
@@ -152,13 +216,14 @@ useEffect(()=>{
 				  placeholder={"e.g. ShadowFury"}
                   svg={callSignSVG}
                 /> */}
+
                 <ReUseableInput
-                  title={"Email Id"}
-                  name={"email"}
-                  value={form.email}
+                  title={"Contact Email"}
+                  name={"tempEmail"}
+                  value={form.tempEmail}
                   onChange={handleChange}
                   color={"#9b59ff"}
-				  placeholder={"9876543210"}
+                  placeholder={"contact email id"}
                   svg={emailSVG}
                 />
                 <ReUseableInput
@@ -167,28 +232,27 @@ useEffect(()=>{
                   value={form.gameId}
                   onChange={handleChange}
                   color={"#ff0055"}
-				  placeholder={"@7575945394"}
-                  svg={gameIdSVG}
+                  placeholder={"eg: @7575945394"}
+                  svg={callSignSVG}
                 />
-                {/* <ReUseableInput
-                  title={"Tournament"}
-                  name={"tournament"}
-                  value={form.tournament}
+                <ReUseableInput
+                  title={"Transaction ID"}
+                  name={"transactionId"}
+                  value={form.transactionId}
                   onChange={handleChange}
                   color={"#ff7a00"}
-				  placeholder={"Solo surviver"}
+                  placeholder={"Eg: Solo surviver"}
                   svg={tournamentSVG}
-                /> */}
-				<ReUseableDropdown
-				title={"Tournament"}
-				name={"tournament"}
-				value={form.tournament}
-				onChange={handleChange}
-					color={"#ff7a00"}
-				svg={tournamentSVG}
-				options={match }
-				/>
-
+                />
+                <ReUseableDropdown
+                  title={"Tournament"}
+                  name={"tournamentId"}
+                  value={form.tournamentId}
+                  onChange={handleChange}
+                  color={"#84ff00"}
+                  svg={gameIdSVG}
+                  options={match}
+                />
               </div>
 
               <div className="pt-2">

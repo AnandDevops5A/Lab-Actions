@@ -56,22 +56,24 @@ export async function useFetchBackendAPI(
     ...(data && { body: JSON.stringify(data) }),
     next: { revalidate }, // ISR-style caching for Next.js App Router
   };
-
   try {
-    const response = await fetch(url, options);
+   const response = await fetch(url, options);
     if (!response.ok) {
       const errorDetails = await response.text().catch(() => "");
       throw new Error(
         `Request failed: ${response.status} ${response.statusText}\n${errorDetails}`
       );
     }
-    const respon=await response.json();
+    const text = await response.text();
+    let respon;
+    try {
+      respon = text ? JSON.parse(text) : {};
+    } catch (e) {
+      respon = text;
+    }
     return { data:respon , status: response.status , ok: true };
   } catch (error) {
     console.error(`[BackendAPI] ${method} ${url} →`, error);
-    return { error: error.message , status: error.status || 500}}; // rethrow so caller can handle it
+    return { error: error.message , status: error.status, ok: false };
   }
-
-
-
-
+}

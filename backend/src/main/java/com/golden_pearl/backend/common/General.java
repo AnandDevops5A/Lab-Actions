@@ -22,6 +22,12 @@ public class General {
         return Long.parseLong(LocalDateTime.now().format(formatter));
     }
 
+    public Integer getCurrentTime() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmm");
+        return Integer.parseInt(LocalDateTime.now().format(formatter));
+    }
+
+
     public List<ResponseUserData> convertUserToResponseUserData(List<User> users) {
         List<ResponseUserData> responseUserDataSet = new ArrayList<>();
 

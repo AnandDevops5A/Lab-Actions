@@ -1,8 +1,10 @@
 "use client";
-import React, {useState, useContext } from "react";
+import React, { useState, useContext, useMemo, useCallback } from "react";
 import { ThemeContext } from "../Library/ThemeContext";
 import CyberLoading from "../skeleton/CyberLoading";
 import dynamic from "next/dynamic";
+import { errorMessage, successMessage, confirmMessage } from "../Library/Alert";
+import { useFetchBackendAPI } from "../Library/API";
 
 
 const Table = dynamic(() => import('./Table'), {
@@ -17,7 +19,7 @@ const AddTournamentForm = dynamic(() => import('./AddTournament'), {
 
 
 
-const Tournament = ({ tournaments }) => {
+const Tournament = ({ tournaments, refreshData }) => {
   // const [tournamentData] = useState(tournaments);
   const { isDarkMode } = useContext(ThemeContext);
   const [showAddTournamentForm, setShowAddTournamentForm] = useState(true);
@@ -29,7 +31,33 @@ const Tournament = ({ tournaments }) => {
 
   const highlightText = isDarkMode ? "text-green-300" : "text-green-600";
 
-  const columns = [
+  const performDeletion = useCallback(async (id) => {
+    try {
+      const response = await useFetchBackendAPI(`tournament/delete/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        const msg = typeof response.data === 'string' ? response.data : (response.data?.message || "Tournament deleted successfully");
+        successMessage(msg);
+        if (refreshData) refreshData();
+      } else {
+        errorMessage("Failed to delete tournament.");
+      }
+    } catch (error) {
+      console.error("Error deleting tournament:", error);
+      errorMessage("An error occurred while deleting the tournament.");
+    }
+  }, [refreshData]);
+
+  const deleteTournament = useCallback((id) => async () => {
+    const confirmed = await confirmMessage("This action cannot be undone.", "Delete Tournament");
+    if (confirmed) {
+      await performDeletion(id);
+    }
+  }, [performDeletion]);
+
+  const columns = useMemo(() => [
     {
       header: "ID",
       sortKey: "id",
@@ -107,7 +135,7 @@ const Tournament = ({ tournaments }) => {
     {
       header: "Action",
       className: "hidden lg:table-cell",
-      render: () => (
+      render: (t) => (
         <div className="flex items-center gap-3">
           <button
             className={`text-xs font-bold uppercase tracking-wider hover:underline ${
@@ -124,13 +152,14 @@ const Tournament = ({ tournaments }) => {
                 ? "text-pink-500 hover:text-pink-400"
                 : "text-red-600 hover:text-red-800"
             }`}
+            onClick={deleteTournament(t.id)}
           >
             [Del]
           </button>
         </div>
       ),
     },
-  ];
+  ], [isDarkMode, highlightText, now, deleteTournament]);
 
   return (
     <div className="font-mono">

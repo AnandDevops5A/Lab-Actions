@@ -3,6 +3,7 @@ import React from "react";
 import { X } from "lucide-react"; // Icon library for the cross button
 import { errorMessage, successMessage } from "../Library/Alert";
 import { useFetchBackendAPI } from "../Library/API";
+import { setCache } from "../Library/ActionRedis";
 
 const inputBoxes = [
   { label: "Prize", type: "number", placeholder: "500", name: "prizePool" },
@@ -70,6 +71,10 @@ const formAction = async (e) => {
       data: data,
     });
     if (response.ok) {
+      const data=await setCache('upcomingTournament',response.data);
+      // console.log(response.data);
+      console.log("caching data",data);
+      if(!data) errorMessage("Error in caching data");
       successMessage("Tournament created successfully!");
       // console.log(response);
       // Reset form or redirect

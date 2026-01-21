@@ -6,7 +6,9 @@ import java.util.HashMap;
 import com.golden_pearl.backend.common.General;
 
 import java.util.List;
+
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.redis.core.PartialUpdate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -41,12 +43,16 @@ public class TournamentService {
 
     // add tournament
     @CacheEvict(value = "adminData", allEntries = true)
-    public Tournament addTournament(Tournament tournamentDetails) {
+    public List<Tournament> addTournament(Tournament tournamentDetails) {
         // The startDateTime should be set in the request body by the client
         if (tournamentDetails == null)
             return null;
         // tournamentDetails.setDateTime(general.getCurrentDateTime());
-        return tournamentRepository.save(tournamentDetails);
+        Tournament t= tournamentRepository.save(tournamentDetails);
+        if(t!=null) {
+            return getUpcomingTournaments();
+        }
+        return null;
     }
 
     // get tournament by id
@@ -59,6 +65,7 @@ public class TournamentService {
     @CacheEvict(value = "adminData", allEntries = true)
     public void deleteTournamentById(String id) {
         tournamentRepository.deleteById(id);
+        // System.out.println("Tournament deleted successfully");
     }
 
     // update tournament by id
