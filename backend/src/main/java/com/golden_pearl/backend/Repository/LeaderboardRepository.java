@@ -20,6 +20,10 @@ public interface LeaderBoardRepository extends MongoRepository<LeaderBoard, Stri
     // Find a specific user's entry in a specific tournament
     LeaderBoard findByTournamentIdAndUserId(String tournamentId, String userId);
 
+    // Find multiple users' entries in a specific tournament
+    List<LeaderBoard> findByTournamentIdAndUserIdIn(String tournamentId, List<String> userIds);
+
+
     // Get leaderboard for a tournament sorted by rank (Ascending: 1, 2, 3...)
     List<LeaderBoard> findByTournamentIdOrderByRankAsc(String tournamentId);
 
@@ -31,4 +35,6 @@ public interface LeaderBoardRepository extends MongoRepository<LeaderBoard, Stri
 
     // Get paginated leaderboard for a tournament sorted by score (Descending: High to Low)
     Page<LeaderBoard> findByTournamentIdOrderByScoreDesc(String tournamentId, Pageable pageable);
+
+     List<LeaderBoard> findByTournamentIdIn(List<String> tournamentIds);
 }

@@ -7,6 +7,7 @@ import {
   tournamentSVG,
   tempEmailSVG,
   emailSVG,
+  LoadingCircleSVG,
 } from "./svg";
 import { getCache } from "../Library/ActionRedis";
 import { errorMessage, simpleMessage, successMessage } from "../Library/Alert";
@@ -96,35 +97,62 @@ export default function MatchJoiningForm({
   const [success, setSuccess] = useState(false);
   const [match, setMatch] = useState(null);
 
-  useLayoutEffect(() => {
-    // console.log("useeffect of match history");
-    let i = true;
+  useEffect(() => {
+    let isMounted = true;
+    // console.log(user);
     const fetchData = async () => {
-      const data = await getCache("upcomingTournament");
+      if (!user?.id) return;
+      try {
+        const data = await getCache("upcomingTournament");
+        if (!isMounted) return;
 
-      console.log("before",data);
-      if ( data && data.status !== false) {
-        // filter out user already registered tournaments
-        const response = await useFetchBackendAPI("leaderboard/user/"+user.id, {
-          method: "POST",
-        });
-        const joinedTournaments = response.data;
-        const joinedTournamentsIds = joinedTournaments.map((t) => t.tournamentId);
-        console.log("joinedTournamentsIds",joinedTournamentsIds);
-        const filteredData = data.filter(
-          (d) => !joinedTournamentsIds.includes(d.id)
-        );
-        console.log("response of user joined tournaments",response.data);
-        // const filteredData = data.filter((d) => d.userId != user.id);
-        console.log("after",filteredData);
-        setMatch(filteredData);
+        if (data && Array.isArray(data)) {
+          const response = await useFetchBackendAPI(
+            `leaderboard/user/${user.id}`,
+            {
+              method: "POST",
+            },
+          );
+          if (!isMounted) return;
+
+          const joinedTournaments = Array.isArray(response.data)
+            ? response.data
+            : [];
+          const joinedTournamentsIds = new Set(
+            joinedTournaments.map((t) => String(t.tournamentId)),
+          );
+          const filteredData = data.filter(
+            (d) => !joinedTournamentsIds.has(String(d.id)),
+          );
+
+          if (filteredData.length == 0) {
+            simpleMessage(
+              "You have already joined all upcoming tournaments.",
+              "Info",
+            );
+
+            setSubmitting(false);
+            setSuccess(true);
+            setSuccess(false);
+            setOpen(false);
+            setForm({
+              callsign: "",
+              tempEmail: "",
+              gameId: "",
+              tournament: "",
+            });
+            return;
+          }
+          setMatch(filteredData);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
       }
     };
-    if(i)
     fetchData();
-    console.log(match);
+
     return () => {
-      i = false;
+      isMounted = false;
     };
   }, [user]);
 
@@ -138,30 +166,21 @@ export default function MatchJoiningForm({
   async function handleSubmit(e) {
     e.preventDefault();
     setSubmitting(true);
-    console.log(form);
+    // console.log(form);
     // simulate network
     const response = await useFetchBackendAPI("leaderboard/register", {
       method: "POST",
       data: form,
     });
-    console.log(response.status);
-    console.log(response.data);
-    if (response.status !== 200) {
-      errorMessage("Error", response.data || "Failed to join tournament");
-      setSubmitting(false);
-      return;
-    } else if (response.status == 409) {
-      simpleMessage(
-        "ALREADY REGISTERED",
-        response.data || "Already registered for this tournament",
-      );
+    // console.log(response);
+    // console.log(response.status);
+    // console.log(response.data);
+    if (response.ok === false) {
+      errorMessage(response.message || "Failed to join tournament");
       setSubmitting(false);
       return;
     } else {
-      successMessage(
-        "Success",
-        response.data || "Successfully joined tournament",
-      );
+      successMessage(response.data || "Successfully joined tournament");
     }
 
     setSubmitting(false);
@@ -170,13 +189,13 @@ export default function MatchJoiningForm({
       setSuccess(false);
       setOpen(false);
       setForm({ callsign: "", tempEmail: "", gameId: "", tournament: "" });
-    }, 1200);
+    }, 1000);
   }
 
   if (!open) return null;
 
   return (
-    <div className="fixed animate-slideInUp inset-0 z-50 flex items-center justify-center">
+    <div className="fixed  animate-slideInUp inset-0 z-50 flex items-center justify-center">
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={() => setOpen(false)}
@@ -277,25 +296,7 @@ export default function MatchJoiningForm({
 
                   <span className="relative  flex items-center gap-3">
                     {submitting ? (
-                      <svg
-                        className="w-5 h-5 animate-spin"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                        />
-                      </svg>
+                      <LoadingCircleSVG />
                     ) : success ? (
                       <svg
                         className="w-5 h-5 text-white"

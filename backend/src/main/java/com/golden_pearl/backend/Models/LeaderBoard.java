@@ -26,5 +26,5 @@ public class LeaderBoard {
     private Integer rank;
     private Integer time;
     private Integer score;
-
+    private Boolean isApproved=false;
 }

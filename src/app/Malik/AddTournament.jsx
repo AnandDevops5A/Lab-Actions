@@ -18,7 +18,9 @@ const inputBoxes = [
   { label: "Date", type: "date", placeholder: "02-02-2020", name: "date" },
 ];
 
-const formAction = async (e) => {
+
+const AddTournamentForm = ({ onClose, refreshData}) => {
+  const handleSubmit = async (e) => {
   e.preventDefault();
 
   // Extract form data
@@ -30,6 +32,19 @@ const formAction = async (e) => {
   const time = formData.get("time");
   const date = formData.get("date");
   const description = formData.get("description");
+
+  // Validate required fields
+  if (
+    !tornamentName ||
+    !prizePool ||
+    !slot ||
+    !plateform ||
+    !time ||
+    !date
+  ) {
+    errorMessage("All required fields");
+    return;
+  }
 
   // Split date into parts
   const [year, month, day] = date.split("-");
@@ -50,36 +65,30 @@ const formAction = async (e) => {
     description: description,
   };
 
-  // Validate required fields
-  if (
-    !tornamentName ||
-    !prizePool ||
-    !slot ||
-    !plateform ||
-    !time ||
-    !date
-  ) {
-    errorMessage("All required fields");
-    return;
-  }
 // console.log(data);
   // Submit data to backend
   try {
     // TODO: Replace with your API endpoint
-    const response = await useFetchBackendAPI("tournament/add", {
+    const response = await fetch("http://localhost:8082/tournament/add", {
       method: "POST",
-      data: data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
     });
+
     if (response.ok) {
-      const data=await setCache('upcomingTournament',response.data);
+      const responseData = await response.json();
+      const cacheData = await setCache('upcomingTournament', responseData);
       // console.log(response.data);
-      console.log("caching data",data);
-      if(!data) errorMessage("Error in caching data");
+      console.log("caching data", cacheData);
+      if(!cacheData) errorMessage("Error in caching data");
       successMessage("Tournament created successfully!");
       // console.log(response);
       // Reset form or redirect
       e.target.reset();
-
+      if (refreshData) refreshData();
+      onClose(true);
     } else {
       errorMessage("Failed to create tournament");
     }
@@ -89,9 +98,8 @@ const formAction = async (e) => {
   }
 
 };
-const AddTournamentForm = ({ onClose }) => {
   return (
-    <div className="max-h-screen bg-[#050505] flex items-center justify-center  md:p-3 font-mono">
+    <div className="max-h-screen bg-[#050505] flex items-center justify-center  md:p-3 font-mono animate-slideInUp">
       {/* Main Container - Responsive Widths */}
       <div className="relative w-full max-w-sm sm:max-w-xl md:max-w-3xl lg:max-w-4xl p-0.5 bg-linear-to-br from-green-500 via-transparent to-emerald-500 shadow-[0_0_30px_rgba(34,197,94,0.3)]">
         {/* The "Cyber-Box" */}
@@ -121,7 +129,7 @@ const AddTournamentForm = ({ onClose }) => {
             <div className="h-1 w-20 bg-green-500 mt-2"></div>
           </div>
 
-          <form className="space-y-6" onSubmit={formAction}>
+          <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Tournament Name - Full Width */}
             <div className="group">
               <label className="text-xs text-emerald-500 uppercase font-bold tracking-widest mb-2 block">

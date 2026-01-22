@@ -32,17 +32,36 @@ public class LeaderboardController {
     // register user for tournament
     @PostMapping("/register")
     public ResponseEntity<String> registerUserForTournament(@RequestBody LeaderboardRegisterReceiveData registerData) {
-        System.out.println("Received registration data: " + registerData);
+        // System.out.println("Received registration data: " + registerData);
         return leaderboardService.registerUserForTournament(registerData); 
     
         
+    }
+
+    @PostMapping("/registerAll/{tournamentId}/users/{userIds}")
+    public ResponseEntity<String> registerAllUsersForTournament(@PathVariable String tournamentId, @PathVariable List<String> userIds) {
+        Tournament tournament = tournamentService.getTournamentById(tournamentId);
+        if (tournament == null) {
+            return ResponseEntity.badRequest().body("Tournament not found");
+        }
+        return leaderboardService.registerAllUsersForTournament(tournament, userIds);
     }
 
     @PostMapping("/{tournamentId}")
     public ResponseEntity<List<LeaderBoard>> getLeaderboard(@PathVariable String tournamentId) {
         return leaderboardService.getLeaderboard(tournamentId);
     }
-    
+
+    @PostMapping("/getByTornamentIds")
+    public ResponseEntity<?> getLeaderboardByTournamentIds(@RequestBody List<String> tournamentIds) {
+        return leaderboardService.getLeaderboardByTournamentIds(tournamentIds);
+    }
+
+    //approve user from tournament
+    @PostMapping("/approve/{tournamentId}/user/{userId}")
+    public ResponseEntity<String> approveUser(@PathVariable String tournamentId, @PathVariable String userId) {
+        return leaderboardService.approveUserFromTournament(tournamentId, userId);
+    }
         @PostMapping("/updateRank")
         public ResponseEntity<String> updateRank(@RequestBody UpdateRank updateRankData) {
             return leaderboardService.updateRank(updateRankData.tournamentId(), updateRankData.userId(), updateRankData.rank());

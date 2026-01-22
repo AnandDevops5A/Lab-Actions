@@ -20,7 +20,6 @@ const AddTournamentForm = dynamic(() => import('./AddTournament'), {
 
 
 const Tournament = ({ tournaments, refreshData }) => {
-  // const [tournamentData] = useState(tournaments);
   const { isDarkMode } = useContext(ThemeContext);
   const [showAddTournamentForm, setShowAddTournamentForm] = useState(true);
   const date = new Date();
@@ -33,12 +32,16 @@ const Tournament = ({ tournaments, refreshData }) => {
 
   const performDeletion = useCallback(async (id) => {
     try {
-      const response = await useFetchBackendAPI(`tournament/delete/${id}`, {
+      const response = await fetch(`http://localhost:8082/tournament/delete/${id}`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
 
       if (response.ok) {
-        const msg = typeof response.data === 'string' ? response.data : (response.data?.message || "Tournament deleted successfully");
+        const responseData = await response.json();
+        const msg = typeof responseData === 'string' ? responseData : (responseData?.message || "Tournament deleted successfully");
         successMessage(msg);
         if (refreshData) refreshData();
       } else {
@@ -146,7 +149,7 @@ const Tournament = ({ tournaments, refreshData }) => {
           >
             [Edit]
           </button>
-          <button
+          {t.dateTime > now && (<button
             className={`text-xs font-bold uppercase tracking-wider hover:underline ${
               isDarkMode
                 ? "text-pink-500 hover:text-pink-400"
@@ -155,7 +158,7 @@ const Tournament = ({ tournaments, refreshData }) => {
             onClick={deleteTournament(t.id)}
           >
             [Del]
-          </button>
+          </button>)}
         </div>
       ),
     },
@@ -193,7 +196,7 @@ const Tournament = ({ tournaments, refreshData }) => {
         />
 
       ) : (
-          <AddTournamentForm onClose={setShowAddTournamentForm} />
+          <AddTournamentForm onClose={setShowAddTournamentForm} refreshData={refreshData}/>
       )}
     </div>
   );

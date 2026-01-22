@@ -15,69 +15,67 @@ import {
 } from "lucide-react";
 import { ThemeContext } from "../Library/ThemeContext";
 
+// StatCard component moved outside to avoid creating during render
+const StatCard = ({ icon: Icon, label, value, subValue, isDarkMode }) => (
+  <div
+    className={`p-4 rounded-lg border ${isDarkMode ? 'border-cyan-500/20' : 'border-blue-100'} ${isDarkMode ? 'bg-black/40' : 'bg-gray-50'} flex items-start space-x-3`}
+  >
+    <div
+      className={`p-2 rounded-md ${isDarkMode ? "bg-cyan-500/10 text-cyan-400" : "bg-blue-100 text-blue-600"}`}
+    >
+      <Icon size={20} />
+    </div>
+    <div>
+      <p
+        className={`text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-cyan-500' : 'text-blue-600'}`}
+      >
+        {label}
+      </p>
+      <p className={`text-lg font-mono font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+        {value}
+      </p>
+      {subValue && <p className="text-xs text-gray-500">{subValue}</p>}
+    </div>
+  </div>
+);
+
+// DetailRow component moved outside to avoid creating during render
+const DetailRow = ({ icon: Icon, label, value, isDarkMode }) => (
+  <div
+    className={`flex items-center justify-between p-3 border-b ${isDarkMode ? "border-gray-800" : "border-gray-100"} last:border-0`}
+  >
+    <div className="flex items-center space-x-3">
+      <Icon
+        size={16}
+        className={isDarkMode ? "text-gray-500" : "text-gray-400"}
+      />
+      <span
+        className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
+      >
+        {label}
+      </span>
+    </div>
+    <span className={`font-mono text-sm ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+      {value || "N/A"}
+    </span>
+  </div>
+);
+
 const ViewParticipation = ({ data, onClose }) => {
   const { isDarkMode } = useContext(ThemeContext);
 
-  if (!data) return null;
-
   const total = data.totalPlay || 0;
-  const wins =
-    data.totalPlay && data.totallosses != null ? total - data.totallosses : 0;
+  const wins = data.totalWin || (data.totalPlay && data.totallosses != null ? data.totalPlay - data.totallosses : 0);
   const winRate = total > 0 ? (wins / total) * 100 : 0;
 
   const themeColors = {
-    bg: isDarkMode ? "bg-gray-900/95" : "bg-white/95",
     border: isDarkMode ? "border-cyan-500/30" : "border-blue-200",
-    text: isDarkMode ? "text-cyan-100" : "text-gray-800",
-    label: isDarkMode ? "text-cyan-500" : "text-blue-600",
-    value: isDarkMode ? "text-white" : "text-gray-900",
-    cardBg: isDarkMode ? "bg-black/40" : "bg-gray-50",
-    cardBorder: isDarkMode ? "border-cyan-500/20" : "border-blue-100",
+    bg: isDarkMode ? "bg-gray-950" : "bg-white",
+    label: isDarkMode ? "text-cyan-600" : "text-blue-400",
+    cardBorder: isDarkMode ? "border-gray-800" : "border-blue-100",
+    cardBg: isDarkMode ? "bg-gray-900/50" : "bg-blue-50/50",
+    text: isDarkMode ? "text-cyan-400" : "text-blue-600"
   };
-
-  const StatCard = ({ icon: Icon, label, value, subValue }) => (
-    <div
-      className={`p-4 rounded-lg border ${themeColors.cardBorder} ${themeColors.cardBg} flex items-start space-x-3`}
-    >
-      <div
-        className={`p-2 rounded-md ${isDarkMode ? "bg-cyan-500/10 text-cyan-400" : "bg-blue-100 text-blue-600"}`}
-      >
-        <Icon size={20} />
-      </div>
-      <div>
-        <p
-          className={`text-xs font-bold uppercase tracking-wider ${themeColors.label}`}
-        >
-          {label}
-        </p>
-        <p className={`text-lg font-mono font-bold ${themeColors.value}`}>
-          {value}
-        </p>
-        {subValue && <p className="text-xs text-gray-500">{subValue}</p>}
-      </div>
-    </div>
-  );
-
-  const DetailRow = ({ icon: Icon, label, value }) => (
-    <div
-      className={`flex items-center justify-between p-3 border-b ${isDarkMode ? "border-gray-800" : "border-gray-100"} last:border-0`}
-    >
-      <div className="flex items-center space-x-3">
-        <Icon
-          size={16}
-          className={isDarkMode ? "text-gray-500" : "text-gray-400"}
-        />
-        <span
-          className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
-        >
-          {label}
-        </span>
-      </div>
-      <span className={`font-mono text-sm ${themeColors.value}`}>
-        {value || "N/A"}
-      </span>
-    </div>
-  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm font-mono no-scrollbar">
@@ -95,7 +93,7 @@ const ViewParticipation = ({ data, onClose }) => {
               Participant_Profile
             </h2>
             <p className={`text-xs tracking-widest ${themeColors.label}`}>
-              // ID: {data.id || data._id || "UNKNOWN"}
+              ID: {data.id || data._id || "UNKNOWN"}
             </p>
           </div>
           <button
@@ -114,21 +112,25 @@ const ViewParticipation = ({ data, onClose }) => {
               label="Win Rate"
               value={`${winRate.toFixed(1)}%`}
               subValue={`${wins} Wins / ${total} Plays`}
+              isDarkMode={isDarkMode}
             />
             <StatCard
               icon={DollarSign}
               label="Total Earnings"
               value={`₹${data.winAmount?.toLocaleString() || 0}`}
+              isDarkMode={isDarkMode}
             />
             <StatCard
               icon={Activity}
               label="Status"
               value={data.active ? "ACTIVE" : "INACTIVE"}
+              isDarkMode={isDarkMode}
             />
             <StatCard
               icon={TrendingUp}
               label="Invested"
               value={`₹${data.investAmount?.toLocaleString() || 0}`}
+              isDarkMode={isDarkMode}
             />
           </div>
 
@@ -147,19 +149,21 @@ const ViewParticipation = ({ data, onClose }) => {
                 </h3>
               </div>
               <div className="p-2">
-                <DetailRow icon={User} label="Username" value={data.username} />
-                <DetailRow icon={Mail} label="Email" value={data.email} />
-                <DetailRow icon={Phone} label="Contact" value={data.contact} />
+                <DetailRow icon={User} label="Username" value={data.username} isDarkMode={isDarkMode} />
+                <DetailRow icon={Mail} label="Email" value={data.email} isDarkMode={isDarkMode} />
+                <DetailRow icon={Phone} label="Contact" value={data.contact} isDarkMode={isDarkMode} />
                 <DetailRow
                   icon={Hash}
                   label="Call Sign"
                   value={data.callSign}
+                  isDarkMode={isDarkMode}
                 />
-                {/* <DetailRow icon={Shield} label="Access Key" value={data.accessKey} /> */}
+                {/* <DetailRow icon={Shield} label="Access Key" value={data.accessKey} isDarkMode={isDarkMode} /> */}
                 <DetailRow
                   icon={Calendar}
                   label="Joined"
                   value={data.joiningDate}
+                  isDarkMode={isDarkMode}
                 />
               </div>
             </div>

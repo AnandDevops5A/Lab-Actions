@@ -20,6 +20,7 @@ import { ThemeContext } from "../Library/ThemeContext";
 import CyberLoading from "../skeleton/CyberLoading";
 import { transformTournaments } from "../Library/common";
 import { dummyParticipants, dummyRevenue, dummyTournaments } from "../Library/DummyData";
+import Tournament from "./Tournament";
 
 const Sidebar = dynamic(() => import('./Sidebar'), {
   loading: () =>( <CyberLoading/>),
@@ -37,11 +38,15 @@ const Revenue = dynamic(() => import('./Revenue'), {
   loading: () =>( <CyberLoading/>),
   ssr: false, // optional: disable SSR
 });
-const Tournament = dynamic(() => import('./Tournament'), {
+const Management = dynamic(() => import('./Management'), {
   loading: () =>( <CyberLoading/>),
   ssr: false, // optional: disable SSR
 });
 const Participants = dynamic(() => import('./Participants'), {
+  loading: () =>( <CyberLoading/>),
+  ssr: false, // optional: disable SSR
+});
+const ManageParticipant = dynamic(() => import('./ManageParticipant'), {
   loading: () =>( <CyberLoading/>),
   ssr: false, // optional: disable SSR
 });
@@ -190,7 +195,9 @@ const tournamentData = {
   const menuItems = [
     { id: "overview", label: "Overview", icon: "📊" },
     { id: "tournaments", label: "Tournaments", icon: "🏆" },
+    {id:"management", label:"Management", icon:"🛠️"},
     { id: "participants", label: "Participants", icon: "👥" },
+    { id: "manage-participants", label: "Manage Participants", icon: "🎮" },
     { id: "revenue", label: "Accounts Analysis", icon: "💰" },
     { id: "reports", label: "Reports", icon: "📄" },
     { id: "settings", label: "Settings", icon: "⚙️" },
@@ -199,6 +206,7 @@ const tournamentData = {
   // console.log(result);
 
   return (
+    
     <div className="flex min-h-screen bg-gray-900 text-white">
       {/* Sidebar */}
       <Suspense fallback={<CyberLoading />}>
@@ -216,7 +224,7 @@ const tournamentData = {
           } transition-all duration-300 w-full pt-15 pl-16 sm:pl-0`}
       >
         {/* Header */}
-        <div className="bg-gray-950 border-b border-gray-800 p-4 md:p-6  top-0 z-30">
+        {(activeTab !== "management") && <div className="animate-slideInUp bg-gray-950 border-b border-gray-800 p-4 md:p-6  top-0 z-30">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>
               <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-white mb-1">
@@ -236,7 +244,7 @@ const tournamentData = {
               </span>
             </div>
           </div>
-        </div>
+        </div>}
 
         {/* Content */}
         <div className="p-2 sm:p-6 ">
@@ -261,8 +269,16 @@ const tournamentData = {
                 <Tournament tournaments={tournaments} refreshData={mutate} />
               )}
 
+              {activeTab === "management" && (
+                <Management tournaments={tournaments} refreshData={mutate} />
+              )}
+
               {activeTab === "participants" && (
                 <Participants participants={participants} />
+              )}
+
+              {activeTab === "manage-participants" && (
+                <ManageParticipant tournaments={tournaments} participants={participants} refreshData={mutate} />
               )}
 
               {activeTab === "revenue" && (

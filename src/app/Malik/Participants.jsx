@@ -159,7 +159,7 @@ const Participants = ({ participants = [] }) => {
     console.log("usememo run admin ");
     console.log(search);
     
-  },[search,participants])
+  },[search])
   console.log("participant component mount");
 
   return (

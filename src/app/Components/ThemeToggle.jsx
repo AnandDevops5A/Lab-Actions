@@ -2,6 +2,7 @@
 
 import React, { useContext } from 'react';
 import { ThemeContext } from '../Library/ThemeContext';
+import { MoonStar, Sun } from 'lucide-react';
 
 const ThemeToggle = () => {
   const themeContext = useContext(ThemeContext);
@@ -22,12 +23,18 @@ const ThemeToggle = () => {
         // Moon icon for dark mode
        <span
          className=" text-3xl transition-transform duration-300 hover:scale-110 bg-slate-800 rounded-full p-1 shadow-xs shadow-white"
-        >🌚</span>
+        >
+          
+         <Sun />
+          </span>
       ) : (
         // Sun icon for light mode
+        
         <span
          className=" text-3xl transition-transform duration-300 hover:scale-110 bg-sky-200 rounded-full p-1 shadow-xs shadow-amber-100/30"
-        >🌞</span>
+        >
+           <MoonStar />
+        </span>
       )}
     </button>
   );

@@ -12,61 +12,66 @@ const Overview = ({
   revenueData,
   registrationData,
 }) => {
-  const safeTournaments = tournaments || [];
-  const safeParticipants = participants || [];
   const { isDarkMode } = useContext(ThemeContext);
   const cardStyle = `bg-linear-to-br
                        ${isDarkMode ? "from-gray-800 to-gray-900" : "from-gray-100 to-gray-200"} p-4 md:p-6 rounded-xl border border-gray-700
                         hover:border-orange-500 transition shadow-lg `;
 
   const stats = useMemo(
-    () => [
-      {
-        label: "Total Tournaments",
-        value: safeTournaments.length,
-        color: "from-blue-500 to-cyan-500",
-        icon: "🏆",
-      },
-      {
-        label: "Active Participants",
-        value: safeParticipants.filter((p) => p.active).length,
-        color: "from-purple-500 to-pink-500",
-        icon: "👥",
-      },
-      {
-        label: "Total Revenue",
-        value: `₹${(revenue || [])
-          .reduce((sum, r) => sum + (r.amount || 0), 0)
-          .toLocaleString()}`,
-        color: "from-green-500 to-emerald-500",
-        icon: "💰",
-      },
-      {
-        label: "Avg Win Rate",
-        value: "64.2%",
-        color: "from-orange-500 to-red-500",
-        icon: "📈",
-      },
-    ],
-    [safeTournaments, safeParticipants, revenue]
+    () => {
+      const safeTournaments = tournaments || [];
+      const safeParticipants = participants || [];
+      return [
+        {
+          label: "Total Tournaments",
+          value: safeTournaments.length,
+          color: "from-blue-500 to-cyan-500",
+          icon: "🏆",
+        },
+        {
+          label: "Active Participants",
+          value: safeParticipants.filter((p) => p.active).length,
+          color: "from-purple-500 to-pink-500",
+          icon: "👥",
+        },
+        {
+          label: "Total Revenue",
+          value: `₹${(revenue || [])
+            .reduce((sum, r) => sum + (r.amount || 0), 0)
+            .toLocaleString()}`,
+          color: "from-green-500 to-emerald-500",
+          icon: "💰",
+        },
+        {
+          label: "Avg Win Rate",
+          value: "64.2%",
+          color: "from-orange-500 to-red-500",
+          icon: "📈",
+        },
+      ];
+    },
+    [tournaments, participants, revenue]
   );
 
   const participantDistribution = useMemo(
-    () => ({
-      labels: ["Active", "Inactive"],
-      datasets: [
-        {
-          data: [
-            safeParticipants.filter((p) => p.active === true).length,
-            safeParticipants.filter((p) => p.active === false).length,
-          ],
-          backgroundColor: ["rgba(76, 175, 80, 0.7)", "rgba(244, 67, 54, 0.7)"],
-          borderColor: ["rgba(76, 175, 80, 1)", "rgba(244, 67, 54, 1)"],
-          borderWidth: 2,
-        },
-      ],
-    }),
-    [safeParticipants]
+    () => {
+      const safeParticipants = participants || [];
+      return {
+        labels: ["Active", "Inactive"],
+        datasets: [
+          {
+            data: [
+              safeParticipants.filter((p) => p.active === true).length,
+              safeParticipants.filter((p) => p.active === false).length,
+            ],
+            backgroundColor: ["rgba(76, 175, 80, 0.7)", "rgba(244, 67, 54, 0.7)"],
+            borderColor: ["rgba(76, 175, 80, 1)", "rgba(244, 67, 54, 1)"],
+            borderWidth: 2,
+          },
+        ],
+      };
+    },
+    [participants]
   );
   return (
     <div className="space-y-8">
