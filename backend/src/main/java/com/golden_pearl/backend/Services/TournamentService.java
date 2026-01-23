@@ -190,14 +190,6 @@ public class TournamentService {
 
     }
 
-    // tempory for testing
-    public Tournament settemprank(String id, HashMap<String, Integer> ranklist) {
-        Tournament t = getTournamentById(id);
-        t.setRankList(ranklist);
-
-        return addTournament(t);
-    }
-
     public List<Tournament> getTournamentsbyids(List<String> tournamentIds) {
         return tournamentRepository.findAllById(tournamentIds);
     }
