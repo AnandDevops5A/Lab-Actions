@@ -5,11 +5,10 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.stereotype.Repository;
 
 import com.golden_pearl.backend.Models.LeaderBoard;
-@Repository
-public interface LeaderBoardRepository extends MongoRepository<LeaderBoard, String> {
+
+public interface LeaderboardRepository extends MongoRepository<LeaderBoard, String> {
 
     // Find all entries for a specific tournament
     List<LeaderBoard> findByTournamentId(String tournamentId);

@@ -21,7 +21,7 @@ import com.golden_pearl.backend.DRO.LeaderboardRegisterReceiveData;
 import com.golden_pearl.backend.Models.LeaderBoard;
 import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.Models.User;
-import com.golden_pearl.backend.Repository.LeaderBoardRepository;
+import com.golden_pearl.backend.Repository.LeaderboardRepository;
 import com.golden_pearl.backend.Repository.TournamentRepository;
 import com.golden_pearl.backend.Repository.UserRepository;
 import com.golden_pearl.backend.common.General;
@@ -29,12 +29,12 @@ import com.golden_pearl.backend.common.General;
 @Service
 public class LeaderboardService {
 
-    private final LeaderBoardRepository leaderboardRepository;
+    private final LeaderboardRepository leaderboardRepository;
     private final UserRepository userRepository;
     private final TournamentRepository tournamentRepository;
     public final General general = new General();
 
-    public LeaderboardService(LeaderBoardRepository leaderboardRepository, UserRepository userRepository,
+    public LeaderboardService(LeaderboardRepository leaderboardRepository, UserRepository userRepository,
             TournamentRepository tournamentRepository) {
         this.leaderboardRepository = leaderboardRepository;
         this.userRepository = userRepository;
