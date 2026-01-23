@@ -136,11 +136,6 @@ public class TournamentController {
         // return null;
     }
 
-    //tempory just for testing
-    @PostMapping("/temprankset/{tid}")
-    public Tournament settemprank(@RequestBody HashMap<String, Integer> rankList,
-            @PathVariable String tid) {
-        return tournamentService.settemprank(tid, rankList);
-    }
+    
 
 }
