@@ -3,15 +3,14 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useContext, useState, useEffect, useRef } from 'react';
+import { useContext, useState, useEffect, useRef, Suspense } from 'react';
 import gsap from 'gsap';
 import { UserContext } from '../Library/ContextAPI';
-import { successMessage } from '../Library/Alert';
 import { LogoutButton } from './LogoutButton';
 import ThemeToggle from './ThemeToggle';
 import { ThemeContext } from '../Library/ThemeContext';
 
-const Navbar = () => {
+const NavbarContent = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { user, getUserFromContext } = useContext(UserContext);
@@ -244,6 +243,14 @@ const Navbar = () => {
           )
         }
       </nav > : null
+  );
+};
+
+const Navbar = () => {
+  return (
+    <Suspense fallback={<div className="h-16" />}>
+      <NavbarContent />
+    </Suspense>
   );
 };
 
