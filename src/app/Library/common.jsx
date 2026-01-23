@@ -52,8 +52,10 @@ export  function calulateWinAndReward(tournamentList){
 
     export const setUpcomingTournamentCache = async () => {
           const data = await getCache("upcomingTournament");
-      
-          if (data.length > 0 ) {
+          // console.log("get upcomming when new user", data);
+
+          if(!data.status)
+          if (data.length > 0 && data.status != false) {
             // successMessage("Cache hit")
             // setUpcomingTournament(data);
             return;
@@ -63,7 +65,7 @@ export  function calulateWinAndReward(tournamentList){
           });
           console.log("upcoming tournament fetch..");
           if (!response.ok) {
-            errorMessage("Something went wrong");
+            errorMessage("Server Error");
             return;
           }
          else if(response.data?.length===0){

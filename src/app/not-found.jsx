@@ -1,9 +1,14 @@
 'use client';
 import Link from 'next/link';
 import { Home, Frown } from 'lucide-react';
+import Navbar from './Components/Navbar';
+import { Suspense } from 'react';
 
-export default function NotFound() {
-  return (
+
+const NotFoundPage = () => (
+  <div>
+  <Suspense fallback={<div>Loading...</div>}>
+     <Navbar/></Suspense>
     <div className=" h-[98vh] flex flex-col items-center justify-center bg-gray-950 text-white relative p-10 pt-25">
       {/* Background effects */}
       <div className="absolute  inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-size-[100%_3px,2px_100%] animate-pulse z-0" />
@@ -86,6 +91,7 @@ export default function NotFound() {
           100% { clip: rect(110px, 450px, 115px, 0); }
         }
       `}</style>
-    </div>
+    </div></div>
   );
-}
+
+  export default NotFoundPage;
