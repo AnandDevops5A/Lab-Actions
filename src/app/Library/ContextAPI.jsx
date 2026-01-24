@@ -19,9 +19,9 @@ export const UserProvider = ({ children }) => {
 
     const getUserFromContext = async () => {
         if (user === null) {
-            const data = await getCache("currentUser");
-            if (data.status !== false) {
-                setUser(data);
+            const udata = await getCache("currentUser");
+            if (udata.status) {
+                setUser(udata.data);
                 return ;
             }
         }

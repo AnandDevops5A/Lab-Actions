@@ -24,8 +24,8 @@ public class User {
     private String accessKey;
     private Long contact;
     private Long joiningDate;
-    private Integer investAmount;
-    private Integer winAmount=0;
+    // private Integer investAmount;
+    // private Integer winAmount=0;
     private Integer withdrawAmount;
     private Integer balanceAmount;
     private Integer totalWin;

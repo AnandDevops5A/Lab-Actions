@@ -32,11 +32,13 @@ export default function Leaderboard() {
     try {
       let data;
       let tournamentData;
-      const cache = await getCache("adminData::SimpleKey []");
+      const c = await getCache("adminData::SimpleKey []");
+      const cache = c.data;
+
 
       // console.log(cache);
       // Check if cache is valid (not the error object from getCache)
-      if (cache && cache.status !== false) {
+      if (c.status) {
         data = cache.users[1];
         tournamentData = cache.tournaments[1];
         // console.log(tournamentData);

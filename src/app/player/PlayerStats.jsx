@@ -44,7 +44,7 @@ const StatsSimpleBox = ({ title, value }) => {
   );
 };
 
-const PlayerStats = ({ player }) => (
+const PlayerStats = ({ player, matchHistory }) => (
   <div className="bg-gray-800 p-6 rounded-xl border border-red-700/50 shadow-lg shadow-gray-700/50">
     <h2 className="text-2xl font-bold uppercase mb-6 border-b-2 border-red-500 pb-2">
       Tournament Stats
@@ -54,21 +54,21 @@ const PlayerStats = ({ player }) => (
         {/* Stat Card 1: Total withdraw (Focus Metric with Neon Glow) */}
         <StatsNeonBox
           title="Withdraw"
-          value={`₹ ${player.reward}` || "N/A"}
+          value={`₹ ${matchHistory.map((m) => m.winAmount).reduce((a, b) => a + b, 0)}` || "N/A"}
           color="green"
         />
 
         {/* Stat Card 2:Total Win */}
-        <StatsSimpleBox title="Wins" value={player.win || "N/A"} />
+        <StatsSimpleBox title="Wins" value={matchHistory.map((m) => m.rank=== 1).length || "N/A"} />
 
         {/* Stat Card 3: Matches Played */}
-        <StatsSimpleBox title="Total Play" value={player.playedTournaments.length || "N/A"} />
+        <StatsSimpleBox title="Total Play" value={matchHistory.length || "N/A"} />
         {/* Stat Card 2: K/D Ratio */}
         <StatsSimpleBox
           title="Win Ratio"
           value={
             player.totalPlay > 0
-              ? `${((player.totalWin / player.totalPlay) * 100).toFixed(0)} %`
+              ? `${((matchHistory.filter((m) => m.rank== 1).length / matchHistory.length) * 100).toFixed(0)} %`
               : "0.0%"
           }
         />
@@ -76,18 +76,18 @@ const PlayerStats = ({ player }) => (
         {/* Stat Card 5: Invest */}
         <StatsSimpleBox
           title="Invest"
-          value={`₹ ${player.investAmount}` || "N/A"}
+          value={`₹ ${matchHistory.map((m) => m.investAmount).reduce((a, b) => a + b, 0)}` || "N/A"}
         />
         {/* Stat Card 6: Total Loose (Focus Metric with Neon Glow) */}
         <StatsNeonBox
           title="Total Loose"
-          value={player.playedTournaments.length - player.win || "N/A"}
+          value={matchHistory.filter((m) => m.rank < 3).length|| "N/A"}
           color="red"
         />
       </div>
     ) : (
       <p className="text-gray-400 text-center">
-        You haven't Played Any Matches Yet.
+        You haven&apos;t Played Any Matches Yet.
         <br />
         No match history available.
       </p>

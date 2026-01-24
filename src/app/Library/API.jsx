@@ -1,6 +1,4 @@
 import useSWR from "swr";
-import { getCache } from "./ActionRedis";
-
 const BASE_URL = "http://localhost:8082";
 
 // Generic fetcher function
@@ -153,13 +151,26 @@ export const registerAllUsersForTournament = async (tournamentId, userIds) => {
 };
 
 export const getHisJoinedTouenament = async (userId) => {
- return await useFetchBackendAPI(`leaderboard/user/${userId}`, {
+  return await useFetchBackendAPI(`leaderboard/user/${userId}`, {
     method: "POST",
   });
 };
-export const joinTournament=async(form)=>{
-  await useFetchBackendAPI("leaderboard/register", {
-      method: "POST",
-      data: form,
-    });
+export const joinTournament = async (form) => {
+  return await useFetchBackendAPI("leaderboard/register", {
+    method: "POST",
+    data: form,
+  });
+};
+
+export const getUserTournamentDetails = async (userId) => {
+  return await useFetchBackendAPI(`leaderboard/user/${userId}`, {
+    method: "POST",
+  });
 }
+
+  export const getUpcomingTournament = async () => {
+    return await useFetchBackendAPI("tournament/upcoming", {
+      method: "GET",
+    })
+  }
+

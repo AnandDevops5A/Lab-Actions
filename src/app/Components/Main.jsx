@@ -1,14 +1,11 @@
 "use client";
 import dynamic from "next/dynamic";
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import image from "../images/image.jpg";
 import { SkeletonCard, SkeletonTable } from "../skeleton/Skeleton";
 import { ThemeContext } from "../Library/ThemeContext";
 import HeroSection from "./HeroSection";
 import UpcomingMatches from "./UpcomingMatches";
-import { useFetchBackendAPI } from "../Library/API";
-import { errorMessage, successMessage } from "../Library/Alert";
-import { getCache, setCache, UpdateCache } from "../Library/ActionRedis";
 import { setUpcomingTournamentCache } from "../Library/common";
 
 const WinnerSection = dynamic(() => import("./Winner"), {

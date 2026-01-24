@@ -110,9 +110,9 @@ const NavbarContent = () => {
       }
     };
     fetchUserData();
-    return () => {
-      setMounted(false);
-    };
+    // return () => {
+    //   setMounted(false);
+    // };
   }, [getUserFromContext, user]);
 
  

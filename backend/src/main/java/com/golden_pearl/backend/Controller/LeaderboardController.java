@@ -6,12 +6,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import com.golden_pearl.backend.DRO.LeaderboardRegisterReceiveData;
+import com.golden_pearl.backend.DRO.UpdateLeaderboardEntry;
 import com.golden_pearl.backend.DRO.UpdateRank;
+import com.golden_pearl.backend.DTO.TournamentWithLeaderboard;
 import com.golden_pearl.backend.Models.LeaderBoard;
 import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.Services.LeaderboardService;
@@ -33,13 +34,13 @@ public class LeaderboardController {
     @PostMapping("/register")
     public ResponseEntity<String> registerUserForTournament(@RequestBody LeaderboardRegisterReceiveData registerData) {
         // System.out.println("Received registration data: " + registerData);
-        return leaderboardService.registerUserForTournament(registerData); 
-    
-        
+        return leaderboardService.registerUserForTournament(registerData);
+
     }
 
     @PostMapping("/registerAll/{tournamentId}/users/{userIds}")
-    public ResponseEntity<String> registerAllUsersForTournament(@PathVariable String tournamentId, @PathVariable List<String> userIds) {
+    public ResponseEntity<String> registerAllUsersForTournament(@PathVariable String tournamentId,
+            @PathVariable List<String> userIds) {
         Tournament tournament = tournamentService.getTournamentById(tournamentId);
         if (tournament == null) {
             return ResponseEntity.badRequest().body("Tournament not found");
@@ -57,27 +58,45 @@ public class LeaderboardController {
         return leaderboardService.getLeaderboardByTournamentIds(tournamentIds);
     }
 
-    //approve user from tournament
+    // approve user from tournament
     @PostMapping("/approve/{tournamentId}/user/{userId}")
     public ResponseEntity<String> approveUser(@PathVariable String tournamentId, @PathVariable String userId) {
         return leaderboardService.approveUserFromTournament(tournamentId, userId);
     }
-        @PostMapping("/updateRank")
-        public ResponseEntity<String> updateRank(@RequestBody UpdateRank updateRankData) {
-            return leaderboardService.updateRank(updateRankData.tournamentId(), updateRankData.userId(), updateRankData.rank());
-        }
+
+    @PostMapping("/updateRank")
+    public ResponseEntity<String> updateRank(@RequestBody UpdateRank updateRankData) {
+        return leaderboardService.updateRank(updateRankData.tournamentId(), updateRankData.userId(),
+                updateRankData.rank());
+    }
 
     @GetMapping("/{tournamentId}/top/{n}")
-    public ResponseEntity<List<LeaderBoard>> getTopNLeaderboard(@PathVariable String tournamentId, @PathVariable int n) {
+    public ResponseEntity<List<LeaderBoard>> getTopNLeaderboard(@PathVariable String tournamentId,
+            @PathVariable int n) {
         return leaderboardService.getTopNLeaderboard(tournamentId, n);
     }
 
     @PostMapping("/updateScore/{tournamentId}/{userId}/{score}")
-    public ResponseEntity<String> updateScore(@PathVariable String tournamentId, @PathVariable String userId, @PathVariable int score) {
+    public ResponseEntity<String> updateScore(@PathVariable String tournamentId, @PathVariable String userId,
+            @PathVariable int score) {
         return leaderboardService.updateScore(tournamentId, userId, score);
     }
+
     @PostMapping("/user/{userId}")
-    public ResponseEntity<List<LeaderBoard>> getJoinedUsersTournaments(@PathVariable String userId) {
-        return leaderboardService.getJoinedUsersTournaments(userId);
-    }   
+    public ResponseEntity<List<TournamentWithLeaderboard>> getJoinedUsersTournaments(@PathVariable String userId) {
+        return leaderboardService.getTournamentsByUserId(userId);
+    }
+
+    // Update leaderboard entry (rank, investAmount and winAmount)
+    @PutMapping("/update/{leaderboardId}")
+    public ResponseEntity<String> updateLeaderboardEntry(@PathVariable String leaderboardId, @RequestBody UpdateLeaderboardEntry updateData) {
+        return leaderboardService.updateLeaderboardEntry(leaderboardId, updateData.rank(), updateData.investAmount(), updateData.winAmount());
+    }
+
+    // Approve leaderboard entry
+    @PutMapping("/approve/{leaderboardId}")
+    public ResponseEntity<String> approveLeaderboardEntry(@PathVariable String leaderboardId) {
+        return leaderboardService.approveLeaderboardEntry(leaderboardId);
+    }
+
 }

@@ -78,8 +78,8 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
                           tournament.platform.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesStatus = statusFilter === "all" ||
-                          (statusFilter === "upcoming" && tournament.dateTime > now) ||
-                          (statusFilter === "completed" && tournament.dateTime <= now);
+                          (statusFilter === "upcoming" && new Date(tournament.dateTime).getTime() > now) ||
+                          (statusFilter === "completed" && new Date(tournament.dateTime).getTime() <= now);
 
       const matchesPlatform = platformFilter === "all" || tournament.platform === platformFilter;
 
@@ -166,7 +166,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
   }, [selectedTournaments, refreshData]);
 
   const getStatusInfo = (tournament) => {
-    if (tournament.dateTime > now) {
+    if (new Date(tournament.dateTime).getTime() > now) {
       return {
         label: "UPCOMING",
         color: isDarkMode ? "text-amber-400 bg-amber-500/10 border-amber-500/20" : "text-amber-800 bg-amber-100 border-amber-200",
@@ -505,7 +505,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
                         >
                           <Edit3 className="h-4 w-4" />
                         </button>
-                        {tournament.dateTime > now && (
+                        {new Date(tournament.dateTime).getTime() > now && (
                           <button
                             onClick={() => deleteTournament(tournament.id)}
                             className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900 text-red-600 hover:text-red-800"

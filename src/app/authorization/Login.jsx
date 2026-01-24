@@ -4,7 +4,7 @@ import React, { useState, useRef, memo, useContext } from "react";
 import { Lock, Eye, EyeOff,PhoneCall } from "lucide-react";
 import { errorMessage, successMessage } from "../Library/Alert";
 import { useFetchBackendAPI } from "../Library/API";
-import { getCache, setCache, UpdateCache } from "../Library/ActionRedis";
+import { setCache, UpdateCache } from "../Library/ActionRedis";
 import { UserContext } from "../Library/ContextAPI";
 import { useRouter } from "next/navigation";
 

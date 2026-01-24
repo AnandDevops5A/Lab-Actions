@@ -6,7 +6,7 @@ import { useFetchBackendAPI } from "../Library/API";
 import { validatePassword } from "./PasswordCheck";
 import { useRouter } from "next/navigation";
 import { errorMessage, successMessage } from "../Library/Alert";
-import { getCache, setCache } from "../Library/ActionRedis";
+import { setCache } from "../Library/ActionRedis";
 import { UserContext } from "../Library/ContextAPI";
 
 // ✅ Constants outside component

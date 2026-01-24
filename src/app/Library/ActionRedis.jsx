@@ -38,7 +38,7 @@ export const getCache = async (key) => {
         const data = await client.get(key);
         if (!data) return { status: false, error: "Cache miss" };
         const parsedData=JSON.parse(data);
-        return parsedData;
+        return {data:parsedData, status: true };
     } catch (error) {
         console.error("Error getting cache:", error);
         return { status: false, error: error.message };

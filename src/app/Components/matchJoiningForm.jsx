@@ -105,84 +105,62 @@ export default function MatchJoiningForm({
             );
 
             setSubmitting(false);
-            setSuccess(true);
             setSuccess(false);
             setOpen(false);
             setForm({
-              callsign: "",
-              tempEmail: "",
+              userId: user ? user.id : "",
+              transactionId: "",
+              tempEmail: user ? user.email : "",
               gameId: "",
-              tournament: "",
+              tournamentId: "",
             });
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     let isMounted = true;
-    console.log(user);
     const fetchData = async () => {
       if (!user?.id) return;
       try {
-        const data = await getCache("upcomingTournament");
-        const hisJoinedTournamentCache=await getCache("hisJoinedTournament");
-        if(hisJoinedTournamentCache && !(hisJoinedTournamentCache.status)){
-          if(Object.keys(data).length == Object.keys(hisJoinedTournamentCache).length){
-             simpleMessage(
-              "You have already joined all upcoming tournaments.",
-              "Info",
-            );
+        const ud = await getCache("upcomingTournament");
+        let upcomingData=ud.data
+        if (!upcomingData || !Array.isArray(upcomingData)) return;
 
-            setSubmitting(false);
-            setSuccess(true);
-            setSuccess(false);
-            setOpen(false);
-            setForm({
-              callsign: "",
-              tempEmail: "",
-              gameId: "",
-              tournament: "",
-            });
+        // Helper to filter matches
+        const filterMatches = (joinedList) => {
+          const joinedIds = new Set(joinedList.map((t) => String(t.tournamentId)));
+          return upcomingData.filter((d) => !joinedIds.has(String(d.id)));
+        };
+
+        // 1. Check Cache
+        const cj = await getCache("hisJoinedTournament");
+        let cachedJoined = cj.data;
+        if (isMounted && cachedJoined && Array.isArray(cachedJoined)) {
+          const availableFromCache = filterMatches(cachedJoined);
+          if (availableFromCache.length === 0) {
+            alreadyRegistered();
+            return;
+          } else {
+            setMatch(availableFromCache);
           }
         }
 
-
         if (!isMounted) return;
 
-        if (data && Array.isArray(data)) {
-          const response = await getHisJoinedTouenament(user.id);
-          //setting into cache
-          let cachingStatus=await setCache("hisJoinedTournament",response.data);
-          if(!cachingStatus.status) errorMessage("Something went wrong");
-          if (!isMounted) return;
+        // 2. Fetch from Backend
+        const response = await getHisJoinedTouenament(user.id);
+        if (!isMounted) return;
 
-          const joinedTournaments = Array.isArray(response.data)
-            ? response.data
-            : [];
-          const joinedTournamentsIds = new Set(
-            joinedTournaments.map((t) => String(t.tournamentId)),
-          );
-          const filteredData = data.filter(
-            (d) => !joinedTournamentsIds.has(String(d.id)),
-          );
+        const freshJoined = Array.isArray(response.data) ? response.data : [];
+        
+        // Update cache silently
+        setCache("hisJoinedTournament", freshJoined);
 
-          if (filteredData.length == 0) {
-            simpleMessage(
-              "You have already joined all upcoming tournaments.",
-              "Info",
-            );
+        const finalAvailable = filterMatches(freshJoined);
 
-            setSubmitting(false);
-            setSuccess(true);
-            setSuccess(false);
-            setOpen(false);
-            setForm({
-              callsign: "",
-              tempEmail: "",
-              gameId: "",
-              tournament: "",
-            });
-            return;
-          }
-          setMatch(filteredData);
+        if (finalAvailable.length === 0) {
+          alreadyRegistered();
+        } else {
+          setMatch(finalAvailable);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -205,26 +183,26 @@ export default function MatchJoiningForm({
   async function handleSubmit(e) {
     e.preventDefault();
     setSubmitting(true);
-    // console.log(form);
-    // simulate network
     const response = await joinTournament(form);
-    // console.log(response);
-    // console.log(response.status);
-    // console.log(response.data);
-    if (response.ok) {
-      errorMessage(response.message || "Failed to join tournament");
+    if (!response.ok) {
+      errorMessage(response.error || "Failed to join tournament");
       setSubmitting(false);
       return;
-    } else {
-      successMessage(response.data || "Successfully joined tournament");
     }
+    successMessage(response.data.message || response.data || "Successfully joined tournament");
 
     setSubmitting(false);
     setSuccess(true);
     setTimeout(() => {
       setSuccess(false);
       setOpen(false);
-      setForm({ callsign: "", tempEmail: "", gameId: "", tournament: "" });
+      setForm({
+        userId: user ? user.id : "",
+        transactionId: "",
+        tempEmail: user ? user.email : "",
+        gameId: "",
+        tournamentId: "",
+      });
     }, 1000);
   }
 
@@ -333,7 +311,7 @@ export default function MatchJoiningForm({
 
                   <span className="relative  flex items-center gap-3">
                     {submitting ? (
-                      <LoadingCircleSVG />
+                      LoadingCircleSVG
                     ) : success ? (
                       <svg
                         className="w-5 h-5 text-white"

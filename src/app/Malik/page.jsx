@@ -50,6 +50,10 @@ const ManageParticipant = dynamic(() => import('./ManageParticipant'), {
   loading: () =>( <CyberLoading/>),
   ssr: false, // optional: disable SSR
 });
+const CompletedTournamentManager = dynamic(() => import('./CompletedTournamentManager'), {
+  loading: () =>( <CyberLoading/>),
+  ssr: false, // optional: disable SSR
+});
 
 
 
@@ -194,8 +198,9 @@ const tournamentData = {
   // Sidebar menu items
   const menuItems = [
     { id: "overview", label: "Overview", icon: "📊" },
-    { id: "tournaments", label: "Tournaments", icon: "🏆" },
-    {id:"management", label:"Management", icon:"🛠️"},
+    // { id: "tournaments", label: "Tournaments", icon: "🏆" },
+    {id:"management", label:" Manage Tournament", icon:"🏆🛠️"},
+    { id: "completed-tournaments", label: "Completed Tournaments", icon: "🏆✅" },
     { id: "participants", label: "Participants", icon: "👥" },
     { id: "manage-participants", label: "Manage Participants", icon: "🎮" },
     { id: "revenue", label: "Accounts Analysis", icon: "💰" },
@@ -231,7 +236,7 @@ const tournamentData = {
                 Tournament Management Dashboard
               </h1>
               <p className="text-gray-400 text-xs md:text-sm">
-                Welcome back! Here's your tournament overview
+                Welcome back! Here&apos;s your tournament overview
               </p>
             </div>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:space-x-4">
@@ -271,6 +276,10 @@ const tournamentData = {
 
               {activeTab === "management" && (
                 <Management tournaments={tournaments} refreshData={mutate} />
+              )}
+
+              {activeTab === "completed-tournaments" && (
+                <CompletedTournamentManager tournaments={tournaments} refreshData={mutate} />
               )}
 
               {activeTab === "participants" && (

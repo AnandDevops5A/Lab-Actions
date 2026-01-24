@@ -1,16 +1,13 @@
 package com.golden_pearl.backend.Services;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.golden_pearl.backend.DRO.LeaderboardRegisterReceiveData;
+import com.golden_pearl.backend.DTO.TournamentWithLeaderboard;
 import com.golden_pearl.backend.Models.LeaderBoard;
 import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.Models.User;
@@ -74,7 +72,7 @@ public class LeaderboardService {
         newEntry.setTime(general.getCurrentTime());
 
         leaderboardRepository.save(newEntry);
-        System.out.println("User registered for tournament: " + newEntry);
+        // System.out.println("User registered for tournament: " + newEntry);
         return ResponseEntity.ok(
                 "You registered successfully for the " + tournament.getTournamentName());
     }
@@ -217,4 +215,96 @@ public class LeaderboardService {
 
         return ResponseEntity.ok("User approved successfully for the tournament");
     }
+
+    //get tournament list by user id with rank and invest amount
+    public ResponseEntity<List<TournamentWithLeaderboard>> getTournamentsByUserId(String userId) {
+        List<LeaderBoard> userTournaments = leaderboardRepository.findByUserId(userId);
+        //fetrieve all tournament ids
+        List<String> tournamentIds = userTournaments.stream().map(LeaderBoard::getTournamentId).collect(Collectors.toList());
+        //fetch all tournaments by ids
+        List<Tournament> tournaments = tournamentService.getTournamentsbyids(tournamentIds);
+        List<TournamentWithLeaderboard> tournamentWithLeaderboards = new ArrayList<>();
+        for (Tournament tournament : tournaments) {
+            TournamentWithLeaderboard twl = new TournamentWithLeaderboard();
+            twl.setTournamentName(tournament.getTournamentName());
+            twl.setPrizePool(tournament.getPrizePool());
+            twl.setDateTime(tournament.getDateTime());
+            twl.setPlateform(tournament.getPlatform());
+            //find corresponding leaderboard entry
+            LeaderBoard lbEntry = userTournaments.stream()
+                    .filter(lb -> lb.getTournamentId().equals(tournament.getId()))
+                    .findFirst()
+                    .orElse(null);
+            if (lbEntry != null) {
+                twl.setRank(lbEntry.getRank());
+                twl.setTempEmail(lbEntry.getTempEmail());
+                twl.setTransactionId(lbEntry.getTransactionId());
+                twl.setInvestAmount(lbEntry.getInvestAmount());
+                twl.setWinAmount(lbEntry.getWinAmount());
+            }
+            
+            tournamentWithLeaderboards.add(twl);
+        
+        }
+        return ResponseEntity.ok(tournamentWithLeaderboards);
+    }
+
+    // Update leaderboard entry (rank, investAmount and winAmount) - partial updates allowed
+    @Transactional
+    public ResponseEntity<String> updateLeaderboardEntry(String leaderboardId, Integer rank, Integer investAmount, Integer winAmount) {
+        // Find the LeaderBoard entry
+        LeaderBoard entry = leaderboardRepository.findById(leaderboardId)
+                .orElseThrow(() -> new ResourceNotFoundException("Leaderboard entry not found"));
+
+        // Update only the provided fields
+        LeaderBoard updatedEntry = LeaderBoard.builder()
+                .id(entry.getId())
+                .userId(entry.getUserId())
+                .tournamentId(entry.getTournamentId())
+                .tempEmail(entry.getTempEmail())
+                .transactionId(entry.getTransactionId())
+                .investAmount(investAmount != null ? investAmount : entry.getInvestAmount())
+                .winAmount(winAmount != null ? winAmount : entry.getWinAmount())
+                .rank(rank != null ? rank : entry.getRank())
+                .time(entry.getTime())
+                .score(entry.getScore())
+                .isApproved(entry.getIsApproved())
+                .build();
+
+        leaderboardRepository.save(updatedEntry);
+
+        return ResponseEntity.ok("Leaderboard entry updated successfully");
+    }
+
+    // Approve leaderboard entry
+    @Transactional
+    public ResponseEntity<String> approveLeaderboardEntry(String leaderboardId) {
+        // Find the LeaderBoard entry
+        LeaderBoard entry = leaderboardRepository.findById(leaderboardId)
+                .orElseThrow(() -> new ResourceNotFoundException("Leaderboard entry not found"));
+
+        if (entry.getIsApproved()) {
+            return ResponseEntity.ok("Entry is already approved");
+        }
+
+        // Update the entry
+        LeaderBoard updatedEntry = LeaderBoard.builder()
+                .id(entry.getId())
+                .userId(entry.getUserId())
+                .tournamentId(entry.getTournamentId())
+                .tempEmail(entry.getTempEmail())
+                .transactionId(entry.getTransactionId())
+                .investAmount(entry.getInvestAmount())
+                .winAmount(entry.getWinAmount())
+                .rank(entry.getRank())
+                .time(entry.getTime())
+                .score(entry.getScore())
+                .isApproved(true)
+                .build();
+
+        leaderboardRepository.save(updatedEntry);
+
+        return ResponseEntity.ok("Leaderboard entry approved successfully");
+    }
+
 }
