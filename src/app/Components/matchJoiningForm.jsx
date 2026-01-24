@@ -9,10 +9,11 @@ import {
   emailSVG,
   LoadingCircleSVG,
 } from "./svg";
-import { getCache } from "../Library/ActionRedis";
+import { getCache, setCache } from "../Library/ActionRedis";
 import { errorMessage, simpleMessage, successMessage } from "../Library/Alert";
-import { useFetchBackendAPI } from "../Library/API";
+import { getHisJoinedTouenament, joinTournament, useFetchBackendAPI } from "../Library/API";
 import { UserContext } from "../Library/ContextAPI";
+import CyberLoading from "../skeleton/CyberLoading";
 
 //reuseable input field
 const ReUseableInput = ({
@@ -32,7 +33,7 @@ const ReUseableInput = ({
         <input
           type="text"
           name={name}
-          value={value}
+          value={value || ""}
           onChange={onChange}
           required
           placeholder={placeholder}
@@ -97,22 +98,60 @@ export default function MatchJoiningForm({
   const [success, setSuccess] = useState(false);
   const [match, setMatch] = useState(null);
 
+  function alreadyRegistered(){
+     simpleMessage(
+              "You have already joined all upcoming tournaments.",
+              "Info",
+            );
+
+            setSubmitting(false);
+            setSuccess(true);
+            setSuccess(false);
+            setOpen(false);
+            setForm({
+              callsign: "",
+              tempEmail: "",
+              gameId: "",
+              tournament: "",
+            });
+  }
+
   useEffect(() => {
     let isMounted = true;
-    // console.log(user);
+    console.log(user);
     const fetchData = async () => {
       if (!user?.id) return;
       try {
         const data = await getCache("upcomingTournament");
+        const hisJoinedTournamentCache=await getCache("hisJoinedTournament");
+        if(hisJoinedTournamentCache && !(hisJoinedTournamentCache.status)){
+          if(Object.keys(data).length == Object.keys(hisJoinedTournamentCache).length){
+             simpleMessage(
+              "You have already joined all upcoming tournaments.",
+              "Info",
+            );
+
+            setSubmitting(false);
+            setSuccess(true);
+            setSuccess(false);
+            setOpen(false);
+            setForm({
+              callsign: "",
+              tempEmail: "",
+              gameId: "",
+              tournament: "",
+            });
+          }
+        }
+
+
         if (!isMounted) return;
 
         if (data && Array.isArray(data)) {
-          const response = await useFetchBackendAPI(
-            `leaderboard/user/${user.id}`,
-            {
-              method: "POST",
-            },
-          );
+          const response = await getHisJoinedTouenament(user.id);
+          //setting into cache
+          let cachingStatus=await setCache("hisJoinedTournament",response.data);
+          if(!cachingStatus.status) errorMessage("Something went wrong");
           if (!isMounted) return;
 
           const joinedTournaments = Array.isArray(response.data)
@@ -168,14 +207,11 @@ export default function MatchJoiningForm({
     setSubmitting(true);
     // console.log(form);
     // simulate network
-    const response = await useFetchBackendAPI("leaderboard/register", {
-      method: "POST",
-      data: form,
-    });
+    const response = await joinTournament(form);
     // console.log(response);
     // console.log(response.status);
     // console.log(response.data);
-    if (response.ok === false) {
+    if (response.ok) {
       errorMessage(response.message || "Failed to join tournament");
       setSubmitting(false);
       return;
@@ -195,7 +231,8 @@ export default function MatchJoiningForm({
   if (!open) return null;
 
   return (
-    <div className="fixed  animate-slideInUp inset-0 z-50 flex items-center justify-center">
+    (match && match.length>0)?
+      (<div className="fixed animate-slideInUp inset-0 z-50 flex items-center justify-center">
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={() => setOpen(false)}
@@ -347,6 +384,6 @@ export default function MatchJoiningForm({
           </div>
         </div>
       </div>
-    </div>
+    </div>):<CyberLoading/>
   );
 }

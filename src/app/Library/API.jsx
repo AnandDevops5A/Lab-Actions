@@ -99,17 +99,18 @@ export async function useFetchBackendAPI(
 // Leaderboard API functions
 export const getUpcomingTournamentsLeaderboard = async (tournamentIds) => {
   //check in cache first
- const response =await useFetchBackendAPI('leaderboard/getByTornamentIds', {
+  const response = await useFetchBackendAPI("leaderboard/getByTornamentIds", {
     method: "POST",
-    data: tournamentIds
- });
+    data: tournamentIds,
+  });
   return response.data;
 };
 
 export const approveUserFromTournament = async (tournamentId, userId) => {
- return await useFetchBackendAPI(`leaderboard/approve/${tournamentId}/user/${userId}`);
- 
-}
+  return await useFetchBackendAPI(
+    `leaderboard/approve/${tournamentId}/user/${userId}`,
+  );
+};
 
 export const getLeaderboard = async (tournamentId) => {
   return await useFetchBackendAPI(`leaderboard/${tournamentId}`, {
@@ -150,3 +151,15 @@ export const registerAllUsersForTournament = async (tournamentId, userIds) => {
     { method: "POST" },
   );
 };
+
+export const getHisJoinedTouenament = async (userId) => {
+ return await useFetchBackendAPI(`leaderboard/user/${userId}`, {
+    method: "POST",
+  });
+};
+export const joinTournament=async(form)=>{
+  await useFetchBackendAPI("leaderboard/register", {
+      method: "POST",
+      data: form,
+    });
+}

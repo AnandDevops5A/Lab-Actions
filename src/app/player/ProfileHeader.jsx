@@ -9,13 +9,13 @@ const DynamicChargeborder = dynamic(
 );
 
 const ProfileHeader = ({ player }) => (
-  <DynamicChargeborder
-    color="#7cfc00 "
-    speed={0.3}
-    chaos={0.5}
-    thickness={2}
-    style={{ borderRadius: 14 }}
-  >
+  // <DynamicChargeborder
+  //   color="#7cfc00 "
+  //   speed={0.3}
+  //   chaos={0.5}
+  //   thickness={2}
+  //   style={{ borderRadius: 14 }}
+  // >
   <div
     className="relative h-48 sm:h-56 md:h-64 lg:h-72 bg-cover bg-center mt-16 rounded-2xl overflow-hidden "
     style={{ backgroundImage: `url(${profileBackImage.src})` }}
@@ -64,7 +64,7 @@ const ProfileHeader = ({ player }) => (
       </div>
     </div>
   </div>
-   </DynamicChargeborder>
+  //  </DynamicChargeborder>
 );
 
 export default ProfileHeader;
