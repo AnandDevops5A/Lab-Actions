@@ -116,47 +116,50 @@ export default function MatchJoiningForm({
             });
   }
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     let isMounted = true;
     const fetchData = async () => {
       if (!user?.id) return;
-      try {
-        const ud = await getCache("upcomingTournament");
-        let upcomingData=ud.data
-        if (!upcomingData || !Array.isArray(upcomingData)) return;
 
-        // Helper to filter matches
+      try {
+        // 1. Get all upcoming tournaments from cache
+        const ud = await getCache("upcomingTournament");
+        const upcomingData = ud?.data;
+        if (!upcomingData || !Array.isArray(upcomingData) || upcomingData.length === 0) {
+          // If there are no upcoming tournaments at all, inform the user.
+          alreadyRegistered();
+          return;
+        }
+
+        // 2. Get local cache of joined tournaments (to preserve optimistic updates)
+        const cj = await getCache(`hisJoinedTournament:${user.id}`);
+        const cachedJoined = Array.isArray(cj?.data) ? cj.data : [];
+
+        // 3. Fetch the user's joined tournaments from the backend for accuracy
+        const response = await getHisJoinedTouenament(user.id);
+        if (!isMounted) return;
+
+        const backendJoined = Array.isArray(response.data) ? response.data : [];
+
+        // 4. Merge cache and backend data to ensure we have the latest joined tournaments
+        const joinedMap = new Map();
+        backendJoined.forEach((t) => joinedMap.set(String(t.tournamentId), t));
+        cachedJoined.forEach((t) => joinedMap.set(String(t.tournamentId), t)); // Local cache takes precedence for recent joins
+        
+        const mergedJoined = Array.from(joinedMap.values());
+
+        // 5. Update the cache with the merged data
+        await setCache(`hisJoinedTournament:${user.id}`, mergedJoined);
+
+        // 6. Filter the upcoming list against the merged joined list
         const filterMatches = (joinedList) => {
           const joinedIds = new Set(joinedList.map((t) => String(t.tournamentId)));
           return upcomingData.filter((d) => !joinedIds.has(String(d.id)));
         };
 
-        // 1. Check Cache
-        const cj = await getCache("hisJoinedTournament");
-        let cachedJoined = cj.data;
-        if (isMounted && cachedJoined && Array.isArray(cachedJoined)) {
-          const availableFromCache = filterMatches(cachedJoined);
-          if (availableFromCache.length === 0) {
-            alreadyRegistered();
-            return;
-          } else {
-            setMatch(availableFromCache);
-          }
-        }
+        const finalAvailable = filterMatches(mergedJoined);
 
-        if (!isMounted) return;
-
-        // 2. Fetch from Backend
-        const response = await getHisJoinedTouenament(user.id);
-        if (!isMounted) return;
-
-        const freshJoined = Array.isArray(response.data) ? response.data : [];
-        
-        // Update cache silently
-        setCache("hisJoinedTournament", freshJoined);
-
-        const finalAvailable = filterMatches(freshJoined);
-
+        // 7. Update the state with the final list of available tournaments
         if (finalAvailable.length === 0) {
           alreadyRegistered();
         } else {
@@ -164,6 +167,8 @@ export default function MatchJoiningForm({
         }
       } catch (error) {
         console.error("Error fetching data:", error);
+        errorMessage("Could not load tournament list. Please try again.");
+        setOpen(false);
       }
     };
     fetchData();
@@ -171,7 +176,7 @@ export default function MatchJoiningForm({
     return () => {
       isMounted = false;
     };
-  }, [user]);
+  }, [user?.id]);
 
   // const upcomingTournament=await getCache("upcomingTournament");
   //   console.log(upcomingTournament);
@@ -190,6 +195,19 @@ export default function MatchJoiningForm({
       return;
     }
     successMessage(response.data.message || response.data || "Successfully joined tournament");
+
+    // Update cache to reflect the new join immediately
+    try {
+      const cj = await getCache(`hisJoinedTournament:${user.id}`);
+      let currentJoined = cj?.data || [];
+      if (!Array.isArray(currentJoined)) currentJoined = [];
+      
+      const newJoin = { tournamentId: form.tournamentId };
+      const updatedJoined = [...currentJoined, newJoin];
+      await setCache("hisJoinedTournament:" + user.id, updatedJoined);
+    } catch (error) {
+      console.error("Error updating cache:", error);
+    }
 
     setSubmitting(false);
     setSuccess(true);

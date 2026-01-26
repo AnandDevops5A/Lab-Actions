@@ -199,8 +199,8 @@ const tournamentData = {
   const menuItems = [
     { id: "overview", label: "Overview", icon: "📊" },
     // { id: "tournaments", label: "Tournaments", icon: "🏆" },
-    {id:"management", label:" Manage Tournament", icon:"🏆🛠️"},
-    { id: "completed-tournaments", label: "Completed Tournaments", icon: "🏆✅" },
+    {id:"management", label:"Tournament", icon:"🏆"},
+    { id: "completed-tournaments", label: "Manage Tournaments", icon: "🛠️" },
     { id: "participants", label: "Participants", icon: "👥" },
     { id: "manage-participants", label: "Manage Participants", icon: "🎮" },
     { id: "revenue", label: "Accounts Analysis", icon: "💰" },

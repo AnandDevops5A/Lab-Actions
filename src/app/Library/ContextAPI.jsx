@@ -11,10 +11,10 @@ export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null); // store user data here
     // logout function
     const logout = async () => {
-        window.location.href = '/'; // Redirect to home page after logout
         user && await deleteCache("currentUser");
         setUser(null);
         successMessage("Logged out successfully");
+        window.location.href = '/'; // Redirect to home page after logout
     };
 
     const getUserFromContext = async () => {

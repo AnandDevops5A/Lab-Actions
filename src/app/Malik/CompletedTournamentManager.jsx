@@ -12,24 +12,33 @@ const CompletedTournamentManager = ({ tournaments, refreshData }) => {
 
   const now = Date.now();
 
+  const parseTournamentDate = (dateTime) => {
+    const dateStr = dateTime.toString();
+    const year = parseInt(dateStr.slice(0, 4));
+    const month = parseInt(dateStr.slice(4, 6)) - 1;
+    const day = parseInt(dateStr.slice(6, 8));
+    const hour = parseInt(dateStr.slice(8, 10));
+    const minute = parseInt(dateStr.slice(10, 12));
+    return new Date(year, month, day, hour, minute).getTime();
+  };
+
   // Get tournaments from last 30 days (both upcoming and completed)
   const recentTournaments = useMemo(() => {
-    const yesterday = now - 24 * 60 * 60 * 1000;
-    // const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
-    const tomorrow = now + 24 * 60 * 60 * 1000;
-    // const thirtyDaysFromNow30 * 24 * 60 * 60 * 1000;
+    if (!tournaments) return [];
+    const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+
     return tournaments
-      .filter(t => new Date(t.dateTime).getTime() > yesterday && new Date(t.dateTime).getTime() < tomorrow)
-      .sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime()); // Most recent first
+      .filter(t => parseTournamentDate(t.dateTime) > thirtyDaysAgo)
+      .sort((a, b) => b.dateTime - a.dateTime); // Most recent first
   }, [tournaments, now]);
 
   // Separate upcoming and completed tournaments
   const upcomingTournaments = useMemo(() => {
-    return recentTournaments.filter(t => new Date(t.dateTime).getTime() > now);
+    return recentTournaments.filter(t => parseTournamentDate(t.dateTime) > now);
   }, [recentTournaments, now]);
 
   const completedTournaments = useMemo(() => {
-    return recentTournaments.filter(t => new Date(t.dateTime).getTime() < now).slice(0, 1);
+    return recentTournaments.filter(t => parseTournamentDate(t.dateTime) < now).slice(0, 1);
   }, [recentTournaments, now]);
 
   return (
