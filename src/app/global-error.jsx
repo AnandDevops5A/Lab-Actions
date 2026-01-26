@@ -27,7 +27,7 @@ export default function GlobalError({ error, reset }) {
               Error Code: 500
             </h2>
 
-            <p className="font-mono text-gray-400 max-w-md mx-auto mb-8">
+            <p className="Rusty Attack text-gray-400 max-w-md mx-auto mb-8">
               A critical error occurred in the application core. Our cyber-response
               unit has been dispatched. Please try to re-initialize the
               connection.
@@ -46,3 +46,6 @@ export default function GlobalError({ error, reset }) {
     </html>
   );
 }
+
+
+

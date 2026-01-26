@@ -96,3 +96,6 @@ const PlayerStats = ({ player, matchHistory }) => (
 );
 
 export default PlayerStats;
+
+
+

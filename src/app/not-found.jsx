@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { Home, Frown } from 'lucide-react';
-import Navbar from './Components/Navbar';
+import Navbar from "../components/layout/navbar";
 import { Suspense } from 'react';
 
 
@@ -24,7 +24,7 @@ const NotFoundPage = () => (
           Signal Lost
         </h2>
         
-        <p className="font-mono text-gray-400 max-w-sm mx-auto mb-8">
+        <p className="Rusty Attack text-gray-400 max-w-sm mx-auto mb-8">
           The requested route could not be found in this sector. The data stream may be corrupted or the path is invalid.
         </p>
 
@@ -95,3 +95,6 @@ const NotFoundPage = () => (
   );
 
   export default NotFoundPage;
+
+
+

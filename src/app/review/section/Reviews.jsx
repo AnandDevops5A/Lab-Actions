@@ -86,3 +86,6 @@ const Reviews = ({ filtered,TournamentBadge,isDarkMode}) => {
 }
 
 export default Reviews
+
+
+

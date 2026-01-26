@@ -1,10 +1,10 @@
 
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "./Components/Navbar";
-import { UserProvider } from "./Library/ContextAPI";
-import { ThemeProvider } from "./Library/ThemeContext";
-import NoConnection from "./Components/NoConnection";
+import Navbar from "../components/layout/navbar";
+import { UserProvider } from "../lib/contexts/user-context";
+import { ThemeProvider } from "../lib/contexts/theme-context";
+import { NoConnection } from "../components/ui/no-connection";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,3 +53,5 @@ export default function RootLayout({ children }) {
   );
 
 }
+
+

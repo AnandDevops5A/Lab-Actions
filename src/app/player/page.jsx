@@ -8,11 +8,11 @@ import {
   SkeletonChart,
   SkeletonTable,
 } from "../skeleton/Skeleton";
-import { UserContext } from "../Library/ContextAPI";
-import { getUserTournamentDetails, useFetchBackendAPI } from "../Library/API";
+import { UserContext } from "../../lib/contexts/user-context";
+import { getUserTournamentDetails, useFetchBackendAPI } from "../../lib/api/backend-api";
 import { useRouter } from "next/navigation";
-import { calulateWinAndReward } from "../Library/common";
-import { getCache, setCache } from "../Library/ActionRedis";
+import { calulateWinAndReward } from "../../lib/utils/common";
+import { getCache, setCache } from "../../lib/utils/action-redis";
 
 const mockPlayer = {
   ign: "SHADOW_LORD_07",
@@ -131,3 +131,6 @@ const PlayerProfile = () => {
 };
 
 export default PlayerProfile;
+
+
+

@@ -25,7 +25,7 @@ export const metadata = {
   },
 };
 
-const Main = dynamic(() => import("./Components/Main"), {
+const Main = dynamic(() => import("../components/features/home/main"), {
   loading: () => <CyberLoading />, // Optional fallback UI
   // ssr: false, // Optional: disable server-side rendering
 });
@@ -34,3 +34,6 @@ const Main = dynamic(() => import("./Components/Main"), {
 export default function LandingPage() {
   return <Main />;
 }
+
+
+

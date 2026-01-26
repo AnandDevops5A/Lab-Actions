@@ -1,12 +1,12 @@
 "use client";
 import React, { useState, useMemo, useContext, useEffect } from "react";
-import { ThemeContext } from "../Library/ThemeContext";
+import { ThemeContext } from "../../lib/contexts/theme-context";
 import { TopThree } from "./components/TopThree";
 import { PlayerCard } from "./components/PlayerCard";
-import { useFetchBackendAPI } from "../Library/API";
-import { calulateWinAndReward } from "../Library/common";
+import { useFetchBackendAPI } from "../../lib/api/backend-api";
+import { calulateWinAndReward } from "../../lib/utils/common";
 import { LeaderboardSkeleton } from "../skeleton/Skeleton";
-import { getCache } from "../Library/ActionRedis";
+import { getCache } from "../../lib/utils/action-redis";
 
 const DummyTournamentforLeaderboard = [
   "Global",
@@ -323,3 +323,6 @@ export default function Leaderboard() {
     </div>
   );
 }
+
+
+

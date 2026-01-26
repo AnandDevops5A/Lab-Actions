@@ -5,7 +5,7 @@ const AddReview = lazy(() => import("./section/AddReview"));
 const Reviews = lazy(() => import("./section/Reviews"));
 const ReviewHero = lazy(() => import("./section/ReviewHero"));
 
-import { ThemeContext } from '../Library/ThemeContext';
+import { ThemeContext } from '../../lib/contexts/theme-context';
 import CyberLoading from '../skeleton/CyberLoading';
 
 export default function ReviewsPage() {
@@ -207,3 +207,6 @@ export default function ReviewsPage() {
     </main>
   );
 }
+
+
+

@@ -4,7 +4,7 @@ import profileBackImage from "../images/profile.png";
 import Image from "next/image";
 
 const DynamicChargeborder = dynamic(
-  () => import("../Components/ChargeBorder.jsx"),
+  () => import("../../components/ui/charge-border"),
   { loading: () => <p>...</p>, ssr: false }
 );
 
@@ -68,3 +68,6 @@ const ProfileHeader = ({ player }) => (
 );
 
 export default ProfileHeader;
+
+
+

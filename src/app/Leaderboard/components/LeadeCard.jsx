@@ -172,3 +172,6 @@ export function LeaderCard({ player, rank, isDarkMode, globalRank, tournamentRan
     </div>
   );
 }
+
+
+

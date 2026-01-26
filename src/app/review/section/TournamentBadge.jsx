@@ -7,3 +7,6 @@ export function TournamentBadge({ id }) {
       </span>
     );
   }
+
+
+

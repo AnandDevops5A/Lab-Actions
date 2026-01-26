@@ -50,12 +50,12 @@ public class LeaderboardController {
         return leaderboardService.registerAllUsersForTournament(tournament, userIds);
     }
 
-    @PostMapping("/{tournamentId}")
+    @PostMapping("/getJoiners/{tournamentId}")
     public ResponseEntity<List<LeaderBoard>> getLeaderboard(@PathVariable String tournamentId) {
         return leaderboardService.getLeaderboard(tournamentId);
     }
 
-    @PostMapping("/getByTornamentIds")
+    @PostMapping("/getJoiners")
     public ResponseEntity<?> getLeaderboardByTournamentIds(@RequestBody List<String> tournamentIds) {
         return leaderboardService.getLeaderboardByTournamentIds(tournamentIds);
     }
