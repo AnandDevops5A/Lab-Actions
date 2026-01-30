@@ -54,7 +54,7 @@ const PlayerStats = ({ player, matchHistory }) => (
         {/* Stat Card 1: Total withdraw (Focus Metric with Neon Glow) */}
         <StatsNeonBox
           title="Withdraw"
-          value={`₹ ${matchHistory.map((m) => m.winAmount).reduce((a, b) => a + b, 0)}` || "N/A"}
+          value={`₹ ${matchHistory?.map((m) => m.winAmount).reduce((a, b) => a + b, 0)}` || "N/A"}
           color="green"
         />
 
@@ -66,14 +66,14 @@ const PlayerStats = ({ player, matchHistory }) => (
         {/* Stat Card 2: K/D Ratio */}
         <StatsSimpleBox
           title="Win Ratio"
-          value={
+          value={ matchHistory?
             player.totalPlay > 0
               ? `${((matchHistory.filter((m) => m.rank== 1).length / matchHistory.length) * 100).toFixed(0)} %`
               : "0.0%"
-          }
+          : "0.0%"}
         />
 
-        {/* Stat Card 5: Invest */}
+         {/* Stat Card 5: Invest */}
         <StatsSimpleBox
           title="Invest"
           value={`₹ ${matchHistory.map((m) => m.investAmount).reduce((a, b) => a + b, 0)}` || "N/A"}
@@ -96,6 +96,3 @@ const PlayerStats = ({ player, matchHistory }) => (
 );
 
 export default PlayerStats;
-
-
-

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy, Calendar, Clock, Users } from "lucide-react";
+import { Trophy, Calendar, Clock, Users, Sofa } from "lucide-react";
 
 const TournamentGrid = ({ tournaments, onSelect, isDarkMode,leaderboardCountRegisterUser }) => {
   const formatDateTime = (dateTime) => {
@@ -29,7 +29,8 @@ const TournamentGrid = ({ tournaments, onSelect, isDarkMode,leaderboardCountRegi
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-${(tournaments.length) % 3} gap-4`}>
+
       {tournaments.map((tournament) => {
         const { date, time } = formatDateTime(tournament.dateTime);
         return (
@@ -50,8 +51,8 @@ const TournamentGrid = ({ tournaments, onSelect, isDarkMode,leaderboardCountRegi
             </div>
             <div className="space-y-1 text-sm">
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-gray-400" />
-                <span className="text-gray-300">{date}</span>
+                <Calendar className="h-4 w-4 text-violet-400" />
+                <span className="text-violet-300">{date}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-gray-400" />
@@ -59,11 +60,15 @@ const TournamentGrid = ({ tournaments, onSelect, isDarkMode,leaderboardCountRegi
               </div>
               <div className="flex items-center gap-2">
                 <Trophy className="h-4 w-4 text-yellow-400" />
-                <span className="text-yellow-400">₹{tournament.prizePool?.toLocaleString()}</span>
+                <span className="text-yellow-400">₹ {tournament.prizePool?.toLocaleString()}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-blue-400" />
                 <span className="text-blue-400">{leaderboardCountRegisterUser?.[tournament.id] || 0} registered</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Sofa className="h-4 w-4 text-pink-400" />
+                <span className="text-pink-400">{(tournament.slot)-(leaderboardCountRegisterUser?.[tournament.id]) || 0} slot left</span>
               </div>
             </div>
           </div>

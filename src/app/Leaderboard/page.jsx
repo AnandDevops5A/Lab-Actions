@@ -3,7 +3,7 @@ import React, { useState, useMemo, useContext, useEffect } from "react";
 import { ThemeContext } from "../../lib/contexts/theme-context";
 import { TopThree } from "./components/TopThree";
 import { PlayerCard } from "./components/PlayerCard";
-import { useFetchBackendAPI } from "../../lib/api/backend-api";
+import { FetchBackendAPI } from "../../lib/api/backend-api";
 import { calulateWinAndReward } from "../../lib/utils/common";
 import { LeaderboardSkeleton } from "../skeleton/Skeleton";
 import { getCache } from "../../lib/utils/action-redis";
@@ -43,7 +43,7 @@ export default function Leaderboard() {
         tournamentData = cache.tournaments[1];
         // console.log(tournamentData);
       } else {
-        const res = await useFetchBackendAPI("users/all");
+        const res = await FetchBackendAPI("users/all");
         data = res.data;
         console.log("backend call");
       }
@@ -57,7 +57,7 @@ export default function Leaderboard() {
       let listoftournaments = Array.from(new Set(ids));
 
       if (!tournamentData) {
-        let response = await useFetchBackendAPI("tournament/getTournament", {
+        let response = await FetchBackendAPI("tournament/getTournament", {
           method: "POST",
           data: listoftournaments,
         });

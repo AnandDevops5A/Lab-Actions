@@ -67,7 +67,7 @@ const ManageParticipant = ({ tournaments, participants, refreshData }) => {
             finalCounts[tournamentId] = countsMap[tournamentId].size;
           }
           setleaderboardCountRegisterUser(finalCounts);
-          console.log("generted map with tournament id and register user", finalCounts);
+          // console.log("generted map with tournament id and register user", finalCounts);
         }
       } catch (error) {
         console.error("Error fetching upcoming tournaments leaderboard", error);

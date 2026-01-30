@@ -7,11 +7,22 @@ import { ThemeContext } from "../../../lib/contexts/theme-context";
 
 import { setUpcomingTournamentCache } from "../../../lib/utils/common";
 import HeroSection from "../tournaments/hero-section";
-import UpcomingMatches from "../../ui/upcoming-matches";
+import UpcomingMatches from "@/components/ui/upcoming-matches";
 // import WinnerSection from "@/components/ui/winner";
 // import Stats from "@/components/ui/stats";
 // import ContactPage from "./contact-page";
 // import Footer from "@/components/layout/footer";
+
+// const ActiveTournaments = dynamic(() => import("../../ui/active-tournaments"), {
+//   loading: () => (
+//     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4">
+//       <SkeletonCard />
+//       <SkeletonCard />
+//       <SkeletonCard />
+//     </div>
+//   ),
+//   ssr: false,
+// });
 
 const WinnerSection = dynamic(() => import("../../ui/winner"), {
   loading: () => <SkeletonTable />, // Optional: A fallback UI while loading
@@ -64,7 +75,8 @@ const Main = () => {
         {/* 2. Hero Section (High Conversion Focus) */}
         <HeroSection image1={image} />
         {/* 3. Upcoming Tournaments Section */}
-        <UpcomingMatches />
+        {/* <ActiveTournaments /> */}
+        <UpcomingMatches/>
         {/*4. Winner section*/}
         <WinnerSection />
         {/* 5. Leaderboard & Stats Section (Engaging Data) */}
@@ -79,5 +91,3 @@ const Main = () => {
 };
 
 export default Main;
-
-

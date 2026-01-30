@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
 import { errorMessage, successMessage } from "../../lib/utils/alert";
-import { useFetchBackendAPI } from "../../lib/api/backend-api";
+import { FetchBackendAPI } from "../../lib/api/backend-api";
 
 
 const EditTournamentForm = ({ tournament, onClose, refreshData }) => {

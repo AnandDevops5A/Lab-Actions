@@ -46,7 +46,7 @@ export const useSWRBackendAPI = (
 };
 
 // ✅ BackendAPI with revalidate support
-export async function useFetchBackendAPI(
+export async function FetchBackendAPI(
   endpoint,
   { method = "POST", data = null, revalidate = 0 } = {},
 ) {
@@ -97,7 +97,7 @@ export async function useFetchBackendAPI(
 // Leaderboard API functions
 export const getUpcomingTournamentsLeaderboard = async (tournamentIds) => {
   //check in cache first
-  const response = await useFetchBackendAPI("leaderboard/getByTornamentIds", {
+  const response = await FetchBackendAPI("leaderboard/getJoiners", {
     method: "POST",
     data: tournamentIds,
   });
@@ -105,38 +105,38 @@ export const getUpcomingTournamentsLeaderboard = async (tournamentIds) => {
 };
 
 export const approveUserFromTournament = async (tournamentId, userId) => {
-  return await useFetchBackendAPI(
+  return await FetchBackendAPI(
     `leaderboard/approve/${tournamentId}/user/${userId}`,
   );
 };
 
 export const getLeaderboard = async (tournamentId) => {
-  return await useFetchBackendAPI(`leaderboard/${tournamentId}`, {
+  return await FetchBackendAPI(`leaderboard/${tournamentId}`, {
     method: "POST",
   });
 };
 
 export const getTopNLeaderboard = async (tournamentId, n) => {
-  return await useFetchBackendAPI(`leaderboard/${tournamentId}/top/${n}`, {
+  return await FetchBackendAPI(`leaderboard/${tournamentId}/top/${n}`, {
     method: "GET",
   });
 };
 
 export const getUserTournaments = async (userId) => {
-  return await useFetchBackendAPI(`leaderboard/user/${userId}`, {
+  return await FetchBackendAPI(`leaderboard/user/${userId}`, {
     method: "POST",
   });
 };
 
 export const updateLeaderboardScore = async (tournamentId, userId, score) => {
-  return await useFetchBackendAPI(
+  return await FetchBackendAPI(
     `leaderboard/updateScore/${tournamentId}/${userId}/${score}`,
     { method: "POST" },
   );
 };
 
 export const updateLeaderboardRank = async (tournamentId, userId, rank) => {
-  return await useFetchBackendAPI(`leaderboard/updateRank`, {
+  return await FetchBackendAPI(`leaderboard/updateRank`, {
     method: "POST",
     data: { tournamentId, userId, rank },
   });
@@ -144,57 +144,57 @@ export const updateLeaderboardRank = async (tournamentId, userId, rank) => {
 
 export const registerAllUsersForTournament = async (tournamentId, userIds) => {
   const userIdsParam = userIds.join(",");
-  return await useFetchBackendAPI(
+  return await FetchBackendAPI(
     `leaderboard/registerAll/${tournamentId}/users/${userIdsParam}`,
     { method: "POST" },
   );
 };
 
 export const getHisJoinedTouenament = async (userId) => {
-  return await useFetchBackendAPI(`leaderboard/user/${userId}`, {
+  return await FetchBackendAPI(`leaderboard/user/${userId}`, {
     method: "POST",
   });
 };
 export const joinTournament = async (form) => {
-  return await useFetchBackendAPI("leaderboard/register", {
+  return await FetchBackendAPI("leaderboard/register", {
     method: "POST",
     data: form,
   });
 };
 
 export const getUserTournamentDetails = async (userId) => {
-  return await useFetchBackendAPI(`leaderboard/user/${userId}`, {
+  return await FetchBackendAPI(`leaderboard/user/${userId}`, {
     method: "POST",
   });
 };
 
 export const getUpcomingTournament = async () => {
-  return await useFetchBackendAPI("tournament/upcoming", {
+  return await FetchBackendAPI("tournament/upcoming", {
     method: "GET",
   });
 };
 
 export const deleteTournamentById = async (tournamentId) => {
-  return await useFetchBackendAPI(`tournament/delete/${tournamentId}`, {
+  return await FetchBackendAPI(`tournament/delete/${tournamentId}`, {
     method: "DELETE",
   });
 };
 
 export const getJoinersByTournamentId = async (tournamentId) => {
-  return await useFetchBackendAPI(`leaderboard/getJoiners/${tournamentId}`, {
+  return await FetchBackendAPI(`leaderboard/getJoiners/${tournamentId}`, {
     method: "POST",
   });
 };
 
 export const getJoinersByTournamentIdList = async (tournamentIds) => {
-  return await useFetchBackendAPI(`leaderboard/getJoiners`, {
+  return await FetchBackendAPI(`leaderboard/getJoiners`, {
     method: "POST",
     data: tournamentIds,
   });
 };
 
 export const approveParticipantForTournament = async (participantId) => {
-  return await useFetchBackendAPI(`leaderboard/approve/${participantId}`, {
+  return await FetchBackendAPI(`leaderboard/approve/${participantId}`, {
     method: "PUT",
   });
 };
@@ -203,7 +203,7 @@ export const updateParticipantTournamentStatus = async (
   participantId,
   updateData,
 ) => {
-  return await useFetchBackendAPI(`leaderboard/update/${participantId}`, {
+  return await FetchBackendAPI(`leaderboard/update/${participantId}`, {
     method: "PUT",
     data: updateData,
   });

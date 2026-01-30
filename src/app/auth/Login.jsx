@@ -3,7 +3,7 @@
 import React, { useState, useRef, memo, useContext } from "react";
 import { Lock, Eye, EyeOff,PhoneCall } from "lucide-react";
 import { errorMessage, successMessage } from "../../lib/utils/alert";
-import { useFetchBackendAPI } from "../../lib/api/backend-api";
+import { FetchBackendAPI } from "../../lib/api/backend-api";
 import { setCache, UpdateCache } from "../../lib/utils/action-redis";
 import { UserContext } from "../../lib/contexts/user-context";
 import { useRouter } from "next/navigation";
@@ -24,7 +24,7 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
 
   async function onSubmit(payload) {
     // console.log("Submitting payload:", payload);
-    const res = await useFetchBackendAPI("users/verify", {
+    const res = await FetchBackendAPI("users/verify", {
       method: "POST",
       data: payload,
     });

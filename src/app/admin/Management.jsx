@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useContext, useMemo, useCallback } from "react";
 import { ThemeContext } from "../../lib/contexts/theme-context";
-import { deleteTournamentById, useFetchBackendAPI } from "../../lib/api/backend-api";
+import { deleteTournamentById, FetchBackendAPI } from "../../lib/api/backend-api";
 import { errorMessage, successMessage, confirmMessage } from "../../lib/utils/alert";
 
 const BASE_URL = "http://localhost:8082";

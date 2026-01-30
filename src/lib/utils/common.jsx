@@ -1,6 +1,6 @@
 import { getCache, setCache, UpdateCache } from "./action-redis";
 import { errorMessage } from "./alert";
-import { getUpcomingTournament, useFetchBackendAPI } from "../api/backend-api";
+import { getUpcomingTournament, FetchBackendAPI } from "../api/backend-api";
 
 export function calulateWinAndReward(tournamentList) {
   const rewardMap = { 1: 500, 2: 200, 3: 100 };

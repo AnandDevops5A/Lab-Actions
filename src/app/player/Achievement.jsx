@@ -16,7 +16,7 @@ const Achievement = ({ matchHistory }) => (
             key={idx}
             className={`p-3 rounded-lg flex justify-between items-center transition duration-300 
                                 ${
-                                  (match.rank ? match.rank >= 3: false)
+                                  (match.rank ? match.rank <= 3: false)
                                     ? "bg-green-900/40 border-l-4 border-green-500 hover:bg-green-800/50"
                                     : "bg-red-900/40 border-l-4 border-red-500 hover:bg-red-800/50"
                                 }`}

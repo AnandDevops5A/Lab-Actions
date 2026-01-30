@@ -9,7 +9,7 @@ import {
   SkeletonTable,
 } from "../skeleton/Skeleton";
 import { UserContext } from "../../lib/contexts/user-context";
-import { getUserTournamentDetails, useFetchBackendAPI } from "../../lib/api/backend-api";
+import { getUserTournamentDetails, FetchBackendAPI } from "../../lib/api/backend-api";
 import { useRouter } from "next/navigation";
 import { calulateWinAndReward } from "../../lib/utils/common";
 import { getCache, setCache } from "../../lib/utils/action-redis";
@@ -54,6 +54,7 @@ const PlayerProfile = () => {
     }
   }, [user, router]);
 
+  //
   useEffect(() => {
     let i = true;
     const fetchData = async () => {

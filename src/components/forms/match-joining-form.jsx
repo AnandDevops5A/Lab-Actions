@@ -11,7 +11,7 @@ import {
 } from "../ui/svg";
 import { getCache, setCache } from "../../lib/utils/action-redis";
 import { errorMessage, simpleMessage, successMessage } from "../../lib/utils/alert";
-import { getHisJoinedTouenament, joinTournament, useFetchBackendAPI } from "../../lib/api/backend-api";
+import { getHisJoinedTouenament, joinTournament, FetchBackendAPI } from "../../lib/api/backend-api";
 import { UserContext } from "../../lib/contexts/user-context";
 import CyberLoading from "../../app/skeleton/CyberLoading";
 
@@ -117,58 +117,93 @@ export default function MatchJoiningForm({
   }
 
   useEffect(() => {
+    if (!open || !user?.id) return;
+
     let isMounted = true;
     const fetchData = async () => {
-      if (!user?.id) return;
-
       try {
-        // 1. Get all upcoming tournaments from cache
+        // 1. Get all upcoming tournaments (Cache First -> API Fallback)
+        let upcomingData = [];
         const ud = await getCache("upcomingTournament");
-        const upcomingData = ud?.data;
-        if (!upcomingData || !Array.isArray(upcomingData) || upcomingData.length === 0) {
-          // If there are no upcoming tournaments at all, inform the user.
+        
+        if (ud?.data && Array.isArray(ud.data) && ud.data.length > 0) {
+          upcomingData = ud.data;
+        } else {
+          // Fallback to API if cache is empty
+          try {
+            const apiRes = await FetchBackendAPI("tournament/upcoming");
+            if (apiRes?.data && Array.isArray(apiRes.data)) {
+              upcomingData = apiRes.data;
+              // Update cache for future use
+              await setCache("upcomingTournament", upcomingData, 300);
+            }
+          } catch (err) {
+            console.warn("Failed to fetch upcoming tournaments from API", err);
+          }
+        }
+
+        if (!isMounted) return;
+
+        if (upcomingData.length === 0) {
           alreadyRegistered();
           return;
         }
 
-        // 2. Get local cache of joined tournaments (to preserve optimistic updates)
-        const cj = await getCache(`hisJoinedTournament:${user.id}`);
-        const cachedJoined = Array.isArray(cj?.data) ? cj.data : [];
+        // 2. Get joined tournaments (Parallel: Cache + API)
+        const [cachedJoinedRes, backendJoinedRes] = await Promise.all([
+          getCache(`hisJoinedTournament:${user.id}`),
+          getHisJoinedTouenament(user.id),
+        ]);
 
-        // 3. Fetch the user's joined tournaments from the backend for accuracy
-        const response = await getHisJoinedTouenament(user.id);
         if (!isMounted) return;
 
-        const backendJoined = Array.isArray(response.data) ? response.data : [];
+        const cachedJoined = Array.isArray(cachedJoinedRes?.data) ? cachedJoinedRes.data : [];
+        const backendJoined = Array.isArray(backendJoinedRes?.data) ? backendJoinedRes.data : [];
 
-        // 4. Merge cache and backend data to ensure we have the latest joined tournaments
+        // 3. Merge cache and backend data
         const joinedMap = new Map();
-        backendJoined.forEach((t) => joinedMap.set(String(t.tournamentId), t));
-        cachedJoined.forEach((t) => joinedMap.set(String(t.tournamentId), t)); // Local cache takes precedence for recent joins
+        
+        // Helper to generate a unique key for deduplication
+        const getJoinKey = (t) => t.tournamentId || t.id || (t.tournamentName ? `NAME:${t.tournamentName}` : null);
+
+        backendJoined.forEach((t) => {
+          const key = getJoinKey(t) || `UNKNOWN:${Math.random()}`;
+          joinedMap.set(String(key), t);
+        });
+        
+        cachedJoined.forEach((t) => {
+          const key = getJoinKey(t);
+          if (key) joinedMap.set(String(key), t);
+        });
         
         const mergedJoined = Array.from(joinedMap.values());
 
-        // 5. Update the cache with the merged data
+        // 4. Update the cache with the merged data
         await setCache(`hisJoinedTournament:${user.id}`, mergedJoined);
 
-        // 6. Filter the upcoming list against the merged joined list
-        const filterMatches = (joinedList) => {
-          const joinedIds = new Set(joinedList.map((t) => String(t.tournamentId)));
-          return upcomingData.filter((d) => !joinedIds.has(String(d.id)));
-        };
+        // 5. Filter available tournaments
+        const joinedIds = new Set(mergedJoined.map((t) => t.tournamentId ? String(t.tournamentId) : null).filter(Boolean));
+        const joinedNames = new Set(mergedJoined.map((t) => t.tournamentName).filter(Boolean));
+        
+        const finalAvailable = upcomingData.filter((d) => {
+          const isIdJoined = joinedIds.has(String(d.id));
+          const isNameJoined = d.tournamentName && joinedNames.has(d.tournamentName);
+          return !isIdJoined && !isNameJoined;
+        });
 
-        const finalAvailable = filterMatches(mergedJoined);
-
-        // 7. Update the state with the final list of available tournaments
-        if (finalAvailable.length === 0) {
-          alreadyRegistered();
-        } else {
-          setMatch(finalAvailable);
+        if (isMounted) {
+          if (finalAvailable.length === 0) {
+            alreadyRegistered();
+          } else {
+            setMatch(finalAvailable);
+          }
         }
       } catch (error) {
         console.error("Error fetching data:", error);
-        errorMessage("Could not load tournament list. Please try again.");
-        setOpen(false);
+        if (isMounted) {
+          errorMessage("Could not load tournament list. Please try again.");
+          setOpen(false);
+        }
       }
     };
     fetchData();
@@ -176,7 +211,7 @@ export default function MatchJoiningForm({
     return () => {
       isMounted = false;
     };
-  }, [user?.id]);
+  }, [open, user?.id]);
 
   // const upcomingTournament=await getCache("upcomingTournament");
   //   console.log(upcomingTournament);
@@ -383,6 +418,3 @@ export default function MatchJoiningForm({
     </div>):<CyberLoading/>
   );
 }
-
-
-

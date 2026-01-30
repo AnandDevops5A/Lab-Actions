@@ -2,7 +2,7 @@
 
 import React, { useContext, useState, useRef, memo } from "react";
 import { Users, UserPlus, Phone, Lock, Eye, EyeOff, Check } from "lucide-react";
-import { useFetchBackendAPI } from "../../lib/api/backend-api";
+import { FetchBackendAPI } from "../../lib/api/backend-api";
 import { validatePassword } from "./PasswordCheck";
 import { useRouter } from "next/navigation";
 import { errorMessage, successMessage } from "../../lib/utils/alert";
@@ -86,7 +86,7 @@ const Signup = memo(({ onSwitch }) => {
 
   async function onSubmit(payload) {
     console.log("Submitting payload:", payload);
-    const res = await useFetchBackendAPI("users/register", {
+    const res = await FetchBackendAPI("users/register", {
       method: "POST",
       data: payload,
     });
