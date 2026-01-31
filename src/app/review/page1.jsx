@@ -20,7 +20,7 @@ export default function ReviewsPage() {
   const [showForm, setShowForm] = useState(false);
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-black via-gray-900 to-black text-white font-mono">
+    <div className="min-h-screen bg-linear-to-br from-black via-gray-900 to-black text-white Rusty Attack">
       {/* Header */}
       <header className="py-12 text-center">
         <h1 className="text-5xl md:text-6xl font-extrabold tracking-widest text-transparent bg-clip-text bg-linear-to-r from-pink-500 via-purple-500 to-cyan-500 drop-shadow-lg">

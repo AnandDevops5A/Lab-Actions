@@ -99,7 +99,7 @@ const AddTournamentForm = ({ onClose, refreshData}) => {
 
 };
   return (
-    <div className="max-h-screen bg-[#050505] flex items-center justify-center  md:p-3 font-mono animate-slideInUp">
+    <div className="max-h-screen bg-[#050505] flex items-center justify-center  md:p-3 Rusty Attack animate-slideInUp">
       {/* Main Container - Responsive Widths */}
       <div className="relative w-full max-w-sm sm:max-w-xl md:max-w-3xl lg:max-w-4xl p-0.5 bg-linear-to-br from-green-500 via-transparent to-emerald-500 shadow-[0_0_30px_rgba(34,197,94,0.3)]">
         {/* The "Cyber-Box" */}

@@ -92,7 +92,7 @@ const Signup = memo(({ onSwitch }) => {
     });
 
     if (res.status === 200 && res.data) {
-      const status = await setCache("activeUser", res.data);
+      const status = await setCache("currentUser", res.data);
       //set to context userdata
       setUser(res.data);
       if (!status.status) {

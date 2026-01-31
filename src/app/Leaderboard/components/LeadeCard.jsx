@@ -68,7 +68,7 @@ export function LeaderCard({ player, rank, isDarkMode, globalRank, tournamentRan
         `}
       >
         <img
-          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.username}`}
+          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.callSign}`}
           alt={player.username}
           className="w-full h-full object-cover rounded-full transition-transform duration-500 ease-out group-hover:scale-105 motion-safe:group-hover:scale-105"
         />
@@ -86,7 +86,7 @@ export function LeaderCard({ player, rank, isDarkMode, globalRank, tournamentRan
       </p>
 
       <div className={`flex justify-center gap-3 text-[10px] font-bold ${labelColor} opacity-80 mb-4`}>
-        {globalRank && <span>🥷 {player.playedTournaments.length}</span>}
+        {/* {globalRank && <span>🥷 {player.playedTournaments.length}</span>} */}
         {tournamentRank && <span>🏆 #{tournamentRank}</span>}
       </div>
 
@@ -143,9 +143,9 @@ export function LeaderCard({ player, rank, isDarkMode, globalRank, tournamentRan
               {tooltipTitle}
             </p>
             {prizePool && (
-              <p className="text-[10px] text-center mb-2 opacity-80 font-mono">{prizePool}</p>
+              <p className="text-[10px] text-center mb-2 opacity-80 Rusty Attack">{prizePool}</p>
             )}
-            <div className="space-y-1.5 font-mono text-[10px]">
+            <div className="space-y-1.5 Rusty Attack text-[10px]">
               <div className="flex justify-between items-center">
                 <span>Rank #1</span> 
                 <span className="font-bold text-yellow-500">₹{rewards[1]}</span>

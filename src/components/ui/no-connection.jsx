@@ -40,7 +40,7 @@ export const NoConnection = () => {
             OFFLINE
           </h2>
 
-          <p className="text-gray-400 font-mono text-sm mb-6">
+          <p className="text-gray-400 Rusty Attack text-sm mb-6">
             Network uplink severed. Check your connection module.
           </p>
 

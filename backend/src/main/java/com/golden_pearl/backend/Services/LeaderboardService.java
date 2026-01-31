@@ -1,9 +1,14 @@
 package com.golden_pearl.backend.Services;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Page;
@@ -33,26 +38,32 @@ public class LeaderboardService {
     private final TournamentRepository tournamentRepository;
     private final TournamentService tournamentService;
     public final General general = new General();
+    public final EmailService emailService;
 
     public LeaderboardService(LeaderboardRepository leaderboardRepository, UserRepository userRepository,
-            TournamentRepository tournamentRepository, TournamentService tournamentService) {
+            TournamentRepository tournamentRepository, TournamentService tournamentService, EmailService emailService) {
         this.leaderboardRepository = leaderboardRepository;
         this.userRepository = userRepository;
         this.tournamentRepository = tournamentRepository;
         this.tournamentService = tournamentService;
+        this.emailService = emailService;
     }
 
     // register user for tournament
     @Transactional
     @PostMapping("/register")
     public ResponseEntity<String> registerUserForTournament(@RequestBody LeaderboardRegisterReceiveData registerData) {
+        // 1. Fail Fast: Validate inputs immediately
+        if (registerData == null || registerData.userId() == null || registerData.tournamentId() == null) {
+            return ResponseEntity.badRequest().body("Invalid registration data: Missing User ID or Tournament ID.");
+        }
+
         // Check if user is already registered for this tournament
         LeaderBoard existingEntry = leaderboardRepository.findByTournamentIdAndUserId(registerData.tournamentId(),
                 registerData.userId());
 
         if (existingEntry != null) {
-            // This will be caught by GlobalExceptionHandler (mapped to 400 Bad Request)
-            throw new IllegalArgumentException("You are already registered for this tournament");
+            return ResponseEntity.badRequest().body("You are already registered for this tournament.");
         }
 
         // Check if user exists
@@ -63,16 +74,28 @@ public class LeaderboardService {
         Tournament tournament = tournamentRepository.findById(registerData.tournamentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
 
-        // Create new LeaderBoard entry
-        LeaderBoard newEntry = new LeaderBoard();
-        newEntry.setUserId(registerData.userId());
-        newEntry.setTournamentId(registerData.tournamentId());
-        newEntry.setTempEmail(registerData.tempEmail());
-        newEntry.setTransactionId(registerData.transactionId());
-        newEntry.setTime(general.getCurrentTime());
+        // 2. Use Builder Pattern for cleaner object creation
+        LeaderBoard newEntry = LeaderBoard.builder()
+                .userId(registerData.userId())
+                .tournamentId(registerData.tournamentId())
+                .tempEmail(registerData.tempEmail())
+                .transactionId(registerData.transactionId())
+                .gameId(registerData.gameId())
+                .time(general.getCurrentTime())
+                .isApproved(false) // Explicitly set default state if needed
+                .build();
 
         leaderboardRepository.save(newEntry);
-        // System.out.println("User registered for tournament: " + newEntry);
+
+        // 3. Send email (Async) - Using the renamed variable
+        try {
+            emailService.sendJoinEmail(newEntry.getTempEmail(), user, tournament, newEntry);
+        } catch (Exception e) {
+            // Log error but do not fail the registration transaction just because email
+            // failed
+            System.err.println("Failed to send confirmation email: " + e.getMessage());
+        }
+
         return ResponseEntity.ok(
                 "You registered successfully for the " + tournament.getTournamentName());
     }
@@ -194,12 +217,77 @@ public class LeaderboardService {
                 .ok("All users registered successfully for the tournament: " + tournament.getTournamentName());
     }
 
-   public ResponseEntity<?> getLeaderboardByTournamentIds(List<String> tournamentIds) {
-    List<LeaderBoard> leaderboard = leaderboardRepository.findByTournamentIdIn(tournamentIds);
-    System.out.println("Leaderboard entries found: " + leaderboard.size());
-    return ResponseEntity.ok(leaderboard);
-}
+    public ResponseEntity<?> getLeaderboardByTournamentIds(List<String> tournamentIds) {
+        List<LeaderBoard> leaderboard = leaderboardRepository.findByTournamentIdIn(tournamentIds);
+        System.out.println("Leaderboard entries found: " + leaderboard.size());
+        return ResponseEntity.ok(leaderboard);
+    }
 
+    // Seed leaderboard with fake/sample data for a tournament
+  @Transactional
+public ResponseEntity<String> seedLeaderboard(List<String> listOfUserIds, String tournamentId, int count) {
+    // 1. Validations & Bounds
+    if (listOfUserIds == null || listOfUserIds.isEmpty())
+        return ResponseEntity.badRequest().body("Empty user list");
+
+    // Senior move: Ensure we never exceed our unique amount pool (1-50)
+    int seedLimit = Math.min(count, Math.min(listOfUserIds.size(), 50));
+    
+    Tournament tournament = tournamentRepository.findById(tournamentId)
+            .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
+
+    // 2. Data Preparation
+    List<String> shuffledUsers = new ArrayList<>(listOfUserIds);
+    Collections.shuffle(shuffledUsers);
+
+    List<Integer> amountPool = IntStream.rangeClosed(1, 50).boxed().collect(Collectors.toList());
+    Collections.shuffle(amountPool);
+
+    ThreadLocalRandom rnd = ThreadLocalRandom.current();
+    List<LeaderBoard> entries = new ArrayList<>();
+    
+    // Move time calculation OUTSIDE the loop unless you want different minutes per entry
+    int timeAsInt = (LocalTime.now().getHour() * 100) + LocalTime.now().getMinute();
+
+    // 3. Generation
+    for (int i = 0; i < seedLimit; i++) {
+        String userId = shuffledUsers.get(i);
+        String shortId = tournamentId.substring(Math.max(0, tournamentId.length() - 4));
+        String gameId = String.format("G-%s-%03d", shortId, i + 1);
+
+        entries.add(LeaderBoard.builder()
+                .tournamentId(tournamentId)
+                .userId(userId)
+                .gameId(gameId)
+                .tempEmail(userId + "@example.com")
+                .transactionId("TXN-" + UUID.randomUUID().toString().substring(0, 8))
+                .score(rnd.nextInt(1, 100))
+                .investAmount(amountPool.get(i))
+                .time(timeAsInt)
+                .isApproved(true)
+                .build());
+    }
+
+    // 4. Ranking & Prize Distribution
+    entries.sort((a, b) -> Integer.compare(b.getScore(), a.getScore()));
+
+    for (int i = 0; i < entries.size(); i++) {
+        LeaderBoard entry = entries.get(i);
+        entry.setRank(i + 1);
+
+        // Fixed indexing: i=0 is 1st place
+        switch (i) {
+            case 0 -> entry.setWinAmount(500); // 1st Place
+            case 1 -> entry.setWinAmount(300); // 2nd Place
+            case 2 -> entry.setWinAmount(100); // 3rd Place
+            default -> entry.setWinAmount(0);
+        }
+    }
+
+    // 5. Save
+    leaderboardRepository.saveAll(entries);
+    return ResponseEntity.ok(String.format("Seeded %d entries for %s", entries.size(), tournament.getTournamentName()));
+}
     public ResponseEntity<String> approveUserFromTournament(String tournamentId, String userId) {
         // Find the LeaderBoard entry
         LeaderBoard entry = leaderboardRepository.findByTournamentIdAndUserId(tournamentId, userId);
@@ -216,12 +304,13 @@ public class LeaderboardService {
         return ResponseEntity.ok("User approved successfully for the tournament");
     }
 
-    //get tournament list by user id with rank and invest amount
+    // get tournament list by user id with rank and invest amount
     public ResponseEntity<List<TournamentWithLeaderboard>> getTournamentsByUserId(String userId) {
         List<LeaderBoard> userTournaments = leaderboardRepository.findByUserId(userId);
-        //fetrieve all tournament ids
-        List<String> tournamentIds = userTournaments.stream().map(LeaderBoard::getTournamentId).collect(Collectors.toList());
-        //fetch all tournaments by ids
+        // fetrieve all tournament ids
+        List<String> tournamentIds = userTournaments.stream().map(LeaderBoard::getTournamentId)
+                .collect(Collectors.toList());
+        // fetch all tournaments by ids
         List<Tournament> tournaments = tournamentService.getTournamentsbyids(tournamentIds);
         List<TournamentWithLeaderboard> tournamentWithLeaderboards = new ArrayList<>();
         for (Tournament tournament : tournaments) {
@@ -230,7 +319,7 @@ public class LeaderboardService {
             twl.setPrizePool(tournament.getPrizePool());
             twl.setDateTime(tournament.getDateTime());
             twl.setPlateform(tournament.getPlatform());
-            //find corresponding leaderboard entry
+            // find corresponding leaderboard entry
             LeaderBoard lbEntry = userTournaments.stream()
                     .filter(lb -> lb.getTournamentId().equals(tournament.getId()))
                     .findFirst()
@@ -242,16 +331,18 @@ public class LeaderboardService {
                 twl.setInvestAmount(lbEntry.getInvestAmount());
                 twl.setWinAmount(lbEntry.getWinAmount());
             }
-            
+
             tournamentWithLeaderboards.add(twl);
-        
+
         }
         return ResponseEntity.ok(tournamentWithLeaderboards);
     }
 
-    // Update leaderboard entry (rank, investAmount and winAmount) - partial updates allowed
+    // Update leaderboard entry (rank, investAmount and winAmount) - partial updates
+    // allowed
     @Transactional
-    public ResponseEntity<String> updateLeaderboardEntry(String leaderboardId, Integer rank, Integer investAmount, Integer winAmount) {
+    public ResponseEntity<String> updateLeaderboardEntry(String leaderboardId, Integer rank, Integer investAmount,
+            Integer winAmount) {
         // Find the LeaderBoard entry
         LeaderBoard entry = leaderboardRepository.findById(leaderboardId)
                 .orElseThrow(() -> new ResourceNotFoundException("Leaderboard entry not found"));
@@ -305,6 +396,10 @@ public class LeaderboardService {
         leaderboardRepository.save(updatedEntry);
 
         return ResponseEntity.ok("Leaderboard entry approved successfully");
+    }
+
+    public List<LeaderBoard> getAllLeaderboard() {
+        return leaderboardRepository.findAll();
     }
 
 }

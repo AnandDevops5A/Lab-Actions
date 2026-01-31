@@ -31,7 +31,7 @@ public class User {
     private Integer totalWin;
     @Builder.Default
     private boolean active = true;
-    private List<String> playedTournaments;
+    // private List<String> playedTournaments;us
 
 
 }

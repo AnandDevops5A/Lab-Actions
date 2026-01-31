@@ -32,6 +32,12 @@ public class LeaderboardController {
         this.tournamentService = tournamentService;
     }
 
+    //get all leaderboard
+    @GetMapping("/all")
+    public ResponseEntity<List<LeaderBoard>> getAllLeaderboard() {
+        return ResponseEntity.ok(leaderboardService.getAllLeaderboard());
+    }
+
     // register user for tournament
     @PostMapping("/register")
     public ResponseEntity<String> registerUserForTournament(@RequestBody LeaderboardRegisterReceiveData registerData) {
@@ -66,6 +72,8 @@ public class LeaderboardController {
         return leaderboardService.approveUserFromTournament(tournamentId, userId);
     }
 
+    
+
     @PostMapping("/updateRank")
     public ResponseEntity<String> updateRank(@RequestBody UpdateRank updateRankData) {
         return leaderboardService.updateRank(updateRankData.tournamentId(), updateRankData.userId(),
@@ -99,6 +107,13 @@ public class LeaderboardController {
     @PutMapping("/approve/{leaderboardId}")
     public ResponseEntity<String> approveLeaderboardEntry(@PathVariable String leaderboardId) {
         return leaderboardService.approveLeaderboardEntry(leaderboardId);
+    }
+
+    // seed leaderboard with sample data
+    @PostMapping("/seed/{listOfUserIds}/{tournamentId}/{count}")
+    public ResponseEntity<String> seedLeaderboard(@PathVariable List<String> listOfUserIds,
+            @PathVariable String tournamentId, @PathVariable int count) {
+        return leaderboardService.seedLeaderboard(listOfUserIds,tournamentId, count);
     }
 
 }

@@ -94,6 +94,59 @@ export async function FetchBackendAPI(
   }
 }
 
+//user API functions
+export const getUsersByIds = async (userIds) => {
+  
+  return await FetchBackendAPI("users/getUsersByIds/"+userIds, {
+    method: "POST",
+  });
+};
+
+export const getAllUsers = async () => {
+  return await FetchBackendAPI("users/all", {
+    method: "POST",
+  });
+};
+
+
+
+
+
+
+//tournament ApI functions
+export const getAllTournaments = async () => {
+  return await FetchBackendAPI("tournament/all", {
+    method: "POST",
+  });
+};
+
+export const getUpcomingTournament = async () => {
+  return await FetchBackendAPI("tournament/upcoming", {
+    method: "GET",
+  });
+};
+
+export const deleteTournamentById = async (tournamentId) => {
+  return await FetchBackendAPI(`tournament/delete/${tournamentId}`, {
+    method: "DELETE",
+  });
+};
+
+
+export const getTournamentByIds = async (tournamentIds) => {
+  return await FetchBackendAPI(`tournament/getTournamentsByIds/${tournamentIds}`, {
+    method: "POST",
+  });
+};
+
+
+
+
+
+
+
+
+
 // Leaderboard API functions
 export const getUpcomingTournamentsLeaderboard = async (tournamentIds) => {
   //check in cache first
@@ -168,25 +221,17 @@ export const getUserTournamentDetails = async (userId) => {
   });
 };
 
-export const getUpcomingTournament = async () => {
-  return await FetchBackendAPI("tournament/upcoming", {
-    method: "GET",
-  });
-};
 
-export const deleteTournamentById = async (tournamentId) => {
-  return await FetchBackendAPI(`tournament/delete/${tournamentId}`, {
-    method: "DELETE",
-  });
-};
 
 export const getJoinersByTournamentId = async (tournamentId) => {
+  // it 
   return await FetchBackendAPI(`leaderboard/getJoiners/${tournamentId}`, {
     method: "POST",
   });
 };
 
 export const getJoinersByTournamentIdList = async (tournamentIds) => {
+  //it return all the leaderboard related to this tournament list
   return await FetchBackendAPI(`leaderboard/getJoiners`, {
     method: "POST",
     data: tournamentIds,
@@ -206,5 +251,22 @@ export const updateParticipantTournamentStatus = async (
   return await FetchBackendAPI(`leaderboard/update/${participantId}`, {
     method: "PUT",
     data: updateData,
+  });
+};
+
+export const getAllLeaderBoard = async () => {
+  return await FetchBackendAPI("leaderboard/all", {
+    method: "GET",
+  });
+};
+
+
+
+
+
+// Seed leaderboard with sample entries
+export const seedLeaderboard = async (listofuserId,tournamentId, count = 20) => {
+  return await FetchBackendAPI(`leaderboard/seed/${listofuserId}/${tournamentId}/${count}`, {
+    method: "POST",
   });
 };

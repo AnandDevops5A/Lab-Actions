@@ -30,7 +30,7 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
-    // verify user by callsign and accessKey or contact and accessKey
+    // verify user by contact and accessKey or contact and accessKey
     public ResponseEntity<User> getUser(UserAuth userAuth) {
         User user;
         Long contact = userAuth.contact();
@@ -89,6 +89,15 @@ public class UserService {
         return ResponseEntity.ok(userRepository.save(user));
     }
 
+
+    // get users by ids
+    public ResponseEntity<List<User>> getUsersByIds(List<String> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        List<User> users = userRepository.findAllById(userIds);
+        return ResponseEntity.ok(users);
+    }
     // bulk save users
     @CacheEvict(value = "adminData", allEntries = true)
     public ResponseEntity<List<User>> saveAllUsers(List<User> users) {

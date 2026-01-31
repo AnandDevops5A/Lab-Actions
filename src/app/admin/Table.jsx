@@ -82,7 +82,7 @@ const Table = ({
   const textClass = isDarkMode ? "text-gray-300" : "text-gray-700";
 
   return (
-    <div className="space-y-6 font-mono">
+    <div className="space-y-6 Rusty Attack">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
         <div>
           <h2
@@ -160,7 +160,7 @@ const Table = ({
                 <tr>
                   <td
                     colSpan={columns.length}
-                    className="px-6 py-8 text-center text-gray-500 font-mono"
+                    className="px-6 py-8 text-center text-gray-500 Rusty Attack"
                   >
                     {/* NO_DATA_FOUND */}
                   </td>

@@ -35,7 +35,7 @@ const ParticipantDetailsModal = ({ participant, tournament, leaderboardData, onC
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="max-h-screen bg-[#050505] flex items-center justify-center md:p-3 font-mono w-full max-w-4xl">
+      <div className="max-h-screen bg-[#050505] flex items-center justify-center md:p-3 Rusty Attack w-full max-w-4xl">
         <div className="relative w-full p-0.5 bg-linear-to-br from-green-500 via-transparent to-blue-500 shadow-[0_0_30px_rgba(34,197,94,0.3)]">
           <div className="bg-black p-5 sm:p-10 relative border border-green-900/50 max-h-[90vh] overflow-y-auto">
             {/* Close Button */}
@@ -174,7 +174,7 @@ const ParticipantDetailsModal = ({ participant, tournament, leaderboardData, onC
                       {participant.transactionId && (
                         <div className="flex justify-between">
                           <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Transaction ID:</span>
-                          <span className={`font-medium font-mono ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>{participant.transactionId}</span>
+                          <span className={`font-medium Rusty Attack ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>{participant.transactionId}</span>
                         </div>
                       )}
                     </div>

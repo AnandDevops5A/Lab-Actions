@@ -226,7 +226,7 @@ const ParticipantManagementTable = ({
                     </td>
                     <td className="px-4 py-4">
                       <span
-                        className={`text-sm font-mono ${isDarkMode ? "text-purple-400" : "text-purple-600"}`}
+                        className={`text-sm Rusty Attack ${isDarkMode ? "text-purple-400" : "text-purple-600"}`}
                       >
                         {participant.transactionId || "N/A"}
                       </span>

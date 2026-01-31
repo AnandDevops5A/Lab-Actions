@@ -1,12 +1,19 @@
 "use client";
-import React, { useState, useMemo, useContext, useEffect } from "react";
+import React, { useState, useMemo, useContext, useEffect, useLayoutEffect } from "react";
 import { ThemeContext } from "../../lib/contexts/theme-context";
+import { UserContext } from "../../lib/contexts/user-context";
 import { TopThree } from "./components/TopThree";
 import { PlayerCard } from "./components/PlayerCard";
-import { FetchBackendAPI } from "../../lib/api/backend-api";
+import {
+  getAllLeaderBoard,
+  getAllTournaments,
+  getAllUsers,
+  getUsersByIds,
+  seedLeaderboard,
+} from "../../lib/api/backend-api";
 import { calulateWinAndReward } from "../../lib/utils/common";
 import { LeaderboardSkeleton } from "../skeleton/Skeleton";
-import { getCache } from "../../lib/utils/action-redis";
+import { errorMessage } from "@/lib/utils/alert";
 
 const DummyTournamentforLeaderboard = [
   "Global",
@@ -18,96 +25,91 @@ const DummyTournamentforLeaderboard = [
 export default function Leaderboard() {
   const [search, setSearch] = useState("");
   // const [tournament, setTournament] = useState("Global");
-  const [sortBy, setSortBy] = useState("wins");
+  const [sortBy, setSortBy] = useState("rank");
   const [loading, setLoading] = useState(true);
   const [dropdown, setDropdown] = useState(0);
 
   const themeContext = useContext(ThemeContext);
+  const { user } = useContext(UserContext);
   const isDarkMode = themeContext?.isDarkMode ?? true;
   const [users, setUsers] = useState([]);
+  const [leaderboardEntries, setLeaderboardEntries] = useState([]);
   const [AllTournament, setAllTournament] = useState();
 
   //GET DATA FROM BACKEND
   async function getData(isMounted) {
     try {
-      let data;
-      let tournamentData;
-      const c = await getCache("adminData::SimpleKey []");
-      const cache = c.data;
+      // Parallel fetch: leaderboard, tournaments, and all users (for fallback)
+      const [leaderboardRes, tournamentRes, userRes] = await Promise.all([
+        getAllLeaderBoard(),
+        getAllTournaments(),
+        getAllUsers(),
+      ]);
 
-
-      // console.log(cache);
-      // Check if cache is valid (not the error object from getCache)
-      if (c.status) {
-        data = cache.users[1];
-        tournamentData = cache.tournaments[1];
-        // console.log(tournamentData);
-      } else {
-        const res = await FetchBackendAPI("users/all");
-        data = res.data;
-        console.log("backend call");
+      if (!leaderboardRes.ok) {
+        errorMessage(leaderboardRes.error || "Failed to load leaderboard data");
+        if (isMounted()) setLoading(false);
+        return;
       }
 
-      if (!isMounted()) return;
+      // Extract leaderboard entries and prepare tournaments map
+      const lbEntries = leaderboardRes.data || [];
+      const tournaments = (tournamentRes?.data || []).map((t) => ({ ...t }));
+      const tournamentById = Object.fromEntries((tournaments || []).map((t) => [t.id || t._id, { ...t }]));
 
-      //filter  played and unplayed user
-      const played = (data || []).filter((d) => d.playedTournaments != null);
+      // Group entries by tournament and compute rankList per tournament
+      const entriesByTournament = lbEntries.reduce((acc, e) => {
+        const tid = e.tournamentId;
+        if (!tid) return acc;
+        acc[tid] = acc[tid] || [];
+        acc[tid].push(e);
+        return acc;
+      }, {});
 
-      let ids = played.flatMap((u) => u.playedTournaments);
-      let listoftournaments = Array.from(new Set(ids));
-
-      if (!tournamentData) {
-        let response = await FetchBackendAPI("tournament/getTournament", {
-          method: "POST",
-          data: listoftournaments,
+      for (const tid of Object.keys(entriesByTournament)) {
+        const entries = entriesByTournament[tid];
+        const hasRank = entries.some((x) => x.rank != null);
+        let sorted = [];
+        if (hasRank) {
+          sorted = entries.slice().sort((a, b) => (a.rank || 9999) - (b.rank || 9999));
+        } else {
+          sorted = entries.slice().sort((a, b) => (b.score || 0) - (a.score || 0));
+        }
+        const rankList = {};
+        sorted.forEach((entry, idx) => {
+          const key = entry.userId || entry.tempEmail;
+          rankList[key] = entry.rank ?? idx + 1;
         });
-        tournamentData = response.data || [];
-        // console.log(tournamentData);
-      } else {
-        tournamentData = tournamentData.filter((t) =>
-          listoftournaments.includes(t.id)
-        );
+        if (tournamentById[tid]) tournamentById[tid].rankList = rankList;
+        else tournaments.push({ id: tid, tournamentName: tid, rankList });
       }
-      
-      if (!isMounted()) return;
-      
-      // console.log(tournamentData);
-      setAllTournament(tournamentData);
 
-      //calculate reward and win
-      const userStats = calulateWinAndReward(tournamentData);
-      //merge reward to user
-      let usersWithStats = played.map((user) => {
-        const stats = userStats.get(user.id) || userStats.get(user._id);
-        return {
-          ...user,
-          reward: stats?.reward || 0,
-          wins: stats?.wins || 0,
-        };
-      });
+      // Determine user ids to fetch details for: prefer users referenced in leaderboard, otherwise fallback to all users
+      const userIdSet = new Set(lbEntries.map((e) => e.userId).filter(Boolean));
+      let finalUsers = userRes?.data || [];
 
-      // Sort by reward then wins to establish global rank
-      usersWithStats.sort((a, b) => {
-        if (b.reward !== a.reward) return b.reward - a.reward;
-        return b.wins - a.wins;
-      });
+      // If we didn't get all users (or empty), and we have leaderboard entries, try fetching specific users
+      if (finalUsers.length === 0 && userIdSet.size > 0) {
+        const idsToFetch = Array.from(userIdSet);
+        const userData = await getUsersByIds(idsToFetch);
+        finalUsers = userData.data || [];
+      }
 
-      // Assign global rank once
-      usersWithStats = usersWithStats.map((user, index) => ({
-        ...user,
-        globalRank: index + 1,
-      }));
-
-      setUsers(usersWithStats);
+      if (isMounted()) {
+        setLeaderboardEntries(lbEntries);
+        setUsers(finalUsers);
+        setAllTournament(Object.values(tournamentById));
+        setLoading(false);
+      }
     } catch (error) {
-      console.error("Failed to fetch leaderboard data", error);
-    } finally {
+      console.error("Leaderboard Data Fetch Error:", error);
       if (isMounted()) setLoading(false);
+      errorMessage("A network error occurred. Please try again.");
     }
   }
 
   //get data from backend
-  useEffect(() => {
+  useLayoutEffect(() => {
     let ignore = false;
     const isMounted = () => !ignore;
 
@@ -119,53 +121,124 @@ export default function Leaderboard() {
     }; // cleanup
   }, []);
 
+  const availableTournaments = useMemo(() => {
+    return AllTournament && AllTournament.length > 0 ? AllTournament : null;
+  }, [AllTournament]);
+
   const selectedTournamentData = useMemo(() => {
     if (dropdown != 0 && AllTournament) {
-      return AllTournament.find((t) => (t.id || t) == dropdown);
+      return AllTournament.find((t) => (t.id || t._id || t) == dropdown);
     }
     return null;
   }, [dropdown, AllTournament]);
 
+ const ListofUserId = useMemo(() => {
+    const idsFromUsers = (users || []).map((player) => player._id || player.id).filter(Boolean);
+    const idsFromLb = (leaderboardEntries || []).map((e) => e.userId).filter(Boolean);
+    return Array.from(new Set([...idsFromUsers, ...idsFromLb]));
+  }, [users, leaderboardEntries]);
+
   const filterPlayers = useMemo(() => {
-    if (!users) return [];
+    // Build a map of stats from leaderboard entries (global and per-tournament)
+    const allEntries = leaderboardEntries || [];
 
-    let result = users.filter((p) =>
-      (p.username || "").toLowerCase().includes(search.toLowerCase())
-    );
+    // If a tournament is selected, restrict entries for per-tournament stats
+    const filteredEntries = dropdown != 0 ? allEntries.filter((e) => e.tournamentId === dropdown) : allEntries;
 
-    if (selectedTournamentData) {
-      if (selectedTournamentData.rankList) {
-        result = result.filter((u) =>
-          Object.prototype.hasOwnProperty.call(
-            selectedTournamentData.rankList,
-            u._id || u.id
-          )
-        );
-        result.sort((a, b) => {
-          const rankA = selectedTournamentData.rankList[a._id || a.id];
-          const rankB = selectedTournamentData.rankList[b._id || b.id];
-          return rankA - rankB;
-        });
-        return result;
-      }
-      result = result.filter((u) =>
-        u.playedTournaments?.some((t) => t == dropdown)
-      );
+    // GLOBAL STATS: build from ALL entries so world rank is stable and independent of selected tournament/filter
+    const globalStats = new Map();
+    for (const entry of allEntries) {
+      const key = entry.userId || entry.tempEmail;
+      if (!key) continue;
+      const g = globalStats.get(key) || { wins: 0, reward: 0 };
+      if (entry.rank === 1) g.wins += 1;
+      g.reward += entry.winAmount || 0;
+      globalStats.set(key, g);
     }
 
+    // Build a global rank map (reward desc -> wins desc)
+    const globalRankMap = (() => {
+      const arr = Array.from(globalStats.entries()).map(([key, stats]) => ({ key, ...stats }));
+      arr.sort((a, b) => {
+        if (b.reward !== a.reward) return b.reward - a.reward;
+        return (b.wins || 0) - (a.wins || 0);
+      });
+      const map = new Map();
+      arr.forEach((item, idx) => map.set(item.key, idx + 1));
+      return map;
+    })();
+
+    // PER-TOURNAMENT STATS: computed from filteredEntries (if a tournament is selected)
+    const perTournamentStats = new Map(); // key: userIdOrEmail -> { rank, score, winAmount }
+    for (const entry of filteredEntries) {
+      const key = entry.userId || entry.tempEmail;
+      if (!key) continue;
+
+      const p = perTournamentStats.get(key) || { rank: entry.rank || null, score: entry.score || 0 };
+      if (entry.rank != null && (p.rank == null || entry.rank < p.rank)) p.rank = entry.rank;
+      if ((entry.score || 0) > (p.score || 0)) p.score = entry.score;
+      perTournamentStats.set(key, p);
+    }
+
+    // Get list of participant ids (userId or tempEmail)
+    const participantIds = Array.from(new Set(filteredEntries.map((e) => e.userId || e.tempEmail).filter(Boolean)));
+
+    // If no participants (empty), we can show all users (global view)
+    const idsToShow = participantIds.length > 0 ? participantIds : (users || []).map((u) => u._id || u.id).filter(Boolean);
+
+    // Build result objects
+    let result = idsToShow.map((id) => {
+      // find user object (if any)
+      const userObj = (users || []).find((u) => (u._id || u.id) === id);
+      const placeholder = {
+        id,
+        _id: id,
+        username: id.includes("@") ? id.split("@")[0] : `User-${id.substring(0,6)}`,
+        email: id.includes("@") ? id : undefined,
+        playedTournaments: [],
+        matches: [],
+      };
+      const finalUser = userObj || placeholder;
+
+      const gstats = globalStats.get(id) || { wins: 0, reward: 0 };
+      const pstats = perTournamentStats.get(id) || { rank: null, score: 0 };
+
+      return {
+        ...finalUser,
+        wins: gstats.wins || 0,
+        reward: gstats.reward || 0,
+        tournamentRank: pstats.rank,
+        tournamentScore: pstats.score,
+        rank: pstats.rank,
+        globalRank: globalRankMap.get(id) || null, // stable world rank
+      };
+    });
+
+    // Apply search filter
+    result = result.filter((user) => (user.username || "").toLowerCase().includes(search.toLowerCase()));
+
+    // Sort by selected metric
     if (sortBy === "reward") {
-      result.sort((a, b) => b.reward - a.reward);
-    } else {
+      result.sort((a, b) => (b.reward || 0) - (a.reward || 0));
+    } else if (sortBy === "wins") {
       result.sort((a, b) => (b.wins || 0) - (a.wins || 0));
+    } else {
+      result.sort((a, b) => {
+        const rankA = (dropdown != 0 ? a.tournamentRank : a.globalRank) ?? 999999;
+        const rankB = (dropdown != 0 ? b.tournamentRank : b.globalRank) ?? 999999;
+        return rankA - rankB;
+      });
     }
+
+    // Note: We do NOT overwrite globalRank here, so player.globalRank remains the true calculated World Rank.
 
     return result;
-  }, [search, dropdown, users, sortBy, selectedTournamentData]);
+  }, [users, leaderboardEntries, search, dropdown, sortBy]);
 
   const topThree = filterPlayers.slice(0, 3);
   const restPlayer = filterPlayers.slice(3);
   //user from contextapi
-  const loggedInUser = "Anand Raj";
+  const loggedInUser = user?.username || "";
 
   const selectedTournament = selectedTournamentData || "Global";
 
@@ -180,7 +253,7 @@ export default function Leaderboard() {
 
   return (
     <div
-      className={`min-h-screen ${bgColor} ${textColor} font-mono p-8 relative overflow-hidden pt-22`}
+      className={`min-h-screen ${bgColor} ${textColor} Rusty Attack p-8 relative overflow-hidden pt-22`}
     >
       {/* Scanlines */}
       <div
@@ -245,10 +318,10 @@ export default function Leaderboard() {
           >
             Global
           </option>
-          {(AllTournament || DummyTournamentforLeaderboard).map((t, index) => (
+          {(availableTournaments || DummyTournamentforLeaderboard).map((t, index) => (
             <option
               key={index + 1}
-              value={t.id || t}
+              value={t.id || t._id || t}
               className={isDarkMode ? "bg-gray-900" : "bg-slate-100"}
             >
               {t.tournamentName || t}
@@ -265,6 +338,7 @@ export default function Leaderboard() {
               : "bg-slate-100 border border-slate-400 text-slate-700 focus:border-blue-500"
           } px-3 py-2 tracking-widest focus:outline-none transition-colors`}
         >
+          <option value="rank">SORT BY RANK</option>
           <option value="wins">SORT BY WINS</option>
           <option value="reward">SORT BY REWARD</option>
         </select>
@@ -274,6 +348,37 @@ export default function Leaderboard() {
           }`}
         >
           RESULTS: {filterPlayers?.length}
+        </div>
+        <div className="flex items-center justify-center">
+          <button
+            onClick={async () => {
+              try {
+                const tId = dropdown != 0 ? dropdown : (AllTournament?.[0]?.id || AllTournament?.[0]?._id);
+                if (!tId) {
+                  errorMessage("No tournament available to seed");
+                  return;
+                }
+                if (!ListofUserId || ListofUserId.length === 0) {
+                  errorMessage("No users available to seed. Please ensure there are users in the system or use registerAll endpoint.");
+                  return;
+                }
+                const resp = await seedLeaderboard(ListofUserId, tId, 30);
+                if (resp.ok) {
+                  alert(resp.data || "Seeded leaderboard entries");
+                  setLoading(true);
+                  await getData(() => true);
+                } else {
+                  errorMessage("Seeding failed: " + resp.error);
+                }
+              } catch (e) {
+                console.error(e);
+                errorMessage("Error while seeding leaderboard");
+              }
+            }}
+            className="ml-3 px-3 py-2 bg-emerald-500 text-white rounded-md text-xs"
+          >
+            Seed Data
+          </button>
         </div>
       </section>
 
@@ -286,22 +391,19 @@ export default function Leaderboard() {
             players={topThree}
             isDarkMode={isDarkMode}
             selectedTournament={selectedTournament}
-            globalUsers={users}
+            globalUsers={filterPlayers}
           />
 
           <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-9">
             {restPlayer.map((player, index) => {
-              const globalRank = player.globalRank;
-              const tournamentRank =
-                selectedTournament?.rankList?.[player._id || player.id];
-
+              const rankToShow = (selectedTournamentData ? player.tournamentRank : player.globalRank) || index + 4;
               return (
                 <PlayerCard
                   key={player._id || player.id}
                   player={player}
-                  rank={tournamentRank || globalRank}
-                  globalRank={globalRank}
-                  tournamentRank={tournamentRank}
+                  rank={rankToShow}
+                  globalRank={player.globalRank}
+                  tournamentRank={player.tournamentRank}
                   searchTerm={search}
                   loggedInUser={loggedInUser}
                   isDarkMode={isDarkMode}
@@ -323,6 +425,3 @@ export default function Leaderboard() {
     </div>
   );
 }
-
-
-

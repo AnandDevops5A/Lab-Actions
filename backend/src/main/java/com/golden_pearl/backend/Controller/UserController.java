@@ -28,6 +28,8 @@ public class UserController {
         this.userService = userService;
     }
 
+
+
     // find user by id
     @GetMapping("/{id}")
     public User findUserById(@PathVariable String id) {
@@ -46,6 +48,14 @@ public class UserController {
         return userService.saveUser(user);
 
     }
+
+    //get all user by ids
+    @PostMapping("/getUsersByIds/{userIds}")
+    public ResponseEntity<List<User>> getUsersByIds(@PathVariable List<String> userIds) {
+        return userService.getUsersByIds(userIds);
+    }
+
+
 
     @PutMapping("/update")
     public ResponseEntity<User> updateUser(@RequestBody User user) {

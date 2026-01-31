@@ -71,7 +71,7 @@ const EditTournamentForm = ({ tournament, onClose, refreshData }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="max-h-screen bg-[#050505] flex items-center justify-center md:p-3 font-mono w-full max-w-2xl">
+      <div className="max-h-screen bg-[#050505] flex items-center justify-center md:p-3 Rusty Attack w-full max-w-2xl">
         <div className="relative w-full max-w-sm sm:max-w-xl md:max-w-3xl p-0.5 bg-linear-to-br from-blue-500 via-transparent to-cyan-500 shadow-[0_0_30px_rgba(34,197,94,0.3)]">
           <div className="bg-black p-5 sm:p-10 relative border border-blue-900/50">
             {/* Close Button */}

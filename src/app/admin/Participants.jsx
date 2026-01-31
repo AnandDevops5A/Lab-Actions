@@ -49,7 +49,7 @@ const Participants = ({ participants = [] }) => {
       header: "Attendance",
       sortKey: "totalPlay",
       render: (p) => (
-        <span className="font-mono">
+        <span className="Rusty Attack">
           {String(p.totalPlay || 0).padStart(3, "0")}
         </span>
       ),
@@ -58,7 +58,7 @@ const Participants = ({ participants = [] }) => {
       header: "Invested",
       sortKey: "investAmount",
       render: (p) => (
-        <span className={`${highlightText} font-mono`}>
+        <span className={`${highlightText} Rusty Attack`}>
           ₹{p.investAmount?.toLocaleString() || 0}
         </span>
       ),
@@ -70,7 +70,7 @@ const Participants = ({ participants = [] }) => {
         <span
           className={`${
             isDarkMode ? "text-green-400" : "text-green-600"
-          } font-mono`}
+          } Rusty Attack`}
         >
           ₹{p.winAmount?.toLocaleString() || 0}
         </span>

@@ -20,7 +20,7 @@ const CyberLoading = () => {
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-12 h-12 bg-gray-900 rounded-full border border-gray-700 flex items-center justify-center shadow-inner relative overflow-hidden">
              <div className="absolute inset-0 bg-linear-to-t from-[#39ff14]/20 to-transparent animate-pulse"></div>
-             <span className="text-[#39ff14] font-mono text-xl font-bold animate-pulse">⚡</span>
+             <span className="text-[#39ff14] Rusty Attack text-xl font-bold animate-pulse">⚡</span>
           </div>
         </div>
       </div>
@@ -36,7 +36,7 @@ const CyberLoading = () => {
           <div className="absolute inset-0 bg-linear-to-r from-transparent via-[#00E5FF] to-transparent w-1/2 h-full animate-[shimmer_1.5s_infinite_linear]"></div>
         </div>
         
-        <p className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">
+        <p className="text-[10px] Rusty Attack text-gray-500 uppercase tracking-widest">
           Initializing Neural Link...
         </p>
       </div>

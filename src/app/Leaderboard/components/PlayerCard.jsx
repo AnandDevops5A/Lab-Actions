@@ -91,7 +91,7 @@ export function PlayerCard({
       {/* Avatar */}
       <div className={`w-16 h-16 border-2 ${avatarBorderColor} mb-4 overflow-hidden rounded-full`}>
         <img
-          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.username}`}
+          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.callSign}`}
           alt={player.username}
           className="w-full h-full object-cover rounded-full transition-transform duration-500 ease-out group-hover:scale-105 motion-safe:group-hover:scale-105"
         />
@@ -108,7 +108,7 @@ export function PlayerCard({
           {player.rank} · {selectedTournament?.tournamentName || "Global"}
         </p>
         <div className={`flex gap-3 text-[10px] font-bold ${metaColor} opacity-80`}>
-         {globalRank && <span>🥷 {player.playedTournaments.length}</span>}
+         {/* {globalRank && <span>🥷 {player.playedTournament?s.length}</span>} */}
           {tournamentRank && <span>🏆 #{tournamentRank}</span>}
         </div>
       </div>
@@ -135,7 +135,7 @@ export function PlayerCard({
           </div>
         </div>
         <div>
-          <p className={`text-xs uppercase ${statLabelColor}`}>🌐</p>
+          <p className={`text-xs uppercase ${statLabelColor}`}>🌐 Rank</p>
           <p className={`text-2xl font-black ${statValueColor}`}>#{globalRank}</p>
         </div>
 
@@ -155,9 +155,9 @@ export function PlayerCard({
               {tooltipTitle}
             </p>
             {prizePool && (
-              <p className="text-[10px] text-center mb-2 opacity-80 font-mono">{prizePool}</p>
+              <p className="text-[10px] text-center mb-2 opacity-80 Rusty Attack">{prizePool}</p>
             )}
-            <div className="space-y-1.5 font-mono text-[10px]">
+            <div className="space-y-1.5 Rusty Attack text-[10px]">
               <div className="flex justify-between items-center">
                 <span>Rank #1</span> 
                 <span className="font-bold text-yellow-500">₹{rewards[1]}</span>
@@ -190,6 +190,3 @@ export function PlayerCard({
     </div>
   );
 }
-
-
-

@@ -115,12 +115,7 @@ public class TournamentController {
 
     }
 
-    // get all register userid for tournament
-    @PostMapping("/getUsers/{tournamentId}")
-    public ResponseEntity<?> getAllRegisteredUsers(@PathVariable String tournamentId) {
-        return tournamentService.getRegisterdUserForTournament(tournamentId);
-    }
-
+  
     // update rank of user
     @PostMapping("/updateRank/{tId}/{uId}/{rank}")
     public ResponseEntity<String> updateRank(@PathVariable String tId, @PathVariable String uId,
@@ -129,9 +124,9 @@ public class TournamentController {
     }
 
     //find all tournament by list 
-    @PostMapping("/getTournament")
-    public List<Tournament> getTournamentsbyids(@RequestBody List<String> tournamentIds){
-        System.out.println(tournamentIds);
+    @PostMapping("/getTournamentsByIds/{tournamentIds}")
+    public List<Tournament> getTournamentsbyids(@PathVariable List<String> tournamentIds){
+        // System.out.println(tournamentIds);
         return tournamentService.getTournamentsbyids(tournamentIds);
         // return null;
     }

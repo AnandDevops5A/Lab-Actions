@@ -68,7 +68,7 @@ const AddParticipantModal = ({ tournament, participants, onClose, refreshData })
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="max-h-screen bg-[#050505] flex items-center justify-center md:p-3 font-mono w-full max-w-4xl">
+      <div className="max-h-screen bg-[#050505] flex items-center justify-center md:p-3 Rusty Attack w-full max-w-4xl">
         <div className="relative w-full p-0.5 bg-linear-to-br from-blue-500 via-transparent to-purple-500 shadow-[0_0_30px_rgba(59,130,246,0.3)]">
           <div className="bg-black p-5 sm:p-10 relative border border-blue-900/50 max-h-[90vh] overflow-hidden flex flex-col">
             {/* Close Button */}

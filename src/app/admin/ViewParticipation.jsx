@@ -31,7 +31,7 @@ const StatCard = ({ icon: Icon, label, value, subValue, isDarkMode }) => (
       >
         {label}
       </p>
-      <p className={`text-lg font-mono font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+      <p className={`text-lg Rusty Attack font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
         {value}
       </p>
       {subValue && <p className="text-xs text-gray-500">{subValue}</p>}
@@ -55,7 +55,7 @@ const DetailRow = ({ icon: Icon, label, value, isDarkMode }) => (
         {label}
       </span>
     </div>
-    <span className={`font-mono text-sm ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+    <span className={`Rusty Attack text-sm ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
       {value || "N/A"}
     </span>
   </div>
@@ -78,7 +78,7 @@ const ViewParticipation = ({ data, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm font-mono no-scrollbar">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm Rusty Attack no-scrollbar">
       <div
         className={`relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl border ${themeColors.border} ${themeColors.bg} shadow-[0_0_50px_rgba(6,182,212,0.15)]`}
       >
@@ -199,7 +199,7 @@ const ViewParticipation = ({ data, onClose }) => {
                           Balance
                         </span>
                         <span
-                          className={`font-mono font-bold ${isDarkMode ? "text-green-400" : "text-green-600"}`}
+                          className={`Rusty Attack font-bold ${isDarkMode ? "text-green-400" : "text-green-600"}`}
                         >
                           ₹{data.balanceAmount?.toLocaleString() || 0}
                         </span>
@@ -213,7 +213,7 @@ const ViewParticipation = ({ data, onClose }) => {
                           Withdrawn
                         </span>
                         <span
-                          className={`font-mono ${isDarkMode ? "text-red-400" : "text-red-600"}`}
+                          className={`Rusty Attack ${isDarkMode ? "text-red-400" : "text-red-600"}`}
                         >
                           ₹{data.withdrawAmount?.toLocaleString() || 0}
                         </span>
@@ -247,7 +247,7 @@ const ViewParticipation = ({ data, onClose }) => {
                         >
                           Total Matches
                         </span>
-                        <span className="font-mono">{data.totalPlay || 0}</span>
+                        <span className="Rusty Attack">{data.totalPlay || 0}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span
@@ -258,7 +258,7 @@ const ViewParticipation = ({ data, onClose }) => {
                           Victories
                         </span>
                         <span
-                          className={`font-mono ${isDarkMode ? "text-cyan-400" : "text-blue-600"}`}
+                          className={`Rusty Attack ${isDarkMode ? "text-cyan-400" : "text-blue-600"}`}
                         >
                           {data.totalWin || 0}
                         </span>
@@ -272,7 +272,7 @@ const ViewParticipation = ({ data, onClose }) => {
                           Defeats
                         </span>
                         <span
-                          className={`font-mono ${isDarkMode ? "text-pink-500" : "text-red-500"}`}
+                          className={`Rusty Attack ${isDarkMode ? "text-pink-500" : "text-red-500"}`}
                         >
                           {data.totallosses || 0}
                         </span>

@@ -30,6 +30,7 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
     });
     //    console.log("Response from backend:", res);
     //    console.log("Before set context is :" , user);
+    // console.log("Response from backend:", res.status);
     if (res.status === 200 && res.data) {
       const status = await setCache("currentUser", res.data, 3600);
       if (!status.status) {
@@ -63,7 +64,7 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
       result = await onSubmit(payload);
       if (result.status === 200 && result.data) {
         successMessage(result.message || "Login successful.");
-      } else if (result.status === 500) {
+      } else if (!result.status) {
        
         errorMessage("Invalid Player ID or accessKey.");
       } else {
@@ -205,7 +206,7 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
             onClick={() => onSwitch?.("signup")}
             className="text-[#00E5FF] font-semibold hover:text-[#00B8E6] transition-colors inline-flex items-center gap-2 cursor-pointer"
           >
-            Create Team
+            Register Me 😊
           </span>
         </p>
       </form>

@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 const CyberpunkError = ({ message }) => {
   return (
-    <div className="relative w-full max-w-lg p-8 mx-auto my-8 overflow-hidden bg-gray-950 border-4 border-red-600 shadow-[0_0_40px_rgba(220,38,38,0.6)] font-mono transform -skew-x-2">
+    <div className="relative w-full max-w-lg p-8 mx-auto my-8 overflow-hidden bg-gray-950 border-4 border-red-600 shadow-[0_0_40px_rgba(220,38,38,0.6)] Rusty Attack transform -skew-x-2">
       {/* Scanline overlay */}
       <div className="absolute inset-0 pointer-events-none  bg-[linear-gradient(transparent_50%,rgba(50,0,0,0.5)_50%)] bg-[length:100%_4px]" />
       <div className="absolute inset-0 pointer-events-none z-0 bg-red-900/10 animate-pulse" />
@@ -24,7 +24,7 @@ const CyberpunkError = ({ message }) => {
         <div className="text-lg font-bold text-gray-100 uppercase tracking-widest drop-shadow-md">
           {message}
         </div>
-        <div className="mt-4 text-xs text-red-500/60 font-mono">
+        <div className="mt-4 text-xs text-red-500/60 Rusty Attack">
             ERROR_CODE: 0xFAIL // SYSTEM_HALTED
         </div>
       </div>

@@ -66,7 +66,7 @@ const Tournament = ({ tournaments, refreshData }) => {
       sortKey: "id",
       render: (t, idx) => (
         <span
-          className={`font-mono ${isDarkMode ? "text-white" : "text-gray-900"}`}
+          className={`Rusty Attack ${isDarkMode ? "text-white" : "text-gray-900"}`}
         >
           {(idx + 1).toString().padStart(2, "0")}
         </span>
@@ -81,7 +81,7 @@ const Tournament = ({ tournaments, refreshData }) => {
       header: "Prize Pool",
       sortKey: "prizePool",
       render: (t) => (
-        <span className={`${highlightText} font-mono`}>
+        <span className={`${highlightText} Rusty Attack`}>
           ₹ {t.prizePool?.toLocaleString()}
         </span>
       ),
@@ -123,14 +123,14 @@ const Tournament = ({ tournaments, refreshData }) => {
     },
     {
       header: "Date",
-      className: "hidden md:table-cell font-mono text-xs",
+      className: "hidden md:table-cell Rusty Attack text-xs",
       sortKey: "dateTime",
       accessor: "date",
       render: (t) => t.date,
     },
     {
       header: "Time",
-      className: "hidden lg:table-cell font-mono text-xs",
+      className: "hidden lg:table-cell Rusty Attack text-xs",
       sortKey: "dateTime",
       accessor: "time",
       render: (t) => t.time,
@@ -165,7 +165,7 @@ const Tournament = ({ tournaments, refreshData }) => {
   ], [isDarkMode, highlightText, now, deleteTournament]);
 
   return (
-    <div className="font-mono">
+    <div className="Rusty Attack">
       {showAddTournamentForm ? (
       
         <Table

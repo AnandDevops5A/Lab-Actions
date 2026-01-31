@@ -3,13 +3,16 @@ import { LeaderCard } from "./LeadeCard";
 export function TopThree({ players, isDarkMode, selectedTournament, globalUsers }) {
   if (!players || players.length === 0) return null;
 
+  // Prefer ranks attached to player objects (stable). Fallback to tournament rankList when necessary.
   const getRank = (player, defaultRank) => {
-    return selectedTournament?.rankList?.[player._id || player.id] || defaultRank;
+    const isGlobal = !selectedTournament || typeof selectedTournament === 'string';
+    if (isGlobal) return player.globalRank ?? defaultRank;
+    return player.tournamentRank ?? selectedTournament?.rankList?.[player._id || player.id] ?? defaultRank;
   };
 
   const getRanks = (player) => {
-    const globalRank = globalUsers?.findIndex((u) => (u._id || u.id) === (player._id || player.id)) + 1;
-    const tournamentRank = selectedTournament?.rankList?.[player._id || player.id];
+    const globalRank = player.globalRank ?? null;
+    const tournamentRank = player.tournamentRank ?? selectedTournament?.rankList?.[player._id || player.id] ?? null;
     return { globalRank, tournamentRank };
   };
 
@@ -48,6 +51,3 @@ export function TopThree({ players, isDarkMode, selectedTournament, globalUsers 
     </section>
   );
 }
-
-
-

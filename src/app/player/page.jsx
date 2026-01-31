@@ -13,6 +13,7 @@ import { getUserTournamentDetails, FetchBackendAPI } from "../../lib/api/backend
 import { useRouter } from "next/navigation";
 import { calulateWinAndReward } from "../../lib/utils/common";
 import { getCache, setCache } from "../../lib/utils/action-redis";
+import { ThemeContext } from "../../lib/contexts/theme-context";
 
 const mockPlayer = {
   ign: "SHADOW_LORD_07",
@@ -41,9 +42,15 @@ const DynamicPlayerHeader = dynamic(() => import("./ProfileHeader.jsx"), {
   ssr: false,
 });
 
+const DynamicUpcomingTournaments = dynamic(() => import("./UpcomingTournaments.jsx"), {
+  loading: () => <SkeletonCard />,
+  ssr: false,
+});
+
 const PlayerProfile = () => {
   //get user from context
   const { user } = useContext(UserContext);
+  const { isDarkMode } = useContext(ThemeContext);
   const [matchHistory, setMatchHistory] = useState(null);
   const router = useRouter();
 
@@ -56,44 +63,57 @@ const PlayerProfile = () => {
 
   //
   useEffect(() => {
-    let i = true;
+    let isMounted = true;
     const fetchData = async () => {
-      const userTournamentDetails = await getCache(`userTournamentDetails:${user.id}`);
-      if (userTournamentDetails.status && userTournamentDetails.data) {
-        // console.log("from cache", userTournamentDetails.data);
-        // console.log("from cache loaded");
-     if(i) setMatchHistory(userTournamentDetails.data);
-        return;
-      } else {
-        const response = await getUserTournamentDetails(user.id);
-        console.log("backend hit ");
-        const setCacheUserTournamentDetails = await setCache(
-          `userTournamentDetails:${user.id}`,
-          response.data,
-          3600,
-        ); // Cache for 1 hour
+      if (!user?.id) return;
+      try {
+        const userTournamentDetails = await getCache(`userTournamentDetails:${user.id}`);
+        if (userTournamentDetails?.status && userTournamentDetails?.data) {
+          if (isMounted) setMatchHistory(userTournamentDetails.data);
+          return;
+        }
 
-        // console.log("-------------+api+ --------------");
-        // console.log(response.data);
-        if (!setCacheUserTournamentDetails.status)
-          error("Error caching user tournament details");
-        if (response.data) setMatchHistory(response.data);
+        // Fallback to API
+        const response = await getUserTournamentDetails(user.id);
+        if (response?.data) {
+          if (isMounted) setMatchHistory(response.data);
+          // Cache asynchronously to not block UI
+          setCache(`userTournamentDetails:${user.id}`, response.data, 3600)
+            .catch(e => console.warn("Cache update failed", e));
+        }
+      } catch (err) {
+        console.error("Failed to fetch tournament details", err);
       }
     };
-    if (user) fetchData();
+    
+    fetchData();
 
     return () => {
-      i = false;
+      isMounted = false;
     };
   }, [user]);
 
   if (!user) return null;
 
+  // Filter match history to only show completed matches (where rank is assigned)
+  const pastMatches = useMemo(() => {
+    if (!matchHistory) return null;
+    return matchHistory.filter((match) => match.rank);
+  }, [matchHistory]);
+
+  // Filter for upcoming tournaments (where rank is not yet assigned)
+  const upcomingMatches = useMemo(() => {
+    if (!matchHistory) return null;
+    return matchHistory.filter((match) => !match.rank);
+  }, [matchHistory]);
+
+  // console.log(upcomingMatches);
+
   const userStats = useMemo(() => {
-    if (!matchHistory) return { reward: 0, wins: 0 };
-    const stats = calulateWinAndReward(matchHistory);
+    if (!pastMatches) return { reward: 0, wins: 0 };
+    const stats = calulateWinAndReward(pastMatches);
     return stats.get(user.id) || { reward: 0, wins: 0 };
-  }, [matchHistory, user.id]);
+  }, [pastMatches, user.id]);
 
   const player = useMemo(
     () =>
@@ -111,7 +131,7 @@ const PlayerProfile = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4 md:p-10">
+    <div className={`min-h-screen p-4 md:p-10 transition-colors duration-300 ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
       {/* 1. Header & Quick Stats (Top Section) */}
       <DynamicPlayerHeader player={player} />
 
@@ -119,12 +139,31 @@ const PlayerProfile = () => {
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left/Middle Column (Stats) - Takes 2/3 space on large screens */}
         <div className="lg:col-span-2 space-y-8">
-          <DynamicPlayerStats player={player} matchHistory={matchHistory} />
+
+           {upcomingMatches ? (
+            <DynamicUpcomingTournaments tournaments={upcomingMatches} />
+          ) : (
+            <SkeletonCard />
+          )}
+
+          {pastMatches ? (
+            <DynamicPlayerStats player={player} matchHistory={pastMatches} />
+          ) 
+          : (
+            <SkeletonChart />
+          )
+          }
+          
+         
         </div>
 
         {/* Right Column (Match History) - Takes 1/3 space on large screens */}
-        <div className="lg:col-span-1">
-          {<DynamicAchievement matchHistory={matchHistory} />}
+        <div className="lg:col-span-1 space-y-8">
+          {pastMatches ? (
+            <DynamicAchievement matchHistory={pastMatches} />
+          ) : (
+            <SkeletonCard />
+          )}
         </div>
       </div>
     </div>
@@ -132,6 +171,3 @@ const PlayerProfile = () => {
 };
 
 export default PlayerProfile;
-
-
-

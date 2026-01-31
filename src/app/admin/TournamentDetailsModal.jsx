@@ -62,7 +62,7 @@ const TournamentDetailsModal = ({ tournament, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="max-h-screen bg-[#050505] flex items-center justify-center md:p-3 font-mono w-full max-w-4xl">
+      <div className="max-h-screen bg-[#050505] flex items-center justify-center md:p-3 Rusty Attack w-full max-w-4xl">
         <div className="relative w-full p-0.5 bg-linear-to-br from-purple-500 via-transparent to-pink-500 shadow-[0_0_30px_rgba(168,85,247,0.3)]">
           <div className="bg-black p-5 sm:p-10 relative border border-purple-900/50 max-h-[90vh] overflow-y-auto">
             {/* Close Button */}
@@ -173,7 +173,7 @@ const TournamentDetailsModal = ({ tournament, onClose }) => {
                       </div>
                       <div className="flex justify-between">
                         <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Tournament ID:</span>
-                        <span className={`font-mono text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>#{tournament.id}</span>
+                        <span className={`Rusty Attack text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>#{tournament.id}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Date & Time:</span>

@@ -19,6 +19,7 @@ public class LeaderBoard {
     private String id;
     private String userId;
     private String tournamentId;
+    private String gameId;
     private String tempEmail;
     private String transactionId;
     private Integer investAmount;

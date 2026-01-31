@@ -110,7 +110,7 @@ const UpcomingMatches = () => {
     }
 
     return (
-      <div className={`flex items-center gap-2 text-xs font-mono ${isDarkMode ? "text-cyan-400" : "text-cyan-600"}`}>
+      <div className={`flex items-center gap-2 text-xs Rusty Attack ${isDarkMode ? "text-cyan-400" : "text-cyan-600"}`}>
         <div className={`px-2 py-1 rounded border ${isDarkMode ? "bg-gray-900/80 border-gray-700" : "bg-gray-100 border-gray-300"}`}>
           <span className={`font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>{String(timeLeft.d).padStart(2, '0')}</span>d
         </div>
@@ -143,8 +143,8 @@ const UpcomingMatches = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 ">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-linear-to-r from-red-500 via-orange-500 to-yellow-500 uppercase tracking-wider drop-shadow-sm mb-4">
-            Upcoming Warzones
+          <h2 className="text-xl md:text-3xl lg:text-4xl font-black text-transparent bg-clip-text bg-linear-to-r from-red-500 via-orange-500 to-yellow-500 uppercase tracking-wider drop-shadow-sm mb-4">
+           ⚔️ Upcoming Warzones
           </h2>
           <div className="h-1 w-24 bg-red-500 mx-auto rounded-full shadow-[0_0_10px_rgba(239,68,68,0.6)]"></div>
         </div>
@@ -161,7 +161,7 @@ const UpcomingMatches = () => {
         ) : tournaments.length === 0 ? (
           <div className={`text-center py-20 rounded-2xl border border-dashed ${isDarkMode ? "bg-gray-900/30 border-gray-800" : "bg-gray-100 border-gray-300"}`}>
             <Trophy className={`w-16 h-16 mx-auto mb-4 ${isDarkMode ? "text-gray-600" : "text-gray-400"}`} />
-            <p className={`text-xl font-mono ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+            <p className={`text-xl Rusty Attack ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
               No active tournaments found. Check back later.
             </p>
           </div>
@@ -185,7 +185,7 @@ const UpcomingMatches = () => {
                     <span className="px-3 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1">
                       <Zap size={12} /> Live
                     </span>
-                    <span className={`text-xs font-mono border px-2 py-1 rounded ${isDarkMode ? "text-gray-500 border-gray-800" : "text-gray-500 border-gray-200"}`}>
+                    <span className={`text-xs Rusty Attack border px-2 py-1 rounded ${isDarkMode ? "text-gray-500 border-gray-800" : "text-gray-500 border-gray-200"}`}>
                       {tournament.platform || "MOBILE"}
                     </span>
                   </div>

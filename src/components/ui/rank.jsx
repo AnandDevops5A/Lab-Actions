@@ -115,7 +115,7 @@ export default function Rank() {
                     className={`text-sm font-bold tracking-wide ${
                       isDarkMode ? "text-cyan-400" : "text-blue-400"
                     }
-                      md:text-xl font-mono ${
+                      md:text-xl Rusty Attack ${
                       isDarkMode ? "text-cyan-400" : "text-blue-600"
                     }`}
                   >
