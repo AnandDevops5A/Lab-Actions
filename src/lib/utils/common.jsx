@@ -1,29 +1,28 @@
 import { getCache, setCache, UpdateCache } from "./action-redis";
 import { errorMessage } from "./alert";
-import { getUpcomingTournament, FetchBackendAPI } from "../api/backend-api";
+import { getUpcomingTournament} from "../api/backend-api";
+import { SunDim, SunMedium, Sunset } from "lucide-react";
 
 export function calulateWinAndReward(tournamentList) {
   const rewardMap = { 1: 500, 2: 200, 3: 100 };
   //calculate rewards
   let userStats = new Map();
+  // console.log(tournamentList);
 
   for (const tournament of tournamentList || []) {
     const rankList = tournament.rankList || {};
-    for (const userId in rankList) {
-      if (Object.prototype.hasOwnProperty.call(rankList, userId)) {
-        const rank = rankList[userId];
-        let reward = rewardMap[rank] || 0;
+    for (const [userId, rank] of Object.entries(rankList)) {
+      let reward = rewardMap[rank] || 0;
 
-        let stats = userStats.get(userId);
-        if (!stats) {
-          stats = { reward: 0, wins: 0 };
-          userStats.set(userId, stats);
-        }
+      let stats = userStats.get(userId);
+      if (!stats) {
+        stats = { reward: 0, wins: 0 };
+        userStats.set(userId, stats);
+      }
 
-        stats.reward += reward;
-        if (rank == 1) {
-          stats.wins += 1;
-        }
+      stats.reward += reward;
+      if (rank ==1) {
+        stats.wins += 1;
       }
     }
   }
@@ -85,5 +84,31 @@ export const setUpcomingTournamentCache = async () => {
   // console.log(response?.data);
 };
 
+export  const FormatDate = ({ dateNum }) => {
+  if (!dateNum) return <span className="text-gray-400">TBA</span>;
+  
+  const str = dateNum.toString();
+  if (str.length < 12) return <span>{str}</span>;
 
+  // Extract parts
+  const year = str.substring(0, 4);
+  const month = str.substring(4, 6);
+  const day = str.substring(6, 8);
+  const hour = parseInt(str.substring(8, 10), 10);
+  const minute = str.substring(10, 12);
 
+  // Determine Icon
+  const getIcon = () => {
+    if (hour >= 6 && hour < 12) return <SunDim className="inline w-4 h-4 mb-1 text-orange-400" />;
+    if (hour >= 12 && hour < 18) return <SunMedium className="inline w-4 h-4 mb-1 text-yellow-500" />;
+    return <Sunset className="inline w-4 h-4 mb-1 text-orange-500" />;
+  };
+
+  return (
+    <span className="flex items-center gap-1.5 whitespace-nowrap">
+      <span className="font-medium">{`${day}/${month}/${year}`}</span>
+      {getIcon()}
+      <span className="opacity-80">{`${hour}:${minute}`}</span>
+    </span>
+  );
+};

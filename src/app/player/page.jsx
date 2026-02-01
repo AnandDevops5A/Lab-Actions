@@ -9,7 +9,10 @@ import {
   SkeletonTable,
 } from "../skeleton/Skeleton";
 import { UserContext } from "../../lib/contexts/user-context";
-import { getUserTournamentDetails, FetchBackendAPI } from "../../lib/api/backend-api";
+import {
+  getUserTournamentDetails,
+  FetchBackendAPI,
+} from "../../lib/api/backend-api";
 import { useRouter } from "next/navigation";
 import { calulateWinAndReward } from "../../lib/utils/common";
 import { getCache, setCache } from "../../lib/utils/action-redis";
@@ -42,10 +45,13 @@ const DynamicPlayerHeader = dynamic(() => import("./ProfileHeader.jsx"), {
   ssr: false,
 });
 
-const DynamicUpcomingTournaments = dynamic(() => import("./UpcomingTournaments.jsx"), {
-  loading: () => <SkeletonCard />,
-  ssr: false,
-});
+const DynamicUpcomingTournaments = dynamic(
+  () => import("./UpcomingTournaments.jsx"),
+  {
+    loading: () => <SkeletonCard />,
+    ssr: false,
+  },
+);
 
 const PlayerProfile = () => {
   //get user from context
@@ -61,13 +67,15 @@ const PlayerProfile = () => {
     }
   }, [user, router]);
 
-  //
+  //Load data to player section to db
   useEffect(() => {
     let isMounted = true;
     const fetchData = async () => {
       if (!user?.id) return;
       try {
-        const userTournamentDetails = await getCache(`userTournamentDetails:${user.id}`);
+        const userTournamentDetails = await getCache(
+          `userTournamentDetails:${user.id}`,
+        );
         if (userTournamentDetails?.status && userTournamentDetails?.data) {
           if (isMounted) setMatchHistory(userTournamentDetails.data);
           return;
@@ -78,22 +86,23 @@ const PlayerProfile = () => {
         if (response?.data) {
           if (isMounted) setMatchHistory(response.data);
           // Cache asynchronously to not block UI
-          setCache(`userTournamentDetails:${user.id}`, response.data, 3600)
-            .catch(e => console.warn("Cache update failed", e));
+          setCache(
+            `userTournamentDetails:${user.id}`,
+            response.data,
+            3600,
+          ).catch((e) => console.warn("Cache update failed", e));
         }
       } catch (err) {
         console.error("Failed to fetch tournament details", err);
       }
     };
-    
+
     fetchData();
 
     return () => {
       isMounted = false;
     };
   }, [user]);
-
-  if (!user) return null;
 
   // Filter match history to only show completed matches (where rank is assigned)
   const pastMatches = useMemo(() => {
@@ -110,10 +119,10 @@ const PlayerProfile = () => {
   // console.log(upcomingMatches);
 
   const userStats = useMemo(() => {
-    if (!pastMatches) return { reward: 0, wins: 0 };
+    if (!pastMatches || !user) return { reward: 0, wins: 0 };
     const stats = calulateWinAndReward(pastMatches);
     return stats.get(user.id) || { reward: 0, wins: 0 };
-  }, [pastMatches, user.id]);
+  }, [pastMatches, user]);
 
   const player = useMemo(
     () =>
@@ -130,8 +139,12 @@ const PlayerProfile = () => {
     [user, userStats],
   );
 
+  if (!user && !matchHistory) return null;
+
   return (
-    <div className={`min-h-screen p-4 md:p-10 transition-colors duration-300 ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
+    <div
+      className={`min-h-screen p-4 md:p-10 transition-colors duration-300 ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}
+    >
       {/* 1. Header & Quick Stats (Top Section) */}
       <DynamicPlayerHeader player={player} />
 
@@ -139,22 +152,22 @@ const PlayerProfile = () => {
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left/Middle Column (Stats) - Takes 2/3 space on large screens */}
         <div className="lg:col-span-2 space-y-8">
-
-           {upcomingMatches ? (
-            <DynamicUpcomingTournaments tournaments={upcomingMatches} />
+          {upcomingMatches ? (
+            <details>
+              <summary className="cursor-pointer text-xl font-bold mb-4 select-none outline-none marker:text-cyan-500 hover:opacity-80 transition-opacity">
+                My Upcoming joined Tournaments Details
+              </summary>
+              <DynamicUpcomingTournaments tournaments={upcomingMatches} />
+            </details>
           ) : (
             <SkeletonCard />
           )}
 
           {pastMatches ? (
             <DynamicPlayerStats player={player} matchHistory={pastMatches} />
-          ) 
-          : (
+          ) : (
             <SkeletonChart />
-          )
-          }
-          
-         
+          )}
         </div>
 
         {/* Right Column (Match History) - Takes 1/3 space on large screens */}
