@@ -4,6 +4,7 @@ import { X } from "lucide-react"; // Icon library for the cross button
 import { errorMessage, successMessage } from "../../lib/utils/alert";
 import { FetchBackendAPI } from "../../lib/api/backend-api";
 import { setCache } from "../../lib/utils/action-redis";
+import { dateInLongFormat } from "@/lib/utils/common";
 
 const inputBoxes = [
   { label: "Prize", type: "number", placeholder: "500", name: "prizePool" },
@@ -46,14 +47,8 @@ const AddTournamentForm = ({ onClose, refreshData}) => {
     return;
   }
 
-  // Split date into parts
-  const [year, month, day] = date.split("-");
+ const dateTime=dateInLongFormat(date);
 
-  // Remove colon from time
-  const timeFormatted = time.replace(":", "");
-
-  // Concatenate into desired format
-  const dateTime = `${year}${month}${day}${timeFormatted}`;
 
   // Prepare data payload
   const data = {

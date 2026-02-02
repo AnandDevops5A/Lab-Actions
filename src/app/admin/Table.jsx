@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext, useState, useMemo } from "react";
+import React, { useContext, useState, useMemo, useEffect } from "react";
 import { ThemeContext } from "../../lib/contexts/theme-context";
 import { ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react";
 
@@ -10,11 +10,17 @@ const Table = ({
   data,
   actions,
   pagination = true,
+  itemsPerPage = 10,
   themeColor = "green", // "green" or "cyan"
   containerClassName = "",
 }) => {
   const { isDarkMode } = useContext(ThemeContext);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [data]);
 
   const sortedData = useMemo(() => {
     if (!data) return [];
@@ -32,6 +38,14 @@ const Table = ({
       return sortConfig.direction === "asc" ? comparison : -comparison;
     });
   }, [data, sortConfig]);
+
+  const totalPages = Math.ceil((sortedData?.length || 0) / itemsPerPage);
+
+  const paginatedData = useMemo(() => {
+    if (!pagination) return sortedData;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return sortedData.slice(startIndex, startIndex + itemsPerPage);
+  }, [sortedData, currentPage, pagination, itemsPerPage]);
 
   const handleSort = (key) => {
     if (!key) return;
@@ -62,6 +76,16 @@ const Table = ({
       dropShadow: "drop-shadow-[0_0_5px_rgba(34,197,94,0.5)]",
       subtitle: "text-green-600",
       paginationHover: "hover:text-green-400",
+    },
+    purple: {
+      border: "border-purple-500/30",
+      shadow: "shadow-[0_0_20px_rgba(168,85,247,0.15)]",
+      headerText: "text-purple-400",
+      rowHover: "hover:bg-purple-950/30",
+      titleGradient: "from-purple-400 to-pink-500",
+      dropShadow: "drop-shadow-[0_0_5px_rgba(168,85,247,0.5)]",
+      subtitle: "text-purple-600",
+      paginationHover: "hover:text-purple-400",
     },
   };
 
@@ -139,8 +163,8 @@ const Table = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
-              {sortedData && sortedData.length > 0 ? (
-                sortedData.map((row, rowIndex) => (
+              {paginatedData && paginatedData.length > 0 ? (
+                paginatedData.map((row, rowIndex) => (
                   <tr key={row.id || rowIndex} className={rowClass}>
                     {columns.map((col, colIndex) => (
                       <td
@@ -162,7 +186,7 @@ const Table = ({
                     colSpan={columns.length}
                     className="px-6 py-8 text-center text-gray-500 Rusty Attack"
                   >
-                    {/* NO_DATA_FOUND */}
+                    NO DATA FOUND
                   </td>
                 </tr>
               )}
@@ -177,15 +201,22 @@ const Table = ({
                 : "border-gray-200 text-gray-500"
             }`}
           >
-            <span>SHOWING {data ? data.length : 0} RECORDS</span>
+            <span>
+              SHOWING {paginatedData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} -{" "}
+              {Math.min(currentPage * itemsPerPage, sortedData?.length || 0)} OF {sortedData?.length || 0} RECORDS
+            </span>
             <div className="flex gap-2">
               <button
-                className={`${theme.paginationHover} transition-colors`}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className={`${theme.paginationHover} transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 &lt; PREV
               </button>
               <button
-                className={`${theme.paginationHover} transition-colors`}
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages || totalPages === 0}
+                className={`${theme.paginationHover} transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 NEXT &gt;
               </button>
@@ -198,6 +229,3 @@ const Table = ({
 };
 
 export default Table;
-
-
-

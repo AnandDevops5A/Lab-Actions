@@ -112,3 +112,14 @@ export  const FormatDate = ({ dateNum }) => {
     </span>
   );
 };
+
+export const dateInLongFormat=(date)=>{
+   // Split date into parts
+  const [year, month, day] = date.split("-");
+
+  // Remove colon from time
+  const timeFormatted = time.replace(":", "");
+
+  // Concatenate into desired format
+  return `${year}${month}${day}${timeFormatted}`;
+}

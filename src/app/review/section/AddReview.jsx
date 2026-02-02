@@ -50,9 +50,9 @@ const AddReview = ({
                 <label className="text-xs text-gray-400">Name</label>
                 <input
                   type="text"
-                  value={form.name}
+                  value={form.reviewerName}
                   onChange={(e) =>
-                    setForm((f) => ({ ...f, name: e.target.value }))
+                    setForm((f) => ({ ...f, reviewerName: e.target.value }))
                   }
                   placeholder="Your display name"
                   className={`${inputClasses}`}
@@ -62,16 +62,16 @@ const AddReview = ({
               <div>
                 <label className="text-xs text-gray-400">Tournament</label>
                 <select
-                  value={form.tournamentId}
+                  value={form.tournamentName}
                   onChange={(e) =>
-                    setForm((f) => ({ ...f, tournamentId: e.target.value }))
+                    setForm((f) => ({ ...f, tournamentName: e.target.value }))
                   }
                   className={`${inputClasses}`}
                   required
                 >
                   {tournaments.map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.name}
+                      {t.tournamentName}
                     </option>
                   ))}
                 </select>

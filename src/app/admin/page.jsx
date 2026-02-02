@@ -51,6 +51,10 @@ const ManageParticipant = dynamic(() => import('./ManageParticipant'), {
   loading: () =>( <CyberLoading/>),
   ssr: false, // optional: disable SSR
 });
+const Reviews = dynamic(() => import('./Reviews'), {
+  loading: () =>( <CyberLoading/>),
+  ssr: false, // optional: disable SSR
+});
 const CompletedTournamentManager = dynamic(() => import('./CompletedTournamentManager'), {
   loading: () =>( <CyberLoading/>),
   ssr: false, // optional: disable SSR
@@ -228,6 +232,7 @@ const tournamentData = {
     { id: "completed-tournaments", label: "Manage Tournaments", icon: "🛠️" },
     { id: "participants", label: "Participants", icon: "👥" },
     { id: "manage-participants", label: "Manage Participants", icon: "🎮" },
+    { id: "reviews", label: "Reviews", icon: "⭐" },
     { id: "revenue", label: "Accounts Analysis", icon: "💰" },
     { id: "reports", label: "Reports", icon: "📄" },
     { id: "settings", label: "Settings", icon: "⚙️" },
@@ -313,6 +318,8 @@ const tournamentData = {
               {activeTab === "manage-participants" && (
                 <ManageParticipant tournaments={tournaments} participants={participants} refreshData={mutate} />
               )}
+
+              {activeTab === "reviews" && <Reviews />}
 
               {activeTab === "revenue" && (
                 <Revenue

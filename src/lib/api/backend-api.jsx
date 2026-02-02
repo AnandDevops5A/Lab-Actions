@@ -37,7 +37,7 @@ export const useSWRBackendAPI = (
     () => fetcher(url, method, data), // fetcher function
     {
       refreshInterval, // ⏱ auto revalidate every X ms (e.g., 60000 = 60s)
-      revalidateOnFocus: true, // refetch when window regains focus
+      revalidateOnFocus: false, // refetch when window regains focus
       revalidateOnReconnect: false, // refetch when network reconnects
     },
   );
@@ -267,6 +267,29 @@ export const getAllLeaderBoard = async () => {
 // Seed leaderboard with sample entries
 export const seedLeaderboard = async (listofuserId,tournamentId, count = 20) => {
   return await FetchBackendAPI(`leaderboard/seed/${listofuserId}/${tournamentId}/${count}`, {
+    method: "POST",
+  });
+};
+
+
+
+//review Apis
+
+export const addNewReview = async (review) => {
+  return await FetchBackendAPI("review/add", {
+    method: "POST",
+    data: review,
+  });
+};
+
+export const getReviewsByTournamentId = async (tournamentId) => {
+  return await FetchBackendAPI(`review/tournament/${tournamentId}`, {
+    method: "POST",
+  });
+};
+
+export const getReviewsByUserId = async (userId) => {
+  return await FetchBackendAPI(`review/user/${userId}`, {
     method: "POST",
   });
 };

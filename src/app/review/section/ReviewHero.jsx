@@ -64,15 +64,15 @@ const ReviewHero = ({
                 <label className="text-xs text-gray-400">Tournament</label>
                 <select
                   className={`${inputClasses}`}
-                  value={filters.tournamentId}
+                  value={filters.tournamentName}
                   onChange={(e) =>
-                    setFilters((f) => ({ ...f, tournamentId: e.target.value }))
+                    setFilters((f) => ({ ...f, tournamentName: e.target.value }))
                   }
                 >
                   <option value="all">All tournaments</option>
                   {tournaments.map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.name}
+                      {t.tournamentName}
                     </option>
                   ))}
                 </select>

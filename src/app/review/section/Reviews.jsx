@@ -17,7 +17,7 @@ const Reviews = ({ filtered,TournamentBadge,isDarkMode}) => {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((r) => (
             <article
-              key={r.id}
+              key={r.reviewId}
               className={`group relative rounded-xl border border-white/10 bg-linear-to-b  p-5 shadow-[0_0_20px_rgba(34,211,238,0.08)] transition-transform hover:-translate-y-0.5 
                 ${isDarkMode ? "from-gray-900/50 to-black/50" : "from-blue-50 to-gray-100"} `}
             >
@@ -59,7 +59,7 @@ const Reviews = ({ filtered,TournamentBadge,isDarkMode}) => {
                 </div>
               )}
 
-              <div className="mt-5 flex items-center justify-between">
+              <div className="mt-5 flex flex-row-reverse items-center justify-between">
                 <button className={`inline-flex items-center rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 py-1.5 text-sm text-cyan-300 hover:bg-cyan-500/20 transition-colors`}>
                   ❤️ Helpful
                 </button>
