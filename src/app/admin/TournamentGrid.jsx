@@ -42,7 +42,7 @@ const TournamentGrid = ({ tournaments, onSelect, isDarkMode,leaderboardCountRegi
             onClick={() => onSelect(tournament)}
           >
             <div className="flex items-center justify-between mb-2">
-              <h4 className="font-bold text-white truncate">{tournament.tournamentName}</h4>
+              <h4 className="font-bold text-slate-100 truncate">{tournament.tournamentName}</h4>
               <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
                 isDarkMode ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-amber-100 text-amber-800 border-amber-200"
               }`}>

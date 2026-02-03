@@ -41,7 +41,7 @@ const StatsSimpleBox = ({ title, value, isDarkMode }) => {
   return (
     <div className={`p-4 rounded-lg text-center transition-colors duration-300 ${isDarkMode ? "bg-gray-700" : "bg-gray-100"}`}>
       <p className={`text-xs uppercase font-medium ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>{title}</p>
-      <p className={`text-xl md:text-3xl font-extrabold ${isDarkMode ? "text-white" : "text-gray-900"}`}>{value}</p>
+      <p className={`text-xl md:text-3xl font-extrabold ${isDarkMode ? "text-slate-100" : "text-gray-900"}`}>{value}</p>
     </div>
   );
 };

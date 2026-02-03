@@ -18,9 +18,9 @@ const Stats = () => {
               </p>
               
               <ul className="space-y-4 mb-8 ">
-                <li className="flex items-center text-xl font-medium text-white"><span className="text-neon-blue mr-3">🏆</span> Track Top 100 Players</li>
-                <li className="flex items-center text-xl font-medium text-white"><span className="text-neon-blue mr-3">📊</span> In-Depth Match Analysis</li>
-                <li className="flex items-center text-xl font-medium text-white"><span className="text-neon-blue mr-3">📈</span> ELO and Rank History</li>
+                <li className="flex items-center text-xl font-medium text-slate-100"><span className="text-neon-blue mr-3">🏆</span> Track Top 100 Players</li>
+                <li className="flex items-center text-xl font-medium text-slate-100"><span className="text-neon-blue mr-3">📊</span> In-Depth Match Analysis</li>
+                <li className="flex items-center text-xl font-medium text-slate-100"><span className="text-neon-blue mr-3">📈</span> ELO and Rank History</li>
               </ul>
               
               <Link href="/leaderboard" className="border border-neon-red text-neon-red hover:bg-neon-red/10 px-8 py-3 rounded-lg font-bold transition duration-300 uppercase tracking-widest">

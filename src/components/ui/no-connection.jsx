@@ -46,7 +46,7 @@ export const NoConnection = () => {
 
           <button
             onClick={() => window.location.reload()}
-            className="flex items-center justify-center gap-2 w-full py-3 px-6 bg-[#FF0055] hover:bg-[#D40046] text-white font-bold uppercase tracking-wider transition-all hover:shadow-[0_0_15px_#FF0055] cursor-pointer"
+            className="flex items-center justify-center gap-2 w-full py-3 px-6 bg-[#FF0055] hover:bg-[#D40046] text-slate-100 font-bold uppercase tracking-wider transition-all hover:shadow-[0_0_15px_#FF0055] cursor-pointer"
           >
             <RefreshCw className="w-4 h-4" />
             RECONNECT

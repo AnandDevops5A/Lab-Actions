@@ -13,12 +13,14 @@ const Table = ({
   itemsPerPage = 10,
   themeColor = "green", // "green" or "cyan"
   containerClassName = "",
+  renderRowTooltip,
 }) => {
   const { isDarkMode } = useContext(ThemeContext);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
+    
     setCurrentPage(1);
   }, [data]);
 
@@ -133,7 +135,7 @@ const Table = ({
         className={`rounded-xl overflow-hidden backdrop-blur-sm ${containerClass} flex flex-col ${containerClassName}`}
       >
         <div className="overflow-x-auto flex-1">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-fixed">
             <thead className={`${headerClass} sticky top-0 z-10`}>
               <tr>
                 {columns.map((col, index) => (
@@ -165,7 +167,11 @@ const Table = ({
             <tbody className="divide-y divide-gray-800">
               {paginatedData && paginatedData.length > 0 ? (
                 paginatedData.map((row, rowIndex) => (
-                  <tr key={row.id || rowIndex} className={rowClass}>
+                  <tr 
+                    key={row.id || rowIndex} 
+                    className={rowClass}
+                    title={renderRowTooltip ? "USER COMMENT: "+renderRowTooltip(row) : undefined}
+                  >
                     {columns.map((col, colIndex) => (
                       <td
                         key={`${rowIndex}-${colIndex}`}

@@ -11,11 +11,11 @@ const Settings = () => {
                       <div className="space-y-4">
                         <div>
                           <label className="block text-xs md:text-sm font-bold mb-2">Platform Name</label>
-                          <input type="text" defaultValue="Gold_Pearl Tournament" className="w-full bg-gray-900 border border-gray-700 rounded px-3 md:px-4 py-2 text-white text-xs md:text-sm focus:border-orange-500 outline-none" />
+                          <input type="text" defaultValue="Gold_Pearl Tournament" className="w-full bg-gray-900 border border-gray-700 rounded px-3 md:px-4 py-2 text-slate-100 text-xs md:text-sm focus:border-orange-500 outline-none" />
                         </div>
                         <div>
                           <label className="block text-xs md:text-sm font-bold mb-2">Admin Email</label>
-                          <input type="email" defaultValue="admin@tournament.com" className="w-full bg-gray-900 border border-gray-700 rounded px-3 md:px-4 py-2 text-white text-xs md:text-sm focus:border-orange-500 outline-none" />
+                          <input type="email" defaultValue="admin@tournament.com" className="w-full bg-gray-900 border border-gray-700 rounded px-3 md:px-4 py-2 text-slate-100 text-xs md:text-sm focus:border-orange-500 outline-none" />
                         </div>
                       </div>
                     </div>

@@ -37,7 +37,7 @@ const WinnerSection = () => {
           <p className="text-sm font-extrabold  tracking-widest text-red-500">
             MENS💪 means BEAST😈
           </p>
-          <h2 className="mt-2 text-5xl sm:text-6xl md:text-7xl font-extrabold text-white leading-tight autoblur">
+          <h2 className="mt-2 text-5xl sm:text-6xl md:text-7xl font-extrabold text-slate-100 leading-tight autoblur">
             We Don&apos;t Just Compete. <p className="text-red-500">We Conquer.</p>
           </h2>
         </div>
@@ -54,7 +54,7 @@ const WinnerSection = () => {
               
                 <achievement.icon className={`autorotate w-12 h-12 mb-4 ${achievement.color}`} />
               
-              <p className="text-5xl font-extrabold text-white mb-2">
+              <p className="text-5xl font-extrabold text-slate-100 mb-2">
                 {achievement.stat}
               </p>
               
@@ -73,7 +73,7 @@ const WinnerSection = () => {
         <div className="fadeup mt-16 sm:mt-24 text-center">
           <a
             href="#contact"
-            className=" inline-block px-12 py-4 text-lg font-extrabold uppercase tracking-wider text-white bg-red-600 rounded-lg shadow-xl hover:bg-red-700 transition duration-300 transform hover:-translate-y-1 ring-4 ring-red-600 ring-offset-4 ring-offset-gray-950"
+            className=" inline-block px-12 py-4 text-lg font-extrabold uppercase tracking-wider text-slate-100 bg-red-600 rounded-lg shadow-xl hover:bg-red-700 transition duration-300 transform hover:-translate-y-1 ring-4 ring-red-600 ring-offset-4 ring-offset-gray-950"
           >
             Claim Your Victory
           </a>

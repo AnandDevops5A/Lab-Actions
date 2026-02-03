@@ -375,7 +375,7 @@ export default function Leaderboard() {
                 errorMessage("Error while seeding leaderboard");
               }
             }}
-            className="ml-3 px-3 py-2 bg-emerald-500 text-white rounded-md text-xs"
+            className="ml-3 px-3 py-2 bg-emerald-500 text-slate-100 rounded-md text-xs"
           >
             Seed Data
           </button>

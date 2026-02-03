@@ -70,7 +70,7 @@ ThemeContext (Provider)
 html (root)
 ├── class="dark" (Default)
 │   ├── bg-gray-950
-│   ├── text-white
+│   ├── text-slate-100
 │   ├── border-neon-blue/20
 │   └── [all dark mode styles]
 │
@@ -209,7 +209,7 @@ html.light .bg-gray-950 {
 
 ### Text Transformation
 ```css
-html.light .text-white {
+html.light .text-slate-100 {
   @apply text-gray-900;  /* #ffffff → #111827 */
 }
 ```
@@ -238,7 +238,7 @@ When in Dark Mode, inspect shows:
 ```html
 <html class="dark">
   <body class="... antialiased">
-    <div class="... bg-gray-950 text-white">
+    <div class="... bg-gray-950 text-slate-100">
       <!-- App content with dark theme applied -->
     </div>
   </body>

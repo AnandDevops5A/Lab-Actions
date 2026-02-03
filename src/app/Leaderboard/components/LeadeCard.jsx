@@ -13,7 +13,7 @@ export function LeaderCard({ player, rank, isDarkMode, globalRank, tournamentRan
     : isFirst ? "shadow-xl shadow-amber-600/30" : "shadow-lg shadow-slate-400/20";
     
   const bgColor = isDarkMode ? "bg-slate-900" : "bg-slate-100";
-  const textColor = isDarkMode ? "text-white" : "text-slate-900";
+  const textColor = isDarkMode ? "text-slate-100" : "text-slate-900";
   const topGlowColor = isDarkMode ? "via-green-400" : "via-blue-400";
   const rankBadgeColor = isDarkMode 
     ? isFirst ? "text-yellow-400" : "text-green-400"

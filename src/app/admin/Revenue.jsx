@@ -8,11 +8,11 @@ const Revenue = ({revenueData,registrationData,chartOptions}) => {
                   <h2 className="text-xl md:text-2xl font-bold">Revenue Analytics</h2>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                     <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg">
-                      <h3 className="text-lg md:text-xl font-bold mb-4 text-white">Monthly Revenue</h3>
+                      <h3 className="text-lg md:text-xl font-bold mb-4 text-slate-100">Monthly Revenue</h3>
                       <Line data={revenueData} options={chartOptions} />
                     </div>
                     <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg">
-                      <h3 className="text-lg md:text-xl font-bold mb-4 text-white">Registration Growth</h3>
+                      <h3 className="text-lg md:text-xl font-bold mb-4 text-slate-100">Registration Growth</h3>
                       <Bar data={registrationData} options={chartOptions} />
                     </div>
                   </div>

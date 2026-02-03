@@ -43,7 +43,7 @@ function InputField({
         type={type}
         ref={inputRef}
         placeholder={placeholder}
-        className={`w-full bg-transparent border-b border-[#00E5FF]/10 py-3 pl-12 pr-4 text-white placeholder-gray-400 focus:outline-none focus:border-[#FF4170] transition-colors ${extraClass}`}
+        className={`w-full bg-transparent border-b border-[#00E5FF]/10 py-3 pl-12 pr-4 text-slate-100 placeholder-gray-400 focus:outline-none focus:border-[#FF4170] transition-colors ${extraClass}`}
       />
     </div>
   );
@@ -169,14 +169,14 @@ const Signup = memo(({ onSwitch }) => {
             aria-label="Country code"
             ref={countryRef}
             defaultValue={COUNTRIES[0].code}
-            className="absolute left-10 top-1/2 -translate-y-1/2 bg-transparent text-white text-sm pl-2 pr-6 py-1 rounded-md focus:outline-none focus:border-[#00E5FF]/30"
+            className="absolute left-10 top-1/2 -translate-y-1/2 bg-transparent text-slate-100 text-sm pl-2 pr-6 py-1 rounded-md focus:outline-none focus:border-[#00E5FF]/30"
             disabled //only indian number are allowed
           >
             {COUNTRIES.map((c) => (
               <option
                 key={c.code}
                 value={c.code}
-                className="bg-black text-white"
+                className="bg-black text-slate-100"
               >{`${c.emoji} ${c.code}`}</option>
             ))}
           </select>
@@ -186,7 +186,7 @@ const Signup = memo(({ onSwitch }) => {
             name="contact"
             ref={contactRef}
             placeholder="Local number"
-            className="w-full bg-transparent border-b border-[#00E5FF]/10 py-3 pl-36 pr-4 text-white placeholder-gray-400 focus:outline-none focus:border-[#FF4170] transition-colors"
+            className="w-full bg-transparent border-b border-[#00E5FF]/10 py-3 pl-36 pr-4 text-slate-100 placeholder-gray-400 focus:outline-none focus:border-[#FF4170] transition-colors"
           />
         </div>
 
@@ -202,7 +202,7 @@ const Signup = memo(({ onSwitch }) => {
         <button
           type="button"
           onClick={() => setShowPwd(!showPwd)}
-          className="absolute right-3 top-[38%] text-white/80 hover:text-white p-1"
+          className="absolute right-3 top-[38%] text-slate-100/80 hover:text-slate-100 p-1"
         >
           {showPwd ? (
             <EyeOff className="w-5 h-5" />

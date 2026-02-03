@@ -68,7 +68,7 @@ const Main = () => {
   return (
     <div
       className={`min-h-screen font-sans antialiased transition-colors duration-300 ${
-        isDarkMode ? "bg-gray-950 text-white" : "bg-blue-50 text-gray-900"
+        isDarkMode ? "bg-gray-950 text-slate-100" : "bg-blue-50 text-gray-900"
       }`}
     >
       <main>

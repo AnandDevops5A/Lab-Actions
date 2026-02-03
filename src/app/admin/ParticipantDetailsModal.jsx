@@ -43,7 +43,7 @@ const ParticipantDetailsModal = ({ participant, tournament, leaderboardData, onC
               type="button"
               onClick={onClose}
               aria-label="Close participant details"
-              className="absolute top-0 right-0 bg-red-600 p-2 text-white hover:bg-green-400 hover:text-black transition-colors z-50 group cursor-pointer"
+              className="absolute top-0 right-0 bg-red-600 p-2 text-slate-100 hover:bg-green-400 hover:text-black transition-colors z-50 group cursor-pointer"
               style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 20% 100%)" }}
             >
               <X size={24} className="group-hover:rotate-180 transition-transform" />
@@ -62,11 +62,11 @@ const ParticipantDetailsModal = ({ participant, tournament, leaderboardData, onC
 
             {/* Participant Header */}
             <div className="flex items-center gap-6 mb-8 p-6 bg-gray-900/50 rounded-lg border border-gray-800">
-              <div className="h-20 w-20 rounded-full flex items-center justify-center bg-gradient-to-br from-green-500 to-blue-500 text-white text-2xl font-bold">
+              <div className="h-20 w-20 rounded-full flex items-center justify-center bg-gradient-to-br from-green-500 to-blue-500 text-slate-100 text-2xl font-bold">
                 {participant.username ? participant.username.charAt(0).toUpperCase() : "?"}
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-bold text-white mb-1">{participant.username}</h3>
+                <h3 className="text-2xl font-bold text-slate-100 mb-1">{participant.username}</h3>
                 <p className="text-gray-400 mb-2">{participant.callSign}</p>
                 <div className="flex items-center gap-4">
                   <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${
@@ -153,23 +153,23 @@ const ParticipantDetailsModal = ({ participant, tournament, leaderboardData, onC
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Username:</span>
-                        <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{participant.username}</span>
+                        <span className={`font-medium ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>{participant.username}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Call Sign:</span>
-                        <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{participant.callSign}</span>
+                        <span className={`font-medium ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>{participant.callSign}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Email:</span>
-                        <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{participant.email}</span>
+                        <span className={`font-medium ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>{participant.email}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Contact:</span>
-                        <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{participant.contact}</span>
+                        <span className={`font-medium ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>{participant.contact}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Joined:</span>
-                        <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{formatJoiningDate(participant.joiningDate)}</span>
+                        <span className={`font-medium ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>{formatJoiningDate(participant.joiningDate)}</span>
                       </div>
                       {participant.transactionId && (
                         <div className="flex justify-between">
@@ -191,7 +191,7 @@ const ParticipantDetailsModal = ({ participant, tournament, leaderboardData, onC
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Tournament:</span>
-                        <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{tournament.tournamentName}</span>
+                        <span className={`font-medium ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>{tournament.tournamentName}</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Registration Status:</span>
@@ -236,7 +236,7 @@ const ParticipantDetailsModal = ({ participant, tournament, leaderboardData, onC
                       <div>
                         <div className="flex justify-between text-sm mb-1">
                           <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>Win Rate</span>
-                          <span className={isDarkMode ? 'text-white' : 'text-gray-900'}>{winRate.toFixed(1)}%</span>
+                          <span className={isDarkMode ? 'text-slate-100' : 'text-gray-900'}>{winRate.toFixed(1)}%</span>
                         </div>
                         <div className="w-full bg-gray-700 rounded-full h-2">
                           <div

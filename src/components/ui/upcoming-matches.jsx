@@ -112,19 +112,19 @@ const UpcomingMatches = () => {
     return (
       <div className={`flex items-center gap-2 text-xs Rusty Attack ${isDarkMode ? "text-cyan-400" : "text-cyan-600"}`}>
         <div className={`px-2 py-1 rounded border ${isDarkMode ? "bg-gray-900/80 border-gray-700" : "bg-gray-100 border-gray-300"}`}>
-          <span className={`font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>{String(timeLeft.d).padStart(2, '0')}</span>d
+          <span className={`font-bold ${isDarkMode ? "text-slate-100" : "text-gray-900"}`}>{String(timeLeft.d).padStart(2, '0')}</span>d
         </div>
         <span className="text-gray-600">:</span>
         <div className={`px-2 py-1 rounded border ${isDarkMode ? "bg-gray-900/80 border-gray-700" : "bg-gray-100 border-gray-300"}`}>
-          <span className={`font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>{String(timeLeft.h).padStart(2, '0')}</span>h
+          <span className={`font-bold ${isDarkMode ? "text-slate-100" : "text-gray-900"}`}>{String(timeLeft.h).padStart(2, '0')}</span>h
         </div>
         <span className="text-gray-600">:</span>
         <div className={`px-2 py-1 rounded border ${isDarkMode ? "bg-gray-900/80 border-gray-700" : "bg-gray-100 border-gray-300"}`}>
-          <span className={`font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>{String(timeLeft.m).padStart(2, '0')}</span>m
+          <span className={`font-bold ${isDarkMode ? "text-slate-100" : "text-gray-900"}`}>{String(timeLeft.m).padStart(2, '0')}</span>m
         </div>
         <span className="text-gray-600">:</span>
         <div className={`px-2 py-1 rounded border ${isDarkMode ? "bg-gray-900/80 border-gray-700" : "bg-gray-100 border-gray-300"}`}>
-          <span className={`font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>{String(timeLeft.s).padStart(2, '0')}</span>s
+          <span className={`font-bold ${isDarkMode ? "text-slate-100" : "text-gray-900"}`}>{String(timeLeft.s).padStart(2, '0')}</span>s
         </div>
       </div>
     );
@@ -190,7 +190,7 @@ const UpcomingMatches = () => {
                     </span>
                   </div>
 
-                  <h3 className={`text-2xl font-bold mb-2 line-clamp-1 transition-colors ${isDarkMode ? "text-white group-hover:text-red-400" : "text-gray-900 group-hover:text-red-600"}`}>
+                  <h3 className={`text-2xl font-bold mb-2 line-clamp-1 transition-colors ${isDarkMode ? "text-slate-100 group-hover:text-red-400" : "text-gray-900 group-hover:text-red-600"}`}>
                     {tournament.tournamentName}
                   </h3>
 
@@ -222,7 +222,7 @@ const UpcomingMatches = () => {
 
                   {/* <button
                     onClick={() => setOpen(true)}
-                    className="w-full py-3 rounded-lg bg-gradient-to-r from-red-600 to-red-700 text-white font-bold uppercase tracking-wider text-sm hover:from-red-500 hover:to-red-600 transition-all shadow-lg shadow-red-900/20 hover:shadow-red-500/40 flex items-center justify-center gap-2 group-hover:scale-[1.02] cursor-pointer"
+                    className="w-full py-3 rounded-lg bg-gradient-to-r from-red-600 to-red-700 text-slate-100 font-bold uppercase tracking-wider text-sm hover:from-red-500 hover:to-red-600 transition-all shadow-lg shadow-red-900/20 hover:shadow-red-500/40 flex items-center justify-center gap-2 group-hover:scale-[1.02] cursor-pointer"
                   >
                     <Swords size={16} /> Register Now
                   </button> */}

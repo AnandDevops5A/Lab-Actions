@@ -253,14 +253,14 @@ const ManageParticipant = ({ tournaments, participants, refreshData }) => {
       <div className="space-y-6">
         <div className="text-center">
           <Trophy className={`mx-auto h-16 w-16 ${isDarkMode ? 'text-gray-400' : 'text-gray-400'} mb-4`} />
-          <h2 className="text-2xl font-bold text-white mb-4">Tournament Participant Management</h2>
+          <h2 className="text-2xl font-bold text-slate-100 mb-4">Tournament Participant Management</h2>
           <p className={`text-lg mb-6 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
             Select a tournament to manage its participants
           </p>
         </div>
 
         <div className={`rounded-lg border overflow-hidden p-6 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-          <h3 className="text-lg font-semibold mb-4 text-white">Available Tournaments</h3>
+          <h3 className="text-lg font-semibold mb-4 text-slate-100">Available Tournaments</h3>
           <TournamentGrid
             tournaments={upcomingTournaments}
             onSelect={setSelectedTournament}

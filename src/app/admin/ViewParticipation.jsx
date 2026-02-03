@@ -31,7 +31,7 @@ const StatCard = ({ icon: Icon, label, value, subValue, isDarkMode }) => (
       >
         {label}
       </p>
-      <p className={`text-lg Rusty Attack font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+      <p className={`text-lg Rusty Attack font-bold ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>
         {value}
       </p>
       {subValue && <p className="text-xs text-gray-500">{subValue}</p>}
@@ -55,7 +55,7 @@ const DetailRow = ({ icon: Icon, label, value, isDarkMode }) => (
         {label}
       </span>
     </div>
-    <span className={`Rusty Attack text-sm ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+    <span className={`Rusty Attack text-sm ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>
       {value || "N/A"}
     </span>
   </div>
@@ -98,7 +98,7 @@ const ViewParticipation = ({ data, onClose }) => {
           </div>
           <button
             onClick={onClose}
-            className={`p-2 rounded-lg transition-colors ${isDarkMode ? "hover:bg-gray-800 text-gray-400 hover:text-white" : "hover:bg-gray-100 text-gray-500 hover:text-gray-900"}`}
+            className={`p-2 rounded-lg transition-colors ${isDarkMode ? "hover:bg-gray-800 text-gray-400 hover:text-slate-100" : "hover:bg-gray-100 text-gray-500 hover:text-gray-900"}`}
           >
             <X size={24} />
           </button>
@@ -291,11 +291,11 @@ const ViewParticipation = ({ data, onClose }) => {
         <div className={`p-6 border-t ${isDarkMode ? "border-gray-800" : "border-gray-200"} flex justify-end gap-3`}>
            <button 
             onClick={onClose}
-            className={`px-6 py-2 rounded-lg font-bold uppercase text-sm tracking-wider transition-all ${isDarkMode ? "bg-gray-800 hover:bg-gray-700 text-white" : "bg-gray-200 hover:bg-gray-300 text-gray-800"}`}
+            className={`px-6 py-2 rounded-lg font-bold uppercase text-sm tracking-wider transition-all ${isDarkMode ? "bg-gray-800 hover:bg-gray-700 text-slate-100" : "bg-gray-200 hover:bg-gray-300 text-gray-800"}`}
           >
             Close
           </button>
-          <button className={`px-6 py-2 rounded-lg font-bold uppercase text-sm tracking-wider transition-all ${isDarkMode ? "bg-pink-600 hover:bg-pink-500 text-white shadow-[0_0_15px_rgba(219,39,119,0.4)]" : "bg-red-600 hover:bg-red-700 text-white"}`}>
+          <button className={`px-6 py-2 rounded-lg font-bold uppercase text-sm tracking-wider transition-all ${isDarkMode ? "bg-pink-600 hover:bg-pink-500 text-slate-100 shadow-[0_0_15px_rgba(219,39,119,0.4)]" : "bg-red-600 hover:bg-red-700 text-slate-100"}`}>
             Ban User
           </button>
         </div>

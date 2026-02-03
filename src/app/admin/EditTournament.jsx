@@ -79,7 +79,7 @@ const EditTournamentForm = ({ tournament, onClose, refreshData }) => {
               type="button"
               onClick={onClose}
               aria-label="Close edit tournament"
-              className="absolute top-0 right-0 bg-red-600 p-2 text-white hover:bg-blue-400 hover:text-black transition-colors z-50 group cursor-pointer"
+              className="absolute top-0 right-0 bg-red-600 p-2 text-slate-100 hover:bg-blue-400 hover:text-black transition-colors z-50 group cursor-pointer"
               style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 20% 100%)" }}
             >
               <X size={24} className="group-hover:rotate-180 transition-transform" />
@@ -124,7 +124,7 @@ const EditTournamentForm = ({ tournament, onClose, refreshData }) => {
                     value={formData.prizePool}
                     onChange={handleChange}
                     placeholder="500"
-                    className="w-full bg-transparent outline-none text-white text-sm"
+                    className="w-full bg-transparent outline-none text-slate-100 text-sm"
                   />
                 </div>
 
@@ -138,7 +138,7 @@ const EditTournamentForm = ({ tournament, onClose, refreshData }) => {
                     value={formData.slot}
                     onChange={handleChange}
                     placeholder="50"
-                    className="w-full bg-transparent outline-none text-white text-sm"
+                    className="w-full bg-transparent outline-none text-slate-100 text-sm"
                   />
                 </div>
 
@@ -152,7 +152,7 @@ const EditTournamentForm = ({ tournament, onClose, refreshData }) => {
                     value={formData.platform}
                     onChange={handleChange}
                     placeholder="Game platform"
-                    className="w-full bg-transparent outline-none text-white text-sm"
+                    className="w-full bg-transparent outline-none text-slate-100 text-sm"
                   />
                 </div>
 
@@ -165,7 +165,7 @@ const EditTournamentForm = ({ tournament, onClose, refreshData }) => {
                     name="time"
                     value={formData.time}
                     onChange={handleChange}
-                    className="w-full bg-transparent outline-none text-white text-sm"
+                    className="w-full bg-transparent outline-none text-slate-100 text-sm"
                   />
                 </div>
 
@@ -178,7 +178,7 @@ const EditTournamentForm = ({ tournament, onClose, refreshData }) => {
                     name="date"
                     value={formData.date}
                     onChange={handleChange}
-                    className="w-full bg-transparent outline-none text-white text-sm"
+                    className="w-full bg-transparent outline-none text-slate-100 text-sm"
                   />
                 </div>
               </div>
@@ -201,7 +201,7 @@ const EditTournamentForm = ({ tournament, onClose, refreshData }) => {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 uppercase
+                className="w-full bg-blue-600 hover:bg-blue-500 text-slate-100 font-black py-4 uppercase
               tracking-[0.2em] relative overflow-hidden group transition-all rounded-lg"
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">

@@ -69,7 +69,7 @@ const CompletedTournamentManager = ({ tournaments, refreshData, joiners, updateJ
             className={`p-4 rounded-lg ${isDarkMode ? "bg-gray-800/50" : "bg-gray-50"}`}
           >
             <h3
-              className={`text-lg font-semibold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"}`}
+              className={`text-lg font-semibold mb-4 ${isDarkMode ? "text-slate-100" : "text-gray-900"}`}
             >
               Recent Tournaments (Upcoming & Recently Completed)
             </h3>

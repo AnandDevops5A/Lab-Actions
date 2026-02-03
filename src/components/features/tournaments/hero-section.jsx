@@ -235,7 +235,7 @@ const HeroSection = () => {
                   : "bg-linear-to-r from-red-500 to-red-600 shadow-md shadow-red-400/40 group-hover:shadow-red-400/60"
               } transition-all duration-300 rounded-lg`}
             ></div>
-            <span className="relative flex items-center gap-2 text-white font-bold">
+            <span className="relative flex items-center gap-2 text-slate-100 font-bold">
               Join Tournament 🎮
             </span>
           </button>

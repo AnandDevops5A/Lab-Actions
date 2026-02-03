@@ -76,7 +76,7 @@ const AddParticipantModal = ({ tournament, participants, onClose, refreshData })
               type="button"
               onClick={onClose}
               aria-label="Close add participants"
-              className="absolute top-0 right-0 bg-red-600 p-2 text-white hover:bg-blue-400 hover:text-black transition-colors z-50 group cursor-pointer"
+              className="absolute top-0 right-0 bg-red-600 p-2 text-slate-100 hover:bg-blue-400 hover:text-black transition-colors z-50 group cursor-pointer"
               style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 20% 100%)" }}
             >
               <X size={24} className="group-hover:rotate-180 transition-transform" />
@@ -92,7 +92,7 @@ const AddParticipantModal = ({ tournament, participants, onClose, refreshData })
               </h2>
               <div className="h-1 w-20 bg-blue-500 mt-2"></div>
               <p className="text-gray-400 mt-2">
-                Add participants to: <span className="text-white font-semibold">{tournament.tournamentName}</span>
+                Add participants to: <span className="text-slate-100 font-semibold">{tournament.tournamentName}</span>
               </p>
             </div>
 
@@ -154,7 +154,7 @@ const AddParticipantModal = ({ tournament, participants, onClose, refreshData })
                           {participant.username ? participant.username.charAt(0).toUpperCase() : "?"}
                         </div>
                         <div className="flex-1">
-                          <div className="text-white font-medium">{participant.username}</div>
+                          <div className="text-slate-100 font-medium">{participant.username}</div>
                           <div className="text-gray-400 text-sm">{participant.callSign} • {participant.email}</div>
                         </div>
                         <div className="text-right">
@@ -195,7 +195,7 @@ const AddParticipantModal = ({ tournament, participants, onClose, refreshData })
                 <button
                   onClick={handleSubmit}
                   disabled={selectedParticipants.length === 0 || isSubmitting}
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium transition-colors rounded-lg flex items-center gap-2"
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-slate-100 font-medium transition-colors rounded-lg flex items-center gap-2"
                 >
                   {isSubmitting ? (
                     <>

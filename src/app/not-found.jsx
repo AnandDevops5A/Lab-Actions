@@ -9,7 +9,7 @@ const NotFoundPage = () => (
   <div>
   <Suspense fallback={<div>Loading...</div>}>
      <Navbar/></Suspense>
-    <div className=" h-[98vh] flex flex-col items-center justify-center bg-gray-950 text-white relative p-10 pt-25">
+    <div className=" h-[98vh] flex flex-col items-center justify-center bg-gray-950 text-slate-100 relative p-10 pt-25">
       {/* Background effects */}
       <div className="absolute  inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-size-[100%_3px,2px_100%] animate-pulse z-0" />
       

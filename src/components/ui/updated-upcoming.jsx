@@ -34,7 +34,7 @@ const cards = [
 
 const EscapeCards = () => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#021311] text-white pt-10 md:pt-0">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#021311] text-slate-100 pt-10 md:pt-0">
       {/* Title */}
       <h1 className= "autoblur mb-10 text-[25px] md:text-4xl lg:text-5xl font-extrabold  text-amber-300 drop-shadow-[0_0_30px_rgba(14,211,8,0.75)]">
        ⚔ Upcoming Matches ⚔

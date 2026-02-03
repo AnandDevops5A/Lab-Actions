@@ -14,7 +14,7 @@ export const ThemeToggle = () => {
       className={`relative inline-flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 font-semibold text-sm ${
         isDarkMode
           ? 'bg-linear-to-br from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 text-yellow-400 shadow-lg shadow-yellow-500/20 border border-gray-700'
-          : 'bg-linear-to-br from-blue-400 to-blue-500 hover:from-blue-300 hover:to-blue-400 text-white shadow-lg shadow-blue-400/30 border border-blue-300'
+          : 'bg-linear-to-br from-blue-400 to-blue-500 hover:from-blue-300 hover:to-blue-400 text-slate-100 shadow-lg shadow-blue-400/30 border border-blue-300'
       }`}
       aria-label="Toggle theme"
       title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}

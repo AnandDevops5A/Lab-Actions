@@ -41,7 +41,7 @@ const TournamentList = ({ recentTournaments, upcomingTournaments, completedTourn
               >
                 <div className="flex justify-between items-start mb-3">
                   <div>
-                    <h4 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    <h4 className={`text-lg font-bold ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>
                       {tournament.tournamentName}
                     </h4>
                     <div className="flex items-center gap-4 mt-2 text-sm">
@@ -104,7 +104,7 @@ const TournamentList = ({ recentTournaments, upcomingTournaments, completedTourn
               >
                 <div className="flex justify-between items-start mb-3">
                   <div>
-                    <h4 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    <h4 className={`text-lg font-bold ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>
                       {tournament.tournamentName}
                     </h4>
                     <div className="flex items-center gap-4 mt-2 text-sm">

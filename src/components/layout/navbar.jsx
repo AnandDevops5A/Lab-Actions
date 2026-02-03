@@ -156,7 +156,7 @@ const NavbarContent = () => {
                 <Link
                   key={item.name}
                   href={!user  && item.name === "leaderboard" ? "/?scroll=leaderboard" : item.href}
-                  className={`group ${idx % 2 === 0 ? "animate-slideInLeft" : "animate-slideInRight"} px-4 py-2 text-sm font-semibold transition-colors duration-200 text-gray-200/90 hover:text-white border-l-2 border-r-2 border-transparent hover:border-l-neon-red hover:border-r-neon-red ${item.name !== "leaderboard" ? "focus:cursor-none" : ""} nav-item`}
+                  className={`group ${idx % 2 === 0 ? "animate-slideInLeft" : "animate-slideInRight"} px-4 py-2 text-sm font-semibold transition-colors duration-200 text-gray-200/90 hover:text-slate-100 border-l-2 border-r-2 border-transparent hover:border-l-neon-red hover:border-r-neon-red ${item.name !== "leaderboard" ? "focus:cursor-none" : ""} nav-item`}
                 >
                   <span className="relative inline-block">
                     {item.name}
@@ -178,7 +178,7 @@ const NavbarContent = () => {
                 onClick={() => setIsOpen(!isOpen)}
                 className={`inline-flex items-center justify-center p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-neon-red transition-colors will-change-transform ${
                   isDarkMode
-                    ? 'text-gray-400 hover:text-white hover:bg-gray-700'
+                    ? 'text-gray-400 hover:text-slate-100 hover:bg-gray-700'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-blue-100'
                 }`}
                 aria-controls="mobile-menu"
@@ -228,7 +228,7 @@ const NavbarContent = () => {
                     onClick={() => setIsOpen(false)}
                     className={`block px-4 py-2 rounded-lg text-base font-medium transition-colors shadow-sm ${
                       isDarkMode
-                        ? 'text-gray-200 hover:bg-gray-800 hover:text-white'
+                        ? 'text-gray-200 hover:bg-gray-800 hover:text-slate-100'
                         : 'text-gray-800 hover:bg-blue-100 hover:text-gray-900'
                     }`}
                   >

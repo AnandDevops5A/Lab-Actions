@@ -274,7 +274,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
                 Total Tournaments
               </p>
               <p
-                className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}
+                className={`text-2xl font-bold ${isDarkMode ? "text-slate-100" : "text-gray-900"}`}
               >
                 {stats.total}
               </p>
@@ -296,7 +296,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
                 Upcoming
               </p>
               <p
-                className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}
+                className={`text-2xl font-bold ${isDarkMode ? "text-slate-100" : "text-gray-900"}`}
               >
                 {stats.upcoming}
               </p>
@@ -318,7 +318,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
                 Completed
               </p>
               <p
-                className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}
+                className={`text-2xl font-bold ${isDarkMode ? "text-slate-100" : "text-gray-900"}`}
               >
                 {stats.completed}
               </p>
@@ -340,7 +340,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
                 Total Prize Pool
               </p>
               <p
-                className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}
+                className={`text-2xl font-bold ${isDarkMode ? "text-slate-100" : "text-gray-900"}`}
               >
                 ₹{stats.totalPrize.toLocaleString()}
               </p>
@@ -371,7 +371,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
                       isDarkMode
-                        ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                        ? "bg-gray-700 border-gray-600 text-slate-100 placeholder-gray-400"
                         : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
                     }`}
                   />
@@ -381,7 +381,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
                   onClick={() => setShowFilters(!showFilters)}
                   className={`flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors ${
                     isDarkMode
-                      ? "bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+                      ? "bg-gray-700 border-gray-600 text-slate-100 hover:bg-gray-600"
                       : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                   }`}
                 >
@@ -400,7 +400,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
                 {selectedTournaments.length > 0 && (
                   <button
                     onClick={handleBulkDelete}
-                    className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-red-600 text-slate-100 rounded-lg hover:bg-red-700 transition-colors"
                   >
                     <Trash2 className="h-4 w-4" />
                     Delete ({selectedTournaments.length})
@@ -409,7 +409,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
 
                 <button
                   onClick={() => setShowAddForm(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-slate-100 rounded-lg hover:bg-green-700 transition-colors"
                 >
                   <Plus className="h-4 w-4" />
                   Add Tournament
@@ -432,7 +432,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
                       onChange={(e) => setStatusFilter(e.target.value)}
                       className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
                         isDarkMode
-                          ? "bg-gray-700 border-gray-600 text-white"
+                          ? "bg-gray-700 border-gray-600 text-slate-100"
                           : "bg-white border-gray-300 text-gray-900"
                       }`}
                     >
@@ -453,7 +453,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
                       onChange={(e) => setPlatformFilter(e.target.value)}
                       className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
                         isDarkMode
-                          ? "bg-gray-700 border-gray-600 text-white"
+                          ? "bg-gray-700 border-gray-600 text-slate-100"
                           : "bg-white border-gray-300 text-gray-900"
                       }`}
                     >
@@ -477,7 +477,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
                       onChange={(e) => setSortBy(e.target.value)}
                       className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
                         isDarkMode
-                          ? "bg-gray-700 border-gray-600 text-white"
+                          ? "bg-gray-700 border-gray-600 text-slate-100"
                           : "bg-white border-gray-300 text-gray-900"
                       }`}
                     >
@@ -497,7 +497,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
             className={`animate-slideInDown rounded-lg border overflow-hidden ${isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}
           >
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full table-fixed">
                 <thead className={isDarkMode ? "bg-gray-700" : "bg-gray-50"}>
                   <tr>
                     <th className="px-4 py-3 text-left">
@@ -580,7 +580,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
                             ? isDarkMode
                               ? "bg-green-900/20 hover:bg-gray-600"
                               : "bg-green-50 hover:bg-gray-50"
-                            : ""
+                            : isDarkMode ? "hover:bg-gray-700 odd:bg-black/20 even:bg-gray-800/20" : "hover:bg-gray-100 odd:bg-white even:bg-gray-50/50"
                         }
                       >
                         <td className="px-4 py-4">
@@ -599,7 +599,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
                           <div className="flex items-center">
                             <div>
                               <div
-                                className={`text-sm font-medium ${isDarkMode ? "text-white" : "text-gray-900"}`}
+                                className={`text-sm font-medium ${isDarkMode ? "text-slate-100" : "text-gray-900"}`}
                               >
                                 {tournament.tournamentName}
                               </div>
@@ -736,6 +736,3 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
 };
 
 export default TournamentManagement;
-
-
-

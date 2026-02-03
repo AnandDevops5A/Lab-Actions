@@ -104,7 +104,7 @@ const AddTournamentForm = ({ onClose, refreshData}) => {
             type="button"
             onClick={() => onClose(true)}
             aria-label="Close add tournament"
-            className="absolute top-0 right-0 bg-red-600 p-2 text-white hover:bg-green-400 hover:text-black transition-colors z-50 group cursor-pointer"
+            className="absolute top-0 right-0 bg-red-600 p-2 text-slate-100 hover:bg-green-400 hover:text-black transition-colors z-50 group cursor-pointer"
             style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 20% 100%)" }}
           >
             <X
@@ -152,7 +152,7 @@ const AddTournamentForm = ({ onClose, refreshData}) => {
                   <input
                     type={box.type}
                     placeholder={box.placeholder}
-                    className="w-full bg-transparent outline-none text-white text-sm"
+                    className="w-full bg-transparent outline-none text-slate-100 text-sm"
                     name={box.name}
                   />
                 </div>
@@ -178,7 +178,7 @@ const AddTournamentForm = ({ onClose, refreshData}) => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-green-600 hover:bg-green-500 text-white font-black py-4 uppercase 
+              className="w-full bg-green-600 hover:bg-green-500 text-slate-100 font-black py-4 uppercase 
             tracking-[0.2em] relative overflow-hidden group transition-all rounded-lg "
             >
               <span className="relative ">Add ➕ </span>

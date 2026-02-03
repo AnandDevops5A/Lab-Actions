@@ -24,7 +24,7 @@ const TournamentStatsHeader = ({ tournament, participants, onBack, isDarkMode })
     <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-2xl font-bold text-white">{tournament.tournamentName}</h2>
+          <h2 className="text-2xl font-bold text-slate-100">{tournament.tournamentName}</h2>
           <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
             Managing Participants • {date} at {time}
           </p>
@@ -32,7 +32,7 @@ const TournamentStatsHeader = ({ tournament, participants, onBack, isDarkMode })
         <button
           onClick={onBack}
           className={`px-4 py-2 border rounded-lg transition-colors ${
-            isDarkMode ? 'bg-gray-700 border-gray-600 text-white hover:bg-gray-600' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+            isDarkMode ? 'bg-gray-700 border-gray-600 text-slate-100 hover:bg-gray-600' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
           }`}
         >
           ← Back to Tournaments

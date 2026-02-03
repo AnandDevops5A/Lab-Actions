@@ -39,7 +39,7 @@ const sortedMatchHistory = useMemo(() => { return [...(matchHistory || [])].sort
                                 }`}
           >
             <div>
-              <p className={`font-semibold text-lg ${isDarkMode ? "text-white" : "text-gray-900"}`}>{match.tournamentName}</p>
+              <p className={`font-semibold text-lg ${isDarkMode ? "text-slate-100" : "text-gray-900"}`}>{match.tournamentName}</p>
               <p className={`text-xs mb-1 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}><FormatDate dateNum={match.dateTime} /></p>
               <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
                 {match.rank<=3

@@ -117,7 +117,7 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
             name="contact"
             ref={contactRef}
             placeholder="Player ID or Contact"
-            className="w-full bg-transparent border-b border-[#00E5FF]/10 py-3 pl-12 pr-4 text-white placeholder-gray-400 focus:outline-none focus:border-[#FF4170] transition-colors"
+            className="w-full bg-transparent border-b border-[#00E5FF]/10 py-3 pl-12 pr-4 text-slate-100 placeholder-gray-400 focus:outline-none focus:border-[#FF4170] transition-colors"
             autoComplete="username"
           />
         </div>
@@ -137,14 +137,14 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
             ref={accessKeyRef}
             placeholder="Secure Access Key"
             type={showPwd ? "text" : "password"}
-            className="w-full bg-transparent border-b border-[#00E5FF]/10 py-3 pl-12 pr-12 text-white placeholder-gray-400 focus:outline-none focus:border-[#FF4170] transition-colors"
+            className="w-full bg-transparent border-b border-[#00E5FF]/10 py-3 pl-12 pr-12 text-slate-100 placeholder-gray-400 focus:outline-none focus:border-[#FF4170] transition-colors"
             autoComplete="current-password"
           />
 
           <span
             // type="button"
             onClick={() => setShowPwd((s) => !s)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-1"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-100/80 hover:text-slate-100 p-1"
             aria-label={showPwd ? "Hide accessKey" : "Show accessKey"}
           >
             {showPwd ? (
@@ -192,7 +192,7 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
                 />
               </svg>
             ) : null}
-            <span className={`${isDarkMode ? "text-white" : "text-black"}`}>
+            <span className={`${isDarkMode ? "text-slate-100" : "text-black"}`}>
               {loading ? "Signing in..." : "Sign In"}
             </span>
           </button>

@@ -11,7 +11,7 @@ export default function GlobalError({ error, reset }) {
 
   return (
     <html>
-      <body className="bg-gray-950 text-white">
+      <body className="bg-gray-950 text-slate-100">
         <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
           {/* Background effects */}
           <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_3px,2px_100%] z-0" />

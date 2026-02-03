@@ -80,7 +80,7 @@ const ParticipantManagementTable = ({
                 onChange={(e) => onSearchChange(e.target.value)}
                 className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                   isDarkMode
-                    ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                    ? "bg-gray-700 border-gray-600 text-slate-100 placeholder-gray-400"
                     : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
                 }`}
               />
@@ -92,7 +92,7 @@ const ParticipantManagementTable = ({
             {selectedParticipants.length > 0 && (
               <button
                 onClick={onBulkRemove}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-slate-100 rounded-lg hover:bg-red-700 transition-colors"
               >
                 <UserMinus className="h-4 w-4" />
                 Remove ({selectedParticipants.length})
@@ -101,7 +101,7 @@ const ParticipantManagementTable = ({
 
             <button
               onClick={onAdd}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-slate-100 rounded-lg hover:bg-blue-700 transition-colors"
             >
               <UserPlus className="h-4 w-4" />
               Add Participant
@@ -123,7 +123,7 @@ const ParticipantManagementTable = ({
           </div>
         )}
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full table-fixed">
             <thead className={isDarkMode ? "bg-gray-700" : "bg-gray-50"}>
               <tr>
                 <th className="px-4 py-3 text-left">
@@ -181,7 +181,7 @@ const ParticipantManagementTable = ({
                 return (
                   <tr
                     key={participant.id}
-                    className={`hover:bg-gray-50 dark:hover:bg-gray-700 ${selectedParticipants.includes(participant.id) ? "bg-blue-50 dark:bg-blue-900/20" : ""}`}
+                    className={`hover:bg-gray-50 dark:hover:bg-gray-700 ${selectedParticipants.includes(participant.id) ? "bg-blue-50 dark:bg-blue-900/20" : "dark:odd:bg-gray-800/50 dark:even:bg-black/20 odd:bg-white even:bg-gray-50/50"}`}
                   >
                     <td className="px-4 py-4">
                       <input
@@ -202,7 +202,7 @@ const ParticipantManagementTable = ({
                         </div>
                         <div>
                           <div
-                            className={`text-sm font-medium ${isDarkMode ? "text-white" : "text-gray-900"}`}
+                            className={`text-sm font-medium ${isDarkMode ? "text-slate-100" : "text-gray-900"}`}
                           >
                             {participant.username}
                           </div>
@@ -252,13 +252,13 @@ const ParticipantManagementTable = ({
                       </div>
                     </td>
                     {/* <td className="px-4 py-4">
-                      <span className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                      <span className={`text-sm font-medium ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>
                         {participantLeaderboard.score || 0}
                       </span>
                     </td> */}
                     <td className="px-4 py-4">
                       <span
-                        className={`text-sm font-medium ${isDarkMode ? "text-white" : "text-gray-900"}`}
+                        className={`text-sm font-medium ${isDarkMode ? "text-slate-100" : "text-gray-900"}`}
                       >
                         {totalGames}
                       </span>
@@ -351,6 +351,3 @@ const ParticipantManagementTable = ({
 };
 
 export default ParticipantManagementTable;
-
-
-

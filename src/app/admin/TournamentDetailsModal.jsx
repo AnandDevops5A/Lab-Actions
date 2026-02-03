@@ -70,7 +70,7 @@ const TournamentDetailsModal = ({ tournament, onClose }) => {
               type="button"
               onClick={onClose}
               aria-label="Close tournament details"
-              className="absolute top-0 right-0 bg-red-600 p-2 text-white hover:bg-purple-400 hover:text-black transition-colors z-50 group cursor-pointer"
+              className="absolute top-0 right-0 bg-red-600 p-2 text-slate-100 hover:bg-purple-400 hover:text-black transition-colors z-50 group cursor-pointer"
               style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 20% 100%)" }}
             >
               <X size={24} className="group-hover:rotate-180 transition-transform" />
@@ -89,7 +89,7 @@ const TournamentDetailsModal = ({ tournament, onClose }) => {
 
             {/* Tournament Name */}
             <div className="mb-6">
-              <h3 className="text-xl sm:text-3xl font-bold text-white mb-2">
+              <h3 className="text-xl sm:text-3xl font-bold text-slate-100 mb-2">
                 {tournament.tournamentName}
               </h3>
               <div className="flex items-center gap-2">
@@ -165,11 +165,11 @@ const TournamentDetailsModal = ({ tournament, onClose }) => {
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Platform:</span>
-                        <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{tournament.platform}</span>
+                        <span className={`font-medium ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>{tournament.platform}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Max Slots:</span>
-                        <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{maxSlots}</span>
+                        <span className={`font-medium ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>{maxSlots}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Tournament ID:</span>
@@ -177,7 +177,7 @@ const TournamentDetailsModal = ({ tournament, onClose }) => {
                       </div>
                       <div className="flex justify-between">
                         <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Date & Time:</span>
-                        <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{date} at {time}</span>
+                        <span className={`font-medium ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>{date} at {time}</span>
                       </div>
                     </div>
                   </div>

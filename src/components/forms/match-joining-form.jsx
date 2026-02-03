@@ -37,7 +37,7 @@ const ReUseableInput = ({
           onChange={onChange}
           required
           placeholder={placeholder}
-          className={`w-full bg-transparent border-2 border-[${color}]/10 rounded-md px-3 pl-10 py-2 text-white placeholder-gray-400 focus:outline-none neon-input transition-colors duration-200`}
+          className={`w-full bg-transparent border-2 border-[${color}]/10 rounded-md px-3 pl-10 py-2 text-slate-100 placeholder-gray-400 focus:outline-none neon-input transition-colors duration-200`}
         />
       </div>
     </label>
@@ -63,13 +63,13 @@ const ReUseableDropdown = ({
           value={value}
           onChange={onChange}
           required
-          className={`w-full bg-transparent border-2 rounded-md px-3 pl-10 py-2 text-white placeholder-gray-400 focus:outline-none neon-input transition-colors duration-200 border-${color}/10 appearance-none`}
+          className={`w-full bg-transparent border-2 rounded-md px-3 pl-10 py-2 text-slate-100 placeholder-gray-400 focus:outline-none neon-input transition-colors duration-200 border-${color}/10 appearance-none`}
         >
-          <option value="" className="bg-gray-900 text-white">
+          <option value="" className="bg-gray-900 text-slate-100">
             Select {title}
           </option>
           {options?.map((opt, idx) => (
-            <option key={idx} value={opt.id} className="bg-gray-900 text-white">
+            <option key={idx} value={opt.id} className="bg-gray-900 text-slate-100">
               {opt.tournamentName}
             </option>
           ))}
@@ -277,7 +277,7 @@ export default function MatchJoiningForm({
             <span className="absolute -right-6 -bottom-6 w-24 h-1 bg-linear-to-r from-[#9b59ff] to-[#ff0055] opacity-70 blur-sm -rotate-12"></span>
             <div className="flex items-start justify-between gap-4">
               <div className=" animate-slideInRight">
-                <h3 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+                <h3 className="text-2xl md:text-3xl font-extrabold text-slate-100 tracking-tight">
                   Join Tournament
                 </h3>
                 <p className="text-sm text-gray-300/80 mt-1">
@@ -288,7 +288,7 @@ export default function MatchJoiningForm({
               <button
                 aria-label="close"
                 onClick={() => setOpen(false)}
-                className="  text-[#00fff0] hover:text-white p-2 rounded-md transition border border-transparent hover:border-[#00fff0]/30 cursor-pointer"
+                className="  text-[#00fff0] hover:text-slate-100 p-2 rounded-md transition border border-transparent hover:border-[#00fff0]/30 cursor-pointer"
               >
                 ✕
               </button>
@@ -348,7 +348,7 @@ export default function MatchJoiningForm({
                   disabled={submitting}
                   className={` animate-slideInLeft neon-accent-btn neon-pulse-slow relative w-full inline-flex items-center justify-center overflow-hidden rounded-lg px-6 py-3 font-extrabold text-lg transition-transform duration-200 transform ${
                     submitting ? "scale-95" : "hover:scale-105"
-                  } from-[#00fff0] via-[#ff0055] to-[#9b59ff] text-white`}
+                  } from-[#00fff0] via-[#ff0055] to-[#9b59ff] text-slate-100`}
                   style={{
                     background:
                       "linear-gradient(90deg,#00fff0, #ff0055, #9b59ff)",
@@ -367,7 +367,7 @@ export default function MatchJoiningForm({
                       LoadingCircleSVG
                     ) : success ? (
                       <svg
-                        className="w-5 h-5 text-white"
+                        className="w-5 h-5 text-slate-100"
                         viewBox="0 0 24 24"
                         fill="none"
                       >
@@ -381,7 +381,7 @@ export default function MatchJoiningForm({
                       </svg>
                     ) : (
                       <svg
-                        className="w-5 h-5 text-white"
+                        className="w-5 h-5 text-slate-100"
                         viewBox="0 0 24 24"
                         fill="none"
                       >

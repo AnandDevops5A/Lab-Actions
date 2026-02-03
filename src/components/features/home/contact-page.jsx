@@ -20,7 +20,7 @@ export default function ContactPage() {
       </div>
 
       {/* Right Side with Contact Form */}
-      <div className="autoshow md:w-1/2 w-full bg-black text-white flex items-center justify-center px-6 py-12">
+      <div className="autoshow md:w-1/2 w-full bg-black text-slate-100 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-lg ">
           <h1 className="autoblur text-4xl md:text-5xl font-extrabold uppercase tracking-widest text-red-600 mb-8">
             Contact Us
@@ -34,7 +34,7 @@ export default function ContactPage() {
               <input
                 type="text"
                 placeholder="Your Name"
-                className="w-full px-4 py-3 rounded-md bg-black border border-red-600 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="w-full px-4 py-3 rounded-md bg-black border border-red-600 text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-500"
               />
             </div>
 
@@ -45,7 +45,7 @@ export default function ContactPage() {
               <input
                 type="email"
                 placeholder="Your Email"
-                className="w-full px-4 py-3 rounded-md bg-black border border-red-600 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="w-full px-4 py-3 rounded-md bg-black border border-red-600 text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-500"
               />
             </div>
 
@@ -56,13 +56,13 @@ export default function ContactPage() {
               <textarea
                 rows="5"
                 placeholder="Your Message"
-                className="w-full px-4 py-3 rounded-md bg-black border border-red-600 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="w-full px-4 py-3 rounded-md bg-black border border-red-600 text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-500"
               ></textarea>
             </div>
 
             <button
               type="submit"
-              className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold uppercase rounded-md shadow-lg transition duration-300"
+              className="w-full py-3 bg-red-600 hover:bg-red-700 text-slate-100 font-bold uppercase rounded-md shadow-lg transition duration-300"
             >
               Send Message
             </button>

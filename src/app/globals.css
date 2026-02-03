@@ -230,7 +230,7 @@ html.light .bg-black {
   @apply bg-slate-50 border border-slate-200;
 }
 
-html.light .text-white {
+html.light .text-slate-100 {
   @apply text-slate-900;
 }
 
@@ -285,7 +285,7 @@ html.dark {
 }
 
 html.dark body {
-  @apply bg-gradient-to-tr from-gray-950 via-slate-950 to-gray-950 text-white;
+  @apply bg-gradient-to-tr from-gray-950 via-slate-950 to-gray-950 text-slate-100;
 }
 
 html.dark a {
@@ -293,7 +293,7 @@ html.dark a {
 }
 
 /* html.dark button {
-  @apply bg-linear-to-r from-pink-600 to-indigo-600 text-white hover:from-indigo-700 hover:to-pink-800 transition-all duration-200 shadow-lg hover:shadow-blue-500/50 hover:-translate-y-0.5;
+  @apply bg-linear-to-r from-pink-600 to-indigo-600 text-slate-100 hover:from-indigo-700 hover:to-pink-800 transition-all duration-200 shadow-lg hover:shadow-blue-500/50 hover:-translate-y-0.5;
 }
 
 html.dark button:focus {
@@ -315,13 +315,13 @@ html.dark nav button {
 html.dark .card,
 html.dark article,
 html.dark section {
-  @apply bg-gray-900/50 text-white shadow-lg shadow-black/30 border border-gray-800 backdrop-blur-sm;
+  @apply bg-gray-900/50 text-slate-100 shadow-lg shadow-black/30 border border-gray-800 backdrop-blur-sm;
 }
 
 /* html.dark input,
 html.dark textarea,
 html.dark select {
-  @apply bg-gray-800 text-white border-gray-700 rounded-lg transition-all duration-200;
+  @apply bg-gray-800 text-slate-100 border-gray-700 rounded-lg transition-all duration-200;
 }
 
 html.dark input:focus,
@@ -340,7 +340,7 @@ html.dark h3,
 html.dark h4,
 html.dark h5,
 html.dark h6 {
-  @apply text-white font-semibold;
+  @apply text-slate-100 font-semibold;
 }
 
 /* ==================== GLASSMORPHISM EFFECTS ==================== */

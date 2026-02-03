@@ -274,7 +274,7 @@ const ParticipantList = ({
 
                     <div>
                       <div
-                        className={`font-medium ${isDarkMode ? "text-white" : "text-gray-900"}`}
+                        className={`font-medium ${isDarkMode ? "text-slate-100" : "text-gray-900"}`}
                       >
                         {participant.tempEmail || `User ${participant.userId}`}
                       </div>
@@ -304,7 +304,7 @@ const ParticipantList = ({
                               }
                               className={`w-16 px-2 py-1 text-sm rounded border ${
                                 isDarkMode
-                                  ? "bg-gray-700 border-gray-600 text-white"
+                                  ? "bg-gray-700 border-gray-600 text-slate-100"
                                   : "bg-white border-gray-300 text-gray-900"
                               }`}
                               min="1"
@@ -324,7 +324,7 @@ const ParticipantList = ({
                               }
                               className={`w-24 px-2 py-1 text-sm rounded border ${
                                 isDarkMode
-                                  ? "bg-gray-700 border-gray-600 text-white"
+                                  ? "bg-gray-700 border-gray-600 text-slate-100"
                                   : "bg-white border-gray-300 text-gray-900"
                               }`}
                               min="0"
@@ -343,7 +343,7 @@ const ParticipantList = ({
                               }
                               className={`w-24 px-2 py-1 text-sm rounded border ${
                                 isDarkMode
-                                  ? "bg-gray-700 border-gray-600 text-white"
+                                  ? "bg-gray-700 border-gray-600 text-slate-100"
                                   : "bg-white border-gray-300 text-gray-900"
                               }`}
                               min="0"
@@ -363,7 +363,7 @@ const ParticipantList = ({
                             isDarkMode
                               ? "hover:bg-green-600"
                               : "hover:bg-green-500"
-                          } text-white bg-green-500`}
+                          } text-slate-100 bg-green-500`}
                         >
                           <Save className="w-4 h-4" />
                         </button>

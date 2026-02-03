@@ -31,16 +31,16 @@ export function PlayerCard({
   
   const cornerAccentColor = isDarkMode ? "border-green-400" : "border-blue-500";
   const badgeBgColor = isDarkMode ? "bg-green-400" : "bg-blue-600";
-  const badgeTextColor = isDarkMode ? "text-black" : "text-white";
+  const badgeTextColor = isDarkMode ? "text-black" : "text-slate-100";
   const youBadgeBgColor = isDarkMode ? "bg-red-600" : "bg-red-500";
-  const youBadgeTextColor = "text-white";
+  const youBadgeTextColor = "text-slate-100";
   const avatarBorderColor = isDarkMode ? "border-amber-500" : "border-amber-600";
   const nameColor = isDarkMode
     ? isYou
       ? "text-yellow-400"
       : isSearched
         ? "text-green-400"
-        : "text-white"
+        : "text-slate-100"
     : isYou
       ? "text-amber-700"
       : isSearched

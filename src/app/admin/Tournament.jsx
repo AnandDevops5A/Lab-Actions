@@ -66,7 +66,7 @@ const Tournament = ({ tournaments, refreshData }) => {
       sortKey: "id",
       render: (t, idx) => (
         <span
-          className={`Rusty Attack ${isDarkMode ? "text-white" : "text-gray-900"}`}
+          className={`Rusty Attack ${isDarkMode ? "text-slate-100" : "text-gray-900"}`}
         >
           {(idx + 1).toString().padStart(2, "0")}
         </span>
@@ -180,7 +180,7 @@ const Tournament = ({ tournaments, refreshData }) => {
               className={`relative group overflow-hidden px-6 py-2 rounded-lg font-bold uppercase tracking-wider transition-all hover:scale-105 ${
                 isDarkMode
                   ? "bg-green-950 border border-green-500 text-green-400 hover:shadow-[0_0_20px_rgba(34,197,94,0.4)]"
-                  : "bg-green-600 text-white hover:bg-green-700 shadow-lg"
+                  : "bg-green-600 text-slate-100 hover:bg-green-700 shadow-lg"
               }`}
               onClick={() => setShowAddTournamentForm(!showAddTournamentForm)}
             >

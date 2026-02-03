@@ -69,7 +69,7 @@ const ProfileHeader = ({ player }) => {
 
         <p className={`text-sm sm:text-base md:text-lg lg:text-xl mt-2 transition-colors duration-300 ${isDarkMode ? "text-gray-300" : "text-gray-100"}`}>
           Team:{" "}
-          <span className="font-semibold text-white">{player.teamName || "N/A"}</span>{" "}
+          <span className="font-semibold text-slate-100">{player.teamName || "N/A"}</span>{" "}
           | Player ID: {player.playerId|| "N/A"}
         </p>
       </div>

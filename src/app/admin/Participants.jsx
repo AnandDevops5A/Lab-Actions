@@ -37,7 +37,7 @@ const Participants = ({ participants = [] }) => {
           </div>
           <span
             className={`font-bold ${
-              isDarkMode ? "text-white" : "text-gray-900"
+              isDarkMode ? "text-slate-100" : "text-gray-900"
             }`}
           >
             {p.username}

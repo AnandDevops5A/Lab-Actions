@@ -143,7 +143,7 @@ const PlayerProfile = () => {
 
   return (
     <div
-      className={`min-h-screen p-4 md:p-10 transition-colors duration-300 ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}
+      className={`min-h-screen p-4 md:p-10 transition-colors duration-300 ${isDarkMode ? "bg-gray-900 text-slate-100" : "bg-gray-50 text-gray-900"}`}
     >
       {/* 1. Header & Quick Stats (Top Section) */}
       <DynamicPlayerHeader player={player} />

@@ -37,7 +37,7 @@ export default function RootLayout({ children }) {
         <meta name="theme-color" content="#f8f8f8" media="(prefers-color-scheme: light)" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-950 text-white`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-950 text-slate-100`}
       >
         <NoConnection/>
 

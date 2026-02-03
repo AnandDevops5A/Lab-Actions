@@ -88,7 +88,7 @@ const Overview = ({
               </h3>
               <span className="text-2xl md:text-3xl">{stat.icon}</span>
             </div>
-            <p className="text-2xl md:text-3xl font-bold text-white">
+            <p className="text-2xl md:text-3xl font-bold text-slate-100">
               {stat.value}
             </p>
             <p className="text-green-400 text-xs mt-2">↑ 12% from last month</p>
@@ -100,25 +100,25 @@ const Overview = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
         
         <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-inner inset-1">
-          <h2 className="text-lg md:text-xl font-bold mb-4 text-white">
+          <h2 className="text-lg md:text-xl font-bold mb-4 text-slate-100">
             Revenue Trends
           </h2>
           <Line data={revenueData} options={chartOptions} />
         </div>
         <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-inner inset-1">
-          <h2 className="text-lg md:text-xl font-bold mb-4 text-white">
+          <h2 className="text-lg md:text-xl font-bold mb-4 text-slate-100">
             Monthly Registrations
           </h2>
           <Bar data={registrationData} options={chartOptions} />
         </div>
         <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-inner inset-1 ">
-          <h2 className="text-lg md:text-xl font-bold mb-4 text-white">
+          <h2 className="text-lg md:text-xl font-bold mb-4 text-slate-100">
             Tournament Participants Distribution
           </h2>
           <Bar data={tournamentData} options={chartOptions} />
         </div>
         <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-inner inset-1  ">
-          <h2 className="text-lg md:text-xl font-bold mb-4 text-white">
+          <h2 className="text-lg md:text-xl font-bold mb-4 text-slate-100">
             Participant Status
           </h2>
           <Doughnut data={participantDistribution} options={chartOptions} />

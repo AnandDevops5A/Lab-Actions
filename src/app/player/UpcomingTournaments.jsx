@@ -60,7 +60,7 @@ const UpcomingTournaments = ({ tournaments }) => {
               <div className="relative z-10">
                 <div className="flex justify-between items-start mb-2">
                   <h3
-                    className={`font-bold text-lg transition-colors line-clamp-1 ${isDarkMode ? "text-white group-hover:text-cyan-300" : "text-gray-900 group-hover:text-cyan-600"}`}
+                    className={`font-bold text-lg transition-colors line-clamp-1 ${isDarkMode ? "text-slate-100 group-hover:text-cyan-300" : "text-gray-900 group-hover:text-cyan-600"}`}
                   >
                     {match.tournamentName}
                   </h3>

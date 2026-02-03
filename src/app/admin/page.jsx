@@ -242,7 +242,7 @@ const tournamentData = {
 
   return (
     
-    <div className="flex min-h-screen bg-gray-900 text-white">
+    <div className="flex min-h-screen bg-gray-900 text-slate-100">
       {/* Sidebar */}
       <Sidebar
         sidebarOpen={sidebarOpen}
@@ -261,7 +261,7 @@ const tournamentData = {
         {(activeTab !== "management") && <div className="animate-slideInUp bg-gray-950 border-b border-gray-800 p-4 md:p-6  top-0 z-30">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>
-              <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-white mb-1">
+              <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-slate-100 mb-1">
                 Tournament Management Dashboard
               </h1>
               <p className="text-gray-400 text-xs md:text-sm">
@@ -271,7 +271,7 @@ const tournamentData = {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:space-x-4">
               <input
                 type="date"
-                className="bg-gray-800 border border-gray-700 rounded px-3 md:px-4 py-2 text-white text-xs md:text-sm"
+                className="bg-gray-800 border border-gray-700 rounded px-3 md:px-4 py-2 text-slate-100 text-xs md:text-sm"
               />
               <span className="bg-linear-to-r from-orange-500 to-red-500 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg hover:shadow-orange-500/50 hover:scale-110 transition text-sm md:text-base">
                 Export 📝
