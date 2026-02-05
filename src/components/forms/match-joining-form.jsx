@@ -1,19 +1,28 @@
 "use client";
 
-import { useState, useEffect, useLayoutEffect, use } from "react";
+import { useState, useEffect, use } from "react";
 import {
   callSignSVG,
   gameIdSVG,
   tournamentSVG,
-  tempEmailSVG,
   emailSVG,
   LoadingCircleSVG,
 } from "../ui/svg";
 import { getCache, setCache } from "../../lib/utils/action-redis";
-import { errorMessage, simpleMessage, successMessage } from "../../lib/utils/alert";
-import { getHisJoinedTouenament, joinTournament, FetchBackendAPI } from "../../lib/api/backend-api";
+import {
+  errorMessage,
+  simpleMessage,
+  successMessage,
+} from "../../lib/utils/alert";
+import {
+  joinTournament,
+  getUserTournamentDetails,
+  FetchBackendAPI,
+} from "../../lib/api/backend-api";
 import { UserContext } from "../../lib/contexts/user-context";
 import CyberLoading from "../../app/skeleton/CyberLoading";
+import { generateRandomNumber } from "@/lib/utils/common";
+import Swal from "sweetalert2";
 
 //reuseable input field
 const ReUseableInput = ({
@@ -69,7 +78,11 @@ const ReUseableDropdown = ({
             Select {title}
           </option>
           {options?.map((opt, idx) => (
-            <option key={idx} value={opt.id} className="bg-gray-900 text-slate-100">
+            <option
+              key={idx}
+              value={opt.id}
+              className="bg-gray-900 text-slate-100"
+            >
               {opt.tournamentName}
             </option>
           ))}
@@ -98,22 +111,19 @@ export default function MatchJoiningForm({
   const [success, setSuccess] = useState(false);
   const [match, setMatch] = useState(null);
 
-  function alreadyRegistered(){
-     simpleMessage(
-              "You have already joined all upcoming tournaments.",
-              "Info",
-            );
+  function alreadyRegistered() {
+    simpleMessage("You have already joined all upcoming tournaments.", "Info");
 
-            setSubmitting(false);
-            setSuccess(false);
-            setOpen(false);
-            setForm({
-              userId: user ? user.id : "",
-              transactionId: "",
-              tempEmail: user ? user.email : "",
-              gameId: "",
-              tournamentId: "",
-            });
+    setSubmitting(false);
+    setSuccess(false);
+    setOpen(false);
+    setForm({
+      userId: user ? user.id : "",
+      transactionId: "",
+      tempEmail: user ? user.email : "",
+      gameId: "",
+      tournamentId: "",
+    });
   }
 
   useEffect(() => {
@@ -125,13 +135,15 @@ export default function MatchJoiningForm({
         // 1. Get all upcoming tournaments (Cache First -> API Fallback)
         let upcomingData = [];
         const ud = await getCache("upcomingTournament");
-        
+
         if (ud?.data && Array.isArray(ud.data) && ud.data.length > 0) {
+          console.log("fetch from cache");
           upcomingData = ud.data;
         } else {
           // Fallback to API if cache is empty
           try {
             const apiRes = await FetchBackendAPI("tournament/upcoming");
+            console.log("backend hit");
             if (apiRes?.data && Array.isArray(apiRes.data)) {
               upcomingData = apiRes.data;
               // Update cache for future use
@@ -144,52 +156,40 @@ export default function MatchJoiningForm({
 
         if (!isMounted) return;
 
-        if (upcomingData.length === 0) {
+        if (!upcomingData || upcomingData.length === 0) {
           alreadyRegistered();
           return;
         }
 
-        // 2. Get joined tournaments (Parallel: Cache + API)
-        const [cachedJoinedRes, backendJoinedRes] = await Promise.all([
-          getCache(`hisJoinedTournament:${user.id}`),
-          getHisJoinedTouenament(user.id),
-        ]);
+        // 2. Get user's already joined tournaments
+        let userJoinedTournaments = [];
+        const cachedJoinedRes = await getCache(`userTournamentDetails:${user.id}`);
+        if (cachedJoinedRes?.status && cachedJoinedRes.data) {
+          console.log("user tournament details from cahe")
+          userJoinedTournaments = cachedJoinedRes.data;
+        } else {
+          const backendJoinedRes = await getUserTournamentDetails(user.id);
+                  console.log("user tournament details from db")
+
+          if (backendJoinedRes?.data) {
+            userJoinedTournaments = backendJoinedRes.data;
+            // Update cache for next time
+            setCache(`userTournamentDetails:${user.id}`, backendJoinedRes.data, 3600).catch(
+              (e) => console.warn("Cache update failed", e),
+            );
+          }
+        }
 
         if (!isMounted) return;
 
-        const cachedJoined = Array.isArray(cachedJoinedRes?.data) ? cachedJoinedRes.data : [];
-        const backendJoined = Array.isArray(backendJoinedRes?.data) ? backendJoinedRes.data : [];
-
-        // 3. Merge cache and backend data
-        const joinedMap = new Map();
-        
-        // Helper to generate a unique key for deduplication
-        const getJoinKey = (t) => t.tournamentId || t.id || (t.tournamentName ? `NAME:${t.tournamentName}` : null);
-
-        backendJoined.forEach((t) => {
-          const key = getJoinKey(t) || `UNKNOWN:${Math.random()}`;
-          joinedMap.set(String(key), t);
-        });
-        
-        cachedJoined.forEach((t) => {
-          const key = getJoinKey(t);
-          if (key) joinedMap.set(String(key), t);
-        });
-        
-        const mergedJoined = Array.from(joinedMap.values());
-
-        // 4. Update the cache with the merged data
-        await setCache(`hisJoinedTournament:${user.id}`, mergedJoined);
-
         // 5. Filter available tournaments
-        const joinedIds = new Set(mergedJoined.map((t) => t.tournamentId ? String(t.tournamentId) : null).filter(Boolean));
-        const joinedNames = new Set(mergedJoined.map((t) => t.tournamentName).filter(Boolean));
-        
-        const finalAvailable = upcomingData.filter((d) => {
-          const isIdJoined = joinedIds.has(String(d.id));
-          const isNameJoined = d.tournamentName && joinedNames.has(d.tournamentName);
-          return !isIdJoined && !isNameJoined;
-        });
+        const joinedTournamentIds = new Set(
+          userJoinedTournaments.map((t) => String(t.id)),
+        );
+
+        const finalAvailable = upcomingData.filter(
+          (d) => !joinedTournamentIds.has(String(d.id)),
+        );
 
         if (isMounted) {
           if (finalAvailable.length === 0) {
@@ -216,8 +216,26 @@ export default function MatchJoiningForm({
   // const upcomingTournament=await getCache("upcomingTournament");
   //   console.log(upcomingTournament);
 
-  function handleChange(e) {
-    setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
+  async function handleChange(e) {
+    let selectedTournamentName = e.target.options[e.target.selectedIndex].text;
+    Swal.fire({
+      title: "Are you want to join " + selectedTournamentName + "?",
+      text: "You won't be able to revert payable for tournament!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Let me In!",
+    }).then(async(result) => {
+      if (result.isConfirmed) {
+       
+        const response = await generateRandomNumber(e.target.value, user.id, 1, 2);
+        if (!response) errorMessage("All slots are book for the tournament...");
+    
+        setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
+      }
+    });
+
   }
 
   async function handleSubmit(e) {
@@ -229,20 +247,13 @@ export default function MatchJoiningForm({
       setSubmitting(false);
       return;
     }
-    successMessage(response.data.message || response.data || "Successfully joined tournament");
+    successMessage(
+      response.data.message ||
+        response.data ||
+        "Successfully joined tournament",
+    );
 
-    // Update cache to reflect the new join immediately
-    try {
-      const cj = await getCache(`hisJoinedTournament:${user.id}`);
-      let currentJoined = cj?.data || [];
-      if (!Array.isArray(currentJoined)) currentJoined = [];
-      
-      const newJoin = { tournamentId: form.tournamentId };
-      const updatedJoined = [...currentJoined, newJoin];
-      await setCache("hisJoinedTournament:" + user.id, updatedJoined);
-    } catch (error) {
-      console.error("Error updating cache:", error);
-    }
+
 
     setSubmitting(false);
     setSuccess(true);
@@ -261,9 +272,8 @@ export default function MatchJoiningForm({
 
   if (!open) return null;
 
-  return (
-    (match && match.length>0)?
-      (<div className="fixed animate-slideInUp inset-0 z-50 flex items-center justify-center">
+  return match && match.length > 0 ? (
+    <div className="fixed animate-slideInUp inset-0 z-50 flex items-center justify-center">
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={() => setOpen(false)}
@@ -322,15 +332,6 @@ export default function MatchJoiningForm({
                   placeholder={"eg: @7575945394"}
                   svg={callSignSVG}
                 />
-                <ReUseableInput
-                  title={"Transaction ID"}
-                  name={"transactionId"}
-                  value={form.transactionId}
-                  onChange={handleChange}
-                  color={"#ff7a00"}
-                  placeholder={"Eg: Solo surviver"}
-                  svg={tournamentSVG}
-                />
                 <ReUseableDropdown
                   title={"Tournament"}
                   name={"tournamentId"}
@@ -339,6 +340,15 @@ export default function MatchJoiningForm({
                   color={"#84ff00"}
                   svg={gameIdSVG}
                   options={match}
+                />
+                <ReUseableInput
+                  title={"Transaction ID"}
+                  name={"transactionId"}
+                  value={form.transactionId}
+                  onChange={handleChange}
+                  color={"#ff7a00"}
+                  placeholder={"Eg: Solo surviver"}
+                  svg={tournamentSVG}
                 />
               </div>
 
@@ -415,6 +425,8 @@ export default function MatchJoiningForm({
           </div>
         </div>
       </div>
-    </div>):<CyberLoading/>
+    </div>
+  ) : (
+    <CyberLoading />
   );
 }

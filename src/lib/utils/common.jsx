@@ -1,5 +1,5 @@
 import { getCache, setCache, UpdateCache } from "./action-redis";
-import { errorMessage } from "./alert";
+import { errorMessage, successMessage } from "./alert";
 import { getUpcomingTournament} from "../api/backend-api";
 import { SunDim, SunMedium, Sunset } from "lucide-react";
 
@@ -113,7 +113,7 @@ export  const FormatDate = ({ dateNum }) => {
   );
 };
 
-export const dateInLongFormat=(date)=>{
+export const dateInLongFormat=(date,time)=>{
    // Split date into parts
   const [year, month, day] = date.split("-");
 
@@ -123,3 +123,74 @@ export const dateInLongFormat=(date)=>{
   // Concatenate into desired format
   return `${year}${month}${day}${timeFormatted}`;
 }
+
+
+
+export async function generateRandomNumber(
+  tournamentId,
+  userId,
+  min = 1,
+  max = 50
+) {
+  const cacheKey = `invest4tournaments:${tournamentId}`;
+
+  // Load existing assignment from cache
+  let userAndInvest = await getCache(cacheKey);
+  let listOfInvest = [];
+
+
+  if (!userAndInvest) {
+    userAndInvest = {
+      userId: userId,
+      invest: 0,
+      isComplete: false
+    };
+  } else if (typeof userAndInvest !== "object") {
+    // Defensive: ensure it's an object
+    userAndInvest = {
+      userId: userId,
+      invest: 0,
+      isComplete: false
+    };
+  }
+
+  // Rule 1: Prevent duplicate userId
+  if(userAndInvest.isComplete){
+    return null;
+  }
+  else if (userAndInvest.userId === userId && userAndInvest.invest !== 0 ){
+    return userAndInvest.invest;
+  } 
+
+
+  // Collect the used number (if any)
+  
+  const usedNumbers = new Set();
+  if (userAndInvest.invest) {
+    usedNumbers.add(userAndInvest.invest);
+  }
+
+  // Rule 2: Prevent duplicate numbers
+  if (usedNumbers.size >= max - min + 1) {
+    return null;
+  }
+
+  // Generate a unique random number
+  let num;
+  do {
+    num = Math.floor(Math.random() * (max - min + 1)) + min;
+  } while (usedNumbers.has(num));
+
+  // Assign number to user
+  userAndInvest.invest = num;
+  listOfInvest.push(userAndInvest);
+
+  // Persist updated state in cache (10 hours TTL)
+  await setCache(cacheKey, userAndInvest, 36000);
+  let res=await getCache(cacheKey); 
+  console.log(userAndInvest) 
+  successMessage(res.data)
+
+  return num;
+}
+

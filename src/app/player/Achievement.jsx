@@ -43,7 +43,7 @@ const sortedMatchHistory = useMemo(() => { return [...(matchHistory || [])].sort
               <p className={`text-xs mb-1 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}><FormatDate dateNum={match.dateTime} /></p>
               <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
                 {match.rank<=3
-                  ? `🪙: ${
+                  ? `💰 : ${
                       (match.rank === 1 && 500) ||
                       (match.rank === 2 && 200) ||
                       (match.rank === 3 && 100)

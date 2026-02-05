@@ -33,6 +33,10 @@ export const askLogin = (router) => {
     }
   });
 };
+
+
+
+
 export const simpleMessage = (message, title = "Oops..") => {
   Swal.fire({
     title: title,

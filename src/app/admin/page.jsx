@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useLayoutEffect, useCallback, useMemo, useContext, Suspense, lazy } from "react"; 
+import { useState, useEffect, useCallback, useMemo, useContext } from "react"; 
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -20,10 +20,12 @@ import { ThemeContext } from "../../lib/contexts/theme-context";
 import CyberLoading from "../skeleton/CyberLoading";
 import { transformTournaments } from "../../lib/utils/common";
 import { dummyParticipants, dummyRevenue, dummyTournaments } from "../../lib/constants/dummy-data";
-import Tournament from "./Tournament";
+// import Tournament from "./Tournament";
 import { errorMessage } from "@/lib/utils/alert";
+import Sidebar from "@/components/layout/sidebar";
 
-const Sidebar = dynamic(() => import('../../components/layout/sidebar'), {
+
+const Tournament = dynamic(() => import('./Tournament'), {
   loading: () =>( <CyberLoading/>),
   ssr: false, // optional: disable SSR
 });
@@ -79,9 +81,8 @@ ChartJS.register(
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [tournaments, setTournaments] = useState();
-  const [participants, setParticipants] = useState();
     const [joiners, setJoiners]=useState([]);
+  const [revenue, setRevenue] = useState(dummyRevenue);
   
   const { isDarkMode } = useContext(ThemeContext);
   // const [isLoading, setIsLoading] = useState(true)
@@ -96,14 +97,24 @@ const AdminPage = () => {
     0 //revalidate in 10sec
   );
 
-  useLayoutEffect(() => {
-    if (window.innerWidth < 640) setSidebarOpen((prev) => !prev);
-  }, []);
+  // Derived state to avoid extra renders from useEffect syncing
+  const tournaments = useMemo(() => {
+    if (result && !error && result.tournaments) {
+      return transformTournaments(result.tournaments);
+    }
+    return dummyTournaments;
+  }, [result, error]);
 
+  //set participants if participants formed or not
+  const participants = useMemo(() => {
+    if (result && !error && result.users) {
+      return result.users;
+    }
+    return dummyParticipants;
+  }, [result, error]);
 
   //update joiner because tournament and users fetch from cache
   const updateJoiners = useCallback(async () => {
-      console.log("get joiner called");
       if (!tournaments) {
         errorMessage("Tournaments not loaded yet.");
         return;
@@ -122,24 +133,12 @@ const AdminPage = () => {
 
   // populate data once fetched
   useEffect(() => {
-    // console.log("Fetched admin data:", result);
-    if (result && !error) {
-      // console.log("Result fetched....");
-      // console.log(transformTournaments(result.tournaments));
-      setTournaments(transformTournaments(result.tournaments));
-      setParticipants(result.users);
+    if (result && !error && result.leaderboard) {
       setJoiners(result.leaderboard);
-      // setRevenue(result.revenue);
-      // console.log(tournaments);
-    } else {
-      setParticipants(dummyParticipants);
-      setTournaments(dummyTournaments);
-      // setRevenue(dummyRevenue);
     }
-  }, [result]);
+  }, [result, error]);
 
 
-  const [revenue, setRevenue] = useState(dummyRevenue);
 
   // Statistics Cards Data
 const COLORS = [
@@ -149,26 +148,27 @@ const COLORS = [
   { bg: "rgba(255, 206, 86, 0.6)", border: "rgba(255, 206, 86, 1)" },
 ];
 
-const safeTournaments = tournaments ?? [];
+const tournamentData = useMemo(() => {
+  const safeTournaments = tournaments ?? [];
+  return {
+    labels: safeTournaments.map(t => t.tournamentName),
+    datasets: [
+      {
+        label: "Participants",
+        data: safeTournaments.map(
+          t => t.rankList ? Object.keys(t.rankList).length : (t.participants ?? 0)
+        ),
+        backgroundColor: safeTournaments.map((_, i) => COLORS[i % COLORS.length].bg),
+        borderColor: safeTournaments.map((_, i) => COLORS[i % COLORS.length].border),
+        borderWidth: 2,
+        borderRadius: 8,
+      },
+    ],
+  };
+}, [tournaments]);
 
-const tournamentData = {
-  labels: safeTournaments.map(t => t.tournamentName),
-  datasets: [
-    {
-      label: "Participants",
-      data: safeTournaments.map(
-        t => t.rankList ? Object.keys(t.rankList).length : (t.participants ?? 0)
-      ),
-      backgroundColor: safeTournaments.map((_, i) => COLORS[i % COLORS.length].bg),
-      borderColor: safeTournaments.map((_, i) => COLORS[i % COLORS.length].border),
-      borderWidth: 2,
-      borderRadius: 8,
-    },
-  ],
-};
 
-
-  const revenueData = {
+  const revenueData = useMemo(() => ({
     labels: revenue.map((r) => r.month),
     datasets: [
       {
@@ -185,9 +185,9 @@ const tournamentData = {
         pointBorderWidth: 2,
       },
     ],
-  };
+  }), [revenue]);
 
-  const registrationData = {
+  const registrationData = useMemo(() => ({
     labels: revenue.map((r) => r.month),
     datasets: [
       {
@@ -199,9 +199,9 @@ const tournamentData = {
         borderRadius: 8,
       },
     ],
-  };
+  }), [revenue]);
 
-  const chartOptions = {
+  const chartOptions = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: true,
     plugins: {
@@ -222,10 +222,10 @@ const tournamentData = {
         grid: { display: false },
       },
     },
-  };
+  }), []);
 
   // Sidebar menu items
-  const menuItems = [
+  const menuItems = useMemo(() => [
     { id: "overview", label: "Overview", icon: "📊" },
     // { id: "tournaments", label: "Tournaments", icon: "🏆" },
     {id:"management", label:"Tournament", icon:"🏆"},
@@ -236,7 +236,7 @@ const tournamentData = {
     { id: "revenue", label: "Accounts Analysis", icon: "💰" },
     { id: "reports", label: "Reports", icon: "📄" },
     { id: "settings", label: "Settings", icon: "⚙️" },
-  ];
+  ], []);
 
   // console.log(result);
 

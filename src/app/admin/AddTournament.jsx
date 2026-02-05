@@ -47,7 +47,7 @@ const AddTournamentForm = ({ onClose, refreshData}) => {
     return;
   }
 
- const dateTime=dateInLongFormat(date);
+ const dateTime=dateInLongFormat(date,time);
 
 
   // Prepare data payload
