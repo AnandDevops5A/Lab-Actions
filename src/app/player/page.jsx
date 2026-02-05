@@ -155,7 +155,7 @@ const PlayerProfile = () => {
           {upcomingMatches ? (
             <details>
               <summary className="cursor-pointer text-xl font-bold mb-4 select-none outline-none marker:text-cyan-500 hover:opacity-80 transition-opacity">
-                My Upcoming joined Tournaments Details
+                My Upcoming joined Tournaments Details {upcomingMatches.length > 0 && <span className="w-2 h-2 rounded-full animate-ping bg-green-300 inline-block ml-2 mb-1"></span>}
               </summary>
               <DynamicUpcomingTournaments tournaments={upcomingMatches} />
             </details>

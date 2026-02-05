@@ -126,7 +126,7 @@ export const dateInLongFormat=(date,time)=>{
 
 
 
-export async function generateRandomNumber(
+export async function generateRandomNumberForQR(
   tournamentId,
   userId,
   min = 1,
@@ -134,62 +134,49 @@ export async function generateRandomNumber(
 ) {
   const cacheKey = `invest4tournaments:${tournamentId}`;
 
-  // Load existing assignment from cache
-  let userAndInvest = await getCache(cacheKey);
-  let listOfInvest = [];
+  // 1. Fetch the existing tournament list from cache
+  const cacheRes = await getCache(cacheKey);
+  let listOfInvest = cacheRes.status ? cacheRes.data : [];
 
-
-  if (!userAndInvest) {
-    userAndInvest = {
-      userId: userId,
-      invest: 0,
-      isComplete: false
-    };
-  } else if (typeof userAndInvest !== "object") {
-    // Defensive: ensure it's an object
-    userAndInvest = {
-      userId: userId,
-      invest: 0,
-      isComplete: false
-    };
-  }
-
-  // Rule 1: Prevent duplicate userId
-  if(userAndInvest.isComplete){
-    return null;
-  }
-  else if (userAndInvest.userId === userId && userAndInvest.invest !== 0 ){
-    return userAndInvest.invest;
-  } 
-
-
-  // Collect the used number (if any)
+  // 2. CHECK FOR EXISTING USER (Requirement: return invest if available)
+  const existingUser = listOfInvest.find((u) => u.userId === userId);
   
-  const usedNumbers = new Set();
-  if (userAndInvest.invest) {
-    usedNumbers.add(userAndInvest.invest);
+  if (existingUser) {
+    // If they already have a number, just give it back
+    if (existingUser.invest !== 0) return existingUser.invest;
+    // If they were added but somehow have 0, we continue to assignment
   }
 
-  // Rule 2: Prevent duplicate numbers
-  if (usedNumbers.size >= max - min + 1) {
+  // 3. COLLECT ALL USED NUMBERS (Requirement: no duplicate invest amount)
+  const takenNumbers = new Set(listOfInvest.map((item) => item.invest));
+
+  // 4. CHECK AVAILABILITY
+  const totalPossible = max - min + 1;
+  if (takenNumbers.size >= totalPossible) {
+    console.error("Tournament is full. No unique numbers left.");
     return null;
   }
 
-  // Generate a unique random number
+  // 5. GENERATE UNIQUE NUMBER
   let num;
   do {
-    num = Math.floor(Math.random() * (max - min + 1)) + min;
-  } while (usedNumbers.has(num));
+    num = Math.floor(Math.random() * totalPossible) + min;
+  } while (takenNumbers.has(num));
 
-  // Assign number to user
-  userAndInvest.invest = num;
-  listOfInvest.push(userAndInvest);
+  // 6. UPDATE THE LIST (Requirement: no duplicate user records)
+  if (existingUser) {
+    existingUser.invest = num;
+  } else {
+    listOfInvest.push({
+      userId: userId,
+      invest: num,
+      isComplete: false
+    });
+  }
 
-  // Persist updated state in cache (10 hours TTL)
-  await setCache(cacheKey, userAndInvest, 36000);
-  let res=await getCache(cacheKey); 
-  console.log(userAndInvest) 
-  successMessage(res.data)
+  // 7. SAVE ENTIRE UPDATED LIST BACK TO CACHE
+  // Use 36000 (10 hours) as you requested
+  await setCache(cacheKey, listOfInvest, 36000);
 
   return num;
 }

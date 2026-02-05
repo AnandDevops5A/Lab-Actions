@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Calendar, Trophy, Gamepad2, Clock, SunDim, SunMedium, Sunset } from "lucide-react";
+import { Calendar, Trophy, Gamepad2, Clock, Users } from "lucide-react";
 import { ThemeContext } from "../../lib/contexts/theme-context";
 import { FormatDate } from "@/lib/utils/common";
 
@@ -8,9 +8,11 @@ import { FormatDate } from "@/lib/utils/common";
 const UpcomingTournaments = ({ tournaments }) => {
   const { isDarkMode } = useContext(ThemeContext);
 
+
+
   return (
     <div
-      className={`animate-slideInDown p-6 rounded-xl border shadow-lg transition-colors duration-300 ${isDarkMode ? "bg-gray-800 border-cyan-500/30 shadow-cyan-900/20" : "bg-white border-cyan-200 shadow-cyan-500/20"}`}
+      className={`animate-slideInDown p-6 rounded-xl border shadow-lg transition-colors duration-300 ${isDarkMode ? "bg-gray-800 border-cyan-400/30 shadow-cyan-900/20" : "bg-white border-cyan-200 shadow-cyan-500/20"}`}
     >
       <div
         className={`flex items-center justify-between border-b pb-3 mb-6 ${
@@ -67,7 +69,8 @@ const UpcomingTournaments = ({ tournaments }) => {
                   <span
                     className={`shrink-0 px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider rounded border ${isDarkMode ? "bg-cyan-900/60 text-cyan-300 border-cyan-500/30" : "bg-cyan-100 text-cyan-700 border-cyan-200"}`}
                   >
-                    Joined
+                   {(UserjoinTournament&& UserjoinTournament.has(match.tournamentName))?" Joined" : " Join Now"}]
+                   Joined
                   </span>
                 </div>
 
@@ -82,6 +85,12 @@ const UpcomingTournaments = ({ tournaments }) => {
                     <Gamepad2 className="w-3.5 h-3.5 text-purple-400" />
                     <span className="text-xs">
                       {match.plateform || "Mobile"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-green-400" />
+                    <span className="text-xs">
+                      Slots: {match.filledSlots || 0}/{match.maxSlots || 50}
                     </span>
                   </div>
                   <div

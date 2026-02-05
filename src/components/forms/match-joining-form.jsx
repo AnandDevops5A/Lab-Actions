@@ -1,13 +1,6 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import {
-  callSignSVG,
-  gameIdSVG,
-  tournamentSVG,
-  emailSVG,
-  LoadingCircleSVG,
-} from "../ui/svg";
 import { getCache, setCache } from "../../lib/utils/action-redis";
 import {
   errorMessage,
@@ -21,9 +14,40 @@ import {
 } from "../../lib/api/backend-api";
 import { UserContext } from "../../lib/contexts/user-context";
 import CyberLoading from "../../app/skeleton/CyberLoading";
-import { generateRandomNumber } from "@/lib/utils/common";
+import {  generateRandomNumberForQR } from "@/lib/utils/common";
 import Swal from "sweetalert2";
+import dynamic from "next/dynamic";
+import { SkeletonCard } from "@/app/skeleton/Skeleton";
+import Image from "next/image";
+import { Mail, Gamepad2, Trophy, CreditCard, Loader2, Check, Plus } from "lucide-react";
 
+
+// This function now returns a Dynamic Component
+export function GetQRCode({ no }) {
+  const DynamicQR = dynamic(
+    async () => {
+      // Import the image dynamically
+      const image = await import(`@/app/payment_QR/payment${no}.jpeg`);
+      
+      // Return a temporary component that renders the image
+      return () => (
+        <Image
+          src={image.default} 
+          alt="Payment QR" 
+          width={160} 
+          height={160} 
+           className="w-40 h-40 object-contain rounded-lg shadow-[0_0_15px_rgba(0,255,240,0.2)] mx-auto overflow-hidden scale-260"
+        />
+      );
+    },
+    { 
+      ssr: false, 
+      loading: () => <SkeletonCard /> 
+    }
+  );
+
+  return <DynamicQR />;
+}
 //reuseable input field
 const ReUseableInput = ({
   title,
@@ -110,6 +134,7 @@ export default function MatchJoiningForm({
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [match, setMatch] = useState(null);
+  const [qrCode, setQrCode] = useState(null);
 
   function alreadyRegistered() {
     simpleMessage("You have already joined all upcoming tournaments.", "Info");
@@ -117,6 +142,7 @@ export default function MatchJoiningForm({
     setSubmitting(false);
     setSuccess(false);
     setOpen(false);
+    setQrCode(null);
     setForm({
       userId: user ? user.id : "",
       transactionId: "",
@@ -125,6 +151,7 @@ export default function MatchJoiningForm({
       tournamentId: "",
     });
   }
+
 
   useEffect(() => {
     if (!open || !user?.id) return;
@@ -137,13 +164,13 @@ export default function MatchJoiningForm({
         const ud = await getCache("upcomingTournament");
 
         if (ud?.data && Array.isArray(ud.data) && ud.data.length > 0) {
-          console.log("fetch from cache");
+          // console.log("fetch from cache");
           upcomingData = ud.data;
         } else {
           // Fallback to API if cache is empty
           try {
             const apiRes = await FetchBackendAPI("tournament/upcoming");
-            console.log("backend hit");
+            // console.log("backend hit");
             if (apiRes?.data && Array.isArray(apiRes.data)) {
               upcomingData = apiRes.data;
               // Update cache for future use
@@ -165,11 +192,11 @@ export default function MatchJoiningForm({
         let userJoinedTournaments = [];
         const cachedJoinedRes = await getCache(`userTournamentDetails:${user.id}`);
         if (cachedJoinedRes?.status && cachedJoinedRes.data) {
-          console.log("user tournament details from cahe")
+          // console.log("user tournament details from cahe")
           userJoinedTournaments = cachedJoinedRes.data;
         } else {
           const backendJoinedRes = await getUserTournamentDetails(user.id);
-                  console.log("user tournament details from db")
+                  // console.log("user tournament details from db")
 
           if (backendJoinedRes?.data) {
             userJoinedTournaments = backendJoinedRes.data;
@@ -213,29 +240,39 @@ export default function MatchJoiningForm({
     };
   }, [open, user?.id]);
 
+
   // const upcomingTournament=await getCache("upcomingTournament");
   //   console.log(upcomingTournament);
 
   async function handleChange(e) {
-    let selectedTournamentName = e.target.options[e.target.selectedIndex].text;
-    Swal.fire({
-      title: "Are you want to join " + selectedTournamentName + "?",
-      text: "You won't be able to revert payable for tournament!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Let me In!",
-    }).then(async(result) => {
-      if (result.isConfirmed) {
-       
-        const response = await generateRandomNumber(e.target.value, user.id, 1, 2);
-        if (!response) errorMessage("All slots are book for the tournament...");
-    
-        setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
-      }
-    });
+    const { name, value } = e.target;
 
+    if (name === "tournamentId") {
+      const selectedTournament = match.find((t) => String(t.id) === value);
+      if (!selectedTournament) return;
+
+      Swal.fire({
+        title: "Are you want to join " + selectedTournament.tournamentName + "?",
+        text: "You won't be able to revert payable for tournament!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Let me In!",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const response = await generateRandomNumberForQR(value, user.id, 1, 50);
+          if (!response) errorMessage("All slots are book for the tournament...");
+          // successMessage(qrNo+response)
+          
+          setForm((s) => ({ ...s, [name]: value }));
+          setQrCode( response || null);
+          // successMessage(response)
+        }
+      });
+    } else {
+      setForm((s) => ({ ...s, [name]: value }));
+    }
   }
 
   async function handleSubmit(e) {
@@ -260,6 +297,7 @@ export default function MatchJoiningForm({
     setTimeout(() => {
       setSuccess(false);
       setOpen(false);
+      setQrCode(null);
       setForm({
         userId: user ? user.id : "",
         transactionId: "",
@@ -321,7 +359,7 @@ export default function MatchJoiningForm({
                   onChange={handleChange}
                   color={"#9b59ff"}
                   placeholder={"contact email id"}
-                  svg={emailSVG}
+                  svg={<Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9b59ff]" />}
                 />
                 <ReUseableInput
                   title={"Game ID"}
@@ -330,7 +368,7 @@ export default function MatchJoiningForm({
                   onChange={handleChange}
                   color={"#ff0055"}
                   placeholder={"eg: @7575945394"}
-                  svg={callSignSVG}
+                  svg={<Gamepad2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#ff0055]" />}
                 />
                 <ReUseableDropdown
                   title={"Tournament"}
@@ -338,7 +376,7 @@ export default function MatchJoiningForm({
                   value={form.tournamentId}
                   onChange={handleChange}
                   color={"#84ff00"}
-                  svg={gameIdSVG}
+                  svg={<Trophy className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#84ff00]" />}
                   options={match}
                 />
                 <ReUseableInput
@@ -347,9 +385,25 @@ export default function MatchJoiningForm({
                   value={form.transactionId}
                   onChange={handleChange}
                   color={"#ff7a00"}
-                  placeholder={"Eg: Solo surviver"}
-                  svg={tournamentSVG}
+                  placeholder={"Eg: TXH543KGJIYJF"}
+                  svg={<CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#ff7a00]" />}
                 />
+              </div>
+                  
+              <div
+                className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                  qrCode ? "max-h-60 opacity-100 mt-4" : "max-h-0 opacity-0"
+                }`}
+              >
+                {qrCode && (
+                  <div className="flex flex-col items-center justify-center p-3 border border-[#00fff0]/20 rounded-xl bg-black/40 backdrop-blur-sm">
+                    <p className="text-xs text-[#00fff0] mb-2 font-semibold tracking-wider uppercase">
+                      Scan to Pay
+                    </p>
+                     {qrCode&&GetQRCode({ no: qrCode })}
+                    
+                  </div>
+                )}
               </div>
 
               <div className="pt-2">
@@ -374,42 +428,11 @@ export default function MatchJoiningForm({
 
                   <span className="relative  flex items-center gap-3">
                     {submitting ? (
-                      LoadingCircleSVG
+                      <Loader2 className="w-5 h-5 text-slate-100 animate-spin" />
                     ) : success ? (
-                      <svg
-                        className="w-5 h-5 text-slate-100"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <path
-                          d="M20 6L9 17l-5-5"
-                          stroke="white"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      <Check className="w-5 h-5 text-slate-100" />
                     ) : (
-                      <svg
-                        className="w-5 h-5 text-slate-100"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <path
-                          d="M5 12h14"
-                          stroke="white"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M12 5v14"
-                          stroke="white"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      <Plus className="w-5 h-5 text-slate-100" />
                     )}
                     <span>
                       {submitting
