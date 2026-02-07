@@ -11,7 +11,6 @@ import {
 import { UserContext } from "../../lib/contexts/user-context";
 import {
   getUserTournamentDetails,
-  FetchBackendAPI,
 } from "../../lib/api/backend-api";
 import { useRouter } from "next/navigation";
 import { calulateWinAndReward } from "../../lib/utils/common";

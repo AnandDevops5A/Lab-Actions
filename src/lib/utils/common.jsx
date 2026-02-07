@@ -84,6 +84,20 @@ export const setUpcomingTournamentCache = async () => {
   // console.log(response?.data);
 };
 
+export const formatDateTimeAsText = (dateTime) => {
+    const dateStr = dateTime.toString();
+    const year = dateStr.slice(0, 4);
+    const month = dateStr.slice(4, 6);
+    const day = dateStr.slice(6, 8);
+    const hour = dateStr.slice(8, 10);
+    const minute = dateStr.slice(10, 12);
+
+    return {
+      date: `${day}/${month}/${year}`,
+      time: `${hour}:${minute}`
+    };
+  };
+
 export  const FormatDate = ({ dateNum }) => {
   if (!dateNum) return <span className="text-gray-400">TBA</span>;
   

@@ -1,20 +1,9 @@
 import React from 'react';
 import { Trophy, Calendar, Clock, Users, Sofa } from "lucide-react";
+import { formatDateTimeAsText } from '@/lib/utils/common';
 
 const TournamentGrid = ({ tournaments, onSelect, isDarkMode,leaderboardCountRegisterUser }) => {
-  const formatDateTime = (dateTime) => {
-    const dateStr = dateTime.toString();
-    const year = dateStr.slice(0, 4);
-    const month = dateStr.slice(4, 6);
-    const day = dateStr.slice(6, 8);
-    const hour = dateStr.slice(8, 10);
-    const minute = dateStr.slice(10, 12);
-
-    return {
-      date: `${day}/${month}/${year}`,
-      time: `${hour}:${minute}`
-    };
-  };
+ 
 
   if (!tournaments || tournaments.length === 0) {
     return (
@@ -32,7 +21,7 @@ const TournamentGrid = ({ tournaments, onSelect, isDarkMode,leaderboardCountRegi
     <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-${(tournaments.length) % 3} gap-4`}>
 
       {tournaments.map((tournament) => {
-        const { date, time } = formatDateTime(tournament.dateTime);
+        const { date, time } = formatDateTimeAsText(tournament.dateTime);
         return (
           <div
             key={tournament.id}

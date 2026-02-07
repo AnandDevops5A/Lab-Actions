@@ -16,7 +16,10 @@ public class ReviewService {
     }
 
     public Review addReview(ReviewDRO review) {
-        Review newReview = Review.builder().reviewId(review.reviewId()).reviewerName(review.reviewerName()).comment(review.comment())
+        System.out.println(review);
+        
+       // Review newReview = new Review();
+        Review newReview = Review.builder().reviewId(review.reviewId()).reviewerName(review.reviewerName()).comment(review.comment()).tournamentId(review.tournamentId())
                 .rating(review.rating()).createdAt(review.createdAt()).tags(review.tags()).build();
         // return newReview;
         return reviewRepository.save(newReview);

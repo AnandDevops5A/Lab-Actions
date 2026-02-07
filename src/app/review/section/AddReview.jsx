@@ -1,14 +1,91 @@
-import React from "react";
+import React, { useContext, useEffect, useState, useTransition } from "react";
+import { ArrowRight, LoaderCircle } from "lucide-react";
+import { StarRating } from "../StarRating";
+import { askLogin, errorMessage, successMessage } from "@/lib/utils/alert";
+import { useRouter } from "next/navigation";
+import { UserContext } from "@/lib/contexts/user-context";
+import { UpdateCache } from "@/lib/utils/action-redis";
+import { addNewReview } from "@/lib/api/backend-api";
 
 const AddReview = ({
-  form,
-  setForm,
+  setReviews,
   tournaments,
-  submitReview,
-  StarRating,
   isDarkMode,
-  inputClasses
+  inputClasses,
 }) => {
+  const router = useRouter();
+  const { user } = useContext(UserContext);
+  const [isPending, startTransition] = useTransition();
+
+  const [form, setForm] = useState({
+    reviewerName: "",
+    tournamentId: "",
+    rating: 5,
+    comment: "",
+    tags: "",
+  });
+
+  useEffect(() => {
+    if (user?.username) {
+      setForm((prev) => ({
+        ...prev,
+        reviewerName: prev.reviewerName || user.username,
+      }));
+    }
+  }, [user]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!user) {
+      askLogin(router);
+      return;
+    }
+    if (!form.reviewerName.trim() || !form.comment.trim() || !form.tournamentId) return;
+    
+    const tags =
+      form.tags
+        .split(/[,\.\s]+/) // split on comma, period, or whitespace
+        .map((t) => t.trim())
+        .filter(Boolean) || [];
+
+    const newReview = {
+      reviewId: `r-${Date.now()}`,
+      reviewerName: form.reviewerName.trim(),
+      tournamentId: form.tournamentId,
+      rating: form.rating,
+      comment: form.comment.trim(),
+      tags,
+      createdAt: new Date().toISOString(),
+    };
+
+    startTransition(async () => {
+      try {
+        const resp = await addNewReview(newReview);
+        if (resp.ok) {
+          successMessage("Review added successfully");
+          
+          // Optimistic update
+          setReviews((prev) => [newReview, ...prev]);
+          
+          // Invalidate cache so next load gets fresh data
+          await UpdateCache("reviews",reviews);
+
+          setForm({
+            reviewerName: user?.username || "",
+            tournamentId: "",
+            rating: 5,
+            comment: "",
+            tags: "",
+          });
+        } else {
+          errorMessage("Something went wrong");
+        }
+      } catch (error) {
+        errorMessage("Failed to submit review");
+      }
+    });
+  };
+
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 p-7 ">
       <div
@@ -44,10 +121,10 @@ const AddReview = ({
             </ul>
           </div>
 
-          <form onSubmit={submitReview} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-gray-400">Name</label>
+                <label className="text-xs text-gray-400">Display Name</label>
                 <input
                   type="text"
                   value={form.reviewerName}
@@ -56,20 +133,23 @@ const AddReview = ({
                   }
                   placeholder="Your display name"
                   className={`${inputClasses}`}
+                  disabled={isPending}
                   required
                 />
               </div>
               <div>
                 <label className="text-xs text-gray-400">Tournament</label>
                 <select
-                  value={form.tournamentName}
+                  value={form.tournamentId}
                   onChange={(e) =>
-                    setForm((f) => ({ ...f, tournamentName: e.target.value }))
+                    setForm((f) => ({ ...f, tournamentId: e.target.value }))
                   }
                   className={`${inputClasses}`}
+                  disabled={isPending}
                   required
                 >
-                  {tournaments.map((t) => (
+                  <option value="">Select a tournament</option>
+                  {tournaments?.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.tournamentName}
                     </option>
@@ -86,6 +166,7 @@ const AddReview = ({
                   onChange={(n) => setForm((f) => ({ ...f, rating: n }))}
                   size="lg"
                   label="Select rating"
+                  readOnly={isPending}
                 />
               </div>
             </div>
@@ -100,6 +181,7 @@ const AddReview = ({
                 placeholder="What stood out? Be specific."
                 rows={4}
                 className={`${inputClasses}`}
+                disabled={isPending}
                 required
               />
             </div>
@@ -114,6 +196,7 @@ const AddReview = ({
                 onChange={(e) =>
                   setForm((f) => ({ ...f, tags: e.target.value }))
                 }
+                disabled={isPending}
                 placeholder="Logistics, Production, Bracket"
                 className={`${inputClasses}`}
               />
@@ -125,18 +208,20 @@ const AddReview = ({
               </div>
               <button
                 type="submit"
-                className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-500/20 transition-colors"
+                disabled={isPending}
+                className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M5 12h14M12 5l7 7-7 7"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                Publish review
+                {isPending ? (
+                  //spinner
+                  <>
+                 <LoaderCircle className="h-4 w-4 animate-spin"/>
+                  <span className="">Publishing...</span></>
+                ) : (
+                  <>
+                    <ArrowRight className="h-4 w-4" strokeWidth={1.6} />
+                    Publish review
+                  </>
+                )}
               </button>
             </div>
           </form>
@@ -147,6 +232,3 @@ const AddReview = ({
 };
 
 export default AddReview;
-
-
-

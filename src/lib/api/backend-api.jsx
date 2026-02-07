@@ -126,6 +126,13 @@ export const getUpcomingTournament = async () => {
   });
 };
 
+export const updateTournament=async(updateData)=>{
+  return await FetchBackendAPI(`tournament/update`, {
+    method: "PUT",
+    data: updateData,
+  });
+};
+
 export const deleteTournamentById = async (tournamentId) => {
   return await FetchBackendAPI(`tournament/delete/${tournamentId}`, {
     method: "DELETE",
@@ -164,7 +171,7 @@ export const approveUserFromTournament = async (tournamentId, userId) => {
 };
 
 export const getLeaderboard = async (tournamentId) => {
-  return await FetchBackendAPI(`leaderboard/${tournamentId}`, {
+  return await FetchBackendAPI(`leaderboard/getJoiners/${tournamentId}`, {
     method: "POST",
   });
 };
@@ -275,6 +282,13 @@ export const seedLeaderboard = async (listofuserId,tournamentId, count = 20) => 
 
 //review Apis
 
+export const getAllReviews = async () => {
+  return await FetchBackendAPI("review/all", {
+    method: "POST",
+  });
+};
+
+
 export const addNewReview = async (review) => {
   return await FetchBackendAPI("review/add", {
     method: "POST",
@@ -293,3 +307,16 @@ export const getReviewsByUserId = async (userId) => {
     method: "POST",
   });
 };
+
+export const deleteReview = async (reviewId) => {
+  return await FetchBackendAPI(`review/delete/${reviewId}`, {
+    method: "DELETE",
+  });
+};
+
+export const addAdminReply = async (row) => {
+  return await FetchBackendAPI("review/reply", {
+          method: "PUT",
+          data: { reviewId: row.id, adminReply: row.adminReply },
+        });
+      };

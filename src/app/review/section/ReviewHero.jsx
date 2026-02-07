@@ -1,6 +1,6 @@
 "use client";
 import React, { useMemo } from "react";
-import { StarRating } from "../StartRating";
+import { StarRating } from "../StarRating";
 
 const ReviewHero = ({
   setFilters,
@@ -64,9 +64,9 @@ const ReviewHero = ({
                 <label className="text-xs text-gray-400">Tournament</label>
                 <select
                   className={`${inputClasses}`}
-                  value={filters.tournamentName}
+                  value={filters.tournamentId || "all"}
                   onChange={(e) =>
-                    setFilters((f) => ({ ...f, tournamentName: e.target.value }))
+                    setFilters((f) => ({ ...f, tournamentId: e.target.value }))
                   }
                 >
                   <option value="all">All tournaments</option>
@@ -132,6 +132,3 @@ const ReviewHero = ({
 };
 
 export default ReviewHero;
-
-
-

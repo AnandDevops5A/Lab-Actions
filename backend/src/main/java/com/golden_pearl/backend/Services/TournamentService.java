@@ -74,13 +74,15 @@ public class TournamentService {
         if (tournamentDetails == null)
             return null;
         Tournament existingTournament = getTournamentById(tournamentDetails.getId());
+        if (existingTournament == null)
+            return null;
         existingTournament.setTournamentName(tournamentDetails.getTournamentName());
         existingTournament.setPrizePool(tournamentDetails.getPrizePool());
         existingTournament.setDateTime(tournamentDetails.getDateTime());
-        existingTournament.setEntryFee(tournamentDetails.getEntryFee());
         existingTournament.setPlatform(tournamentDetails.getPlatform());
         existingTournament.setDescription(tournamentDetails.getDescription());
-        existingTournament.setRankList(tournamentDetails.getRankList());
+       existingTournament.setSlot(tournamentDetails.getSlot());
+       
 
         return tournamentRepository.save(existingTournament);
     }

@@ -2,7 +2,6 @@
 import React from "react";
 import { X } from "lucide-react"; // Icon library for the cross button
 import { errorMessage, successMessage } from "../../lib/utils/alert";
-import { FetchBackendAPI } from "../../lib/api/backend-api";
 import { setCache } from "../../lib/utils/action-redis";
 import { dateInLongFormat } from "@/lib/utils/common";
 

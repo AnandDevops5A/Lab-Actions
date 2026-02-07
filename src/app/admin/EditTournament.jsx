@@ -2,8 +2,7 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
 import { errorMessage, successMessage } from "../../lib/utils/alert";
-import { FetchBackendAPI } from "../../lib/api/backend-api";
-
+import {  updateTournament } from "../../lib/api/backend-api";
 
 const EditTournamentForm = ({ tournament, onClose, refreshData }) => {
   const [formData, setFormData] = useState({
@@ -12,15 +11,15 @@ const EditTournamentForm = ({ tournament, onClose, refreshData }) => {
     slot: tournament.slot || 50,
     platform: tournament.platform,
     time: tournament.time || "13:00",
-    date: tournament.date || new Date().toISOString().split('T')[0],
-    description: tournament.description || ""
+    date: tournament.date || new Date().toISOString().split("T")[0],
+    description: tournament.description || "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -28,7 +27,14 @@ const EditTournamentForm = ({ tournament, onClose, refreshData }) => {
     e.preventDefault();
 
     // Validation
-    if (!formData.tournamentName || !formData.prizePool || !formData.slot || !formData.platform || !formData.time || !formData.date) {
+    if (
+      !formData.tournamentName ||
+      !formData.prizePool ||
+      !formData.slot ||
+      !formData.platform ||
+      !formData.time ||
+      !formData.date
+    ) {
       errorMessage("All required fields must be filled");
       return;
     }
@@ -39,23 +45,17 @@ const EditTournamentForm = ({ tournament, onClose, refreshData }) => {
     const dateTime = parseInt(`${year}${month}${day}${timeFormatted}`);
 
     const data = {
+      id: tournament.id,
       tournamentName: formData.tournamentName,
       prizePool: parseInt(formData.prizePool),
       slot: parseInt(formData.slot),
       platform: formData.platform,
       dateTime: dateTime,
-      description: formData.description
+      description: formData.description,
     };
 
     try {
-      const response = await fetch(`http://localhost:8082/tournament/update/${tournament.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
+      const response = await updateTournament(data);
       if (response.ok) {
         successMessage("Tournament updated successfully!");
         if (refreshData) refreshData();
@@ -82,7 +82,10 @@ const EditTournamentForm = ({ tournament, onClose, refreshData }) => {
               className="absolute top-0 right-0 bg-red-600 p-2 text-slate-100 hover:bg-blue-400 hover:text-black transition-colors z-50 group cursor-pointer"
               style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 20% 100%)" }}
             >
-              <X size={24} className="group-hover:rotate-180 transition-transform" />
+              <X
+                size={24}
+                className="group-hover:rotate-180 transition-transform"
+              />
             </button>
 
             {/* Header */}
@@ -218,6 +221,3 @@ const EditTournamentForm = ({ tournament, onClose, refreshData }) => {
 };
 
 export default EditTournamentForm;
-
-
-

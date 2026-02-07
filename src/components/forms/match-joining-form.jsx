@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
-import { getCache, setCache } from "../../lib/utils/action-redis";
+import { useState, useEffect, use, useRef } from "react";
+import { getCache, setCache, UpdateCache } from "../../lib/utils/action-redis";
 import {
   errorMessage,
   simpleMessage,
@@ -10,7 +10,7 @@ import {
 import {
   joinTournament,
   getUserTournamentDetails,
-  FetchBackendAPI,
+  getUpcomingTournament,
 } from "../../lib/api/backend-api";
 import { UserContext } from "../../lib/contexts/user-context";
 import CyberLoading from "../../app/skeleton/CyberLoading";
@@ -55,7 +55,7 @@ const ReUseableInput = ({
   color,
   placeholder,
   svg,
-  value,
+  defaultValue,
   onChange,
 }) => {
   return (
@@ -66,7 +66,7 @@ const ReUseableInput = ({
         <input
           type="text"
           name={name}
-          value={value || ""}
+          defaultValue={defaultValue || ""}
           onChange={onChange}
           required
           placeholder={placeholder}
@@ -124,17 +124,30 @@ export default function MatchJoiningForm({
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = controlledSetOpen || setInternalOpen;
   const { user } = use(UserContext);
-  const [form, setForm] = useState({
-    userId: user ? user.id : "",
+  
+  // Use useRef for form fields to avoid re-renders on every keystroke
+  const formRef = useRef({
+    userId: user?.id || "",
     transactionId: "",
-    tempEmail: user ? user.email : "",
+    tempEmail: user?.email || "",
     gameId: "",
-    tournamentId: "",
   });
+
+  // Keep tournamentId in state because it triggers UI updates (QR code)
+  const [tournamentId, setTournamentId] = useState("");
+
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [match, setMatch] = useState(null);
   const [qrCode, setQrCode] = useState(null);
+
+  // Sync user data to ref if it loads after component mount
+  useEffect(() => {
+    if (user) {
+      if (!formRef.current.userId) formRef.current.userId = user.id;
+      if (!formRef.current.tempEmail) formRef.current.tempEmail = user.email;
+    }
+  }, [user]);
 
   function alreadyRegistered() {
     simpleMessage("You have already joined all upcoming tournaments.", "Info");
@@ -143,13 +156,13 @@ export default function MatchJoiningForm({
     setSuccess(false);
     setOpen(false);
     setQrCode(null);
-    setForm({
-      userId: user ? user.id : "",
+    setTournamentId("");
+    formRef.current = {
+      userId: user?.id || "",
       transactionId: "",
-      tempEmail: user ? user.email : "",
+      tempEmail: user?.email || "",
       gameId: "",
-      tournamentId: "",
-    });
+    };
   }
 
 
@@ -169,7 +182,7 @@ export default function MatchJoiningForm({
         } else {
           // Fallback to API if cache is empty
           try {
-            const apiRes = await FetchBackendAPI("tournament/upcoming");
+            const apiRes = await getUpcomingTournament();
             // console.log("backend hit");
             if (apiRes?.data && Array.isArray(apiRes.data)) {
               upcomingData = apiRes.data;
@@ -246,8 +259,10 @@ export default function MatchJoiningForm({
 
   async function handleChange(e) {
     const { name, value } = e.target;
-
-    if (name === "tournamentId") {
+    if (name !== "tournamentId") {
+      // Update ref for non-triggering fields
+      formRef.current[name] = value;
+    } else {
       const selectedTournament = match.find((t) => String(t.id) === value);
       if (!selectedTournament) return;
 
@@ -265,20 +280,24 @@ export default function MatchJoiningForm({
           if (!response) errorMessage("All slots are book for the tournament...");
           // successMessage(qrNo+response)
           
-          setForm((s) => ({ ...s, [name]: value }));
+          setTournamentId(value);
           setQrCode( response || null);
           // successMessage(response)
         }
       });
-    } else {
-      setForm((s) => ({ ...s, [name]: value }));
-    }
+    } 
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setSubmitting(true);
-    const response = await joinTournament(form);
+    
+    const payload = {
+      ...formRef.current,
+      tournamentId
+    };
+
+    const response = await joinTournament(payload);
     if (!response.ok) {
       errorMessage(response.error || "Failed to join tournament");
       setSubmitting(false);
@@ -290,6 +309,8 @@ export default function MatchJoiningForm({
         "Successfully joined tournament",
     );
 
+    //update cache with adding recent join of user tournament details
+  
 
 
     setSubmitting(false);
@@ -298,13 +319,13 @@ export default function MatchJoiningForm({
       setSuccess(false);
       setOpen(false);
       setQrCode(null);
-      setForm({
-        userId: user ? user.id : "",
+      setTournamentId("");
+      formRef.current = {
+        userId: user?.id || "",
         transactionId: "",
-        tempEmail: user ? user.email : "",
+        tempEmail: user?.email || "",
         gameId: "",
-        tournamentId: "",
-      });
+      };
     }, 1000);
   }
 
@@ -355,7 +376,7 @@ export default function MatchJoiningForm({
                 <ReUseableInput
                   title={"Contact Email"}
                   name={"tempEmail"}
-                  value={form.tempEmail}
+                  defaultValue={formRef.current.tempEmail}
                   onChange={handleChange}
                   color={"#9b59ff"}
                   placeholder={"contact email id"}
@@ -364,7 +385,7 @@ export default function MatchJoiningForm({
                 <ReUseableInput
                   title={"Game ID"}
                   name={"gameId"}
-                  value={form.gameId}
+                  defaultValue={formRef.current.gameId}
                   onChange={handleChange}
                   color={"#ff0055"}
                   placeholder={"eg: @7575945394"}
@@ -373,7 +394,7 @@ export default function MatchJoiningForm({
                 <ReUseableDropdown
                   title={"Tournament"}
                   name={"tournamentId"}
-                  value={form.tournamentId}
+                  value={tournamentId}
                   onChange={handleChange}
                   color={"#84ff00"}
                   svg={<Trophy className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#84ff00]" />}
@@ -382,7 +403,7 @@ export default function MatchJoiningForm({
                 <ReUseableInput
                   title={"Transaction ID"}
                   name={"transactionId"}
-                  value={form.transactionId}
+                  defaultValue={formRef.current.transactionId}
                   onChange={handleChange}
                   color={"#ff7a00"}
                   placeholder={"Eg: TXH543KGJIYJF"}

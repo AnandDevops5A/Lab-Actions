@@ -1,10 +1,11 @@
 import React from 'react'
-import { StarRating } from '../StartRating'
+import { StarRating } from '../StarRating'
 // import { TournamentBadge } from './TournamentBadge'
 
 
 
 const Reviews = ({ filtered,TournamentBadge,isDarkMode}) => {
+  // console.log(filtered);
   return (
      <section id="reviews" className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16 ${isDarkMode ? "bg-black/40" : "bg-blue-200/50"} `}>
         <div className="flex items-center justify-between mb-4 ">
@@ -24,10 +25,10 @@ const Reviews = ({ filtered,TournamentBadge,isDarkMode}) => {
               <div className= "absolute inset-px rounded-xl ring-1 ring-white/10 pointer-events-none" />
               <div className="flex items-start justify-between">
                 <div>
-                  <h4 className="font-bold">{r.name}</h4>
+                  <h4 className="font-bold mb-1 text-sm">{r.reviewerName}</h4>
                   <div className="mt-1 flex items-center gap-2">
                     <StarRating value={r.rating} readOnly size="sm" />
-                    <TournamentBadge id={r.tournamentId} />
+                    <TournamentBadge id={r.tournamentId } />
                   </div>
                 </div>
                 <time

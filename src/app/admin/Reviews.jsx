@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { Star, Trash2, ThumbsUp, Search, Save, X } from "lucide-react";
 import { confirmMessage, successMessage, errorMessage } from "../../lib/utils/alert";
 import CyberLoading from "../skeleton/CyberLoading";
-import { FetchBackendAPI } from "../../lib/api/backend-api";
+import { addAdminReply, deleteReview, getAllReviews } from "../../lib/api/backend-api";
 import { SkeletonTable } from "../skeleton/Skeleton";
 
 const Table = dynamic(() => import('./Table'), {
@@ -56,7 +56,7 @@ const Reviews = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await FetchBackendAPI("review/all");
+        const response = await getAllReviews();
         if (response && response.data && response.data.length > 0) {
           const formatted = response.data.map((r) => ({
             ...r,
@@ -87,7 +87,7 @@ const Reviews = () => {
     const confirmed = await confirmMessage("Are you sure you want to delete this review?", "Delete Review");
     if (confirmed) {
       try {
-        const response = await FetchBackendAPI(`review/delete/${id}`, { method: "DELETE" });
+        const response = await deleteReview(id);
         if (response.ok) {
           setReviews(prev => prev.filter(r => r.id !== id));
           successMessage("Review deleted successfully");
@@ -102,10 +102,7 @@ const Reviews = () => {
 
   const handleSaveReply = async (row) => {
     try {
-      const response = await FetchBackendAPI("review/reply", {
-        method: "PUT",
-        data: { reviewId: row.id, adminReply: row.adminReply },
-      });
+      const response = await addAdminReply(row);
 
       if (response.ok) {
         setReviews(prev => prev.map(r => r.id === row.id ? { ...r, savedAdminReply: row.adminReply } : r));

@@ -19,6 +19,7 @@ public class Review {
     @Id
     private String reviewId;
     private String reviewerName;
+    private String tournamentId;
     private String comment;
     private Integer rating;
     private String createdAt;

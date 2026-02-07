@@ -7,6 +7,7 @@ import {
   Users,
   CheckCircle
 } from "lucide-react";
+import { formatDateTimeAsText } from "@/lib/utils/common";
 
 const TournamentList = ({ recentTournaments, upcomingTournaments, completedTournaments, onSelectTournament, isDarkMode,joiners }) => {
   if (recentTournaments.length === 0) {
@@ -23,19 +24,22 @@ const TournamentList = ({ recentTournaments, upcomingTournaments, completedTourn
     <div className="space-y-6">
       {/* Upcoming Tournaments */}
       {upcomingTournaments?.length > 0 && (
+        
         <div>
           <h4 className={`text-md font-semibold mb-3 flex items-center gap-2 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-            <Clock className="w-5 h-5" />
+            <Clock className="w-5 h-5 text-blue-400" />
             Upcoming Tournaments
           </h4>
           <div className="grid gap-4">
-            {upcomingTournaments?.map((tournament) => (
-              <div
+            {upcomingTournaments?.map((tournament) => {
+              const { date, time } = formatDateTimeAsText(tournament.dateTime);
+              
+              return (<div
                 key={tournament.id}
-                className={`p-4 rounded-lg border cursor-pointer transition-all hover:scale-[1.02] ${
+                className={`p-4 rounded-lg border cursor-pointer transition duration-500 hover:scale-[1.02] ${
                   isDarkMode
-                    ? 'bg-gray-800 border-gray-600 hover:border-blue-500'
-                    : 'bg-white border-gray-300 hover:border-blue-500'
+                    ? 'bg-gray-800 border-gray-600 hover:border-amber-500'
+                    : 'bg-white border-gray-300 hover:border-amber-500'
                 }`}
                 onClick={() => onSelectTournament && onSelectTournament(tournament)}
               >
@@ -47,11 +51,11 @@ const TournamentList = ({ recentTournaments, upcomingTournaments, completedTourn
                     <div className="flex items-center gap-4 mt-2 text-sm">
                       <span className={`flex items-center gap-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                         <Calendar className="w-4 h-4" />
-                        {new Date(tournament.dateTime).toLocaleDateString()}
+                        {date}
                       </span>
                       <span className={`flex items-center gap-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                         <Clock className="w-4 h-4" />
-                        {new Date(tournament.dateTime).toLocaleTimeString()}
+                        {time}
                       </span>
                     </div>
                   </div>
@@ -78,8 +82,8 @@ const TournamentList = ({ recentTournaments, upcomingTournaments, completedTourn
                     UPCOMING
                   </div>
                 </div>
-              </div>
-            ))}
+              </div>);
+})}
           </div>
         </div>
       )}
@@ -88,14 +92,15 @@ const TournamentList = ({ recentTournaments, upcomingTournaments, completedTourn
       {completedTournaments?.length > 0 && (
         <div>
           <h4 className={`text-md font-semibold mb-3 flex items-center gap-2 ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}>
-            <CheckCircle className="w-5 h-5" />
+            <CheckCircle className="w-5 h-5 text-green-400" />
             Last Completed Tournament
           </h4>
           <div className="grid gap-4">
-            {completedTournaments?.map((tournament) => (
-              <div
+            {completedTournaments?.map((tournament) => {
+              const { date, time } = formatDateTimeAsText(tournament.dateTime);
+             return ( <div
                 key={tournament.id}
-                className={`p-4 rounded-lg border cursor-pointer transition-all hover:scale-[1.02] ${
+                className={`p-4 rounded-lg border cursor-pointer transition duration-300 hover:scale-[1.02] ${
                   isDarkMode
                     ? 'bg-gray-800 border-gray-600 hover:border-green-500'
                     : 'bg-white border-gray-300 hover:border-green-500'
@@ -110,11 +115,11 @@ const TournamentList = ({ recentTournaments, upcomingTournaments, completedTourn
                     <div className="flex items-center gap-4 mt-2 text-sm">
                       <span className={`flex items-center gap-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                         <Calendar className="w-4 h-4" />
-                        {new Date(tournament.dateTime).toLocaleDateString()}
+                        {date}
                       </span>
                       <span className={`flex items-center gap-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                         <Clock className="w-4 h-4" />
-                        {new Date(tournament.dateTime).toLocaleTimeString()}
+                        {time}
                       </span>
                     </div>
                   </div>
@@ -141,8 +146,8 @@ const TournamentList = ({ recentTournaments, upcomingTournaments, completedTourn
                     COMPLETED
                   </div>
                 </div>
-              </div>
-            ))}
+              </div>)
+})}
           </div>
         </div>
       )}

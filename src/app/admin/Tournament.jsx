@@ -4,7 +4,6 @@ import { ThemeContext } from "../../lib/contexts/theme-context";
 import CyberLoading from "../skeleton/CyberLoading";
 import dynamic from "next/dynamic";
 import { errorMessage, successMessage, confirmMessage } from "../../lib/utils/alert";
-import { FetchBackendAPI } from "../../lib/api/backend-api";
 
 
 const Table = dynamic(() => import('./Table'), {

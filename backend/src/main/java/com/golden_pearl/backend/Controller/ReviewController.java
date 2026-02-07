@@ -34,7 +34,7 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.addReview(review));
     }
 
-    @GetMapping("/all")
+    @PostMapping("/all")
     public ResponseEntity<List<Review>> getAllReviews() {
         return ResponseEntity.ok(reviewService.getAllReviews());
     }

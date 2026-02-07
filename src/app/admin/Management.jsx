@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useContext, useMemo, useCallback } from "react";
 import { ThemeContext } from "../../lib/contexts/theme-context";
-import { deleteTournamentById, FetchBackendAPI } from "../../lib/api/backend-api";
+import { deleteTournamentById } from "../../lib/api/backend-api";
 import { errorMessage, successMessage, confirmMessage } from "../../lib/utils/alert";
 
 const BASE_URL = "http://localhost:8082";
@@ -28,6 +28,7 @@ import {
   XCircle,
 } from "lucide-react";
 import dynamic from "next/dynamic";
+import { formatDateTimeAsText } from "@/lib/utils/common";
 
 const AddTournamentForm = dynamic(() => import("./AddTournament"), {
   loading: () => <div className="text-green-400">Loading...</div>,
@@ -187,6 +188,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
   }, [selectedTournaments, refreshData]);
 
   const getStatusInfo = (tournament) => {
+    
     if (new Date(tournament.dateTime).getTime() > now) {
       return {
         label: "UPCOMING",
@@ -206,19 +208,19 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
     }
   };
 
-  const formatDateTime = (dateTime) => {
-    const dateStr = dateTime.toString();
-    const year = dateStr.slice(0, 4);
-    const month = dateStr.slice(4, 6);
-    const day = dateStr.slice(6, 8);
-    const hour = dateStr.slice(8, 10);
-    const minute = dateStr.slice(10, 12);
+  // const formatDateTime = (dateTime) => {
+  //   const dateStr = dateTime.toString();
+  //   const year = dateStr.slice(0, 4);
+  //   const month = dateStr.slice(4, 6);
+  //   const day = dateStr.slice(6, 8);
+  //   const hour = dateStr.slice(8, 10);
+  //   const minute = dateStr.slice(10, 12);
 
-    return {
-      date: `${day}/${month}/${year}`,
-      time: `${hour}:${minute}`,
-    };
-  };
+  //   return {
+  //     date: `${day}/${month}/${year}`,
+  //     time: `${hour}:${minute}`,
+  //   };
+  // };
 
   const stats = useMemo(() => {
     if (!tournaments)
@@ -570,7 +572,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
                 >
                   {filteredTournaments.map((tournament, index) => {
                     const statusInfo = getStatusInfo(tournament);
-                    const { date, time } = formatDateTime(tournament.dateTime);
+                    const { date, time } = formatDateTimeAsText(tournament.dateTime);
 
                     return (
                       <tr

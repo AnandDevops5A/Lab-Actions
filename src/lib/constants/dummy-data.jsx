@@ -306,5 +306,47 @@
     { month: "Jun", amount: 82000, registrations: 480 },
   ];
 
+  export const dummyReview=[
+    {
+      reviewId: "r1",
+      name: "Rhea",
+      tournamentName: "neo-city-cup",
+      rating: 5,
+      comment:
+        "Electrifying atmosphere, spotless logistics, and the finals were pure adrenaline. Neon perfection.",
+      tags: ["Logistics", "Finals", "Ambience"],
+      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 6).toISOString(),
+    },
+    {
+      reviewId: "r2",
+      name: "Ishan",
+      tournamentName: "quantum-league",
+      rating: 4,
+      comment:
+        "Production value was insane. Minor delays, but staff handled it smoothly.",
+      tags: ["Production", "Staff"],
+      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
+    },
+    {
+      reviewId: "r3",
+      name: "Akira",
+      tournamentName: "aurora-series",
+      rating: 3,
+      comment:
+        "Great bracket and fair seeding. Could use better crowd control next time.",
+      tags: ["Seeding", "Crowd"],
+      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(),
+    },
+    {
+      reviewId: "r4",
+      name: "Abhay",
+      tournamentName: "Arihant Open",
+      rating: 2,
+      comment:
+        "Great plateform but low reward. Could use better reward for winner next time.",
+      tags: ["Ranking", "Crowd", "rewards"],
+      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
+    },
+  ];
 
 
