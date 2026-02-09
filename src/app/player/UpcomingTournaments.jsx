@@ -69,7 +69,10 @@ const UpcomingTournaments = ({ tournaments }) => {
                   <span
                     className={`shrink-0 px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider rounded border ${isDarkMode ? "bg-cyan-900/60 text-cyan-300 border-cyan-500/30" : "bg-cyan-100 text-cyan-700 border-cyan-200"}`}
                   >
-                   Joined
+                   {/* Joined */}
+                   {
+                    match.approved? "Approved": "Pending"
+                   }
                   </span>
                 </div>
 

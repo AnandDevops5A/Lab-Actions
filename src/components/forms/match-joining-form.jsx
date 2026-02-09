@@ -131,6 +131,7 @@ export default function MatchJoiningForm({
     transactionId: "",
     tempEmail: user?.email || "",
     gameId: "",
+    investAmount: ""
   });
 
   // Keep tournamentId in state because it triggers UI updates (QR code)
@@ -179,7 +180,8 @@ export default function MatchJoiningForm({
         if (ud?.data && Array.isArray(ud.data) && ud.data.length > 0) {
           // console.log("fetch from cache");
           upcomingData = ud.data;
-        } else {
+        } 
+        else {
           // Fallback to API if cache is empty
           try {
             const apiRes = await getUpcomingTournament();
@@ -187,7 +189,7 @@ export default function MatchJoiningForm({
             if (apiRes?.data && Array.isArray(apiRes.data)) {
               upcomingData = apiRes.data;
               // Update cache for future use
-              await setCache("upcomingTournament", upcomingData, 300);
+              await setCache("upcomingTournament", upcomingData, 3000);
             }
           } catch (err) {
             console.warn("Failed to fetch upcoming tournaments from API", err);
@@ -223,12 +225,12 @@ export default function MatchJoiningForm({
         if (!isMounted) return;
 
         // 5. Filter available tournaments
-        const joinedTournamentIds = new Set(
-          userJoinedTournaments.map((t) => String(t.id)),
+        const joinedTournamentNames = new Set(
+          userJoinedTournaments.map((t) => t.tournamentName).filter(Boolean)
         );
 
         const finalAvailable = upcomingData.filter(
-          (d) => !joinedTournamentIds.has(String(d.id)),
+          (d) => !joinedTournamentNames.has(d.tournamentName)
         );
 
         if (isMounted) {
@@ -278,6 +280,7 @@ export default function MatchJoiningForm({
         if (result.isConfirmed) {
           const response = await generateRandomNumberForQR(value, user.id, 1, 50);
           if (!response) errorMessage("All slots are book for the tournament...");
+          form.current[investAmount]=response;
           // successMessage(qrNo+response)
           
           setTournamentId(value);

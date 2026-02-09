@@ -58,6 +58,8 @@ const PlayerStats = ({ matchHistory }) => {
     const totalPlay = matchHistory.length;
     const totalLoose = matchHistory.filter((m) => m.rank > 3 || m.rank === 0).length;
     const winRatio = totalPlay > 0 ? ((onTop / totalPlay) * 100).toFixed(1) + " %" : "0.0%";
+    const missed= matchHistory.filter((m) => !m.rank).length;
+
 
     return {
       totalWithdraw,
@@ -66,6 +68,7 @@ const PlayerStats = ({ matchHistory }) => {
       totalPlay,
       totalLoose,
       winRatio,
+      missed
     };
   }, [matchHistory]);
 
@@ -109,6 +112,12 @@ const PlayerStats = ({ matchHistory }) => {
           color="red"
           isDarkMode={isDarkMode}
         />
+       {stats.missed && <StatsNeonBox
+          title="Missed Matches"
+          value={stats.missed}
+          color="amber"
+          isDarkMode={isDarkMode}
+        />}
       </div>
     ) : (
       <p className={`text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>

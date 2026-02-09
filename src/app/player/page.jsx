@@ -10,10 +10,12 @@ import {
 } from "../skeleton/Skeleton";
 import { UserContext } from "../../lib/contexts/user-context";
 import {
+  getJoinersByTournamentIdList,
+  getLeaderboard,
   getUserTournamentDetails,
 } from "../../lib/api/backend-api";
 import { useRouter } from "next/navigation";
-import { calulateWinAndReward } from "../../lib/utils/common";
+import { calulateWinAndReward, getCurrentTime } from "../../lib/utils/common";
 import { getCache, setCache } from "../../lib/utils/action-redis";
 import { ThemeContext } from "../../lib/contexts/theme-context";
 
@@ -96,6 +98,7 @@ const PlayerProfile = () => {
       }
     };
 
+    // Fetch data on component mount
     fetchData();
 
     return () => {
@@ -103,20 +106,67 @@ const PlayerProfile = () => {
     };
   }, [user]);
 
-  // Filter match history to only show completed matches (where rank is assigned)
-  const pastMatches = useMemo(() => {
-    if (!matchHistory) return null;
-    return matchHistory.filter((match) => match.rank);
-  }, [matchHistory]);
-
-  // Filter for upcoming tournaments (where rank is not yet assigned)
-  const upcomingMatches = useMemo(() => {
-    if (!matchHistory) return null;
-    return matchHistory.filter((match) => !match.rank);
+  // Memoized categorization of matches into past and upcoming.
+  const { pastMatches, upcomingMatches } = useMemo(() => {
+    if (!matchHistory) return { pastMatches: null, upcomingMatches: null };
+    const past = [];
+    const upcoming = [];
+    const now = getCurrentTime();
+    for (const match of matchHistory) {
+      if (match.dateTime > now && !match.rank) {
+        upcoming.push(match);
+      } else {
+        past.push(match);
+      }
+    }
+    return { pastMatches: past, upcomingMatches: upcoming };
   }, [matchHistory]);
 
   // console.log(upcomingMatches);
+  useEffect(() => {
+    async function getUpcomingTournamentsLeaderboard() {
+      let ids = [];
+      if (upcomingMatches) {
+        //get id of user upcoming tournament
+        upcomingMatches.forEach((match) => {
+          ids.push(match.userId);
+        });
+        //return when no upcoming
+        if (ids.length != 0) return;
 
+        //if id available
+        let data = null;
+        //check in cahe
+        let cache = await getCache(
+          "userUpcomingTournamentsLeaderBoard:" + user.id,
+        );
+        if (cache.status && cache.data.length == ids.length) {
+          data = cache.data;
+        } else {
+          //get from leaderboard
+          const resp = await getJoinersByTournamentIdList(ids);
+          data = resp.data;
+        }
+        if (data) {
+          //set new key approved
+          data.forEach((le) => {
+            upcomingMatches.forEach((upcomingMatch) => {
+              if (upcomingMatch.tournamentId === le.tournamentId) {
+                upcomingMatch.approved = le.isApproved && le.investAmount > 0;
+              }
+            });
+          });
+          //set user upcoming tournament to cache
+          await setCache(
+            "userUpcomingTournamentsLeaderBoard:" + user.id,
+            upcomingMatches,
+            3600,
+          );
+        }
+      }
+    }
+    getUpcomingTournamentsLeaderboard();
+  }, [upcomingMatches]);
   const userStats = useMemo(() => {
     if (!pastMatches || !user) return { reward: 0, wins: 0 };
     const stats = calulateWinAndReward(pastMatches);
@@ -154,7 +204,10 @@ const PlayerProfile = () => {
           {upcomingMatches ? (
             <details>
               <summary className="cursor-pointer text-xl font-bold mb-4 select-none outline-none marker:text-cyan-500 hover:opacity-80 transition-opacity">
-                My Upcoming joined Tournaments Details {upcomingMatches.length > 0 && <span className="w-2 h-2 rounded-full animate-ping bg-green-300 inline-block ml-2 mb-1"></span>}
+                My Upcoming joined Tournaments Details{" "}
+                {upcomingMatches.length > 0 && (
+                  <span className="w-2 h-2 rounded-full animate-bounce bg-green-300 inline-block ml-2 mb-1"></span>
+                )}
               </summary>
               <DynamicUpcomingTournaments tournaments={upcomingMatches} />
             </details>

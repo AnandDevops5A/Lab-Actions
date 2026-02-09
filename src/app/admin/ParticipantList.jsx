@@ -8,6 +8,7 @@ import {
   X,
   Users,
   CheckCircle,
+  Receipt,
 } from "lucide-react";
 import {
   confirmMessage,
@@ -15,11 +16,11 @@ import {
   successMessage,
 } from "../../lib/utils/alert";
 import { approveParticipantForTournament, updateParticipantTournamentStatus } from "@/lib/api/backend-api";
+import { getCurrentTime } from "@/lib/utils/common";
 
 const ParticipantList = ({
   selectedTournament,
   isDarkMode,
-  refreshData,
   onBack,
   joiners,
   updateJoiners,
@@ -172,9 +173,9 @@ const ParticipantList = ({
     setEditData({ rank: "", investAmount: "", winAmount: "" });
   };
 
-  const approveParticipant = async (participantId) => {
+  const approveParticipant = async (participantId,txn,Samt) => {
     const confirmed = await confirmMessage(
-      "Approve this participant's results?",
+      "Txn Id: "+txn+" & "+"Submit Amount: ₹ "+(Samt || "none"),
       "Confirm Approval",
     );
     if (!confirmed) return;
@@ -263,14 +264,25 @@ const ParticipantList = ({
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
+                   {selectedTournament.dateTime > getCurrentTime()?
+                  
+                    
+                    (<div className="flex items-center gap-2">
+                      <Receipt className="w-4 h-4" />
+                      <span
+                        className={`font-bold ${getRankColor(participant.rank)}`}
+                      >
+                        {participant.transactionId || "None"}
+                      </span>
+                    </div>): (<div className="flex items-center gap-2">
                       {getRankIcon(participant.rank)}
                       <span
                         className={`font-bold ${getRankColor(participant.rank)}`}
                       >
                         Rank #{participant.rank || "Unranked"}
                       </span>
-                    </div>
+                    </div>)
+                    }
 
                     <div>
                       <div
@@ -380,6 +392,8 @@ const ParticipantList = ({
                       </div>
                     ) : (
                       <div className="flex items-center gap-4">
+                       {selectedTournament.dateTime > getCurrentTime() ?
+                        ( //show win amount when math complete
                         <div className="text-right">
                           <div
                             className={`font-bold ${isDarkMode ? "text-blue-400" : "text-blue-600"}`}
@@ -391,8 +405,9 @@ const ParticipantList = ({
                           >
                             Invested
                           </div>
-                        </div>
-                        <div className="text-right">
+                        </div>)
+                        :
+                        (<div className="text-right">
                           <div
                             className={`font-bold ${isDarkMode ? "text-green-400" : "text-green-600"}`}
                           >
@@ -403,7 +418,7 @@ const ParticipantList = ({
                           >
                             Win Amount
                           </div>
-                        </div>
+                        </div>)}
 
                         <div className="flex items-center gap-2">
                           <button
@@ -432,7 +447,7 @@ const ParticipantList = ({
                             <button
                               onClick={() =>
                                 approveParticipant &&
-                                approveParticipant(participant.id)
+                                approveParticipant(participant.id,participant.transactionId,participant.investAmount)
                               }
                               disabled={loading}
                               className={`p-2 rounded-lg transition-colors ${

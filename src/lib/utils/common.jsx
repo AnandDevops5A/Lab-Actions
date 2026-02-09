@@ -1,6 +1,6 @@
 import { getCache, setCache, UpdateCache } from "./action-redis";
 import { errorMessage, successMessage } from "./alert";
-import { getUpcomingTournament} from "../api/backend-api";
+import { getUpcomingTournament } from "../api/backend-api";
 import { SunDim, SunMedium, Sunset } from "lucide-react";
 
 export function calulateWinAndReward(tournamentList) {
@@ -21,7 +21,7 @@ export function calulateWinAndReward(tournamentList) {
       }
 
       stats.reward += reward;
-      if (rank ==1) {
+      if (rank == 1) {
         stats.wins += 1;
       }
     }
@@ -55,7 +55,7 @@ export const setUpcomingTournamentCache = async () => {
 
   // console.log("get upcomming when new user", data);
 
-  if (data&&data.status && data.length > 0) {
+  if (data && data.status && data.length > 0) {
     // successMessage("Cache hit")
     // setUpcomingTournament(data);
     return;
@@ -84,23 +84,35 @@ export const setUpcomingTournamentCache = async () => {
   // console.log(response?.data);
 };
 
+export const getCurrentTime = () => {
+  let date = new Date();
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  let year = date.getFullYear();
+  let month = date.getMonth() + 1;
+  let day = date.getDate();
+  // console.log(year, month, day, hours, minutes);
+  return `${year}${month < 10 ? "0" + month : month}${day<10?"0"+day:day}${hours<10?"0"+hours:hours}${minutes<10?"0"+minutes:minutes}`;
+};
+
 export const formatDateTimeAsText = (dateTime) => {
-    const dateStr = dateTime.toString();
-    const year = dateStr.slice(0, 4);
-    const month = dateStr.slice(4, 6);
-    const day = dateStr.slice(6, 8);
-    const hour = dateStr.slice(8, 10);
-    const minute = dateStr.slice(10, 12);
+  const dateStr = dateTime.toString();
+  const year = dateStr.slice(0, 4);
+  const month = dateStr.slice(4, 6);
+  const day = dateStr.slice(6, 8);
+  const hour = dateStr.slice(8, 10);
+  const minute = dateStr.slice(10, 12);
 
-    return {
-      date: `${day}/${month}/${year}`,
-      time: `${hour}:${minute}`
-    };
+  return {
+    date: `${day}/${month}/${year}`,
+    time: `${hour}:${minute}`,
   };
+};
 
-export  const FormatDate = ({ dateNum }) => {
+//with svg of sun
+export const FormatDate = ({ dateNum }) => {
   if (!dateNum) return <span className="text-gray-400">TBA</span>;
-  
+
   const str = dateNum.toString();
   if (str.length < 12) return <span>{str}</span>;
 
@@ -113,8 +125,10 @@ export  const FormatDate = ({ dateNum }) => {
 
   // Determine Icon
   const getIcon = () => {
-    if (hour >= 6 && hour < 12) return <SunDim className="inline w-4 h-4 mb-1 text-orange-400" />;
-    if (hour >= 12 && hour < 18) return <SunMedium className="inline w-4 h-4 mb-1 text-yellow-500" />;
+    if (hour >= 6 && hour < 12)
+      return <SunDim className="inline w-4 h-4 mb-1 text-orange-400" />;
+    if (hour >= 12 && hour < 18)
+      return <SunMedium className="inline w-4 h-4 mb-1 text-yellow-500" />;
     return <Sunset className="inline w-4 h-4 mb-1 text-orange-500" />;
   };
 
@@ -127,8 +141,8 @@ export  const FormatDate = ({ dateNum }) => {
   );
 };
 
-export const dateInLongFormat=(date,time)=>{
-   // Split date into parts
+export const dateInLongFormat = (date, time) => {
+  // Split date into parts
   const [year, month, day] = date.split("-");
 
   // Remove colon from time
@@ -136,15 +150,13 @@ export const dateInLongFormat=(date,time)=>{
 
   // Concatenate into desired format
   return `${year}${month}${day}${timeFormatted}`;
-}
-
-
+};
 
 export async function generateRandomNumberForQR(
   tournamentId,
   userId,
   min = 1,
-  max = 50
+  max = 50,
 ) {
   const cacheKey = `invest4tournaments:${tournamentId}`;
 
@@ -154,7 +166,7 @@ export async function generateRandomNumberForQR(
 
   // 2. CHECK FOR EXISTING USER (Requirement: return invest if available)
   const existingUser = listOfInvest.find((u) => u.userId === userId);
-  
+
   if (existingUser) {
     // If they already have a number, just give it back
     if (existingUser.invest !== 0) return existingUser.invest;
@@ -184,7 +196,7 @@ export async function generateRandomNumberForQR(
     listOfInvest.push({
       userId: userId,
       invest: num,
-      isComplete: false
+      isComplete: false,
     });
   }
 
@@ -194,4 +206,3 @@ export async function generateRandomNumberForQR(
 
   return num;
 }
-

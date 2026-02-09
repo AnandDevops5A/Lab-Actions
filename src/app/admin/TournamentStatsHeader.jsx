@@ -1,22 +1,9 @@
 import React from 'react';
 import { Users, CheckCircle, Clock, Trophy } from "lucide-react";
+import { FormatDate } from '@/lib/utils/common';
 
 const TournamentStatsHeader = ({ tournament, participants, onBack, isDarkMode }) => {
-  const formatDateTime = (dateTime) => {
-    const dateStr = dateTime.toString();
-    const year = dateStr.slice(0, 4);
-    const month = dateStr.slice(4, 6);
-    const day = dateStr.slice(6, 8);
-    const hour = dateStr.slice(8, 10);
-    const minute = dateStr.slice(10, 12);
 
-    return {
-      date: `${day}/${month}/${year}`,
-      time: `${hour}:${minute}`
-    };
-  };
-
-  const { date, time } = formatDateTime(tournament.dateTime);
   const approvedCount = participants.filter(p => p.leaderboardData.isApproved && p.active).length;
   const pendingCount = participants.filter(p => !p.leaderboardData.isApproved && p.leaderboardData.transactionId).length;
 
@@ -25,9 +12,9 @@ const TournamentStatsHeader = ({ tournament, participants, onBack, isDarkMode })
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-100">{tournament.tournamentName}</h2>
-          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            Managing Participants • {date} at {time}
-          </p>
+          <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} flex items-center gap-2`}>
+            Live at • <FormatDate dateNum={tournament.dateTime} /> On <span className='font-bold text-violet-400'> {tournament.plateform || 'Mobile'}</span>
+          </div>
         </div>
         <button
           onClick={onBack}

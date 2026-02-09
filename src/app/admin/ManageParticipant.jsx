@@ -274,7 +274,8 @@ const ManageParticipant = ({ tournaments, participants, refreshData }) => {
 
   return (
     <div className="space-y-6">
-      <TournamentStatsHeader
+
+     <TournamentStatsHeader
         tournament={selectedTournament}
         participants={tournamentParticipants}
         onBack={() => setSelectedTournament(null)}

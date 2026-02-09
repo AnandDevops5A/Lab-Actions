@@ -7,6 +7,7 @@ import {
   Eye,
   Users,
   Signature,
+  CheckCircle,
 } from "lucide-react";
 
 const ParticipantManagementTable = ({
@@ -29,7 +30,10 @@ const ParticipantManagementTable = ({
     if (participant.leaderboardData.isApproved) {
       return participant.active ? "Approved" : "Registered";
     }
-    if (participant.leaderboardData.transactionId && !participant.leaderboardData.isApproved) {
+    if (
+      participant.leaderboardData.transactionId &&
+      !participant.leaderboardData.isApproved
+    ) {
       return "Pending Approval";
     }
     return "Not Registered";
@@ -63,52 +67,54 @@ const ParticipantManagementTable = ({
   return (
     <div className="space-y-6">
       {/* Controls */}
-      <div
-        className={`p-4 rounded-lg border ${isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}
-      >
-        <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-          {/* Search */}
-          <div className="flex flex-col sm:flex-row gap-4 flex-1">
-            <div className="relative flex-1 max-w-md">
-              <Search
-                className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
-              />
-              <input
-                type="text"
-                placeholder="Search participants..."
-                value={searchTerm}
-                onChange={(e) => onSearchChange(e.target.value)}
-                className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  isDarkMode
-                    ? "bg-gray-700 border-gray-600 text-slate-100 placeholder-gray-400"
-                    : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-                }`}
-              />
+      {participants.length > 5 && (
+        <div
+          className={`p-4 rounded-lg border ${isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}
+        >
+          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+            {/* Search */}
+            <div className="flex flex-col sm:flex-row gap-4 flex-1">
+              <div className="relative flex-1 max-w-md">
+                <Search
+                  className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
+                />
+                <input
+                  type="text"
+                  placeholder="Search participants..."
+                  value={searchTerm}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    isDarkMode
+                      ? "bg-gray-700 border-gray-600 text-slate-100 placeholder-gray-400"
+                      : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                  }`}
+                />
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2">
+              {selectedParticipants.length > 0 && (
+                <button
+                  onClick={onBulkRemove}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-slate-100 rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  <UserMinus className="h-4 w-4" />
+                  Remove ({selectedParticipants.length})
+                </button>
+              )}
+
+              <button
+                onClick={onAdd}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-slate-100 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <UserPlus className="h-4 w-4" />
+                Add Participant
+              </button>
             </div>
           </div>
-
-          {/* Actions */}
-          <div className="flex gap-2">
-            {selectedParticipants.length > 0 && (
-              <button
-                onClick={onBulkRemove}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-slate-100 rounded-lg hover:bg-red-700 transition-colors"
-              >
-                <UserMinus className="h-4 w-4" />
-                Remove ({selectedParticipants.length})
-              </button>
-            )}
-
-            <button
-              onClick={onAdd}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-slate-100 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <UserPlus className="h-4 w-4" />
-              Add Participant
-            </button>
-          </div>
         </div>
-      </div>
+      )}
 
       {/* Participants Table */}
       <div
@@ -126,7 +132,7 @@ const ParticipantManagementTable = ({
           <table className="w-full table-fixed">
             <thead className={isDarkMode ? "bg-gray-700" : "bg-gray-50"}>
               <tr>
-                <th className="px-4 py-3 text-left">
+                <th className="py-3 text-center">
                   <input
                     type="checkbox"
                     checked={
@@ -146,9 +152,9 @@ const ParticipantManagementTable = ({
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Transaction ID
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {/* <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Rank
-                </th>
+                </th> */}
                 {/* <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th> */}
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Games Played
@@ -183,7 +189,7 @@ const ParticipantManagementTable = ({
                     key={participant.id}
                     className={`hover:bg-gray-50 dark:hover:bg-gray-700 ${selectedParticipants.includes(participant.id) ? "bg-blue-50 dark:bg-blue-900/20" : "dark:odd:bg-gray-800/50 dark:even:bg-black/20 odd:bg-white even:bg-gray-50/50"}`}
                   >
-                    <td className="px-4 py-4">
+                    <td className="py-4 text-center">
                       <input
                         type="checkbox"
                         checked={selectedParticipants.includes(participant.id)}
@@ -193,13 +199,13 @@ const ParticipantManagementTable = ({
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex items-center">
-                        <div
+                        {/* <div
                           className={`h-10 w-10 rounded-full flex items-center justify-center mr-3 ${isDarkMode ? "bg-gray-600 text-blue-400" : "bg-gray-200 text-gray-600"}`}
                         >
                           {participant.username
                             ? participant.username.charAt(0).toUpperCase()
                             : "?"}
-                        </div>
+                        </div> */}
                         <div>
                           <div
                             className={`text-sm font-medium ${isDarkMode ? "text-slate-100" : "text-gray-900"}`}
@@ -226,12 +232,12 @@ const ParticipantManagementTable = ({
                     </td>
                     <td className="px-4 py-4">
                       <span
-                        className={`text-sm Rusty Attack ${isDarkMode ? "text-purple-400" : "text-purple-600"}`}
+                        className={`text-xs Rusty Attack ${isDarkMode ? "text-purple-400" : "text-purple-600"}`}
                       >
                         {participant.transactionId || "N/A"}
                       </span>
                     </td>
-                    <td className="px-4 py-4">
+                    {/* <td className="px-4 py-4">
                       <div className="flex items-center gap-2">
                         {participantLeaderboard.rank ? (
                           <>
@@ -250,7 +256,7 @@ const ParticipantManagementTable = ({
                           </span>
                         )}
                       </div>
-                    </td>
+                    </td> */}
                     {/* <td className="px-4 py-4">
                       <span className={`text-sm font-medium ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>
                         {participantLeaderboard.score || 0}
@@ -260,7 +266,7 @@ const ParticipantManagementTable = ({
                       <span
                         className={`text-sm font-medium ${isDarkMode ? "text-slate-100" : "text-gray-900"}`}
                       >
-                        {totalGames}
+                        {participant.leaderboardData.length || 0}
                       </span>
                     </td>
                     <td className="px-4 py-4">
@@ -282,7 +288,9 @@ const ParticipantManagementTable = ({
                       <span
                         className={`text-sm font-medium ${isDarkMode ? "text-yellow-400" : "text-yellow-600"}`}
                       >
-                        ₹{participant.investAmount?.toLocaleString() || 0}
+                        ₹
+                        {participant.leaderboardData.investAmount?.toLocaleString() ||
+                          0}
                       </span>
                     </td>
                     <td className="px-4 py-4">
@@ -294,7 +302,7 @@ const ParticipantManagementTable = ({
                           0}
                       </span>
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="text-center">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => onView(participant)}
@@ -305,10 +313,21 @@ const ParticipantManagementTable = ({
                         </button>
                         <button
                           onClick={() => approveUser(participant.id)}
-                          className="p-1 rounded hover:bg-amber-100 dark:hover:bg-amber-900 text-amber-600 hover:text-red-800"
-                          title="Approve from Tournament"
+                          className="p-1 rounded hover:bg-amber-100 dark:hover:bg-amber-900"
+                          title={
+                            !participant.leaderboardData.isApproved
+                              ? "Approve from Tournament"
+                              : "Approved"
+                          }
+                          disabled={
+                            loading || participant.leaderboardData.isApproved
+                          }
                         >
-                          <Signature className="h-4 w-4" />
+                          {participant.leaderboardData.isApproved ? (
+                            <CheckCircle className="h-4 w-4 text-green-400" />
+                          ) : (
+                            <Signature className="h-4 w-4 text-amber-400 hover:text-amber-300" />
+                          )}
                         </button>
                         <button
                           onClick={() => onRemove(participant.id)}

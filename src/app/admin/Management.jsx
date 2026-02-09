@@ -26,6 +26,7 @@ import {
   Pause,
   CheckCircle,
   XCircle,
+  IndianRupee,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { formatDateTimeAsText } from "@/lib/utils/common";
@@ -347,7 +348,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
                 ₹{stats.totalPrize.toLocaleString()}
               </p>
             </div>
-            <DollarSign
+            <IndianRupee
               className={`h-8 w-8 ${isDarkMode ? "text-yellow-400" : "text-yellow-600"}`}
             />
           </div>
@@ -656,7 +657,9 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
                             </button>
 
                             {/* hide button for completed tournament */}
-                            {new Date(tournament.dateTime).getTime() > now && (
+                            {/* {new Date(tournament.dateTime).getTime() > now  */}
+                            
+                            {1<22&& (
                               <>
                                 <button
                                   onClick={() =>
