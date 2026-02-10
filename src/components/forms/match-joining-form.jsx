@@ -280,7 +280,7 @@ export default function MatchJoiningForm({
         if (result.isConfirmed) {
           const response = await generateRandomNumberForQR(value, user.id, 1, 50);
           if (!response) errorMessage("All slots are book for the tournament...");
-          form.current[investAmount]=response;
+          formRef.investAmount=response;
           // successMessage(qrNo+response)
           
           setTournamentId(value);

@@ -16,4 +16,5 @@ public class TournamentWithLeaderboard {
     private Integer investAmount;
     private Integer winAmount;
     private Integer rank;
+    private Boolean isApproved;
 }

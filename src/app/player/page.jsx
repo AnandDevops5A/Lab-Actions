@@ -15,7 +15,7 @@ import {
   getUserTournamentDetails,
 } from "../../lib/api/backend-api";
 import { useRouter } from "next/navigation";
-import { calulateWinAndReward, getCurrentTime } from "../../lib/utils/common";
+import { calulateWinAndReward, fetchUserTournaments, getCurrentTime } from "../../lib/utils/common";
 import { getCache, setCache } from "../../lib/utils/action-redis";
 import { ThemeContext } from "../../lib/contexts/theme-context";
 
@@ -71,35 +71,19 @@ const PlayerProfile = () => {
   //Load data to player section to db
   useEffect(() => {
     let isMounted = true;
-    const fetchData = async () => {
+    const loadUserTournamentData = async () => {
       if (!user?.id) return;
       try {
-        const userTournamentDetails = await getCache(
-          `userTournamentDetails:${user.id}`,
-        );
-        if (userTournamentDetails?.status && userTournamentDetails?.data) {
-          if (isMounted) setMatchHistory(userTournamentDetails.data);
-          return;
-        }
-
-        // Fallback to API
-        const response = await getUserTournamentDetails(user.id);
-        if (response?.data) {
-          if (isMounted) setMatchHistory(response.data);
-          // Cache asynchronously to not block UI
-          setCache(
-            `userTournamentDetails:${user.id}`,
-            response.data,
-            3600,
-          ).catch((e) => console.warn("Cache update failed", e));
-        }
+       const data=await fetchUserTournaments(user.id);
+       console.log(data);
+        setMatchHistory(data);
       } catch (err) {
         console.error("Failed to fetch tournament details", err);
       }
     };
 
     // Fetch data on component mount
-    fetchData();
+    loadUserTournamentData();
 
     return () => {
       isMounted = false;
@@ -122,51 +106,7 @@ const PlayerProfile = () => {
     return { pastMatches: past, upcomingMatches: upcoming };
   }, [matchHistory]);
 
-  // console.log(upcomingMatches);
-  useEffect(() => {
-    async function getUpcomingTournamentsLeaderboard() {
-      let ids = [];
-      if (upcomingMatches) {
-        //get id of user upcoming tournament
-        upcomingMatches.forEach((match) => {
-          ids.push(match.userId);
-        });
-        //return when no upcoming
-        if (ids.length != 0) return;
 
-        //if id available
-        let data = null;
-        //check in cahe
-        let cache = await getCache(
-          "userUpcomingTournamentsLeaderBoard:" + user.id,
-        );
-        if (cache.status && cache.data.length == ids.length) {
-          data = cache.data;
-        } else {
-          //get from leaderboard
-          const resp = await getJoinersByTournamentIdList(ids);
-          data = resp.data;
-        }
-        if (data) {
-          //set new key approved
-          data.forEach((le) => {
-            upcomingMatches.forEach((upcomingMatch) => {
-              if (upcomingMatch.tournamentId === le.tournamentId) {
-                upcomingMatch.approved = le.isApproved && le.investAmount > 0;
-              }
-            });
-          });
-          //set user upcoming tournament to cache
-          await setCache(
-            "userUpcomingTournamentsLeaderBoard:" + user.id,
-            upcomingMatches,
-            3600,
-          );
-        }
-      }
-    }
-    getUpcomingTournamentsLeaderboard();
-  }, [upcomingMatches]);
   const userStats = useMemo(() => {
     if (!pastMatches || !user) return { reward: 0, wins: 0 };
     const stats = calulateWinAndReward(pastMatches);
@@ -209,7 +149,9 @@ const PlayerProfile = () => {
                   <span className="w-2 h-2 rounded-full animate-bounce bg-green-300 inline-block ml-2 mb-1"></span>
                 )}
               </summary>
-              <DynamicUpcomingTournaments tournaments={upcomingMatches} />
+              <DynamicUpcomingTournaments
+                tournaments={upcomingMatches}
+              />
             </details>
           ) : (
             <SkeletonCard />

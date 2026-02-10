@@ -9,8 +9,10 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
     "@heroicons/react": "^2.2.0",
     "chart.js": "^4.5.1",
+    "framer-motion": "^12.34.0",
     "gsap": "^3.13.0",
     "ioredis": "^5.8.2",
     "lucide-react": "^0.555.0",

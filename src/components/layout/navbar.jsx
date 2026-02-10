@@ -9,6 +9,7 @@ import { UserContext } from '../../lib/contexts/user-context';
 import { LogoutButton } from '../ui/logout-button';
 import { ThemeToggle } from '../ui/theme-toggle';
 import { ThemeContext } from '../../lib/contexts/theme-context';
+import { Crown, Home, IdCard, LogIn, LucideTrophy, PenLine } from 'lucide-react';
 
 const NavbarContent = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -43,12 +44,13 @@ const NavbarContent = () => {
       mobileMenuRef.current.setAttribute('aria-hidden', 'true');
     }
   }, [isOpen]);
-
+const iconClass="h-5 w-5 text-cyan-100 hover scale:102 transition duration-300"
   const navItems = [
-    { name: 'Review', href: '/review' },
-    { name: 'leaderboard', href: '/Leaderboard' },
-    { name: 'Admin', href: '/admin' },
-    { name: user ?'My Profile':'Register', href: user ? '/player' : '/auth' }
+    { name: 'Home', href: '/',icons:<Home className={iconClass}/> },
+    { name: 'Review', href: '/review', icons: <PenLine className={iconClass} />},
+    { name: 'leaderboard', href: '/Leaderboard',icons:<LucideTrophy classname={iconClass}/> },
+    { name: 'Admin', href: '/admin' ,icons:<Crown  className={iconClass}/> },
+    { name: user ?'My Profile':'Register', href: user ? '/player' : '/auth' ,icons:user ? <IdCard className={iconClass}/>:<LogIn className={iconClass}/>}
   ];
   const [showNavbar, setShowNavbar] = useState(true);
   const lastScrollY = useRef(0);
@@ -156,10 +158,13 @@ const NavbarContent = () => {
                 <Link
                   key={item.name}
                   href={!user  && item.name === "leaderboard" ? "/?scroll=leaderboard" : item.href}
-                  className={`group ${idx % 2 === 0 ? "animate-slideInLeft" : "animate-slideInRight"} px-4 py-2 text-sm font-semibold transition-colors duration-200 text-gray-200/90 hover:text-slate-100 border-l-2 border-r-2 border-transparent hover:border-l-neon-red hover:border-r-neon-red ${item.name !== "leaderboard" ? "focus:cursor-none" : ""} nav-item`}
-                >
+                  className={`group ${idx % 2 === 0 ? "animate-slideInLeft" : "animate-slideInRight"} px-4 py-2 text-sm capitalize font-semibold transition-colors duration-200 text-gray-200/90 hover:text-slate-100 border-l-2 border-r-2 border-transparent hover:border-l-neon-red hover:border-r-neon-red ${item.name !== "leaderboard" ? "focus:cursor-none" : ""} nav-item`}
+                  aria-label={item.name}
+                  title={item.name}
+               >
                   <span className="relative inline-block">
-                    {item.name}
+                 <span className="hidden lg:block">   {item.name}</span>
+                 <span className="block lg:hidden">{item.icons}</span>
                     <span className="absolute left-0 -bottom-1 h-0.5 w-full bg-linear-to-r from-red-400 to-yellow-400 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
                   </span>
                 </Link>

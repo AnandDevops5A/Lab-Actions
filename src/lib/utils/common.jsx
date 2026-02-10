@@ -1,6 +1,6 @@
 import { getCache, setCache, UpdateCache } from "./action-redis";
-import { errorMessage, successMessage } from "./alert";
-import { getUpcomingTournament } from "../api/backend-api";
+import { errorMessage} from "./alert";
+import {getUpcomingTournament, getUserTournamentDetails } from "../api/backend-api";
 import { SunDim, SunMedium, Sunset } from "lucide-react";
 
 export function calulateWinAndReward(tournamentList) {
@@ -205,4 +205,23 @@ export async function generateRandomNumberForQR(
   await setCache(cacheKey, listOfInvest, 36000);
 
   return num;
+}
+
+export async function fetchUserTournaments(userId) {
+  try {
+    const cacheKey = `userTournamentDetails:${userId}`;
+    const cacheRes = await getCache(cacheKey);
+    if (cacheRes.status && cacheRes.data) {
+      return cacheRes.data;
+    }
+    const response = await getUserTournamentDetails(userId);
+    if (response.ok) {
+      await setCache(cacheKey, response.data, 3600);
+      return response.data;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching user tournaments:", error);
+    return null;
+  }
 }

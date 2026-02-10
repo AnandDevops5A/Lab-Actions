@@ -3,12 +3,8 @@ import { Calendar, Trophy, Gamepad2, Clock, Users } from "lucide-react";
 import { ThemeContext } from "../../lib/contexts/theme-context";
 import { FormatDate } from "@/lib/utils/common";
 
-
-
 const UpcomingTournaments = ({ tournaments }) => {
   const { isDarkMode } = useContext(ThemeContext);
-
-
 
   return (
     <div
@@ -33,7 +29,7 @@ const UpcomingTournaments = ({ tournaments }) => {
               isDarkMode ? "text-slate-100" : "text-slate-800"
             }`}
           >
-          ⚔️  Upcoming Events
+            ⚔️ Upcoming Events
           </h2>
         </div>
 
@@ -67,12 +63,17 @@ const UpcomingTournaments = ({ tournaments }) => {
                     {match.tournamentName}
                   </h3>
                   <span
-                    className={`shrink-0 px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider rounded border ${isDarkMode ? "bg-cyan-900/60 text-cyan-300 border-cyan-500/30" : "bg-cyan-100 text-cyan-700 border-cyan-200"}`}
+                    className={`shrink-0 px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider rounded border ${
+                      match.isApproved
+                        ? isDarkMode
+                          ? "bg-emerald-900/60 text-emerald-300 border-emerald-500/30"
+                          : "bg-emerald-100 text-emerald-700 border-emerald-200"
+                        : isDarkMode
+                          ? "bg-amber-900/60 text-amber-300 border-amber-500/30"
+                          : "bg-amber-100 text-amber-700 border-amber-200"
+                    }`}
                   >
-                   {/* Joined */}
-                   {
-                    match.approved? "Approved": "Pending"
-                   }
+                    {match.isApproved ? "Approved" : "Pending"}
                   </span>
                 </div>
 

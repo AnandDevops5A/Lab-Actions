@@ -155,6 +155,16 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
           </span>
         </div>
 
+        <div className="text-right -mt-2">
+          <button
+            type="button"
+            onClick={() => onSwitch?.("forgot-password")}
+            className="text-xs font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
+          >
+            Forgot Password?
+          </button>
+        </div>
+
         {/* Error Message
 				<div role="status" aria-live="polite" className="min-h-5">
 					{error ? <p id="login-error" className="text-sm text-red-400">{error}</p> : null}
@@ -216,6 +226,3 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
 
 Login.displayName = "Login";
 export default Login;
-
-
-

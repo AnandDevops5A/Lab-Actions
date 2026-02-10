@@ -306,36 +306,7 @@ public ResponseEntity<String> seedLeaderboard(List<String> listOfUserIds, String
 
     // get tournament list by user id with rank and invest amount
     public ResponseEntity<List<TournamentWithLeaderboard>> getTournamentsByUserId(String userId) {
-        List<LeaderBoard> userTournaments = leaderboardRepository.findByUserId(userId);
-        // fetrieve all tournament ids
-        List<String> tournamentIds = userTournaments.stream().map(LeaderBoard::getTournamentId)
-                .collect(Collectors.toList());
-        // fetch all tournaments by ids
-        List<Tournament> tournaments = tournamentService.getTournamentsbyids(tournamentIds);
-        List<TournamentWithLeaderboard> tournamentWithLeaderboards = new ArrayList<>();
-        for (Tournament tournament : tournaments) {
-            TournamentWithLeaderboard twl = new TournamentWithLeaderboard();
-            twl.setTournamentName(tournament.getTournamentName());
-            twl.setPrizePool(tournament.getPrizePool());
-            twl.setDateTime(tournament.getDateTime());
-            twl.setPlateform(tournament.getPlatform());
-            // find corresponding leaderboard entry
-            LeaderBoard lbEntry = userTournaments.stream()
-                    .filter(lb -> lb.getTournamentId().equals(tournament.getId()))
-                    .findFirst()
-                    .orElse(null);
-            if (lbEntry != null) {
-                twl.setRank(lbEntry.getRank());
-                twl.setTempEmail(lbEntry.getTempEmail());
-                twl.setTransactionId(lbEntry.getTransactionId());
-                twl.setInvestAmount(lbEntry.getInvestAmount());
-                twl.setWinAmount(lbEntry.getWinAmount());
-            }
-
-            tournamentWithLeaderboards.add(twl);
-
-        }
-        return ResponseEntity.ok(tournamentWithLeaderboards);
+        return ResponseEntity.ok(leaderboardRepository.findTournamentsByUserIdWithDetails(userId));
     }
 
     // Update leaderboard entry (rank, investAmount and winAmount) - partial updates

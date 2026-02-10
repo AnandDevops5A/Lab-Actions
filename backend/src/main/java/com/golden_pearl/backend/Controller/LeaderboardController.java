@@ -94,6 +94,7 @@ public class LeaderboardController {
 
     @PostMapping("/user/{userId}")
     public ResponseEntity<List<TournamentWithLeaderboard>> getJoinedUsersTournaments(@PathVariable String userId) {
+        // System.out.println("db hits");
         return leaderboardService.getTournamentsByUserId(userId);
     }
 
