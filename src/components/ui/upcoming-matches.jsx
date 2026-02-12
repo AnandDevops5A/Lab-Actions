@@ -19,6 +19,7 @@ import {
 import { ThemeContext } from "../../lib/contexts/theme-context";
 import { fetchUserTournaments } from "@/lib/utils/common";
 import { UserContext } from "@/lib/contexts/user-context";
+import { UpcomingSkeletonCard } from "@/app/skeleton/Skeleton";
 
 // Card styles from the inspirational component
 const cardStyles = [
@@ -137,14 +138,7 @@ const UpcomingMatches = () => {
     () => userJoinedTournaments?.map((t) => t.tournamentName) || [],
     [userJoinedTournaments],
   );
-  // console.log(userJoinedTournaments &&userJoinedTournamentIds);
-  // const filteredTournaments = useMemo(() => {
-  //   if (filter === "ALL") return tournaments;
-  //   return tournaments.filter((t) => {
-  //     const isJoined = userJoinedTournamentIds.includes(t._id) || userJoinedTournamentIds.includes(t.id);
-  //     return filter === "JOINED" ? isJoined : !isJoined;
-  //   });
-  // }, [tournaments, filter, userJoinedTournamentIds]);
+
 
   const parseTournamentDate = (dateVal) => {
     if (!dateVal) return null;
@@ -198,24 +192,7 @@ const UpcomingMatches = () => {
     );
   };
 
-  const SkeletonCard = () => (
-    <div className="w-[320px] md:w-[360px] h-[150px] rounded-2xl border border-[#101821] bg-linear-to-br from-[#020814] via-[#050d18] to-[#050b14] p-4 animate-pulse">
-      <div className="flex justify-between items-start">
-        <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 rounded-2xl bg-gray-700"></div>
-          <div>
-            <div className="h-3 w-20 bg-gray-700 rounded"></div>
-            <div className="h-4 w-32 bg-gray-700 rounded mt-2"></div>
-          </div>
-        </div>
-        <div className="w-8 h-8 rounded-full bg-gray-700"></div>
-      </div>
-      <div className="flex items-center justify-between mt-6">
-        <div className="h-6 w-24 bg-gray-700 rounded"></div>
-        <div className="h-8 w-28 bg-gray-700 rounded-full"></div>
-      </div>
-    </div>
-  );
+
 
   return (
     <section
@@ -228,9 +205,9 @@ const UpcomingMatches = () => {
 
       <div className="bg-[#020b0f]/80 rounded-3xl px-6 py-8 md:p-10 shadow-[0_0_60px_rgba(0,0,0,0.95)]">
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-7">
-            {[1, 2, 3].map((i) => (
-              <SkeletonCard key={i} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-7">
+            {[1, 2,3].map((i) => (
+              <UpcomingSkeletonCard key={i} />
             ))}
           </div>
         ) : (tournaments.length === 0) ? (
@@ -245,7 +222,7 @@ const UpcomingMatches = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-7">
+          <div className={`grid grid-cols-1 md:grid-cols-${(tournaments.length)%2} lg:grid-cols-${(tournaments.length)%3} gap-6 md:gap-7`}>
             {tournaments.map((tournament, index) => {
               const style = cardStyles[index % cardStyles.length];
               const joinedCount = joinerCounts[tournament.id] || 0;

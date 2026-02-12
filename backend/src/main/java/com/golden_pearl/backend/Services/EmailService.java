@@ -9,7 +9,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
 import com.golden_pearl.backend.Models.LeaderBoard;
 import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.Models.User;
@@ -85,6 +84,40 @@ public class EmailService {
         sendEmailSafely(to, subject, body);
     }
 
+    @Async
+    public void sendForgetPasswordEmailOTP(String to, String username,int otp) {
+        String subject = "Your Password Reset Code";
+        String body = String.format(
+            "Dear %s,\n\n" +
+            "We have received a request to reset the password for your account.\n\n" +
+            "Please use the following One-Time Password (OTP) to proceed. This code is valid for 10 minutes.\n\n" +
+            "Your OTP: %d\n\n" +
+            "If you did not initiate this request, please disregard this email. For your security, never share this code with anyone.\n\n" +
+            "Sincerely,\n" +
+            "The Golden Pearl Security Team",
+            username,
+            otp
+        );
+
+        sendEmailSafely(to, subject, body);
+    }
+
+    @Async
+    public void sendPasswordResetEmail(String to, String username) {
+        String subject = "Security Notification: Password Changed Successfully";
+        String body = String.format(
+            "Dear comrade🥷, %s,\n\n" +
+            "This is an automated notification to confirm that the password for your account has been successfully changed.\n\n" +
+            "If you initiated this change, no further action is required.\n\n" +
+            "However, if you did not perform this action, please contact our support team immediately to secure your account.\n\n" +
+            "Thank you,\n" +
+            "Golden Pearl Security Team",
+           username
+        );
+
+        sendEmailSafely(to, subject, body);
+    }
+    
     private void sendEmailSafely(String to, String subject, String body) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();

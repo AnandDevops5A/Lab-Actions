@@ -31,6 +31,11 @@ public class User {
     private Integer totalWin;
     @Builder.Default
     private boolean active = true;
+    private List<Short> loginTimeLines;
+    private List<Short> passwordResetTimeLines;
+
+
+
     // private List<String> playedTournaments;us
 
 

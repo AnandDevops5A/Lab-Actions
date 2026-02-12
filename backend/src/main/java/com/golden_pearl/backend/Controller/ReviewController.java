@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.golden_pearl.backend.DRO.AdminReplyDRO;
 import com.golden_pearl.backend.DRO.ReviewDRO;
 import com.golden_pearl.backend.Models.Review;
 import com.golden_pearl.backend.Services.ReviewService;
@@ -49,7 +50,11 @@ public class ReviewController {
         reviewService.deleteReview(reviewId);
         return ResponseEntity.ok("Review deleted successfully");
     }
+    @PutMapping("/admin-reply")
+    public ResponseEntity<String> AddAdminReply(@RequestBody AdminReplyDRO adminReply){
+        return ResponseEntity.ok(reviewService.AddAdminReply(adminReply));
 
+    } 
     @PutMapping("/update")
     public ResponseEntity<Review> updateReview(@RequestBody Review review) {
         return ResponseEntity.ok(reviewService.updateReview(review));

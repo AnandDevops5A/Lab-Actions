@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+import com.golden_pearl.backend.DRO.ForgotPasswordDRO;
+import com.golden_pearl.backend.DRO.ConfirmResetDRO;
+
 @CrossOrigin("http://localhost:8082/")
 @RestController
 @RequestMapping("/users")
@@ -40,6 +43,20 @@ public class UserController {
     public ResponseEntity<User> verifyUser(@RequestBody UserAuth userAuth) {
         // System.err.println("Received user auth data: " + userAuth);
         return userService.getUser(userAuth);
+    }
+
+    @PostMapping("/updatePassword")
+    public ResponseEntity<?> updatePassword(@RequestBody ForgotPasswordDRO fpDRO){
+        // System.out.println(fpDRO);
+        // return null;
+        return userService.updatePassword(fpDRO);
+    }
+
+    @PutMapping("/confirm-reset")
+    public ResponseEntity<String> confirmReset(@RequestBody ConfirmResetDRO confirmResetData){
+        System.out.println(confirmResetData);
+        return userService.confirmResetPassword(confirmResetData);
+        // return null;
     }
 
     @PostMapping("/register")

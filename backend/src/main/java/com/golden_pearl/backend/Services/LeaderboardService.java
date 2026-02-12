@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -219,75 +220,78 @@ public class LeaderboardService {
 
     public ResponseEntity<?> getLeaderboardByTournamentIds(List<String> tournamentIds) {
         List<LeaderBoard> leaderboard = leaderboardRepository.findByTournamentIdIn(tournamentIds);
-        System.out.println("Leaderboard entries found: " + leaderboard.size());
+        // System.out.println("Leaderboard entries found: " + leaderboard.size());
         return ResponseEntity.ok(leaderboard);
     }
 
     // Seed leaderboard with fake/sample data for a tournament
-  @Transactional
-public ResponseEntity<String> seedLeaderboard(List<String> listOfUserIds, String tournamentId, int count) {
-    // 1. Validations & Bounds
-    if (listOfUserIds == null || listOfUserIds.isEmpty())
-        return ResponseEntity.badRequest().body("Empty user list");
+    @Transactional
+    public ResponseEntity<String> seedLeaderboard(List<String> listOfUserIds, String tournamentId, int count) {
+        // 1. Validations & Bounds
+        if (listOfUserIds == null || listOfUserIds.isEmpty())
+            return ResponseEntity.badRequest().body("Empty user list");
 
-    // Senior move: Ensure we never exceed our unique amount pool (1-50)
-    int seedLimit = Math.min(count, Math.min(listOfUserIds.size(), 50));
-    
-    Tournament tournament = tournamentRepository.findById(tournamentId)
-            .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
+        // Senior move: Ensure we never exceed our unique amount pool (1-50)
+        int seedLimit = Math.min(count, Math.min(listOfUserIds.size(), 50));
 
-    // 2. Data Preparation
-    List<String> shuffledUsers = new ArrayList<>(listOfUserIds);
-    Collections.shuffle(shuffledUsers);
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
 
-    List<Integer> amountPool = IntStream.rangeClosed(1, 50).boxed().collect(Collectors.toList());
-    Collections.shuffle(amountPool);
+        // 2. Data Preparation
+        List<String> shuffledUsers = new ArrayList<>(listOfUserIds);
+        Collections.shuffle(shuffledUsers);
 
-    ThreadLocalRandom rnd = ThreadLocalRandom.current();
-    List<LeaderBoard> entries = new ArrayList<>();
-    
-    // Move time calculation OUTSIDE the loop unless you want different minutes per entry
-    int timeAsInt = (LocalTime.now().getHour() * 100) + LocalTime.now().getMinute();
+        List<Integer> amountPool = IntStream.rangeClosed(1, 50).boxed().collect(Collectors.toList());
+        Collections.shuffle(amountPool);
 
-    // 3. Generation
-    for (int i = 0; i < seedLimit; i++) {
-        String userId = shuffledUsers.get(i);
-        String shortId = tournamentId.substring(Math.max(0, tournamentId.length() - 4));
-        String gameId = String.format("G-%s-%03d", shortId, i + 1);
+        ThreadLocalRandom rnd = ThreadLocalRandom.current();
+        List<LeaderBoard> entries = new ArrayList<>();
 
-        entries.add(LeaderBoard.builder()
-                .tournamentId(tournamentId)
-                .userId(userId)
-                .gameId(gameId)
-                .tempEmail(userId + "@example.com")
-                .transactionId("TXN-" + UUID.randomUUID().toString().substring(0, 8))
-                .score(rnd.nextInt(1, 100))
-                .investAmount(amountPool.get(i))
-                .time(timeAsInt)
-                .isApproved(true)
-                .build());
-    }
+        // Move time calculation OUTSIDE the loop unless you want different minutes per
+        // entry
+        int timeAsInt = (LocalTime.now().getHour() * 100) + LocalTime.now().getMinute();
 
-    // 4. Ranking & Prize Distribution
-    entries.sort((a, b) -> Integer.compare(b.getScore(), a.getScore()));
+        // 3. Generation
+        for (int i = 0; i < seedLimit; i++) {
+            String userId = shuffledUsers.get(i);
+            String shortId = tournamentId.substring(Math.max(0, tournamentId.length() - 4));
+            String gameId = String.format("G-%s-%03d", shortId, i + 1);
 
-    for (int i = 0; i < entries.size(); i++) {
-        LeaderBoard entry = entries.get(i);
-        entry.setRank(i + 1);
-
-        // Fixed indexing: i=0 is 1st place
-        switch (i) {
-            case 0 -> entry.setWinAmount(500); // 1st Place
-            case 1 -> entry.setWinAmount(300); // 2nd Place
-            case 2 -> entry.setWinAmount(100); // 3rd Place
-            default -> entry.setWinAmount(0);
+            entries.add(LeaderBoard.builder()
+                    .tournamentId(tournamentId)
+                    .userId(userId)
+                    .gameId(gameId)
+                    .tempEmail(userId + "@example.com")
+                    .transactionId("TXN-" + UUID.randomUUID().toString().substring(0, 8))
+                    .score(rnd.nextInt(1, 100))
+                    .investAmount(amountPool.get(i))
+                    .time(timeAsInt)
+                    .isApproved(true)
+                    .build());
         }
+
+        // 4. Ranking & Prize Distribution
+        entries.sort((a, b) -> Integer.compare(b.getScore(), a.getScore()));
+
+        for (int i = 0; i < entries.size(); i++) {
+            LeaderBoard entry = entries.get(i);
+            entry.setRank(i + 1);
+
+            // Fixed indexing: i=0 is 1st place
+            switch (i) {
+                case 0 -> entry.setWinAmount(500); // 1st Place
+                case 1 -> entry.setWinAmount(300); // 2nd Place
+                case 2 -> entry.setWinAmount(100); // 3rd Place
+                default -> entry.setWinAmount(0);
+            }
+        }
+
+        // 5. Save
+        leaderboardRepository.saveAll(entries);
+        return ResponseEntity
+                .ok(String.format("Seeded %d entries for %s", entries.size(), tournament.getTournamentName()));
     }
 
-    // 5. Save
-    leaderboardRepository.saveAll(entries);
-    return ResponseEntity.ok(String.format("Seeded %d entries for %s", entries.size(), tournament.getTournamentName()));
-}
     public ResponseEntity<String> approveUserFromTournament(String tournamentId, String userId) {
         // Find the LeaderBoard entry
         LeaderBoard entry = leaderboardRepository.findByTournamentIdAndUserId(tournamentId, userId);
@@ -311,7 +315,9 @@ public ResponseEntity<String> seedLeaderboard(List<String> listOfUserIds, String
 
     // Update leaderboard entry (rank, investAmount and winAmount) - partial updates
     // allowed
+
     @Transactional
+    @CacheEvict(value = "adminData", allEntries = true)
     public ResponseEntity<String> updateLeaderboardEntry(String leaderboardId, Integer rank, Integer investAmount,
             Integer winAmount) {
         // Find the LeaderBoard entry

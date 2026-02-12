@@ -2,6 +2,8 @@ package com.golden_pearl.backend.Controller;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,12 +35,14 @@ public class LeaderboardController {
     }
 
     //get all leaderboard
+    @Cacheable(value="leaderboardData")
     @GetMapping("/all")
     public ResponseEntity<List<LeaderBoard>> getAllLeaderboard() {
         return ResponseEntity.ok(leaderboardService.getAllLeaderboard());
     }
 
     // register user for tournament
+    @CacheEvict(value = "leaderboardData", allEntries = true)
     @PostMapping("/register")
     public ResponseEntity<String> registerUserForTournament(@RequestBody LeaderboardRegisterReceiveData registerData) {
         // System.out.println("Received registration data: " + registerData);
@@ -46,6 +50,7 @@ public class LeaderboardController {
 
     }
 
+    @CacheEvict(value = "leaderboardData", allEntries = true)
     @PostMapping("/registerAll/{tournamentId}/users/{userIds}")
     public ResponseEntity<String> registerAllUsersForTournament(@PathVariable String tournamentId,
             @PathVariable List<String> userIds) {
@@ -60,6 +65,9 @@ public class LeaderboardController {
     public ResponseEntity<List<LeaderBoard>> getLeaderboard(@PathVariable String tournamentId) {
         return leaderboardService.getLeaderboard(tournamentId);
     }
+
+
+    // get leaderboard by tournament ids
 
     @PostMapping("/getJoiners")
     public ResponseEntity<?> getLeaderboardByTournamentIds(@RequestBody List<String> tournamentIds) {

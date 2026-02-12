@@ -75,7 +75,26 @@ const SkeletonCard = () => (
     </div>
   );
 };
-  export { SkeletonCard, SkeletonChart, SkeletonTable ,LeaderboardSkeleton};
+
+  const UpcomingSkeletonCard = () => (
+    <div className="w-[320px] md:w-[360px] h-[150px] rounded-2xl border border-[#101821] bg-linear-to-br from-[#020814] via-[#050d18] to-[#050b14] p-4 animate-pulse">
+      <div className="flex justify-between items-start">
+        <div className="flex items-center space-x-3">
+          <div className="w-12 h-12 rounded-2xl bg-gray-700"></div>
+          <div>
+            <div className="h-3 w-20 bg-gray-700 rounded"></div>
+            <div className="h-4 w-32 bg-gray-700 rounded mt-2"></div>
+          </div>
+        </div>
+        <div className="w-8 h-8 rounded-full bg-gray-700"></div>
+      </div>
+      <div className="flex items-center justify-between mt-6">
+        <div className="h-6 w-24 bg-gray-700 rounded"></div>
+        <div className="h-8 w-28 bg-gray-700 rounded-full"></div>
+      </div>
+    </div>
+  );
+  export { SkeletonCard, SkeletonChart, SkeletonTable ,LeaderboardSkeleton,UpcomingSkeletonCard};
 
 
 

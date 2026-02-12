@@ -7,7 +7,8 @@ import com.golden_pearl.backend.Models.User;
 
 public interface UserRepository extends MongoRepository<User, String>{
     
-    User findByCallSignAndAccessKey(String callSign , String accessKey);
     User findByContactAndAccessKey(Long contact , String accessKey);
+   List< User> findByContactAndEmail(Long contact , String email);
+
 
 }

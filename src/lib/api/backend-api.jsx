@@ -37,7 +37,7 @@ export const useSWRBackendAPI = (
     () => fetcher(url, method, data), // fetcher function
     {
       refreshInterval, // ⏱ auto revalidate every X ms (e.g., 60000 = 60s)
-      revalidateOnFocus: false, // refetch when window regains focus
+      revalidateOnFocus: true, // refetch when window regains focus
       revalidateOnReconnect: false, // refetch when network reconnects
     },
   );
@@ -108,7 +108,20 @@ export const getAllUsers = async () => {
   });
 };
 
+export const resetPassword=async(payload)=>{
+  return await FetchBackendAPI("users/updatePassword",{
+    method:"POST",
+    data:payload
+  });
+};
 
+export const confirmPasswordReset = async (payload) => {
+  // This endpoint is an assumption for the new functionality
+  return await FetchBackendAPI("users/confirm-reset", {
+    method: "PUT",
+    data: payload,
+  });
+};
 
 
 
@@ -155,14 +168,7 @@ export const getTournamentByIds = async (tournamentIds) => {
 
 
 // Leaderboard API functions
-export const getUpcomingTournamentsLeaderboard = async (tournamentIds) => {
-  //check in cache first
-  const response = await FetchBackendAPI("leaderboard/getJoiners", {
-    method: "POST",
-    data: tournamentIds,
-  });
-  return response.data;
-};
+
 
 export const approveUserFromTournament = async (tournamentId, userId) => {
   return await FetchBackendAPI(
@@ -170,11 +176,6 @@ export const approveUserFromTournament = async (tournamentId, userId) => {
   );
 };
 
-export const getLeaderboard = async (tournamentId) => {
-  return await FetchBackendAPI(`leaderboard/getJoiners/${tournamentId}`, {
-    method: "POST",
-  });
-};
 
 export const getTopNLeaderboard = async (tournamentId, n) => {
   return await FetchBackendAPI(`leaderboard/${tournamentId}/top/${n}`, {
@@ -314,8 +315,9 @@ export const deleteReview = async (reviewId) => {
   });
 };
 
+
 export const addAdminReply = async (row) => {
-  return await FetchBackendAPI("review/reply", {
+  return await FetchBackendAPI("review/admin-reply", {
           method: "PUT",
           data: { reviewId: row.id, adminReply: row.adminReply },
         });

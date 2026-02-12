@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import com.golden_pearl.backend.DRO.UserRegisterData;
@@ -75,4 +76,9 @@ public class General {
 
     }
 
+    public Integer generateOTP(){
+        // Generates a number between 100,000 (inclusive) and 1,000,000 (exclusive)
+        return  ThreadLocalRandom.current().nextInt(100_000, 1_000_000);
+    
+    }
 }

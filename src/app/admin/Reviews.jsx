@@ -53,11 +53,11 @@ const Reviews = () => {
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState([]);
   
-  useEffect(() => {
-    const fetchReviews = async () => {
+   const fetchReviews = async () => {
       try {
         const response = await getAllReviews();
         if (response && response.data && response.data.length > 0) {
+          // console.log("Review hit db");
           const formatted = response.data.map((r) => ({
             ...r,
             id: r.reviewId || r._id || r.id,
@@ -80,6 +80,8 @@ const Reviews = () => {
         setLoading(false);
       }
     };
+  useEffect(() => {
+   
     fetchReviews();
   }, []);
 
@@ -107,6 +109,8 @@ const Reviews = () => {
       if (response.ok) {
         setReviews(prev => prev.map(r => r.id === row.id ? { ...r, savedAdminReply: row.adminReply } : r));
         successMessage("Reply saved successfully");
+        fetchReviews();
+
       } else {
         errorMessage("Failed to save reply");
       }

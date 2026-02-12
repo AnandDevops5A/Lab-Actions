@@ -18,7 +18,7 @@ const ParticipantDetailsModal = dynamic(() => import('./ParticipantDetailsModal'
   ssr: false,
 });
 
-import { approveUserFromTournament, getLeaderboard, getTopNLeaderboard, getUpcomingTournaments, getUpcomingTournamentsLeaderboard } from "../../lib/api/backend-api";
+import { approveUserFromTournament, getJoinersByTournamentId, getJoinersByTournamentIdList } from "../../lib/api/backend-api";
 
 const ManageParticipant = ({ tournaments, participants, refreshData }) => {
   const { isDarkMode } = useContext(ThemeContext);
@@ -49,7 +49,8 @@ const ManageParticipant = ({ tournaments, participants, refreshData }) => {
       const tournamentIds = upcomingTournaments.map(tournament => tournament.id);
       let list=Array.from(tournamentIds);
       try {
-        const leaderboardData = await getUpcomingTournamentsLeaderboard(list);
+        const res = await getJoinersByTournamentIdList(list);
+        let leaderboardData=res.data;
         //make object with tournamentId as key and  no.of user id related to this tournamnet as value
         const countsMap = {};
         if (leaderboardData && Array.isArray(leaderboardData)) {
@@ -132,7 +133,7 @@ const ManageParticipant = ({ tournaments, participants, refreshData }) => {
 
       setLoadingLeaderboard(true);
       try {
-        const response = await getLeaderboard(selectedTournament.id);
+        const response = await getJoinersByTournamentId(selectedTournament.id);
         if (response.ok && response.data) {
           setLeaderboardData(response.data);
         } else {
