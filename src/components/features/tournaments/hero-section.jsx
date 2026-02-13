@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useState, useContext, use } from "react";
+import { useState, useContext, use, useEffect } from "react";
 import reloadingGunAsset from "../../../app/images/image.jpg";
 import { ThemeContext } from "../../../lib/contexts/theme-context";
 import dynamic from "next/dynamic";
@@ -8,12 +8,43 @@ import CyberLoading from "../../../app/skeleton/CyberLoading";
 import { UserContext } from "../../../lib/contexts/user-context";
 import { askLogin } from "../../../lib/utils/alert";
 import { useRouter } from "next/navigation";
+import { fetchUpcomingTournament, fetchUserTournaments } from "@/lib/utils/common";
+import { ArrowDownNarrowWide } from "lucide-react";
 // import MatchJoiningForm from "@/components/forms/match-joining-form";
 
 const MatchJoiningForm = dynamic(() => import("../../forms/match-joining-form"), {
   loading: () => <CyberLoading />,
   ssr: false, // optional: disable SSR
 });
+
+
+
+//get upcoming tournament details and check if user has joined all tournament or not
+const checkJoinedTournament = async (userId) => {
+  if (!userId) return false;
+
+  const upcomingTournament = await fetchUpcomingTournament();
+  const userTournaments = await fetchUserTournaments(userId);
+
+  if (!upcomingTournament || !Array.isArray(upcomingTournament)) {
+    return false;
+  }
+  if (upcomingTournament.length === 0) {
+    return true;
+  }
+
+  if (!userTournaments || !Array.isArray(userTournaments)) {
+    return false;
+  }
+
+  const joinedIds = new Set(userTournaments.map((t) => String(t.tournamentName || t.id)));
+  const allJoined = upcomingTournament.every((t) => joinedIds.has(String(t.tournamentName || t.id)));
+
+  return allJoined;
+};
+
+
+
 
 const HeroSection = () => {
   const [tournamentStatus, settournamentStatus] = useState(false);
@@ -22,10 +53,29 @@ const HeroSection = () => {
   const [showForm, setShowForm] = useState(false);
   const { user } = use(UserContext);
   const router = useRouter();
+  const [upcomingTournament, setUpcomingTournament] = useState(null);
 
   const buttonClasses =
     "flex flex-col sm:flex-row justify-center space-x-auto space-y-4 sm:space-y-0 gap-3";
+useEffect(() => {
+    if (user?.id) {
+      checkJoinedTournament(user.id).then((data) => settournamentStatus(data));
+    }
+  }, [user, showForm]);
 
+useEffect(() => {
+    let mounted = true;
+    fetchUpcomingTournament().then((res) => {
+      if (!mounted) return;
+      if (res && Array.isArray(res) && res.length > 0) {
+        setUpcomingTournament(res[0]);
+      }
+    }).catch(() => {});
+    return () => { mounted = false };
+  }, []);
+
+
+   
   return (
     <section
       className={`relative  h-[97vh] flex items-center justify-center pt-10 overflow-hidden transition-colors duration-300 ${
@@ -86,20 +136,15 @@ const HeroSection = () => {
         {/* Professional H1 */}
         {tournamentStatus ? (
           <h1
-            className={`text-6xl md:text-7xl lg:text-8xl font-black mb-6 tracking-tighter drop-shadow-2xl leading-tight hover-lift duration-500 transition-colors ${
-              isDarkMode ? "text-slate-200" : "text-slate-900"
+            className={`text-3xl md:text-5xl lg:text-7xl font-black mb-6 tracking-tighter drop-shadow-2xl leading-tight hover-lift duration-500 transition-colors ${
+              isDarkMode ? "text-slate-200" : "text-slate-700"
             }`}
           >
             <span
-              className={`font-black inline-block mx-2 ${
-                isDarkMode
-                  ? "bg-linear-to-r from-red-500 via-pink-500 to-red-500 bg-clip-text text-transparent animate-gradientFlow"
-                  : "bg-linear-to-r from-red-600 via-pink-600 to-red-600 bg-clip-text text-transparent animate-gradientFlow"
-              }`}
+              className={`font-black inline-block mx-2 ` }
             >
-              WAR
-            </span>{" "}
-            raging
+                          Grab your <span className="text-transparent bg-clip-text bg-linear-to-r from-red-500 to-pink-500 animate-gradientFlow">Bounty</span>
+            </span>
           </h1>
         ) : (
           <h1
@@ -107,7 +152,8 @@ const HeroSection = () => {
               isDarkMode ? "text-slate-200" : "text-slate-800"
             }`}
           >
-            Coming Soon
+                        Waiting for <span className="text-transparent bg-clip-text bg-linear-to-r from-red-500 to-pink-500 animate-gradientFlow">you</span>
+
             <span
               className={`inline-block ${
                 isDarkMode
@@ -115,7 +161,7 @@ const HeroSection = () => {
                   : "bg-linear-to-r from-red-600 to-pink-600 bg-clip-text text-transparent"
               }`}
             ></span>
-            <span className="">🎉</span>
+            <span className="animate-bounce">🎉</span>
           </h1>
         )}
 
@@ -219,14 +265,14 @@ const HeroSection = () => {
           <button
             onClick={() => {
               if (user ){ 
-                
                 setShowForm(true)}
               else askLogin(router);
               
             }}
-            className={`group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold uppercase tracking-widest transition-all duration-300 hover-lift rounded-lg overflow-hidden ${
-              isDarkMode ? "hover:shadow-red-500/50" : "hover:shadow-red-400/50"
-            }`}
+            disabled={!tournamentStatus}
+            className={`group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold uppercase tracking-widest transition-all duration-300 hover-lift rounded-lg overflow-hidden
+               ${tournamentStatus ? (isDarkMode ? "bg-gray-700/50 cursor-not-allowed hover:shadow-none" : "bg-gray-200/50 cursor-not-allowed hover:shadow-none") :
+                 (isDarkMode ? "bg-red-600/70 hover:bg-red-600/90" : "bg-red-500/70 hover:bg-red-500/90") }`}
           >
             <div
               className={`absolute inset-0 ${
@@ -235,12 +281,18 @@ const HeroSection = () => {
                   : "bg-linear-to-r from-red-500 to-red-600 shadow-md shadow-red-400/40 group-hover:shadow-red-400/60"
               } transition-all duration-300 rounded-lg`}
             ></div>
-            <span className="relative flex items-center gap-2 text-slate-100 font-bold">
-              Join Tournament 🎮
+            <span className={`relative flex items-center gap-2 text-slate-100 font-bold ${isDarkMode ? "text-cyan-400" : "text-blue-600"} `}>
+              {tournamentStatus ? "All Joined ✅🫡" : "Join Tournament 🤺🎮"}
             </span>
           </button>
 
           <button
+            onClick={() => {
+              // Navigate to live viewer with tournament query
+              const q = upcomingTournament?.tournamentName || upcomingTournament?.id || 'game tournament';
+              const tid = upcomingTournament?.id || '';
+              router.push(`/live?q=${encodeURIComponent(q)}${tid ? `&tournamentId=${encodeURIComponent(tid)}` : ''}`);
+            }}
             className={`group relative inline-flex items-center justify-center px-10 py-4 text-lg font-bold uppercase tracking-widest border-2 rounded-lg transition-all duration-300 hover-lift hover-glow ${
               isDarkMode
                 ? "border-cyan-400 text-cyan-400 hover:bg-cyan-400/10"
@@ -252,30 +304,15 @@ const HeroSection = () => {
         </div>
 
         {/* Scroll Indicator */}
-        <div
+        <ArrowDownNarrowWide
           className={`absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce transition-colors ${
             isDarkMode ? "text-cyan-400" : "text-blue-600"
           }`}
-        >
-          <svg
-            className="w-8 h-8"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 14l-7 7m0 0l-7-7m7 7V3"
-            />
-          </svg>
-        </div>
+        />
+          
       </div>
     </section>
   );
 };
 
 export default HeroSection;
-
-

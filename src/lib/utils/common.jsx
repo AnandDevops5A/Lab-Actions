@@ -208,6 +208,7 @@ export async function generateRandomNumberForQR(
 }
 
 export async function fetchUserTournaments(userId) {
+  if (!userId) return null;
   try {
     const cacheKey = `userTournamentDetails:${userId}`;
     const cacheRes = await getCache(cacheKey);
@@ -225,3 +226,23 @@ export async function fetchUserTournaments(userId) {
     return null;
   }
 }
+
+export const fetchUpcomingTournament = async () => {
+  try {
+    const cacheRes = await getCache("upcomingTournament");  
+    if (cacheRes.status && cacheRes.data) {
+      return cacheRes.data;
+    }
+    const response = await getUpcomingTournament();
+    if (response.ok) {
+      await setCache("upcomingTournament", response.data, 3600);
+      return response.data;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching upcoming tournaments:", error);
+    return null;
+  }
+};
+
+

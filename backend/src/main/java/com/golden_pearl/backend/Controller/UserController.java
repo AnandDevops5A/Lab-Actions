@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import com.golden_pearl.backend.DRO.ForgotPasswordDRO;
 import com.golden_pearl.backend.DRO.ConfirmResetDRO;
 
-@CrossOrigin("http://localhost:8082/")
+// @CrossOrigin("http://localhost:8082/")
 @RestController
 @RequestMapping("/users")
 public class UserController {

@@ -48,7 +48,7 @@ const iconClass="h-5 w-5 text-cyan-100 hover scale:102 transition duration-300"
   const navItems = [
     { name: 'Home', href: '/',icons:<Home className={iconClass}/> },
     { name: 'Review', href: '/review', icons: <PenLine className={iconClass} />},
-    { name: 'leaderboard', href: '/Leaderboard',icons:<LucideTrophy classname={iconClass}/> },
+    { name: 'leaderboard', href: '/Leaderboard',icons:<LucideTrophy className={iconClass}/> },
     { name: 'Admin', href: '/admin' ,icons:<Crown  className={iconClass}/> },
     { name: user ?'My Profile':'Register', href: user ? '/player' : '/auth' ,icons:user ? <IdCard className={iconClass}/>:<LogIn className={iconClass}/>}
   ];

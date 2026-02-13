@@ -44,13 +44,6 @@ const cardStyles = [
     glow: "bg-red-500/20",
   },
 ];
-const buttonStyles = `
-  relative overflow-hidden rounded-full px-4 py-2 font-semibold tracking-wide
-  text-[11px] md:text-[12px] transition-all duration-300 ease-out
-  bg-cyan-400/10 text-slate-100 border border-cyan-400/60
-  group-hover:bg-amber-400 group-hover:text-slate-900 group-hover:border-amber-300
-  group-hover:shadow-[0_0_25px_rgba(251,191,36,0.85)]
-`;
 
 const UpcomingMatches = () => {
   const { isDarkMode } = useContext(ThemeContext);
@@ -62,6 +55,14 @@ const UpcomingMatches = () => {
   const [userJoinedTournaments, setUserJoinedTournaments] = useState([]);
   const [joinerCounts, setJoinerCounts] = useState({});
   const [filter, setFilter] = useState("ALL");
+
+  const buttonStyles = `
+  relative overflow-hidden rounded-full px-4 py-2 font-semibold tracking-wide
+  text-[11px] md:text-[12px] transition-all duration-300 ease-out
+  ${isDarkMode ? "bg-cyan-400/10 text-slate-100 border border-cyan-400/60" : "bg-cyan-600/10 text-cyan-700 border border-cyan-600/60"}
+  group-hover:bg-amber-400 group-hover:text-slate-900 group-hover:border-amber-300
+  group-hover:shadow-[0_0_25px_rgba(251,191,36,0.85)]
+`;
 
   const handleOpenModal = (tournament) => {
     setSelectedTournament(tournament);
@@ -185,7 +186,7 @@ const UpcomingMatches = () => {
 
     return (
       <p
-        className={`mt-1 text-[13px] font-semibold ${timeLeft === "STARTED" ? "text-red-500 animate-pulse" : "text-slate-200"}`}
+        className={`mt-1 text-[13px] font-semibold ${timeLeft === "STARTED" ? "text-red-500 animate-pulse" : (isDarkMode ? "text-slate-200" : "text-gray-800")}`}
       >
         {timeLeft}
       </p>
@@ -197,13 +198,144 @@ const UpcomingMatches = () => {
   return (
     <section
       id="tournaments"
-      className="min-h-screen flex flex-col items-center justify-center bg-[#021311] text-slate-100 pt-10 md:pt-0"
+      className={`min-h-screen flex flex-col items-center justify-center pt-10 md:pt-0 transition-colors duration-300 ${isDarkMode ? "bg-[#021311] text-slate-100" : "bg-gray-50 text-gray-900"}`}
     >
-      <h1 className="autoblur mb-10 text-[25px] md:text-4xl lg:text-5xl font-extrabold text-amber-300 drop-shadow-[0_0_30px_rgba(14,211,8,0.75)]">
+      {/* Gaming-style decorative background: neon grid, scanlines, blobs, particles, and icons */}
+      <div aria-hidden="true" className="absolute inset-0 -z-20 overflow-hidden pointer-events-none">
+        {/* Neon grid */}
+        <div className="neon-grid" />
+
+        {/* Subtle scanlines for retro/gaming feel */}
+        <div className="scanlines" />
+
+        {/* Animated blurred color blobs (kept from previous design) */}
+        <div
+          className="blob"
+          style={{
+            left: '-12%',
+            top: '-10%',
+            width: '48rem',
+            height: '48rem',
+            background: isDarkMode
+              ? 'radial-gradient(circle at 30% 30%, rgba(14,211,8,0.12), transparent 28%), radial-gradient(circle at 70% 70%, rgba(14,165,233,0.06), transparent 30%)'
+              : 'radial-gradient(circle at 30% 30%, rgba(255,179,71,0.18), transparent 28%), radial-gradient(circle at 70% 70%, rgba(6,182,212,0.08), transparent 30%)',
+          }}
+        />
+
+        <div
+          className="blob"
+          style={{
+            right: '-14%',
+            bottom: '-8%',
+            width: '36rem',
+            height: '36rem',
+            background: isDarkMode
+              ? 'radial-gradient(circle at 40% 40%, rgba(255,179,0,0.08), transparent 40%)'
+              : 'radial-gradient(circle at 60% 60%, rgba(99,102,241,0.12), transparent 40%)',
+            animationDelay: '4s',
+          }}
+        />
+
+        {/* Tiny moving particles for energy */}
+        <div className="particles">
+          <span className="particle p1" />
+          <span className="particle p2" />
+          <span className="particle p3" />
+          <span className="particle p4" />
+          <span className="particle p5" />
+          <span className="particle p6" />
+        </div>
+
+        {/* Low-opacity gamepad icons to reinforce gaming theme */}
+        <svg className="game-icons" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <g fill={isDarkMode ? 'rgba(14,211,8,0.06)' : 'rgba(14,165,233,0.06)'}>
+            <path d="M120 80c-18 0-30 12-30 30s12 30 30 30h80c18 0 30-12 30-30s-12-30-30-30H120z" />
+            <circle cx="160" cy="95" r="6" />
+            <circle cx="180" cy="95" r="6" />
+            <rect x="210" y="88" width="6" height="14" rx="2" />
+          </g>
+        </svg>
+
+        <svg className="absolute inset-0 w-full h-full -z-10" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="um-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={isDarkMode ? '#021b12' : '#fffaf0'} stopOpacity="0.12" />
+              <stop offset="100%" stopColor={isDarkMode ? '#01100c' : '#f0ffff'} stopOpacity="0.06" />
+            </linearGradient>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#um-grad)" />
+        </svg>
+
+        <style jsx>{`
+          .neon-grid {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(0,0,0,0.0) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.0) 1px, transparent 1px), linear-gradient(0deg, rgba(0,0,0,0.0), transparent);
+            background-size: 40px 40px, 40px 40px, 100% 100%;
+            background-position: 0 0, 0 0, 0 0;
+            opacity: ${isDarkMode ? '0.15' : '0.22'};
+            mix-blend-mode: ${isDarkMode ? 'screen' : 'overlay'};
+            transform: translateZ(0);
+            will-change: background-position;
+            animation: gridMove 18s linear infinite;
+            filter: blur(8px) saturate(120%);
+          }
+
+          @keyframes gridMove {
+            0% { background-position: 0 0, 0 0, 0 0; }
+            50% { background-position: -120px -80px, 120px 80px, 0 0; }
+            100% { background-position: 0 0, 0 0, 0 0; }
+          }
+
+          .scanlines {
+            position: absolute;
+            inset: 0;
+            background-image: repeating-linear-gradient(180deg, rgba(255,255,255,${isDarkMode ? '0.01' : '0.02'}) 0px, rgba(255,255,255,${isDarkMode ? '0.01' : '0.02'}) 1px, transparent 2px);
+            mix-blend-mode: ${isDarkMode ? 'overlay' : 'soft-light'};
+            pointer-events: none;
+          }
+
+          .blob {
+            position: absolute;
+            border-radius: 48%;
+            filter: blur(80px);
+            opacity: 0.6;
+            transform-origin: center;
+            animation: blobMove 12s infinite ease-in-out;
+            will-change: transform, opacity;
+          }
+
+          @keyframes blobMove {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(28px, -36px) scale(1.06); }
+            66% { transform: translate(-36px, 24px) scale(0.96); }
+            100% { transform: translate(0px, 0px) scale(1); }
+          }
+
+          .particles { position: absolute; inset: 0; pointer-events: none; }
+          .particle { position: absolute; width: 6px; height: 6px; border-radius: 999px; background: rgba(255,255,255,0.85); opacity: 0.06; box-shadow: 0 0 12px rgba(0,0,0,0.6); }
+          .p1 { left: 12%; top: 22%; animation: particleMove 6s infinite ease-in-out; background: ${isDarkMode ? 'rgba(14,211,8,0.9)' : 'rgba(14,165,233,0.9)'}; }
+          .p2 { left: 42%; top: 12%; animation: particleMove 8s 0.6s infinite ease-in-out; background: ${isDarkMode ? 'rgba(6,182,212,0.9)' : 'rgba(255,179,71,0.9)'}; }
+          .p3 { left: 72%; top: 36%; animation: particleMove 7s 1.2s infinite ease-in-out; background: ${isDarkMode ? 'rgba(255,179,0,0.9)' : 'rgba(99,102,241,0.9)'}; }
+          .p4 { left: 22%; top: 72%; animation: particleMove 9s 0.2s infinite ease-in-out; background: ${isDarkMode ? 'rgba(56,189,248,0.9)' : 'rgba(6,182,212,0.9)'}; }
+          .p5 { left: 58%; top: 68%; animation: particleMove 5s 0.4s infinite ease-in-out; background: ${isDarkMode ? 'rgba(99,102,241,0.9)' : 'rgba(14,165,233,0.9)'}; }
+          .p6 { left: 86%; top: 18%; animation: particleMove 10s 0.9s infinite ease-in-out; background: ${isDarkMode ? 'rgba(255,102,102,0.9)' : 'rgba(255,179,71,0.9)'}; }
+
+          @keyframes particleMove {
+            0% { transform: translateY(0) scale(1); opacity: 0.06; }
+            50% { transform: translateY(-18px) scale(1.25); opacity: 0.18; }
+            100% { transform: translateY(0) scale(1); opacity: 0.06; }
+          }
+
+          .game-icons { position: absolute; right: -6%; top: 6%; width: 36%; height: 36%; opacity: 0.06; transform-origin: center; animation: iconsFloat 14s infinite ease-in-out; }
+          @keyframes iconsFloat { 0% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-10px) rotate(2deg); } 100% { transform: translateY(0) rotate(0deg); } }
+        `}</style>
+      </div>
+      <h1 className={`autoblur mb-10 text-[25px] md:text-4xl lg:text-5xl font-extrabold drop-shadow-[0_0_30px_rgba(14,211,8,0.75)] ${isDarkMode ? "text-amber-300" : "text-amber-600"}`}>
         ⚔ Upcoming Warzones ⚔
       </h1>
 
-      <div className="bg-[#020b0f]/80 rounded-3xl px-6 py-8 md:p-10 shadow-[0_0_60px_rgba(0,0,0,0.95)]">
+      <div className={`rounded-3xl px-6 py-8 md:p-10 shadow-[0_0_60px_rgba(0,0,0,0.95)] transition-colors duration-300 ${isDarkMode ? "bg-[#020b0f]/80" : "bg-white shadow-xl border border-gray-200"}`}>
         {loading ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-7">
             {[1, 2,3].map((i) => (
@@ -211,12 +343,12 @@ const UpcomingMatches = () => {
             ))}
           </div>
         ) : (tournaments.length === 0) ? (
-          <div className="text-center py-20 px-10 rounded-2xl border border-dashed border-amber-500/20 bg-black/20  ">
-            <Trophy className="w-16 h-16 mx-auto mb-4 text-amber-500/40" />
-            <p className="text-xl font-bold text-amber-400/80 tracking-widest">
+          <div className={`text-center py-20 px-10 rounded-2xl border border-dashed ${isDarkMode ? "border-amber-500/20 bg-black/20" : "border-amber-600/20 bg-amber-50/50"}`}>
+            <Trophy className={`w-16 h-16 mx-auto mb-4 ${isDarkMode ? "text-amber-500/40" : "text-amber-600/40"}`} />
+            <p className={`text-xl font-bold tracking-widest ${isDarkMode ? "text-amber-400/80" : "text-amber-700/80"}`}>
               No Active Warzones
             </p>
-            <p className="text-gray-500 mt-2">
+            <p className={`mt-2 ${isDarkMode ? "text-gray-500" : "text-gray-600"}`}>
               Good to see you,  soldier 🫡.<br />
               New missions are being assigned. Check back soon...
             </p>
@@ -233,8 +365,8 @@ const UpcomingMatches = () => {
                   className={`
                     fadeup group relative flex flex-col justify-between
                     w-[320px] md:w-[360px] h-fit
-                    rounded-2xl border border-[#101821] ${style.accent}
-                    bg-linear-to-br from-[#020814] via-[#050d18] to-[#050b14]
+                    rounded-2xl border ${isDarkMode ? "border-[#101821]" : "border-gray-200"} ${style.accent}
+                    ${isDarkMode ? "bg-linear-to-br from-[#020814] via-[#050d18] to-[#050b14]" : "bg-linear-to-br from-white via-gray-50 to-white"}
                     overflow-hidden
                     shadow-[0_18px_30px_rgba(0,0,0,0.85)]
                     transition-all duration-300 ease-out
@@ -260,10 +392,10 @@ const UpcomingMatches = () => {
                         <Swords className="text-lg font-black" />
                       </div>
                       <div>
-                        <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">
+                        <p className={`text-[11px] uppercase tracking-[0.24em] ${isDarkMode ? "text-slate-400" : "text-gray-500"}`}>
                           {tournament.platform || "Mobile"}
                         </p>
-                        <p className="text-[15px] font-semibold tracking-wide text-slate-50 line-clamp-1">
+                        <p className={`text-[15px] font-semibold tracking-wide line-clamp-1 ${isDarkMode ? "text-slate-50" : "text-gray-900"}`}>
                           {tournament.tournamentName}
                         </p>
                       </div>
@@ -271,7 +403,7 @@ const UpcomingMatches = () => {
                     <button
                       type="button"
                       onClick={() => handleOpenModal(tournament)}
-                      className="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-600/60 bg-slate-900/60 text-slate-300 text-xs transition-colors duration-200 group-hover:border-cyan-300 group-hover:text-cyan-300"
+                      className={`mt-1 inline-flex h-8 w-8 items-center justify-center rounded-full border text-xs transition-colors duration-200 group-hover:border-cyan-300 group-hover:text-cyan-300 ${isDarkMode ? "border-slate-600/60 bg-slate-900/60 text-slate-300" : "border-gray-300 bg-gray-100 text-gray-600"}`}
                       aria-label="Join Tournament"
                     >
                       →
@@ -279,10 +411,10 @@ const UpcomingMatches = () => {
                   </div>
 
                   <div className="relative z-10 flex items-center justify-between px-5 pb-4 pt-3">
-                    <div className="flex space-x-6 text-[11px] md:text-[12px] text-slate-400">
+                    <div className={`flex space-x-6 text-[11px] md:text-[12px] ${isDarkMode ? "text-slate-400" : "text-gray-500"}`}>
                       <div>
                         <p className="uppercase tracking-[0.2em]">Prize</p>
-                        <p className="mt-1 text-[13px] font-semibold text-amber-300">
+                        <p className={`mt-1 text-[13px] font-semibold ${isDarkMode ? "text-amber-300" : "text-amber-600"}`}>
                           🏆 ₹{tournament.prizePool}
                         </p>
                       </div>
@@ -307,7 +439,7 @@ const UpcomingMatches = () => {
                           <span className="absolute inset-0 -translate-x-full opacity-0 transition-all duration-400 ease-out bg-linear-to-r from-transparent via-white/60 to-transparent group-hover:translate-x-full group-hover:opacity-100" />
                         </button>
                       ) : (
-                        <div className="flex items-center space-x-2 text-[11px] md:text-[12px] font-medium text-cyan-400/80 uppercase tracking-widest">
+                        <div className={`flex items-center space-x-2 text-[11px] md:text-[12px] font-medium uppercase tracking-widest ${isDarkMode ? "text-cyan-400/80" : "text-cyan-600/80"}`}>
                           <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
                           <span>Enrolled</span>
                         </div>
@@ -315,17 +447,17 @@ const UpcomingMatches = () => {
                     </div>
                     
                   </div>
-                  <hr className="border-slate-800" />
-                  <div className="relative z-10 flex items-center justify-between px-5 py-2 text-slate-400 text-[11px]">
+                  <hr className={`${isDarkMode ? "border-slate-800" : "border-gray-200"}`} />
+                  <div className={`relative z-10 flex items-center justify-between px-5 py-2 text-[11px] ${isDarkMode ? "text-slate-400" : "text-gray-500"}`}>
                     <div className="flex items-center gap-1.5">
                       <Users className="w-3.5 h-3.5" />
                       <span className="font-medium">
-                        <span className="font-bold text-white">{joinedCount}</span>
-                        <span className="text-slate-500"> / </span>
+                        <span className={`font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>{joinedCount}</span>
+                        <span className={`${isDarkMode ? "text-slate-500" : "text-gray-400"}`}> / </span>
                         <span>{maxPlayers} Joined</span>
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5 font-semibold text-green-400">
+                    <div className={`flex items-center gap-1.5 font-semibold ${isDarkMode ? "text-green-400" : "text-green-600"}`}>
                       <span>{maxPlayers - joinedCount} Slots Left</span>
                     </div>
                   </div>

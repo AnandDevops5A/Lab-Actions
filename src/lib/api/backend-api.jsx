@@ -1,5 +1,7 @@
 import useSWR from "swr";
 const BASE_URL = "http://localhost:8082";
+// const BASE_URL = "https://sustainable-encourages-acid-adaptive.trycloudflare.com";
+
 
 // Generic fetcher function
 const fetcher = async (url, method = "GET", data = null) => {

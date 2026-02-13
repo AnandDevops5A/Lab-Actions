@@ -102,7 +102,7 @@ const AdminPage = () => {
     if (result && !error && result.tournaments) {
       return transformTournaments(result.tournaments);
     }
-    return dummyTournaments;
+    return null;
   }, [result, error]);
 
   //set participants if participants formed or not
@@ -110,7 +110,7 @@ const AdminPage = () => {
     if (result && !error && result.users) {
       return result.users;
     }
-    return dummyParticipants;
+    return null;
   }, [result, error]);
 
   //update joiner because tournament and users fetch from cache
