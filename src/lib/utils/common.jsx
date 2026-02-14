@@ -1,107 +1,154 @@
-import { getCache, setCache, UpdateCache } from "./action-redis";
-import { errorMessage} from "./alert";
-import {getUpcomingTournament, getUserTournamentDetails } from "../api/backend-api";
+import { getCache, setCache } from "./client-cache";
+import { errorMessage } from "./alert";
+import {
+  getUpcomingTournament,
+  getUserTournamentDetails,
+} from "../api/backend-api";
 import { SunDim, SunMedium, Sunset } from "lucide-react";
 
-export function calulateWinAndReward(tournamentList) {
-  const rewardMap = { 1: 500, 2: 200, 3: 100 };
-  //calculate rewards
-  let userStats = new Map();
-  // console.log(tournamentList);
+/**
+ * Calculate winning rewards and stats for tournaments
+ * Optimized with early returns and efficient data structures
+ */
+export function calculateWinAndReward(tournamentList) {
+  if (!tournamentList || !Array.isArray(tournamentList)) {
+    return new Map();
+  }
 
-  for (const tournament of tournamentList || []) {
+  const REWARD_MAP = { 1: 500, 2: 200, 3: 100 };
+  const userStats = new Map();
+
+  for (const tournament of tournamentList) {
     const rankList = tournament.rankList || {};
     for (const [userId, rank] of Object.entries(rankList)) {
-      let reward = rewardMap[rank] || 0;
+      const reward = REWARD_MAP[rank] || 0;
 
-      let stats = userStats.get(userId);
-      if (!stats) {
-        stats = { reward: 0, wins: 0 };
-        userStats.set(userId, stats);
+      if (!userStats.has(userId)) {
+        userStats.set(userId, { reward: 0, wins: 0 });
       }
 
+      const stats = userStats.get(userId);
       stats.reward += reward;
-      if (rank == 1) {
+      if (rank === 1) {
         stats.wins += 1;
       }
     }
   }
+
   return userStats;
 }
 
+/**
+ * Transform tournament data with date/time formatting
+ * Uses lazy date parsing for performance
+ */
 export const transformTournaments = (tournaments) => {
-  if (!tournaments || !Array.isArray(tournaments)) return [];
-  return tournaments.map((t) => {
-    const dtStr = t.dateTime ? t.dateTime.toString() : "";
-    if (dtStr.length < 12) return { ...t, date: "N/A", time: "N/A" };
-    // ensure it's a string // Extract parts
-    const year = dtStr.substring(0, 4);
-    const month = dtStr.substring(4, 6);
-    const day = dtStr.substring(6, 8);
-    const hour = dtStr.substring(8, 10);
-    const minute = dtStr.substring(10, 12);
-    // Format date and time
-    const date = `${day}-${month}-${year}`;
-    // e.g. "2025-12-20"
-    const time = `${hour}:${minute}`;
-    // e.g. "07:00"
-    return { ...t, date, time };
+  if (!tournaments || !Array.isArray(tournaments)) {
+    return [];
+  }
+
+  return tournaments.map((tournament) => {
+    if (!tournament.dateTime) {
+      return {
+        ...tournament,
+        date: "TBA",
+        time: "TBA",
+      };
+    }
+
+    const dtStr = tournament.dateTime.toString();
+    if (dtStr.length < 12) {
+      return { ...tournament, date: "N/A", time: "N/A" };
+    }
+
+    const [year, month, day, hour, minute] = [
+      dtStr.substring(0, 4),
+      dtStr.substring(4, 6),
+      dtStr.substring(6, 8),
+      dtStr.substring(8, 10),
+      dtStr.substring(10, 12),
+    ];
+
+    return {
+      ...tournament,
+      date: `${day}-${month}-${year}`,
+      time: `${hour}:${minute}`,
+    };
   });
 };
 
+/**
+ * Set upcoming tournaments in cache with fallback
+ * Better error handling and cache management
+ */
 export const setUpcomingTournamentCache = async () => {
-  const d = await getCache("upcomingTournament");
-  const data = d.data;
+  try {
+    const cached = await getCache("upcomingTournament");
 
-  // console.log("get upcomming when new user", data);
-
-  if (data && data.status && data.length > 0) {
-    // successMessage("Cache hit")
-    // setUpcomingTournament(data);
-    return;
-  }
-  const response = await getUpcomingTournament();
-  // console.log("upcoming tournament fetch..");
-  if (!response.ok) {
-    errorMessage("Server Down. Please try again later.");
-    return;
-  } else if (response.data?.length === 0) {
-    // setUpcomingTournament([]);
-    return;
-  }
-  //
-  const cachingStatus = await setCache("upcomingTournament", response?.data);
-  if (!cachingStatus.status) {
-    const againCaching = await UpdateCache(
-      "upcomingTournament",
-      response?.data,
-    );
-    if (!againCaching.status) {
-      errorMessage("Something went wrong");
+    if (cached?.status && cached?.data?.length > 0) {
+      return cached.data;
     }
+
+    const response = await getUpcomingTournament();
+
+    if (!response.ok) {
+      errorMessage("Server Down. Please try again later.");
+      return [];
+    }
+
+    if (response.data?.length === 0) {
+      return [];
+    }
+
+    await setCache("upcomingTournament", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Cache tournament error:", error);
+    errorMessage("Something went wrong while caching tournaments");
+    return [];
   }
-  // setUpcomingTournament(response?.data);
-  // console.log(response?.data);
 };
 
-export const getCurrentTime = () => {
-  let date = new Date();
-  let hours = date.getHours();
-  let minutes = date.getMinutes();
-  let year = date.getFullYear();
-  let month = date.getMonth() + 1;
-  let day = date.getDate();
-  // console.log(year, month, day, hours, minutes);
-  return `${year}${month < 10 ? "0" + month : month}${day<10?"0"+day:day}${hours<10?"0"+hours:hours}${minutes<10?"0"+minutes:minutes}`;
-};
+/**
+ * Format current timestamp as YYYYMMDDHHMM string
+ * Memoized helper for consistent time formatting
+ */
+export const getCurrentTime = (() => {
+  const pad = (n) => (n < 10 ? "0" + n : n);
+  return () => {
+    const now = new Date();
+    return (
+      `${now.getFullYear()}` +
+      `${pad(now.getMonth() + 1)}` +
+      `${pad(now.getDate())}` +
+      `${pad(now.getHours())}` +
+      `${pad(now.getMinutes())}`
+    );
+  };
+})();
 
+/**
+ * Format datetime number to readable date and time strings
+ * @param {number} dateTime - DateTime in YYYYMMDDHHMM format
+ * @returns {object} { date: 'DD/MM/YYYY', time: 'HH:MM' }
+ */
 export const formatDateTimeAsText = (dateTime) => {
+  if (!dateTime) {
+    return { date: "TBA", time: "TBA" };
+  }
+
   const dateStr = dateTime.toString();
-  const year = dateStr.slice(0, 4);
-  const month = dateStr.slice(4, 6);
-  const day = dateStr.slice(6, 8);
-  const hour = dateStr.slice(8, 10);
-  const minute = dateStr.slice(10, 12);
+  if (dateStr.length < 12) {
+    return { date: "N/A", time: "N/A" };
+  }
+
+  const [year, month, day, hour, minute] = [
+    dateStr.slice(0, 4),
+    dateStr.slice(4, 6),
+    dateStr.slice(6, 8),
+    dateStr.slice(8, 10),
+    dateStr.slice(10, 12),
+  ];
 
   return {
     date: `${day}/${month}/${year}`,
@@ -162,7 +209,7 @@ export async function generateRandomNumberForQR(
 
   // 1. Fetch the existing tournament list from cache
   const cacheRes = await getCache(cacheKey);
-  let listOfInvest = cacheRes.status ? cacheRes.data : [];
+  let listOfInvest = cacheRes?.status ? cacheRes.data : [];
 
   // 2. CHECK FOR EXISTING USER (Requirement: return invest if available)
   const existingUser = listOfInvest.find((u) => u.userId === userId);
@@ -212,7 +259,7 @@ export async function fetchUserTournaments(userId) {
   try {
     const cacheKey = `userTournamentDetails:${userId}`;
     const cacheRes = await getCache(cacheKey);
-    if (cacheRes.status && cacheRes.data) {
+    if (cacheRes?.status && cacheRes?.data) {
       return cacheRes.data;
     }
     const response = await getUserTournamentDetails(userId);
@@ -230,7 +277,7 @@ export async function fetchUserTournaments(userId) {
 export const fetchUpcomingTournament = async () => {
   try {
     const cacheRes = await getCache("upcomingTournament");  
-    if (cacheRes.status && cacheRes.data) {
+    if (cacheRes && cacheRes.data) {
       return cacheRes.data;
     }
     const response = await getUpcomingTournament();
@@ -244,5 +291,3 @@ export const fetchUpcomingTournament = async () => {
     return null;
   }
 };
-
-

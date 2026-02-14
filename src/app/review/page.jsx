@@ -3,7 +3,7 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { ThemeContext } from "../../lib/contexts/theme-context";
 import dynamic from "next/dynamic";
-import { getCache, setCache } from "@/lib/utils/action-redis";
+import { getCache, setCache } from "@/lib/utils/client-cache";
 import {  errorMessage} from "@/lib/utils/alert";
 import { UserContext } from "@/lib/contexts/user-context";
 import { SkeletonCard, SkeletonTable } from "../skeleton/Skeleton";

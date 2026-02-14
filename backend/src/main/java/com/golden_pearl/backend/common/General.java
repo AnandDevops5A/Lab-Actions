@@ -70,7 +70,7 @@ public class General {
 
     public User convertResponseToUser(UserRegisterData userData) {
         User user = User.builder().username(userData.username()).callSign(userData.callSign())
-                .contact(userData.contact()).accessKey(userData.accessKey()).joiningDate(getCurrentDateTime())
+                .email(userData.email()).contact(userData.contact()).accessKey(userData.accessKey()).joiningDate(getCurrentDateTime())
                 .build();
         return user;
 

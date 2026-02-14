@@ -1,98 +1,113 @@
 import useSWR from "swr";
-const BASE_URL = "http://localhost:8082";
-// const BASE_URL = "https://sustainable-encourages-acid-adaptive.trycloudflare.com";
 
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8082";
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // ms
 
-// Generic fetcher function
-const fetcher = async (url, method = "GET", data = null) => {
-  const options = {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    ...(data && { body: JSON.stringify(data) }),
-  };
+/**
+ * Generic fetcher with retry logic and timeout
+ */
+const fetcher = async (url, method = "GET", data = null, timeout = 10000) => {
+  let lastError;
 
-  const response = await fetch(url, options);
-  if (!response.ok) {
-    throw new Error("Failed to fetch");
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+      const options = {
+        method,
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        ...(data && { body: JSON.stringify(data) }),
+      };
+
+      const response = await fetch(url, options);
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return await response.json();
+    } catch (error) {
+      lastError = error;
+      if (attempt < MAX_RETRIES - 1) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, RETRY_DELAY * Math.pow(2, attempt))
+        );
+      }
+    }
   }
-  return response.json();
+  throw lastError || new Error("Max retries exceeded");
 };
 
-// Custom SWR hook
+/**
+ * Custom SWR hook with optimized caching and deduplication
+ */
 export const useSWRBackendAPI = (
   endpoint,
   method = "GET",
   data = null,
   refreshInterval = 0,
 ) => {
-  const url = `${BASE_URL}/${endpoint}`;
+  if (!endpoint) {
+    throw new Error("Endpoint is required");
+  }
 
-  const {
-    data: result,
-    error,
-    isLoading,
-    mutate,
-  } = useSWR(
-    [url, method, data], // key (unique per request)
-    () => fetcher(url, method, data), // fetcher function
+  const url = `${BASE_URL}/${endpoint}`;
+  const cacheKey = data
+    ? [url, method, JSON.stringify(data)]
+    : [url, method];
+
+  const { data: result, error, isLoading, mutate } = useSWR(
+    cacheKey,
+    () => fetcher(url, method, data),
     {
-      refreshInterval, // ⏱ auto revalidate every X ms (e.g., 60000 = 60s)
-      revalidateOnFocus: true, // refetch when window regains focus
-      revalidateOnReconnect: false, // refetch when network reconnects
+      refreshInterval,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      dedupingInterval: 2000,
+      focusThrottleInterval: 30000,
+      errorRetryCount: 2,
+      errorRetryInterval: 5000,
     },
   );
 
-  return { result, error, isLoading, mutate };
+  return {
+    result,
+    error,
+    isLoading,
+    mutate,
+    isEmpty: !result,
+    isError: !!error,
+  };
 };
 
-// ✅ BackendAPI with revalidate support
+/**
+ * Backend API call with advanced error handling and retries
+ */
 export async function FetchBackendAPI(
   endpoint,
-  { method = "POST", data = null, revalidate = 0 } = {},
+  { method = "POST", data = null, revalidate = 0, timeout = 15000 } = {},
 ) {
   if (!endpoint) throw new Error("Endpoint is required");
 
   const url = `${BASE_URL}/${endpoint}`;
-  // console.log(url,method)
-  // console.log(data)
 
-  const options = {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    ...(data && { body: JSON.stringify(data) }),
-    next: { revalidate }, // ISR-style caching for Next.js App Router
-  };
   try {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-      const errorDetails = await response.text().catch(() => "");
-      let serverMessage = "";
-      try {
-        const json = JSON.parse(errorDetails);
-        serverMessage = json.error || json.message || "";
-      } catch (e) {
-        serverMessage = errorDetails;
-      }
-      throw new Error(
-        serverMessage ||
-          `Request failed: ${response.status} ${response.statusText}`,
-      );
-    }
-    const text = await response.text();
-    let respon;
-    try {
-      respon = text ? JSON.parse(text) : {};
-    } catch (e) {
-      respon = text;
-    }
-    return { data: respon, status: response.status, ok: true };
+    const response = await fetcher(url, method, data, timeout);
+    return {
+      ok: true,
+      data: response,
+      status: 200,
+    };
   } catch (error) {
-    console.error(`[BackendAPI] ${method} ${url} →`, error);
-    return { error: error.message, status: error.status, ok: false };
+    const errorMessage = error?.message || "Unknown error occurred";
+    return {
+      ok: false,
+      error: errorMessage,
+      status: error?.status || 500,
+    };
   }
 }
 

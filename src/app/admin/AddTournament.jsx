@@ -2,7 +2,7 @@
 import React from "react";
 import { X } from "lucide-react"; // Icon library for the cross button
 import { errorMessage, successMessage } from "../../lib/utils/alert";
-import { setCache } from "../../lib/utils/action-redis";
+import { setCache } from "../../lib/utils/client-cache";
 import { dateInLongFormat } from "@/lib/utils/common";
 
 const inputBoxes = [

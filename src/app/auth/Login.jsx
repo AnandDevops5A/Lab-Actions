@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useRef, memo, useContext } from "react";
-import { Lock, Eye, EyeOff,PhoneCall } from "lucide-react";
+import { Lock, Eye, EyeOff, PhoneCall, Loader2 } from "lucide-react";
 import { errorMessage, successMessage } from "../../lib/utils/alert";
 import { FetchBackendAPI } from "../../lib/api/backend-api";
-import { setCache, UpdateCache } from "../../lib/utils/action-redis";
+import { setCache } from "../../lib/utils/client-cache";
 import { UserContext } from "../../lib/contexts/user-context";
 import { useRouter } from "next/navigation";
 
@@ -31,19 +31,16 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
     //    console.log("Response from backend:", res);
     //    console.log("Before set context is :" , user);
     // console.log("Response from backend:", res.status);
-    if (res.status === 200 && res.data) {
-      const status = await setCache("currentUser", res.data, 3600);
-      if (!status.status) {
+    if (res?.status === 200 && res?.data) {
+      // const status = await setCache("currentUser", res.data, 3600);
+      const store=localStorage.setItem("currentUser", JSON.stringify(res.data));
+      const status = store ? { status: true } : { status: false };
+      if (!status?.status) {
         errorMessage("Error caching user data");
-        const res = await UpdateCache("currentUser", res.data, 3600);
-        if (!res.status) {
-          errorMessage("Error updating user data");
-        } else {
-          console.log("User data updated in cache");
-        }
-      } else setUser(res.data);
-
-      //    console.log("after set context is :" , user);
+      }
+      // Set user context regardless of cache status
+      setUser(res.data);
+      // console.log("After set context is :" , user);
     }
     return res;
   }
@@ -58,27 +55,24 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
       return;
     }
     setLoading(true);
-    let result = null;
+
     try {
       const payload = { contact: contact.trim(), accessKey };
-      result = await onSubmit(payload);
-      if (result.status === 200 && result.data) {
+      const result = await onSubmit(payload);
+
+      if (result?.status === 200 && result?.data) {
         successMessage(result.message || "Login successful.");
-      } else if (!result.status) {
-       
-        errorMessage("Invalid Player ID or accessKey.");
+        router.push("/player");
       } else {
-         console.log(result.status);
-        errorMessage(result.message || "Server error. Please try again later.");
+        // Improved error handling based on status or message
+        const msg = result?.message || "Invalid credentials or server error.";
+        errorMessage(msg);
       }
     } catch (err) {
+      console.error("Login Error:", err);
       errorMessage(err?.message || "Unexpected error.");
     } finally {
-      //rediect to player dashboard
-      if (result && result.status === 200 && result.data)
-        router.push("/player");
       setLoading(false);
-      // console.log("Login user: ", result.data);
     }
   }
 
@@ -178,29 +172,10 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
             aria-busy={loading}
             className="btn relative w-full overflow-hidden rounded-lg px-6 py-3 font-extrabold text-lg 
                          bg-linear-to-r from-[#00E5FF] via-[#FF0055] to-[#9b59ff] text-black shadow-lg 
-                         hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed focus:ring-2 focus:ring-offset-2 focus:ring-[#00E5FF] focus:ring-offset-gray-950"
+                         hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed focus:ring-2 focus:ring-offset-2 focus:ring-[#00E5FF] focus:ring-offset-gray-950 flex items-center justify-center"
           >
             {loading ? (
-              <svg
-                className="w-5 h-5 animate-spin mr-3"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="rgba(0,0,0,0.2)"
-                  strokeWidth="4"
-                />
-                <path
-                  d="M4 12a8 8 0 018-8"
-                  stroke="rgba(0,0,0,0.6)"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                />
-              </svg>
+              <Loader2 className="w-5 h-5 animate-spin mr-2" />
             ) : null}
             <span className={`${isDarkMode ? "text-slate-100" : "text-black"}`}>
               {loading ? "Signing in..." : "Sign In"}

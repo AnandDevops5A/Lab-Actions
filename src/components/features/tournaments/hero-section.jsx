@@ -63,12 +63,13 @@ useEffect(() => {
     }
   }, [user, showForm]);
 
+  // Fetch upcoming tournament details on component mount and check if user has joined all tournaments
 useEffect(() => {
     let mounted = true;
     fetchUpcomingTournament().then((res) => {
       if (!mounted) return;
       if (res && Array.isArray(res) && res.length > 0) {
-        setUpcomingTournament(res[0]);
+        setUpcomingTournament(res); // Assuming we want the first upcoming tournament
       }
     }).catch(() => {});
     return () => { mounted = false };
@@ -269,7 +270,7 @@ useEffect(() => {
               else askLogin(router);
               
             }}
-            disabled={!tournamentStatus}
+            disabled={tournamentStatus}
             className={`group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold uppercase tracking-widest transition-all duration-300 hover-lift rounded-lg overflow-hidden
                ${tournamentStatus ? (isDarkMode ? "bg-gray-700/50 cursor-not-allowed hover:shadow-none" : "bg-gray-200/50 cursor-not-allowed hover:shadow-none") :
                  (isDarkMode ? "bg-red-600/70 hover:bg-red-600/90" : "bg-red-500/70 hover:bg-red-500/90") }`}

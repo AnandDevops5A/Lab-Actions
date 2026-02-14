@@ -1,39 +1,24 @@
 package com.golden_pearl.backend.Services;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import com.golden_pearl.backend.common.General;
-
 import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.data.redis.core.PartialUpdate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.golden_pearl.backend.Models.Tournament;
-import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.Repository.TournamentRepository;
-import com.golden_pearl.backend.Repository.UserRepository;
+import com.golden_pearl.backend.common.General;
 import com.golden_pearl.backend.errors.ResourceNotFoundException;
 
 @Service
 public class TournamentService {
 
     private final TournamentRepository tournamentRepository;
-    private final UserService UserService;
-    private final UserRepository userRepository;
     private final General general = new General();
 
     // constructor
-    public TournamentService(TournamentRepository tournamentRepository, UserService UserService,
-            UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public TournamentService(TournamentRepository tournamentRepository) {
         this.tournamentRepository = tournamentRepository;
-        this.UserService = UserService;
-
     }
 
     // get all tournaments

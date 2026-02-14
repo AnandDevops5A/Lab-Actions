@@ -3,13 +3,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useContext, useState, useEffect, useRef, Suspense } from 'react';
+import { useContext, useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import gsap from 'gsap';
 import { UserContext } from '../../lib/contexts/user-context';
 import { LogoutButton } from '../ui/logout-button';
 import { ThemeToggle } from '../ui/theme-toggle';
 import { ThemeContext } from '../../lib/contexts/theme-context';
-import { Crown, Home, IdCard, LogIn, LucideTrophy, PenLine } from 'lucide-react';
+import { Crown, Home, IdCard, LogIn, LucideTrophy, PenLine, Menu, X } from 'lucide-react';
 
 const NavbarContent = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -37,26 +37,39 @@ const NavbarContent = () => {
   useEffect(() => {
     if (!mobileMenuRef.current) return;
     if (isOpen) {
-      gsap.from(mobileMenuRef.current, { y: -8, opacity: 0, duration: 0.28, ease: 'power3.out' });
-      // Announce menu state for screen readers
-      mobileMenuRef.current.setAttribute('aria-hidden', 'false');
+      gsap.from(mobileMenuRef.current, {
+        y: -8,
+        opacity: 0,
+        duration: 0.28,
+        ease: "power3.out",
+      });
+      mobileMenuRef.current.setAttribute("aria-hidden", "false");
     } else {
-      mobileMenuRef.current.setAttribute('aria-hidden', 'true');
+      mobileMenuRef.current.setAttribute("aria-hidden", "true");
     }
   }, [isOpen]);
-const iconClass="h-5 w-5 text-cyan-100 hover scale:102 transition duration-300"
-  const navItems = [
-    { name: 'Home', href: '/',icons:<Home className={iconClass}/> },
-    { name: 'Review', href: '/review', icons: <PenLine className={iconClass} />},
+
+  // Memoized icon class to prevent recreation on every render
+  const iconClass =
+    "h-5 w-5 text-cyan-100 hover:scale-110 transition duration-300";
+
+  const navItems = useMemo(
+    () => [
+      { name: "Home", href: "/", icons: <Home className={iconClass} /> },
+      {
+        name: "Review",
+        href: "/review",
+        icons: <PenLine className={iconClass} />,
+      },
     { name: 'leaderboard', href: '/Leaderboard',icons:<LucideTrophy className={iconClass}/> },
     { name: 'Admin', href: '/admin' ,icons:<Crown  className={iconClass}/> },
-    { name: user ?'My Profile':'Register', href: user ? '/player' : '/auth' ,icons:user ? <IdCard className={iconClass}/>:<LogIn className={iconClass}/>}
-  ];
+    { name: user ?'My Profile':'Login', href: user ? '/player' : '/auth' ,icons:user ? <IdCard className={iconClass}/>:<LogIn className={iconClass}/>}
+  ], [user, iconClass]);
   const [showNavbar, setShowNavbar] = useState(true);
   const lastScrollY = useRef(0);
   const Router=useRouter();
 
-
+// Scroll-based show/hide logic for navbar
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -78,7 +91,7 @@ const iconClass="h-5 w-5 text-cyan-100 hover scale:102 transition duration-300"
   const searchParams = useSearchParams();
   const scrollTarget = searchParams.get('scroll');
   
-
+// Scroll to target section if "scroll" query param is present (e.g., after redirect from login)
   useEffect(() => {
     if (scrollTarget === 'leaderboard') {
       const timer = setTimeout(() => {
@@ -99,16 +112,17 @@ const iconClass="h-5 w-5 text-cyan-100 hover scale:102 transition duration-300"
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [scrollTarget]);
+  }, [scrollTarget, Router]);
 
+  // On mount, check if user data is in context; if not, try to get from cache (handles page refresh)
   useEffect(() => {
     // By chance if user refresh page
     // On component mount, check if user data is in context; if not, try to get from cache
     const fetchUserData = async () => {
-      console.log("Navbar mounted, checking user context.");
+      // console.log("Navbar mounted, checking user context.");
       if (!user) {
          await getUserFromContext();
-         console.log("Fetched user data and save to context");
+         // console.log("Fetched user data and save to context");
       }
     };
     fetchUserData();
@@ -190,30 +204,11 @@ const iconClass="h-5 w-5 text-cyan-100 hover scale:102 transition duration-300"
                 aria-expanded={isOpen}
                 aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
               >
-                <svg
-                  className="h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  {isOpen ? (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  ) : (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  )}
-                </svg>
+                {isOpen ? (
+                  <X className="h-6 w-6" aria-hidden="true" />
+                ) : (
+                  <Menu className="h-6 w-6" aria-hidden="true" />
+                )}
               </button>
             </div>
           </div>
@@ -260,6 +255,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
-
-

@@ -4,7 +4,7 @@ import { StarRating } from "../StarRating";
 import { askLogin, errorMessage, successMessage } from "@/lib/utils/alert";
 import { useRouter } from "next/navigation";
 import { UserContext } from "@/lib/contexts/user-context";
-import { UpdateCache } from "@/lib/utils/action-redis";
+import { setCache } from "@/lib/utils/client-cache";
 import { addNewReview } from "@/lib/api/backend-api";
 
 const AddReview = ({
@@ -68,7 +68,7 @@ const AddReview = ({
           setReviews((prev) => [newReview, ...prev]);
           
           // Invalidate cache so next load gets fresh data
-          await UpdateCache("reviews",reviews);
+          await setCache("reviews", reviews);
 
           setForm({
             reviewerName: user?.username || "",

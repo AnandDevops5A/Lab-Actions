@@ -69,16 +69,16 @@ public class UserService {
         if (users != null && !users.isEmpty()) {
             // Use .get(0) instead of [0]
             User user = users.get(0);
-            int OTP=general.generateOTP();
+            int OTP = general.generateOTP();
             ForgotPasswordDTO fDTO = ForgotPasswordDTO.builder()
                     .id(user.getId()).username(user.getUsername()).otp(OTP).build();
-                    //send otp through mail
-                    try{
-                        email.sendForgetPasswordEmailOTP(user.getEmail(),user.getUsername(),OTP);
-                    
-                    }catch(Exception e){
-                        System.out.println(e);
-                    }
+            // send otp through mail
+            try {
+                email.sendForgetPasswordEmailOTP(user.getEmail(), user.getUsername(), OTP);
+
+            } catch (Exception e) {
+                System.out.println(e);
+            }
             return ResponseEntity.ok(fDTO);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Invalid Credentials");
@@ -87,38 +87,40 @@ public class UserService {
 
     // confirm reset password
     public ResponseEntity<String> confirmResetPassword(ConfirmResetDRO confirmResetData) {
-     if (confirmResetData == null || confirmResetData.id() == null || confirmResetData.accessKey() == null) {
-    return ResponseEntity.badRequest().body("Invalid input");
-}
-        
+        if (confirmResetData == null || confirmResetData.id() == null || confirmResetData.accessKey() == null) {
+            return ResponseEntity.badRequest().body("Invalid input");
+        }
+
         User user = userRepository.findById(confirmResetData.id()).orElse(null);
         if (user != null && !(user.getAccessKey().equals(confirmResetData.accessKey()))) {
             user.setAccessKey(confirmResetData.accessKey());
             userRepository.save(user);
-            //send password reset email
-            try{
-                email.sendPasswordResetEmail(user.getEmail(),user.getUsername());
-            }catch(Exception e){
+            // send password reset email
+            try {
+                email.sendPasswordResetEmail(user.getEmail(), user.getUsername());
+            } catch (Exception e) {
                 System.out.println(e);
             }
             return ResponseEntity.ok("Password reset successfully");
         } else
             return ResponseEntity.ok("Password set....");
 
-        
     }
 
     // save user
     @CacheEvict(value = "adminData", allEntries = true)
-    public ResponseEntity<User> saveUser(UserRegisterData user) {
+    public ResponseEntity<?> saveUser(UserRegisterData user) {
         // System.out.println(user);
         // check data have enough data
         if ((user == null) || (user.username() == null) ||
                 (user.callSign() == null) ||
                 (user.contact() == null) ||
-                (user.accessKey()) == null) {
-
-            return ResponseEntity.badRequest().body(null);
+                (user.accessKey() == null)
+                || (user.email() == null)) {
+            if (userRepository.existsByContact(user.contact())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("User with this contact already exists.");
+            }
+            return ResponseEntity.badRequest().body("All fields are required");
         }
 
         else {

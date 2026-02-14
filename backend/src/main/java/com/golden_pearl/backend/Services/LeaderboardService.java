@@ -17,8 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import com.golden_pearl.backend.DRO.LeaderboardRegisterReceiveData;
 import com.golden_pearl.backend.DTO.TournamentWithLeaderboard;
@@ -52,8 +50,7 @@ public class LeaderboardService {
 
     // register user for tournament
     @Transactional
-    @PostMapping("/register")
-    public ResponseEntity<String> registerUserForTournament(@RequestBody LeaderboardRegisterReceiveData registerData) {
+    public ResponseEntity<String> registerUserForTournament(LeaderboardRegisterReceiveData registerData) {
         // 1. Fail Fast: Validate inputs immediately
         if (registerData == null || registerData.userId() == null || registerData.tournamentId() == null) {
             return ResponseEntity.badRequest().body("Invalid registration data: Missing User ID or Tournament ID.");
@@ -68,12 +65,16 @@ public class LeaderboardService {
         }
 
         // Check if user exists
-        User user = userRepository.findById(registerData.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User user = userRepository.findById(registerData.userId()).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(404).body("User not found");
+        }
 
         // Check if tournament exists
-        Tournament tournament = tournamentRepository.findById(registerData.tournamentId())
-                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
+        Tournament tournament = tournamentRepository.findById(registerData.tournamentId()).orElse(null);
+        if (tournament == null) {
+            return ResponseEntity.status(404).body("Tournament not found");
+        }
 
         // 2. Use Builder Pattern for cleaner object creation
         LeaderBoard newEntry = LeaderBoard.builder()

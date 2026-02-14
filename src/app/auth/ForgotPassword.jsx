@@ -80,8 +80,8 @@ const ForgotPassword = ({ onSwitch, isDarkMode }) => {
     e.preventDefault();
     setLoading(true);
 
-    const otp = otpRef.current?.value;
-    if (!otp && !responseOTP && otp.length() !== 6) {
+    const otp = otpRef.current?.value || "";
+    if (!otp && !responseOTP && otp.length !== 6) {
       errorMessage("Please enter OTP");
       setLoading(false);
       return;

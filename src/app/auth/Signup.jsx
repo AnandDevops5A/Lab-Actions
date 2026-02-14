@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useContext, useState, useRef, memo } from "react";
-import { Users, UserPlus, Phone, Lock, Eye, EyeOff, Check } from "lucide-react";
+import { Users, UserPlus, Phone, Lock, Eye, EyeOff, Check, Mail } from "lucide-react";
 import { FetchBackendAPI } from "../../lib/api/backend-api";
 import { validatePassword } from "./PasswordCheck";
 import { useRouter } from "next/navigation";
 import { errorMessage, successMessage } from "../../lib/utils/alert";
-import { setCache } from "../../lib/utils/action-redis";
+import { setCache } from "../../lib/utils/client-cache";
 import { UserContext } from "../../lib/contexts/user-context";
 
 // ✅ Constants outside component
@@ -54,6 +54,7 @@ const Signup = memo(({ onSwitch }) => {
   const { setUser } = useContext(UserContext);
 
   const usernameRef = useRef(null);
+  const emailRef = useRef(null);
   const callSignRef = useRef(null);
   const contactRef = useRef(null);
   const accessKeyRef = useRef(null);
@@ -85,17 +86,22 @@ const Signup = memo(({ onSwitch }) => {
   };
 
   async function onSubmit(payload) {
-    console.log("Submitting payload:", payload);
+    // console.log("Submitting payload:", payload);
     const res = await FetchBackendAPI("users/register", {
       method: "POST",
       data: payload,
     });
 
+    console.log("API response:", res);
+
+    if (!res.ok) {
+      return { ok: false, message: res.message || "Server Error" };
+    }
     if (res.status === 200 && res.data) {
       const status = await setCache("currentUser", res.data);
       //set to context userdata
       setUser(res.data);
-      if (!status.status) {
+      if (!status?.status) {
         errorMessage("Error caching user data");
       }
       console.log("Data found", res.data);
@@ -115,7 +121,8 @@ const Signup = memo(({ onSwitch }) => {
       const payload = {
         username: usernameRef.current.value.trim(),
         callSign: callSignRef.current.value.trim(),
-        contact: `${countryRef.current.value}${contactRef.current.value.trim()}`,
+        email: emailRef.current.value.trim(),
+        contact: `${contactRef.current.value.trim()}`,
         accessKey: accessKeyRef.current.value,
       };
 
@@ -128,7 +135,7 @@ const Signup = memo(({ onSwitch }) => {
         setSuccess(true);
         //success popup
         successMessage("Succesfully Registered...");
-         Router.push("/player");
+         Router.push("/");
       }
     } catch (err) {
       // setError(err?.message || "Unexpected error.");
@@ -158,6 +165,13 @@ const Signup = memo(({ onSwitch }) => {
           inputRef={callSignRef}
           placeholder="Call Sign"
         />
+        <InputField
+          id="email"
+          icon={Mail}
+          inputRef={emailRef}
+          placeholder="Email"
+        />
+
 
         {/* Contact field with country select */}
         <div className="relative group gap-1">
@@ -264,6 +278,3 @@ const Signup = memo(({ onSwitch }) => {
 
 Signup.displayName = "Signup";
 export default Signup;
-
-
-

@@ -9,15 +9,10 @@ import {
   SkeletonTable,
 } from "../skeleton/Skeleton";
 import { UserContext } from "../../lib/contexts/user-context";
-import {
-  getJoinersByTournamentIdList,
-  getLeaderboard,
-  getUserTournamentDetails,
-} from "../../lib/api/backend-api";
 import { useRouter } from "next/navigation";
-import { calulateWinAndReward, fetchUserTournaments, getCurrentTime } from "../../lib/utils/common";
-import { getCache, setCache } from "../../lib/utils/action-redis";
+// import { calulateWinAndReward, fetchUserTournaments, getCurrentTime } from "../../lib/utils/common";
 import { ThemeContext } from "../../lib/contexts/theme-context";
+import { calculateWinAndReward, fetchUserTournaments, getCurrentTime } from "@/lib/utils/common";
 
 const mockPlayer = {
   ign: "SHADOW_LORD_07",
@@ -75,7 +70,6 @@ const PlayerProfile = () => {
       if (!user?.id) return;
       try {
        const data=await fetchUserTournaments(user.id);
-       console.log(data);
         setMatchHistory(data);
       } catch (err) {
         console.error("Failed to fetch tournament details", err);
@@ -109,7 +103,7 @@ const PlayerProfile = () => {
 
   const userStats = useMemo(() => {
     if (!pastMatches || !user) return { reward: 0, wins: 0 };
-    const stats = calulateWinAndReward(pastMatches);
+    const stats = calculateWinAndReward(pastMatches);
     return stats.get(user.id) || { reward: 0, wins: 0 };
   }, [pastMatches, user]);
 
