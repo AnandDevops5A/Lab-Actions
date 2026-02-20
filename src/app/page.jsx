@@ -15,6 +15,14 @@ export const metadata = {
     "Tournaments",
     "Leaderboard",
     "Pro Gaming",
+    "Competitive Gaming",
+    "Gaming Community",
+    "Esports Events",
+    "Play BGMI",
+    "BGMI Esports",
+    "BGMI Tournament",
+    "Play and wind",
+    
   ],
   openGraph: {
     title: "BGMI Elite - The Premier Esports Gaming Platform",

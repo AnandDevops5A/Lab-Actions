@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.golden_pearl.backend.DRO.AdminReplyDRO;
 import com.golden_pearl.backend.DRO.ReviewDRO;
+import com.golden_pearl.backend.DRO.ReviewUpdateReceive;
 import com.golden_pearl.backend.Models.Review;
 import com.golden_pearl.backend.Services.ReviewService;
 
@@ -31,7 +32,6 @@ public class ReviewController {
 
     @PostMapping("/add")
     public ResponseEntity<Review> addReview(@RequestBody ReviewDRO review) {
-         System.out.println("Received review data: " + review);
         return ResponseEntity.ok(reviewService.addReview(review));
     }
 
@@ -51,12 +51,12 @@ public class ReviewController {
         return ResponseEntity.ok("Review deleted successfully");
     }
     @PutMapping("/admin-reply")
-    public ResponseEntity<String> AddAdminReply(@RequestBody AdminReplyDRO adminReply){
-        return ResponseEntity.ok(reviewService.AddAdminReply(adminReply));
+    public ResponseEntity<String> addAdminReply(@RequestBody AdminReplyDRO adminReply){
+        return ResponseEntity.ok(reviewService.saveAdminReply(adminReply));
 
     } 
     @PutMapping("/update")
-    public ResponseEntity<Review> updateReview(@RequestBody Review review) {
+    public ResponseEntity<Review> updateReview(@RequestBody ReviewUpdateReceive review) {
         return ResponseEntity.ok(reviewService.updateReview(review));
     }
 

@@ -119,6 +119,7 @@ const AdminPage = () => {
         errorMessage("Tournaments not loaded yet.");
         return;
       }
+      
       const ids = [...tournaments.filter(t => t.dateTime < Date.now()).map(t => t.id)];
       
       if (ids.length === 0) return;
@@ -299,9 +300,11 @@ const tournamentData = useMemo(() => {
                 />
               )}
 
-              {activeTab === "tournaments" && (
-                <Tournament tournaments={tournaments} refreshData={mutate} />
-              )}
+             {
+            //  activeTab === "tournaments" && (
+            //     <Tournament tournaments={tournaments} refreshData={mutate} />
+            //   )
+              }
 
               {activeTab === "management" && (
                 <Management tournaments={tournaments} refreshData={mutate} />

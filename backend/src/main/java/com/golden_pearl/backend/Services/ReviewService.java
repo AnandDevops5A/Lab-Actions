@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.golden_pearl.backend.DRO.AdminReplyDRO;
 import com.golden_pearl.backend.DRO.ReviewDRO;
+import com.golden_pearl.backend.DRO.ReviewUpdateReceive;
 import com.golden_pearl.backend.Models.Review;
 import com.golden_pearl.backend.Repository.ReviewRepository;
 
@@ -19,13 +20,9 @@ public class ReviewService {
     }
 
     public Review addReview(ReviewDRO review) {
-        System.out.println(review);
-
-        // Review newReview = new Review();
         Review newReview = Review.builder().reviewId(review.reviewId()).reviewerName(review.reviewerName())
                 .comment(review.comment()).tournamentId(review.tournamentId())
                 .rating(review.rating()).createdAt(review.createdAt()).tags(review.tags()).build();
-        // return newReview;
         return reviewRepository.save(newReview);
     }
 
@@ -41,11 +38,18 @@ public class ReviewService {
         reviewRepository.deleteById(reviewId);
     }
 
-    public Review updateReview(Review review) {
-        return reviewRepository.save(review);
+    public Review updateReview(ReviewUpdateReceive review) {
+        Review existingReview = reviewRepository.findById(review.reviewId()).orElse(null);
+        if (existingReview == null) {
+            return null;
+        }
+        Review  updatedReview =existingReview.toBuilder().comment(review.comment()).rating(review.rating())
+                .createdAt(review.createdAt()).build();
+
+        return reviewRepository.save(updatedReview);
     }
 
-    public String AddAdminReply(AdminReplyDRO adminReply) {
+    public String saveAdminReply(AdminReplyDRO adminReply) {
         Review review = reviewRepository.findById(adminReply.reviewId()).orElse(null);
         try {
             if (review != null) {

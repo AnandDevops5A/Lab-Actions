@@ -297,9 +297,6 @@ export default function MatchJoiningForm({
     };
   }, [open, user?.id, alreadyRegistered, setOpen]);
 
-  // const upcomingTournament=await getCache("upcomingTournament");
-  //   console.log(upcomingTournament);
-
   async function handleChange(e) {
     const { name, value } = e.target;
     if (name !== "tournamentId") {
@@ -350,41 +347,56 @@ export default function MatchJoiningForm({
       tournamentId,
     };
 
-    const response = await joinTournament(payload);
-    console.log(payload);
-    console.log(response);
+    try {
+      const response = await joinTournament(payload);
+      // console.log(payload);
+      console.log(response);
 
-    
-  if(response.data) { successMessage(
-      response.data.message ||
-        response.data ||
-        "Successfully joined tournament",
-    );}
-    if (!response.ok) {
-      errorMessage(response.error || "Failed to join tournament");
+      if (!response.ok) {
+        errorMessage(
+          response.data?.message || response.data || "Failed to join tournament",
+        );
+        setSubmitting(false);
+        return;
+      }
+
+      if (response.data) {
+        successMessage(
+          response.data.message ||
+            response.data ||
+            "Successfully joined tournament",
+        );
+      }
+
+      //update cache with adding recent join of user tournament details
+      if (user?.id) {
+        await deleteCache(`userTournamentDetails:${user.id}`);
+      }
+
       setSubmitting(false);
-      return;
+      setSuccess(true);
+      setTimeout(() => {
+        setSuccess(false);
+        setOpen(false);
+        setQrCode(null);
+        setTournamentId("");
+        formRef.current = {
+          userId: user?.id || "",
+          transactionId: "",
+          tempEmail: user?.email || "",
+          gameId: "",
+        };
+      }, 1000);
+    } catch (error) {
+      console.error("Error joining tournament:", error);
+      // Handle JSON parse errors which likely mean the backend returned a plain text string
+      if (error.name === "SyntaxError" && error.message.includes("JSON")) {
+        errorMessage("You might be already joined or Server Error");
+      } else {
+        errorMessage("An error occurred while joining.");
+      }
+      setSubmitting(false);
     }
-
-    //update cache with adding recent join of user tournament details
-    if (user?.id) {
-      await deleteCache(`userTournamentDetails:${user.id}`);
-    }
-
-    setSubmitting(false);
-    setSuccess(true);
-    setTimeout(() => {
-      setSuccess(false);
-      setOpen(false);
-      setQrCode(null);
-      setTournamentId("");
-      formRef.current = {
-        userId: user?.id || "",
-        transactionId: "",
-        tempEmail: user?.email || "",
-        gameId: "",
-      };
-    }, 1000);
   }
 
   if (!open) return null;

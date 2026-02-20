@@ -1,7 +1,7 @@
 'use client'
 import React, { createContext, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { successMessage } from "../utils/alert";
+import { confirmMessage, successMessage } from "../utils/alert";
 // Create Context
 export const UserContext = createContext();
 
@@ -20,25 +20,15 @@ export const UserProvider = ({ children }) => {
       const logout = useCallback(async () => {
     try {
       if (user) {
-        Swal.fire({
-          title: "Are you sure?",
-          text: "You want to go out!",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor: "#d33",
-          confirmButtonText: "Yes, I do!",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            localStorage.removeItem("currentUser");
-            setUser(null);
-            successMessage("Logged out successfully");
-            setTimeout(() => {
-                window.location.href = "/";
-            }, 1000);
-          }
-          return;
-        });
+      let response = await confirmMessage("Are you sure you want to logout?");
+      if (response) {
+        localStorage.removeItem("currentUser");
+        setUser(null);
+        successMessage("Logged out successfully!");
+        router.push("/auth");
+      } else {
+        successMessage("Logout cancelled.");
+      }
       }
     } catch (error) {
       console.error("Logout error:", error);

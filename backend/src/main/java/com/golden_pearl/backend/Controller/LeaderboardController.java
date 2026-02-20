@@ -35,22 +35,20 @@ public class LeaderboardController {
     }
 
     //get all leaderboard
-    @Cacheable(value="leaderboardData")
     @GetMapping("/all")
     public ResponseEntity<List<LeaderBoard>> getAllLeaderboard() {
         return ResponseEntity.ok(leaderboardService.getAllLeaderboard());
     }
 
     // register user for tournament
-    @CacheEvict(value = "leaderboardData", allEntries = true)
     @PostMapping("/register")
     public ResponseEntity<String> registerUserForTournament(@RequestBody LeaderboardRegisterReceiveData registerData) {
-        // System.out.println("Received registration data: " + registerData);
-        return leaderboardService.registerUserForTournament(registerData);
+       ResponseEntity<String> result =leaderboardService.registerUserForTournament(registerData);
+       System.out.println(result);
+        return result;
 
     }
 
-    @CacheEvict(value = "leaderboardData", allEntries = true)
     @PostMapping("/registerAll/{tournamentId}/users/{userIds}")
     public ResponseEntity<String> registerAllUsersForTournament(@PathVariable String tournamentId,
             @PathVariable List<String> userIds) {
@@ -61,7 +59,7 @@ public class LeaderboardController {
         return leaderboardService.registerAllUsersForTournament(tournament, userIds);
     }
 
-    @PostMapping("/getJoiners/{tournamentId}")
+    @GetMapping("/getJoiners/{tournamentId}")
     public ResponseEntity<List<LeaderBoard>> getLeaderboard(@PathVariable String tournamentId) {
         return leaderboardService.getLeaderboard(tournamentId);
     }
@@ -70,7 +68,7 @@ public class LeaderboardController {
     // get leaderboard by tournament ids
 
     @PostMapping("/getJoiners")
-    public ResponseEntity<?> getLeaderboardByTournamentIds(@RequestBody List<String> tournamentIds) {
+    public ResponseEntity<List<LeaderBoard>> getLeaderboardByTournamentIds(@RequestBody List<String> tournamentIds) {
         return leaderboardService.getLeaderboardByTournamentIds(tournamentIds);
     }
 
@@ -100,9 +98,8 @@ public class LeaderboardController {
         return leaderboardService.updateScore(tournamentId, userId, score);
     }
 
-    @PostMapping("/user/{userId}")
+    @GetMapping("/user/{userId}")
     public ResponseEntity<List<TournamentWithLeaderboard>> getJoinedUsersTournaments(@PathVariable String userId) {
-        // System.out.println("db hits");
         return leaderboardService.getTournamentsByUserId(userId);
     }
 

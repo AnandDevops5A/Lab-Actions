@@ -3,6 +3,8 @@ package com.golden_pearl.backend.Services;
 import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -11,6 +13,7 @@ import com.golden_pearl.backend.DRO.ForgotPasswordDRO;
 import com.golden_pearl.backend.DRO.UserAuth;
 import com.golden_pearl.backend.DRO.UserRegisterData;
 import com.golden_pearl.backend.DRO.ConfirmResetDRO;
+import com.golden_pearl.backend.DRO.UserDetailsUpdateReceive;
 import com.golden_pearl.backend.DTO.ForgotPasswordDTO;
 import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.Repository.UserRepository;
@@ -32,8 +35,14 @@ public class UserService {
 
     // find user by id
 
+    @Cacheable(value = "user", key = "#id")
     public User findUserById(String id) {
-        return userRepository.findById(id).orElse(null);
+        if (id == null)
+            return null;
+        System.out.println("Fetching user with id: " + id);
+        User user = userRepository.findById(id).orElse(null);
+        System.out.println("Db hit ");
+        return user;
     }
 
     // verify user by contact and accessKey or contact and accessKey
@@ -59,9 +68,9 @@ public class UserService {
     }
 
     // update Password
-    public ResponseEntity<?> updatePassword(ForgotPasswordDRO fpDRO) {
+    public ResponseEntity<ForgotPasswordDTO> updatePassword(ForgotPasswordDRO fpDRO) {
         if (fpDRO == null || fpDRO.contact() == null || fpDRO.email() == null) {
-            return ResponseEntity.badRequest().body("Invalid input");
+            return ResponseEntity.badRequest().body(null);
         }
         List<User> users = userRepository.findByContactAndEmail(fpDRO.contact(), fpDRO.email());
 
@@ -81,11 +90,16 @@ public class UserService {
             }
             return ResponseEntity.ok(fDTO);
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Invalid Credentials");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
     // confirm reset password
+    @Caching(evict = {
+            @CacheEvict(value = "user", key = "#confirmResetData.id()"),
+            @CacheEvict(value = "users", allEntries = true),
+            @CacheEvict(value = "adminData", allEntries = true)
+    })
     public ResponseEntity<String> confirmResetPassword(ConfirmResetDRO confirmResetData) {
         if (confirmResetData == null || confirmResetData.id() == null || confirmResetData.accessKey() == null) {
             return ResponseEntity.badRequest().body("Invalid input");
@@ -108,45 +122,69 @@ public class UserService {
     }
 
     // save user
-    @CacheEvict(value = "adminData", allEntries = true)
-    public ResponseEntity<?> saveUser(UserRegisterData user) {
-        // System.out.println(user);
+    @Caching(evict = {
+            @CacheEvict(value = "users", allEntries = true),
+            @CacheEvict(value = "adminData", allEntries = true)
+    })
+    public ResponseEntity<String> saveUser(UserRegisterData user) {
         // check data have enough data
         if ((user == null) || (user.username() == null) ||
                 (user.callSign() == null) ||
                 (user.contact() == null) ||
                 (user.accessKey() == null)
                 || (user.email() == null)) {
-            if (userRepository.existsByContact(user.contact())) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("User with this contact already exists.");
-            }
+            
             return ResponseEntity.badRequest().body("All fields are required");
         }
+        if (userRepository.existsByContact(user.contact())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("User with this contact already exists.");
+            }
 
         else {
             User readyUser = general.convertResponseToUser(user);
-            // System.out.println(readyUser);
-            return ResponseEntity.ok(userRepository.save(readyUser));
+            userRepository.save(readyUser);
+            return ResponseEntity.ok("User saved successfully");
         }
 
     }
 
     // get all users
+    @Cacheable(value = "users")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userRepository.findAll();
         return ResponseEntity.ok(users);
     }
 
     // update user
-    @CacheEvict(value = "adminData", allEntries = true)
-    public ResponseEntity<User> updateUser(User user) {
-        if (user.getId() == null) {
+    @Caching(evict = {
+            @CacheEvict(value = "user", key = "#user.userId()"),
+            @CacheEvict(value = "users", allEntries = true),
+            @CacheEvict(value = "adminData", allEntries = true)
+    })
+    public ResponseEntity<User> updateUser(UserDetailsUpdateReceive user) {
+         if (user.userId() == null) {
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(userRepository.save(user));
+        User existingUser = userRepository.findById(user.userId()).orElse(null);
+        if (existingUser == null) {
+            return ResponseEntity.notFound().build();
+        }
+        else{
+            User updatedUser = existingUser.toBuilder()
+                    .name(user.name())
+                    .email(user.email())
+                    .contact(user.contact())
+                    .callSign(user.callSign())
+                    .accessKey(user.accessKey())
+                    .build();
+            return ResponseEntity.ok(userRepository.save(updatedUser));
+        }
+
+       
     }
 
     // get users by ids
+    @Cacheable(value = "usersByIds", key = "#userIds.toString()")
     public ResponseEntity<List<User>> getUsersByIds(List<String> userIds) {
         if (userIds == null || userIds.isEmpty()) {
             return ResponseEntity.badRequest().build();
@@ -156,7 +194,10 @@ public class UserService {
     }
 
     // bulk save users
-    @CacheEvict(value = "adminData", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "users", allEntries = true),
+            @CacheEvict(value = "adminData", allEntries = true)
+    })
     public ResponseEntity<List<User>> saveAllUsers(List<User> users) {
         if (users == null || users.isEmpty()) {
             return ResponseEntity.badRequest().build();

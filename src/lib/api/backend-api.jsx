@@ -10,6 +10,10 @@ const RETRY_DELAY = 1000; // ms
 const fetcher = async (url, method = "GET", data = null, timeout = 10000) => {
   let lastError;
 
+  // Get token from localStorage
+  const currentUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem("currentUser")) : null;
+  const token = currentUser?.token || currentUser?.accessToken;
+
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
       const controller = new AbortController();
@@ -17,7 +21,10 @@ const fetcher = async (url, method = "GET", data = null, timeout = 10000) => {
 
       const options = {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(token && { "Authorization": `Bearer ${token}` })
+        },
         signal: controller.signal,
         ...(data && { body: JSON.stringify(data) }),
       };
@@ -26,19 +33,27 @@ const fetcher = async (url, method = "GET", data = null, timeout = 10000) => {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
+        // senior tip: Don't retry on 4xx client errors (401, 403, 404, etc.)
+        if (response.status >= 400 && response.status < 500) {
+          const errorData = await response.json().catch(() => ({}));
+          throw { 
+            status: response.status, 
+            message: errorData.message || `HTTP ${response.status}: ${response.statusText}`,
+            noRetry: true 
+          };
+        }
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       return await response.json();
     } catch (error) {
       lastError = error;
-      if (attempt < MAX_RETRIES - 1) {
-        await new Promise((resolve) =>
-          setTimeout(resolve, RETRY_DELAY * Math.pow(2, attempt))
-        );
-      }
+      if (error.noRetry || attempt === MAX_RETRIES - 1) break;
+      
+      const delay = RETRY_DELAY * Math.pow(2, attempt);
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
-  throw lastError || new Error("Max retries exceeded");
+  throw lastError;
 };
 
 /**
@@ -113,15 +128,14 @@ export async function FetchBackendAPI(
 
 //user API functions
 export const getUsersByIds = async (userIds) => {
-  
-  return await FetchBackendAPI("users/getUsersByIds/"+userIds, {
-    method: "POST",
+  return await FetchBackendAPI(`users/getUsersByIds/${userIds}`, {
+    method: "GET",
   });
 };
 
 export const getAllUsers = async () => {
   return await FetchBackendAPI("users/all", {
-    method: "POST",
+    method: "GET",
   });
 };
 
@@ -146,7 +160,7 @@ export const confirmPasswordReset = async (payload) => {
 //tournament ApI functions
 export const getAllTournaments = async () => {
   return await FetchBackendAPI("tournament/all", {
-    method: "POST",
+    method: "GET",
   });
 };
 
@@ -228,9 +242,9 @@ export const registerAllUsersForTournament = async (tournamentId, userIds) => {
   );
 };
 
-export const getHisJoinedTouenament = async (userId) => {
+export const getJoinedTournaments = async (userId) => {
   return await FetchBackendAPI(`leaderboard/user/${userId}`, {
-    method: "POST",
+    method: "GET",
   });
 };
 export const joinTournament = async (form) => {
@@ -242,16 +256,15 @@ export const joinTournament = async (form) => {
 
 export const getUserTournamentDetails = async (userId) => {
   return await FetchBackendAPI(`leaderboard/user/${userId}`, {
-    method: "POST",
+    method: "GET",
   });
 };
 
 
 
 export const getJoinersByTournamentId = async (tournamentId) => {
-  // it 
   return await FetchBackendAPI(`leaderboard/getJoiners/${tournamentId}`, {
-    method: "POST",
+    method: "GET",
   });
 };
 
@@ -316,13 +329,13 @@ export const addNewReview = async (review) => {
 
 export const getReviewsByTournamentId = async (tournamentId) => {
   return await FetchBackendAPI(`review/tournament/${tournamentId}`, {
-    method: "POST",
+    method: "GET",
   });
 };
 
 export const getReviewsByUserId = async (userId) => {
   return await FetchBackendAPI(`review/user/${userId}`, {
-    method: "POST",
+    method: "GET",
   });
 };
 

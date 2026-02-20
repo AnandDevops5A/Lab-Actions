@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.Services.TournamentService;
@@ -39,14 +41,14 @@ public class TournamentController {
         this.tournamentService = tournamentService;
     }
 
-    @RequestMapping(path = "/all", method = RequestMethod.POST)
+@GetMapping("/all")
     public ResponseEntity<List<Tournament>> getAllTournaments() {
         return ResponseEntity.ok(tournamentService.getAllTournaments());
     }
 
-    @RequestMapping(path = "/add", method = RequestMethod.POST)
+    @PostMapping("/add")
     public ResponseEntity<List<Tournament>> addTournament(@RequestBody TournamentReceiveData tournamentDetails) {
-       Tournament readyTournament = new Tournament();
+        Tournament readyTournament = new Tournament();
         readyTournament.setTournamentName(tournamentDetails.tournamentName());
         readyTournament.setPrizePool(tournamentDetails.prizePool());
         readyTournament.setDateTime(tournamentDetails.dateTime());
@@ -57,40 +59,37 @@ public class TournamentController {
         return ResponseEntity.status(201).body(returnUpcoming);
     }
 
-//delete tournament by id
-    @RequestMapping(path = "/delete/{tournamentId}", method = RequestMethod.DELETE)
+    // delete tournament by id
+    @DeleteMapping("/delete/{tournamentId}")
     public ResponseEntity<String> deleteTournament(@PathVariable String tournamentId) {
-        // System.out.println("Deleting tournament with ID: " + tournamentId);
         tournamentService.deleteTournamentById(tournamentId);
         return ResponseEntity.ok("Tournament deleted successfully");
     }
 
-
-    @RequestMapping(path = "/update", method = RequestMethod.PUT)
+    @PutMapping("/update")
     public ResponseEntity<Tournament> updateTournament(@RequestBody Tournament tournamentDetails) {
         Tournament updatedTournament = tournamentService.updateTournament(tournamentDetails);
         return ResponseEntity.ok(updatedTournament);
     }
 
-    @RequestMapping(path = "/upcoming", method = RequestMethod.GET)
+    @GetMapping("/upcoming")
     public ResponseEntity<List<Tournament>> getUpcomingTournaments() {
         return ResponseEntity.ok(tournamentService.getUpcomingTournaments());
     }
 
-    //
-    @RequestMapping(path = "/completed", method = RequestMethod.GET)
+    @GetMapping("/completed")
     public ResponseEntity<List<Tournament>> getCompletedTournaments() {
         return ResponseEntity.ok(tournamentService.getCompletedTournaments());
     }
 
     // service for the user who not login or registered
-    @RequestMapping(path = "/lastTournament", method = RequestMethod.GET)
+    @GetMapping("/lastTournament")
     public ResponseEntity<Tournament> getLastTournaments() {
 
         return ResponseEntity.ok(tournamentService.getLastTournament());
     }
 
-    @RequestMapping(path = "/saveAll", method = RequestMethod.POST)
+    @PostMapping("/saveAll")
     public ResponseEntity<List<Tournament>> saveAllTournaments(@RequestBody List<Tournament> tournaments) {
         List<Tournament> savedTournaments = tournamentService.saveAllTournaments(tournaments);
         return ResponseEntity.status(201).body(savedTournaments);
@@ -108,29 +107,10 @@ public class TournamentController {
         return ResponseEntity.ok(tournamentService.getTournamentById(tournamentId));
     }
 
-    // register user for a tournament
-    @PostMapping("/register/{tournamentId}/user/{userId}")
-    public String registerUserForTournament(@PathVariable String tournamentId, @PathVariable String userId) {
-        return tournamentService.registerUserForTournament(tournamentId, userId);
-
-    }
-
-  
-    // update rank of user
-    @PostMapping("/updateRank/{tId}/{uId}/{rank}")
-    public ResponseEntity<String> updateRank(@PathVariable String tId, @PathVariable String uId,
-            @PathVariable int rank) {
-        return tournamentService.updateRank(tId, uId, rank);
-    }
-
-    //find all tournament by list 
+    // find all tournament by list
     @PostMapping("/getTournamentsByIds/{tournamentIds}")
-    public List<Tournament> getTournamentsbyids(@PathVariable List<String> tournamentIds){
-        // System.out.println(tournamentIds);
+    public List<Tournament> getTournamentsbyids(@PathVariable List<String> tournamentIds) {
         return tournamentService.getTournamentsbyids(tournamentIds);
-        // return null;
     }
-
-    
 
 }

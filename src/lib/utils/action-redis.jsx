@@ -18,12 +18,20 @@ const initRedis = async () => {
       Redis = (await import("ioredis")).default;
     }
     
-    redisClient = new Redis({
-      host: process.env.REDIS_HOST || "localhost",
-      port: process.env.REDIS_PORT || 6379,
+    const options = {
       connectTimeout: 10000,
       retryStrategy: (times) => Math.min(times * 50, 2000),
-    });
+    };
+
+    if (process.env.REDIS_URL) {
+      redisClient = new Redis(process.env.REDIS_URL, options);
+    } else {
+      redisClient = new Redis({
+        host: process.env.REDIS_HOST || "localhost",
+        port: process.env.REDIS_PORT || 6379,
+        ...options,
+      });
+    }
     
     return redisClient;
   } catch (error) {

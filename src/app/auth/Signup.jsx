@@ -1,13 +1,10 @@
 "use client";
 
-import React, { useContext, useState, useRef, memo } from "react";
+import React, {  useState, useRef, memo } from "react";
 import { Users, UserPlus, Phone, Lock, Eye, EyeOff, Check, Mail } from "lucide-react";
 import { FetchBackendAPI } from "../../lib/api/backend-api";
 import { validatePassword } from "./PasswordCheck";
-import { useRouter } from "next/navigation";
-import { errorMessage, successMessage } from "../../lib/utils/alert";
-import { setCache } from "../../lib/utils/client-cache";
-import { UserContext } from "../../lib/contexts/user-context";
+import { errorMessage, simpleMessage, successMessage } from "../../lib/utils/alert";
 
 // ✅ Constants outside component
 const COUNTRIES = [
@@ -50,8 +47,7 @@ function InputField({
 }
 
 const Signup = memo(({ onSwitch }) => {
-  const Router = useRouter();
-  const { setUser } = useContext(UserContext);
+
 
   const usernameRef = useRef(null);
   const emailRef = useRef(null);
@@ -86,7 +82,7 @@ const Signup = memo(({ onSwitch }) => {
   };
 
   async function onSubmit(payload) {
-    // console.log("Submitting payload:", payload);
+    console.log(payload);
     const res = await FetchBackendAPI("users/register", {
       method: "POST",
       data: payload,
@@ -95,17 +91,11 @@ const Signup = memo(({ onSwitch }) => {
     console.log("API response:", res);
 
     if (!res.ok) {
-      return { ok: false, message: res.message || "Server Error" };
+      return { ok: false, message: res.message || "Server Error",status: res.status,data: res.data };
     }
     if (res.status === 200 && res.data) {
-      const status = await setCache("currentUser", res.data);
-      //set to context userdata
-      setUser(res.data);
-      if (!status?.status) {
-        errorMessage("Error caching user data");
-      }
-      console.log("Data found", res.data);
-      return { ok: true };
+   
+      return { ok: true ,message:res.data};
     }
     return { ok: false, message: res.message };
   }
@@ -126,16 +116,24 @@ const Signup = memo(({ onSwitch }) => {
         accessKey: accessKeyRef.current.value,
       };
 
-      // console.log("Submitting payload:", payload);
+      
 
       const res = await onSubmit(payload);
-      if (!res.ok) {
-        errorMessage(res.message || "Server Error");
+      console.log(res);
+      if (!res.ok && res.status===409) {
+        simpleMessage("Phone number or email already registered.");
+        setError(res.message || "User already exist.");
+      }
+      else if(res.ok && res.status!==200){
+        errorMessage(res.message || "Internal Server Error");
+
       } else {
         setSuccess(true);
         //success popup
-        successMessage("Succesfully Registered...");
-         Router.push("/");
+        onSwitch?.("login")
+        successMessage(res.message || "Succesfully Registered...");
+
+        //  Router.push("/");
       }
     } catch (err) {
       // setError(err?.message || "Unexpected error.");
