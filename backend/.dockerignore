@@ -1,0 +1,21 @@
+# Ignore build output from Maven
+target/
+
+# Ignore Docker build context files
+.dockerignore
+dockerfile
+
+# Ignore Git repository files and configurations
+.git/
+.gitignore
+
+# Ignore IDE-specific files and directories
+.idea/
+*.iml
+
+# Ignore log files
+*.log
+
+# Ignore local environment or compose files
+*.yaml
+*.yml
