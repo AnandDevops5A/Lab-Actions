@@ -4,7 +4,7 @@ import { StarRating } from "../StarRating";
 import { askLogin, errorMessage, successMessage } from "@/lib/utils/alert";
 import { useRouter } from "next/navigation";
 import { UserContext } from "@/lib/contexts/user-context";
-import { setCache } from "@/lib/utils/client-cache";
+import { deleteCache, setCache } from "@/lib/utils/client-cache";
 import { addNewReview } from "@/lib/api/backend-api";
 
 const AddReview = ({
@@ -12,6 +12,7 @@ const AddReview = ({
   tournaments,
   isDarkMode,
   inputClasses,
+  loadReviews
 }) => {
   const router = useRouter();
   const { user } = useContext(UserContext);
@@ -66,10 +67,11 @@ const AddReview = ({
           
           // Optimistic update
           setReviews((prev) => [newReview, ...prev]);
-          
           // Invalidate cache so next load gets fresh data
-          await setCache("reviews", reviews);
+          await deleteCache("reviews");
+         await loadReviews();
 
+          // Reset form
           setForm({
             reviewerName: user?.username || "",
             tournamentId: "",

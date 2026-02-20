@@ -6,9 +6,8 @@ import dynamic from "next/dynamic";
 import { getCache, setCache } from "@/lib/utils/client-cache";
 import {  errorMessage} from "@/lib/utils/alert";
 import { UserContext } from "@/lib/contexts/user-context";
-import { SkeletonCard, SkeletonTable } from "../skeleton/Skeleton";
+import { SkeletonCard } from "../skeleton/Skeleton";
 import { getAllReviews, getAllTournaments } from "@/lib/api/backend-api";
-import { dummyReview } from "@/lib/constants/dummy-data";
 
 const AddReview = dynamic(() => import("./section/AddReview"), {
   loading: () => <SkeletonCard />,
@@ -27,7 +26,7 @@ const Reviews = dynamic(() => import("./section/Reviews"), {
 });
 
 const ReviewHero = dynamic(() => import("./section/ReviewHero"), {
-  loading: () => <SkeletonTable />,
+  loading: () => <div className="h-[348px] w-full animate-pulse rounded-2xl bg-gray-800/50" />,
   ssr: false,
 });
 
@@ -35,17 +34,15 @@ export default function ReviewsPage() {
   const themeContext = useContext(ThemeContext);
   const { isDarkMode } = themeContext || { isDarkMode: true };
   const { user } = useContext(UserContext);
-  const [tournament, setTournament] = useState([]);
- 
-
-  const [reviews, setReviews] = useState(dummyReview);
+  const [tournaments, setTournaments] = useState([]);
+  const [reviews, setReviews] = useState([]);
 
   async function loadTournaments() {
     try {
       const cacheResult = await getCache("AllTournament");
       if (cacheResult?.status) {
-        // console.log(cacheResult.data);
-        return setTournament(Array.from(cacheResult.data));
+        setTournaments(Array.from(cacheResult.data));
+        return;
       }
       
       const dbResult = await getAllTournaments();
@@ -53,9 +50,8 @@ export default function ReviewsPage() {
         return errorMessage("Server Error");
       }
       let data = Array.from(dbResult.data);
-      // console.log(dbResult.data);
-      setTournament(data);
-      return await setCache("AllTournament", data);
+      setTournaments(data);
+      await setCache("AllTournament", data);
     } catch (err) {
       console.error(err);
       return errorMessage("Unexpected Error");
@@ -71,7 +67,7 @@ export default function ReviewsPage() {
 
       const dbResult = await getAllReviews();
       if (!dbResult?.ok) {
-        return errorMessage("Server Error");
+        return errorMessage("Internal Server Error");
       }
 
       setReviews(dbResult.data);
@@ -85,12 +81,11 @@ export default function ReviewsPage() {
   
 
   const [filters, setFilters] = useState({
-    tournamentName: "all",
+    tournamentId: "all",
     sort: "newest",
     minRating: 0,
     search: "",
   });
-
 
   const filtered = useMemo(() => {
     let data = [...reviews];
@@ -122,23 +117,20 @@ export default function ReviewsPage() {
     return data;
   }, [reviews, filters]);
 
-
-  function TournamentBadge({ id }) {
-    // console.log();;
-    const t = tournament.find((x) => x.id == id);
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2 py-1 text-xs font-medium text-cyan-300">
-        <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-        {t?.tournamentName ?? "Unknown"}
-      </span>
-    );
-  }
+  // For efficient lookups, create a map of tournament IDs to names.
+  // This is much faster than using .find() inside a loop.
+  const tournamentMap = useMemo(() => 
+    new Map(tournaments.map(t => [t.id, t.tournamentName])),
+    [tournaments]
+  );
 
   useEffect(() => {
-    // loadData
-    loadTournaments();
-    loadReviews();
-  }, []);
+    // Fetch tournaments and reviews concurrently for better performance.
+    const loadData = async () => {
+      await Promise.all([loadTournaments(), loadReviews()]);
+    };
+    loadData();
+  }, []); // Empty dependency array ensures this runs only once on mount.
   const inputClasses = `mt-1 w-full rounded-lg border border-white/10 ${
     isDarkMode ? "bg-black/60" : "bg-gray-200/50"
   } px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
@@ -152,7 +144,7 @@ export default function ReviewsPage() {
       <ReviewHero
         setFilters={setFilters}
         reviews={reviews}
-        tournaments={tournament}
+        tournaments={tournaments}
         filters={filters}
         isDarkMode={isDarkMode}
         inputClasses={inputClasses}
@@ -162,7 +154,7 @@ export default function ReviewsPage() {
 
       <Reviews
         filtered={filtered}
-        TournamentBadge={TournamentBadge}
+        tournamentMap={tournamentMap}
         isDarkMode={isDarkMode}
       />
 
@@ -170,9 +162,10 @@ export default function ReviewsPage() {
 
       <AddReview
         setReviews={setReviews}
-        tournaments={tournament}
+        tournaments={tournaments}
         isDarkMode={isDarkMode}
         inputClasses={inputClasses}
+        loadReviews={loadReviews}
       />
     </main>
   );

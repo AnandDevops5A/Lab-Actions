@@ -16,7 +16,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,10 +56,10 @@ public class LeaderboardService {
             @CacheEvict(value = "adminData", allEntries = true),
             @CacheEvict(value = "allLeaderboards", allEntries = true)
     })
-    public ResponseEntity<String> registerUserForTournament(LeaderboardRegisterReceiveData registerData) {
+    public String registerUserForTournament(LeaderboardRegisterReceiveData registerData) {
         // 1. Fail Fast: Validate inputs immediately
         if (registerData == null || registerData.userId() == null || registerData.tournamentId() == null) {
-            return ResponseEntity.badRequest().body("Invalid registration data: Missing User ID or Tournament ID.");
+            throw new IllegalArgumentException("Invalid registration data: Missing User ID or Tournament ID.");
         }
 
         // Check if user is already registered for this tournament
@@ -68,19 +67,19 @@ public class LeaderboardService {
                 registerData.userId());
 
         if (existingEntry != null) {
-            return ResponseEntity.ok("You are already registered for this tournament.");
+            return "You are already registered for this tournament.";
         }
 
         // Check if user exists
         User user = userService.findUserById(registerData.userId());
         if (user == null) {
-            return ResponseEntity.status(404).body("User not found");
+            throw new ResourceNotFoundException("User not found");
         }
 
         // Check if tournament exists
         Tournament tournament = tournamentService.getTournamentById(registerData.tournamentId());
         if (tournament == null) {
-            return ResponseEntity.status(404).body("Tournament not found");
+            throw new ResourceNotFoundException("Tournament not found");
         }
 
         // 2. Use Builder Pattern for cleaner object creation
@@ -105,26 +104,24 @@ public class LeaderboardService {
             System.err.println("Failed to send confirmation email: " + e.getMessage());
         }
 
-        return ResponseEntity.ok(
-                "You registered successfully for the " + tournament.getTournamentName());
+        return "You registered successfully for the " + tournament.getTournamentName();
     }
 
     // get leaderboard for a tournament
-    @Cacheable(value = "leaderboard", key = "#tournamentId")
-    public ResponseEntity<List<LeaderBoard>> getLeaderboard(String tournamentId) {
+    @Cacheable(value = "leaderboard", key = "#tournamentId", sync = true)
+    public List<LeaderBoard> getLeaderboard(String tournamentId) {
         // Check if tournament exists
         // Tournament tournament = tournamentRepository.findById(tournamentId)
         if (tournamentService.getTournamentById(tournamentId) == null) {
             throw new ResourceNotFoundException("Tournament not found");
         }
 
-        List<LeaderBoard> leaderboard = leaderboardRepository.findByTournamentIdOrderByRankAsc(tournamentId);
-        return ResponseEntity.ok(leaderboard);
+        return leaderboardRepository.findByTournamentIdOrderByRankAsc(tournamentId);
     }
 
     // get top n leaderboard for a tournament
-    @Cacheable(value = "topNLeaderboard", key = "#tournamentId + '-' + #n")
-    public ResponseEntity<List<LeaderBoard>> getTopNLeaderboard(String tournamentId, int n) {
+    @Cacheable(value = "topNLeaderboard", key = "#tournamentId + '-' + #n", sync = true)
+    public List<LeaderBoard> getTopNLeaderboard(String tournamentId, int n) {
         // Check if tournament exists
         // Tournament tournament = tournamentRepository.findById(tournamentId)
         if (tournamentService.getTournamentById(tournamentId) == null) {
@@ -134,7 +131,7 @@ public class LeaderboardService {
         Pageable pageable = PageRequest.of(0, n);
         Page<LeaderBoard> leaderboard = leaderboardRepository.findByTournamentIdOrderByScoreDesc(tournamentId,
                 pageable);
-        return ResponseEntity.ok(leaderboard.getContent());
+        return leaderboard.getContent();
     }
 
     // update rank of user
@@ -147,20 +144,20 @@ public class LeaderboardService {
             @CacheEvict(value = "adminData", allEntries = true),
             @CacheEvict(value = "allLeaderboards", allEntries = true)
     })
-    public ResponseEntity<String> updateRank(String tournamentId, String userId, int rank) {
+    public String updateRank(String tournamentId, String userId, int rank) {
         // Find the LeaderBoard entry
         LeaderBoard entry = leaderboardRepository.findByTournamentIdAndUserId(tournamentId, userId);
         if (entry == null) {
             throw new ResourceNotFoundException("User not registered for this tournament");
         }
         if (entry.getRank() != null && entry.getRank() == rank) {
-            return ResponseEntity.ok("Rank is already up to date");
+            return "Rank is already up to date";
         }
         entry.setRank(rank);
 
         leaderboardRepository.save(entry);
 
-        return ResponseEntity.ok("Rank updated successfully");
+        return "Rank updated successfully";
     }
 
     // update score of user
@@ -173,7 +170,7 @@ public class LeaderboardService {
             @CacheEvict(value = "adminData", allEntries = true),
             @CacheEvict(value = "allLeaderboards", allEntries = true)
     })
-    public ResponseEntity<String> updateScore(String tournamentId, String userId, int score) {
+    public String updateScore(String tournamentId, String userId, int score) {
         // Find the LeaderBoard entry
         LeaderBoard entry = leaderboardRepository.findByTournamentIdAndUserId(tournamentId, userId);
         if (entry == null) {
@@ -196,14 +193,13 @@ public class LeaderboardService {
 
         leaderboardRepository.save(updatedEntry);
 
-        return ResponseEntity.ok("Score updated successfully");
+        return "Score updated successfully";
     }
 
     // get tournaments joined by a user
-    @Cacheable(value = "userTournaments", key = "#userId")
-    public ResponseEntity<List<LeaderBoard>> getJoinedUsersTournaments(String userId) {
-        List<LeaderBoard> userTournaments = leaderboardRepository.findByUserId(userId);
-        return ResponseEntity.ok(userTournaments);
+    @Cacheable(value = "userTournaments", key = "#userId", sync = true)
+    public List<LeaderBoard> getJoinedUsersTournaments(String userId) {
+        return leaderboardRepository.findByUserId(userId);
     }
 
     @Caching(evict = {
@@ -214,9 +210,9 @@ public class LeaderboardService {
             @CacheEvict(value = "adminData", allEntries = true),
             @CacheEvict(value = "allLeaderboards", allEntries = true)
     })
-    public ResponseEntity<String> registerAllUsersForTournament(Tournament tournament, List<String> userIds) {
+    public String registerAllUsersForTournament(Tournament tournament, List<String> userIds) {
         if (userIds == null || userIds.isEmpty()) {
-            return ResponseEntity.ok("No users provided for registration");
+            return "No users provided for registration";
         }
 
         // Fetch all existing entries for this tournament in one query
@@ -249,94 +245,15 @@ public class LeaderboardService {
             leaderboardRepository.saveAll(entriesToSave);
         }
 
-        return ResponseEntity
-                .ok("All users registered successfully for the tournament: " + tournament.getTournamentName());
+        return "All users registered successfully for the tournament: " + tournament.getTournamentName();
     }
 
-    @Cacheable(value = "leaderboardByIds", key = "#tournamentIds.toString()")
-    public ResponseEntity<List<LeaderBoard>> getLeaderboardByTournamentIds(List<String> tournamentIds) {
-        List<LeaderBoard> leaderboard = leaderboardRepository.findByTournamentIdIn(tournamentIds);
-        return ResponseEntity.ok(leaderboard);
+    @Cacheable(value = "leaderboardByIds", key = "#tournamentIds.toString()", sync = true)
+    public List<LeaderBoard> getLeaderboardByTournamentIds(List<String> tournamentIds) {
+        return leaderboardRepository.findByTournamentIdIn(tournamentIds);
     }
 
-    // Seed leaderboard with fake/sample data for a tournament
-    @Transactional
-    @Caching(evict = {
-            @CacheEvict(value = "leaderboard", key = "#tournamentId"),
-            @CacheEvict(value = "topNLeaderboard", allEntries = true),
-            @CacheEvict(value = "userTournaments", allEntries = true),
-            @CacheEvict(value = "userTournamentsDetails", allEntries = true),
-            @CacheEvict(value = "adminData", allEntries = true),
-            @CacheEvict(value = "allLeaderboards", allEntries = true)
-    })
-    public ResponseEntity<String> seedLeaderboard(List<String> listOfUserIds, String tournamentId, int count) {
-        // 1. Validations & Bounds
-        if (listOfUserIds == null || listOfUserIds.isEmpty())
-            return ResponseEntity.badRequest().body("Empty user list");
-
-        // Senior move: Ensure we never exceed our unique amount pool (1-50)
-        int seedLimit = Math.min(count, Math.min(listOfUserIds.size(), 50));
-
-        Tournament tournament = tournamentService.getTournamentById(tournamentId);
-        if (tournament == null) {
-            throw new ResourceNotFoundException("Tournament not found");
-        }
-
-        // 2. Data Preparation
-        List<String> shuffledUsers = new ArrayList<>(listOfUserIds);
-        Collections.shuffle(shuffledUsers);
-
-        List<Integer> amountPool = IntStream.rangeClosed(1, 50).boxed().collect(Collectors.toList());
-        Collections.shuffle(amountPool);
-
-        ThreadLocalRandom rnd = ThreadLocalRandom.current();
-        List<LeaderBoard> entries = new ArrayList<>();
-
-        // Move time calculation OUTSIDE the loop unless you want different minutes per
-        // entry
-        int timeAsInt = (LocalTime.now().getHour() * 100) + LocalTime.now().getMinute();
-
-        // 3. Generation
-        for (int i = 0; i < seedLimit; i++) {
-            String userId = shuffledUsers.get(i);
-            String shortId = tournamentId.substring(Math.max(0, tournamentId.length() - 4));
-            String gameId = String.format("G-%s-%03d", shortId, i + 1);
-
-            entries.add(LeaderBoard.builder()
-                    .tournamentId(tournamentId)
-                    .userId(userId)
-                    .gameId(gameId)
-                    .tempEmail(userId + "@example.com")
-                    .transactionId("TXN-" + UUID.randomUUID().toString().substring(0, 8))
-                    .score(rnd.nextInt(1, 100))
-                    .investAmount(amountPool.get(i))
-                    .time(timeAsInt)
-                    .isApproved(true)
-                    .build());
-        }
-
-        // 4. Ranking & Prize Distribution
-        entries.sort((a, b) -> Integer.compare(b.getScore(), a.getScore()));
-
-        for (int i = 0; i < entries.size(); i++) {
-            LeaderBoard entry = entries.get(i);
-            entry.setRank(i + 1);
-
-            // Fixed indexing: i=0 is 1st place
-            switch (i) {
-                case 0 -> entry.setWinAmount(500); // 1st Place
-                case 1 -> entry.setWinAmount(300); // 2nd Place
-                case 2 -> entry.setWinAmount(100); // 3rd Place
-                default -> entry.setWinAmount(0);
-            }
-        }
-
-        // 5. Save
-        leaderboardRepository.saveAll(entries);
-        return ResponseEntity
-                .ok(String.format("Seeded %d entries for %s", entries.size(), tournament.getTournamentName()));
-    }
-
+ 
     @Caching(evict = {
             @CacheEvict(value = "leaderboard", key = "#tournamentId"),
             @CacheEvict(value = "topNLeaderboard", allEntries = true),
@@ -345,26 +262,26 @@ public class LeaderboardService {
             @CacheEvict(value = "adminData", allEntries = true),
             @CacheEvict(value = "allLeaderboards", allEntries = true)
     })
-    public ResponseEntity<String> approveUserFromTournament(String tournamentId, String userId) {
+    public String approveUserFromTournament(String tournamentId, String userId) {
         // Find the LeaderBoard entry
         LeaderBoard entry = leaderboardRepository.findByTournamentIdAndUserId(tournamentId, userId);
         if (entry == null) {
             throw new ResourceNotFoundException("User not registered for this tournament");
         }
         if (entry.getIsApproved()) {
-            return ResponseEntity.ok("User is already approved for this tournament");
+            return "User is already approved for this tournament";
         }
         entry.setIsApproved(true);
 
         leaderboardRepository.save(entry);
 
-        return ResponseEntity.ok("User approved successfully for the tournament");
+        return "User approved successfully for the tournament";
     }
 
     // get tournament list by user id with rank and invest amount
-    @Cacheable(value = "userTournamentsDetails", key = "#userId")
-    public ResponseEntity<List<TournamentWithLeaderboard>> getTournamentsByUserId(String userId) {
-        return ResponseEntity.ok(leaderboardRepository.findTournamentsByUserIdWithDetails(userId));
+    @Cacheable(value = "userTournamentsDetails", key = "#userId", sync = true)
+    public List<TournamentWithLeaderboard> getTournamentsByUserId(String userId) {
+        return (leaderboardRepository.findTournamentsByUserIdWithDetails(userId));
     }
 
     // Update leaderboard entry (rank, investAmount and winAmount) - partial updates
@@ -379,7 +296,7 @@ public class LeaderboardService {
             @CacheEvict(value = "adminData", allEntries = true),
             @CacheEvict(value = "allLeaderboards", allEntries = true)
     })
-    public ResponseEntity<String> updateLeaderboardEntry(String leaderboardId, Integer rank, Integer investAmount,
+    public String updateLeaderboardEntry(String leaderboardId, Integer rank, Integer investAmount,
             Integer winAmount) {
         // Find the LeaderBoard entry
         LeaderBoard entry = leaderboardRepository.findById(leaderboardId)
@@ -402,7 +319,7 @@ public class LeaderboardService {
 
         leaderboardRepository.save(updatedEntry);
 
-        return ResponseEntity.ok("Leaderboard entry updated successfully");
+        return "Leaderboard entry updated successfully";
     }
 
     // Approve leaderboard entry
@@ -415,16 +332,16 @@ public class LeaderboardService {
             @CacheEvict(value = "adminData", allEntries = true),
             @CacheEvict(value = "allLeaderboards", allEntries = true)
     })
-    public ResponseEntity<String> approveLeaderboardEntry(String leaderboardId) {
+    public String approveLeaderboardEntry(String leaderboardId) {
         // Find the LeaderBoard entry
         if (leaderboardId == null) {
-            return ResponseEntity.badRequest().body("Leaderboard ID is required");
+            throw new IllegalArgumentException("Leaderboard ID is required");
         }
         LeaderBoard entry = leaderboardRepository.findById(leaderboardId)
                 .orElseThrow(() -> new ResourceNotFoundException("Leaderboard entry not found"));
 
         if (entry.getIsApproved()) {
-            return ResponseEntity.ok("Entry is already approved");
+            return "Entry is already approved";
         }
 
         // Update the entry
@@ -444,10 +361,10 @@ public class LeaderboardService {
 
         leaderboardRepository.save(updatedEntry);
 
-        return ResponseEntity.ok("Leaderboard entry approved successfully");
+        return "Leaderboard entry approved successfully";
     }
 
-    @Cacheable(value = "allLeaderboards")
+    @Cacheable(value = "allLeaderboards", sync = true)
     public List<LeaderBoard> getAllLeaderboard() {
         return leaderboardRepository.findAll();
     }

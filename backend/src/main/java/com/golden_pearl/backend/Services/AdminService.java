@@ -26,7 +26,7 @@ public class AdminService {
         this.leaderBoardRepository = leaderBoardRepository;
     }
 
-    @Cacheable(value = "adminData")
+    @Cacheable(value = "adminData", sync = true)
     public Map<String, Object> getAllData() {
         Map<String, Object> response = new HashMap<>();
         System.out.println("Database hit for admin database");

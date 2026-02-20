@@ -13,23 +13,24 @@ services:
 #       - redis
 #     networks:
 #       - spring-boot-mongo-net
-# #backend service
-  backend:
-    image: 'anand7254/golden-pearl-backend'
-    container_name: backend
-    ports:
-      - '8082:8082'
-    environment:
-      # Secrets should be loaded from a .env file, not hardcoded.
-      SPRING_DATA_MONGODB_URI: ${SPRING_DATA_MONGODB_URI}
-      SPRING_DATA_MONGODB_DATABASE: ${SPRING_DATA_MONGODB_DATABASE:-golden_pearl_db}
-      REDIS_HOST: 'redis'
-      REDIS_PORT: '6379'
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
-    depends_on:
-      - redis
-    networks:
-      - spring-boot-mongo-net
+#  #backend service
+#   backend:
+#     image: 'anand7254/golden-pearl-backend'
+#     container_name: backend
+#     ports:
+#       - '8082:8082'
+#     environment:
+#       # Secrets should be loaded from a .env file, not hardcoded.
+#       SPRING_DATA_MONGODB_URI: ${SPRING_DATA_MONGODB_URI}
+#       SPRING_DATA_MONGODB_DATABASE: ${SPRING_DATA_MONGODB_DATABASE:-golden_pearl_db}
+#       REDIS_HOST: 'redis'
+#       REDIS_PORT: '6379'
+#       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+#     depends_on:
+#       - redis
+#     networks:
+#       - spring-boot-mongo-net
+
 # Redis service for caching
   redis:
     image: 'redis:7.2'

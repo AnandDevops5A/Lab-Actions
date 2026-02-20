@@ -10,7 +10,6 @@ import {
 } from "../skeleton/Skeleton";
 import { UserContext } from "../../lib/contexts/user-context";
 import { useRouter } from "next/navigation";
-// import { calulateWinAndReward, fetchUserTournaments, getCurrentTime } from "../../lib/utils/common";
 import { ThemeContext } from "../../lib/contexts/theme-context";
 import { calculateWinAndReward, fetchUserTournaments, getCurrentTime } from "@/lib/utils/common";
 

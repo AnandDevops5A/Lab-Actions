@@ -1,4 +1,5 @@
 import useSWR from "swr";
+import axios from "axios";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8082";
 const MAX_RETRIES = 3;
@@ -16,38 +17,31 @@ const fetcher = async (url, method = "GET", data = null, timeout = 10000) => {
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-      const options = {
+      const response = await axios({
+        url,
         method,
+        data,
+        timeout,
         headers: { 
           "Content-Type": "application/json",
           ...(token && { "Authorization": `Bearer ${token}` })
         },
-        signal: controller.signal,
-        ...(data && { body: JSON.stringify(data) }),
-      };
+      });
 
-      const response = await fetch(url, options);
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        // senior tip: Don't retry on 4xx client errors (401, 403, 404, etc.)
-        if (response.status >= 400 && response.status < 500) {
-          const errorData = await response.json().catch(() => ({}));
-          throw { 
-            status: response.status, 
-            message: errorData.message || `HTTP ${response.status}: ${response.statusText}`,
-            noRetry: true 
-          };
-        }
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      return await response.json();
+      return response.data;
     } catch (error) {
-      lastError = error;
-      if (error.noRetry || attempt === MAX_RETRIES - 1) break;
+      const status = error.response?.status;
+      const message = error.response?.data?.message || error.message;
+
+      lastError = { status, message };
+
+      // senior tip: Don't retry on 4xx client errors (401, 403, 404, etc.)
+      if (status && status >= 400 && status < 500) {
+        lastError.noRetry = true;
+        throw lastError;
+      }
+
+      if (attempt === MAX_RETRIES - 1) break;
       
       const delay = RETRY_DELAY * Math.pow(2, attempt);
       await new Promise((resolve) => setTimeout(resolve, delay));
@@ -103,7 +97,7 @@ export const useSWRBackendAPI = (
  */
 export async function FetchBackendAPI(
   endpoint,
-  { method = "POST", data = null, revalidate = 0, timeout = 15000 } = {},
+  { method = "POST", data = null, timeout = 15000 } = {},
 ) {
   if (!endpoint) throw new Error("Endpoint is required");
 
@@ -214,11 +208,6 @@ export const getTopNLeaderboard = async (tournamentId, n) => {
   });
 };
 
-export const getUserTournaments = async (userId) => {
-  return await FetchBackendAPI(`leaderboard/user/${userId}`, {
-    method: "POST",
-  });
-};
 
 export const updateLeaderboardScore = async (tournamentId, userId, score) => {
   return await FetchBackendAPI(
@@ -242,11 +231,7 @@ export const registerAllUsersForTournament = async (tournamentId, userIds) => {
   );
 };
 
-export const getJoinedTournaments = async (userId) => {
-  return await FetchBackendAPI(`leaderboard/user/${userId}`, {
-    method: "GET",
-  });
-};
+
 export const joinTournament = async (form) => {
   return await FetchBackendAPI("leaderboard/register", {
     method: "POST",
@@ -255,7 +240,7 @@ export const joinTournament = async (form) => {
 };
 
 export const getUserTournamentDetails = async (userId) => {
-  return await FetchBackendAPI(`leaderboard/user/${userId}`, {
+  return await FetchBackendAPI(`leaderboard/user/${userId}`, {         
     method: "GET",
   });
 };

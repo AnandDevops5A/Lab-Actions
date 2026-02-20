@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useContext, useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import gsap from 'gsap';
 import { UserContext } from '../../lib/contexts/user-context';
@@ -17,6 +17,8 @@ const NavbarContent = () => {
   const { user, getUserFromContext } = useContext(UserContext);
   const themeContext = useContext(ThemeContext);
   const { isDarkMode } = themeContext || { isDarkMode: true };
+  const pathname = usePathname();
+  const [activeItem, setActiveItem] = useState("Home");
 
   // Animation refs
   const navRef = useRef(null);
@@ -62,7 +64,7 @@ const NavbarContent = () => {
         icons: <PenLine className={iconClass} />,
       },
     { name: 'leaderboard', href: '/Leaderboard',icons:<LucideTrophy className={iconClass}/> },
-    { name: 'Admin', href: '/admin' ,icons:<Crown  className={iconClass}/> },
+    { name: 'Admin', href: user?.id=='6974a799de1b4d108fac7149' ? '/admin' : '/',icons:<Crown  className={iconClass}/> },
     { name: user ?'My Profile':'Login', href: user ? '/player' : '/auth' ,icons:user ? <IdCard className={iconClass}/>:<LogIn className={iconClass}/>}
   ], [user, iconClass]);
   const [showNavbar, setShowNavbar] = useState(true);
@@ -91,6 +93,20 @@ const NavbarContent = () => {
   const searchParams = useSearchParams();
   const scrollTarget = searchParams.get('scroll');
   
+  // Sync active state with path and params
+  useEffect(() => {
+    if (scrollTarget === 'leaderboard') {
+       setActiveItem('leaderboard');
+    } else {
+       const active = navItems.find(item => item.href === pathname);
+       if (active) {
+         setActiveItem(active.name);
+       } else if (pathname === '/') {
+         setActiveItem("Home");
+       }
+    }
+  }, [pathname, navItems, scrollTarget]);
+
 // Scroll to target section if "scroll" query param is present (e.g., after redirect from login)
   useEffect(() => {
     if (scrollTarget === 'leaderboard') {
@@ -172,14 +188,16 @@ const NavbarContent = () => {
                 <Link
                   key={item.name}
                   href={!user  && item.name === "leaderboard" ? "/?scroll=leaderboard" : item.href}
-                  className={`group ${idx % 2 === 0 ? "animate-slideInLeft" : "animate-slideInRight"} px-4 py-2 text-sm capitalize font-semibold transition-colors duration-200 text-gray-200/90 hover:text-slate-100 border-l-2 border-r-2 border-transparent hover:border-l-neon-red hover:border-r-neon-red ${item.name !== "leaderboard" ? "focus:cursor-none" : ""} nav-item`}
+                  onClick={() => setActiveItem(item.name)}
+                  className={`group ${idx % 2 === 0 ? "animate-slideInLeft" : "animate-slideInRight"} px-4 py-2 text-sm capitalize font-semibold transition-colors duration-200 ${activeItem === item.name ? "text-slate-100 border-l-neon-red border-r-neon-red pointer-events-none" : "text-gray-200/90 border-transparent"} hover:text-slate-100 border-l-2 border-r-2 hover:border-l-neon-red hover:border-r-neon-red ${item.name !== "leaderboard" ? "focus:cursor-none" : ""} nav-item
+                  ${item.name === 'Admin' && user?.id !== '6974a799de1b4d108fac7149' ? "hidden" : "block"}`}
                   aria-label={item.name}
                   title={item.name}
                >
                   <span className="relative inline-block">
                  <span className="hidden lg:block">   {item.name}</span>
                  <span className="block lg:hidden">{item.icons}</span>
-                    <span className="absolute left-0 -bottom-1 h-0.5 w-full bg-linear-to-r from-red-400 to-yellow-400 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
+                    <span className={`absolute left-0 -bottom-1 h-0.5 w-full bg-linear-to-r from-red-400 to-yellow-400 transform ${activeItem === item.name ? "scale-x-100" : "scale-x-0"} group-hover:scale-x-100 transition-transform origin-left`}></span>
                   </span>
                 </Link>
               ))}
@@ -225,11 +243,11 @@ const NavbarContent = () => {
                   <Link
                     key={item.name}
                     href={item.href}
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => { setIsOpen(false); setActiveItem(item.name); }}
                     className={`block px-4 py-2 rounded-lg text-base font-medium transition-colors shadow-sm ${
                       isDarkMode
-                        ? 'text-gray-200 hover:bg-gray-800 hover:text-slate-100'
-                        : 'text-gray-800 hover:bg-blue-100 hover:text-gray-900'
+                        ? `${activeItem === item.name ? "bg-gray-800 text-slate-100" : "text-gray-200"} hover:bg-gray-800 hover:text-slate-100`
+                        : `${activeItem === item.name ? "bg-blue-100 text-gray-900" : "text-gray-800"} hover:bg-blue-100 hover:text-gray-900`
                     }`}
                   >
                     <span className="inline-block">{item.name}</span>

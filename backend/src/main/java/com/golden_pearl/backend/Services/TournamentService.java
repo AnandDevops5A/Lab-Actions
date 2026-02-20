@@ -26,7 +26,7 @@ public class TournamentService {
 
     // get all tournaments
 
-    @Cacheable(value = "tournaments")
+    @Cacheable(value = "tournaments", sync = true)
     public List<Tournament> getAllTournaments() {
         return tournamentRepository.findAll();
     }
@@ -50,15 +50,16 @@ public class TournamentService {
     }
 
     // get tournament by id
-    @Cacheable(value = "tournament", key = "#id")
+    @Cacheable(value = "tournament", key = "#id",sync = true)
     public Tournament getTournamentById(String id) {
+        System.out.println("Fetching tournament with id: " );
         return tournamentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tournament not found with id: " + id));
     }
 
     // delete tournament by id
     @Caching(evict = {
-            @CacheEvict(value = "tournament", key = "#id"),
+            @CacheEvict(value = "tournament", key = "#id" ),
             @CacheEvict(value = "tournaments", allEntries = true),
             @CacheEvict(value = "upcomingTournaments", allEntries = true),
             @CacheEvict(value = "completedTournaments", allEntries = true),
@@ -98,19 +99,19 @@ public class TournamentService {
     }
 
     // get completed tournaments
-    @Cacheable(value = "completedTournaments")
+    @Cacheable(value = "completedTournaments", sync = true)
     public List<Tournament> getCompletedTournaments() {
         return tournamentRepository.findByDateTimeLessThan(general.getCurrentDateTime());
     }
 
     // get upcoming tournaments
-    @Cacheable(value = "upcomingTournaments")
+    @Cacheable(value = "upcomingTournaments", sync = true)
     public List<Tournament> getUpcomingTournaments() {
         return tournamentRepository.findByDateTimeGreaterThan(general.getCurrentDateTime());
     }
 
     // get last tournament
-    @Cacheable(value = "lastTournament")
+    @Cacheable(value = "lastTournament", sync = true)
     public Tournament getLastTournament() {
         return tournamentRepository.findFirstByDateTimeLessThan(general.getCurrentDateTime());
     }
@@ -130,7 +131,7 @@ public class TournamentService {
 
     // register user for a tournament
 
-    @Cacheable(value = "tournamentsByIds")
+    @Cacheable(value = "tournamentsByIds", sync = true)
     public List<Tournament> getTournamentsbyids(List<String> tournamentIds) {
         if (tournamentIds == null || tournamentIds.isEmpty()) {
             throw new IllegalArgumentException("Tournament IDs cannot be null or empty");

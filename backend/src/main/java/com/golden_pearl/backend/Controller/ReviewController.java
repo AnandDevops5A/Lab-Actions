@@ -42,11 +42,17 @@ public class ReviewController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Review>> getReviewsByUserId(@PathVariable String userId) {
+        if (userId == null || userId.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.ok(reviewService.getReviewsByUserId(userId));
     }
 
     @DeleteMapping("/delete/{reviewId}")
     public ResponseEntity<String> deleteReview(@PathVariable String reviewId) {
+        if (reviewId == null || reviewId.isEmpty()) {
+            return ResponseEntity.badRequest().body("Invalid review ID");
+        }
         reviewService.deleteReview(reviewId);
         return ResponseEntity.ok("Review deleted successfully");
     }
@@ -57,7 +63,14 @@ public class ReviewController {
     } 
     @PutMapping("/update")
     public ResponseEntity<Review> updateReview(@RequestBody ReviewUpdateReceive review) {
-        return ResponseEntity.ok(reviewService.updateReview(review));
+        if (review == null || review.reviewId() == null || review.reviewId().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        Review updatedReview = reviewService.updateReview(review);
+        if (updatedReview != null) {
+            return ResponseEntity.ok(updatedReview);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/test")

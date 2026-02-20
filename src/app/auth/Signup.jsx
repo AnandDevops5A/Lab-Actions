@@ -124,7 +124,7 @@ const Signup = memo(({ onSwitch }) => {
         simpleMessage("Phone number or email already registered.");
         setError(res.message || "User already exist.");
       }
-      else if(res.ok && res.status!==200){
+      else if( res.status!==200){
         errorMessage(res.message || "Internal Server Error");
 
       } else {

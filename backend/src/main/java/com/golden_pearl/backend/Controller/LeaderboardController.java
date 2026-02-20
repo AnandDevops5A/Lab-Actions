@@ -21,6 +21,7 @@ import com.golden_pearl.backend.Models.LeaderBoard;
 import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.Services.LeaderboardService;
 import com.golden_pearl.backend.Services.TournamentService;
+import com.golden_pearl.backend.errors.ResourceNotFoundException;
 
 @RestController
 @RequestMapping("/leaderboard")
@@ -43,10 +44,14 @@ public class LeaderboardController {
     // register user for tournament
     @PostMapping("/register")
     public ResponseEntity<String> registerUserForTournament(@RequestBody LeaderboardRegisterReceiveData registerData) {
-       ResponseEntity<String> result =leaderboardService.registerUserForTournament(registerData);
-       System.out.println(result);
-        return result;
-
+        try {
+            String result = leaderboardService.registerUserForTournament(registerData);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
     }
 
     @PostMapping("/registerAll/{tournamentId}/users/{userIds}")
@@ -56,12 +61,12 @@ public class LeaderboardController {
         if (tournament == null) {
             return ResponseEntity.badRequest().body("Tournament not found");
         }
-        return leaderboardService.registerAllUsersForTournament(tournament, userIds);
+        return ResponseEntity.ok(leaderboardService.registerAllUsersForTournament(tournament, userIds));
     }
 
     @GetMapping("/getJoiners/{tournamentId}")
     public ResponseEntity<List<LeaderBoard>> getLeaderboard(@PathVariable String tournamentId) {
-        return leaderboardService.getLeaderboard(tournamentId);
+        return ResponseEntity.ok(leaderboardService.getLeaderboard(tournamentId));
     }
 
 
@@ -69,57 +74,56 @@ public class LeaderboardController {
 
     @PostMapping("/getJoiners")
     public ResponseEntity<List<LeaderBoard>> getLeaderboardByTournamentIds(@RequestBody List<String> tournamentIds) {
-        return leaderboardService.getLeaderboardByTournamentIds(tournamentIds);
+        return ResponseEntity.ok(leaderboardService.getLeaderboardByTournamentIds(tournamentIds));
     }
 
     // approve user from tournament
     @PostMapping("/approve/{tournamentId}/user/{userId}")
     public ResponseEntity<String> approveUser(@PathVariable String tournamentId, @PathVariable String userId) {
-        return leaderboardService.approveUserFromTournament(tournamentId, userId);
+        return ResponseEntity.ok(leaderboardService.approveUserFromTournament(tournamentId, userId));
     }
 
     
 
     @PostMapping("/updateRank")
     public ResponseEntity<String> updateRank(@RequestBody UpdateRank updateRankData) {
-        return leaderboardService.updateRank(updateRankData.tournamentId(), updateRankData.userId(),
-                updateRankData.rank());
+        return ResponseEntity.ok(leaderboardService.updateRank(updateRankData.tournamentId(), updateRankData.userId(),
+                updateRankData.rank()));
     }
 
     @GetMapping("/{tournamentId}/top/{n}")
     public ResponseEntity<List<LeaderBoard>> getTopNLeaderboard(@PathVariable String tournamentId,
             @PathVariable int n) {
-        return leaderboardService.getTopNLeaderboard(tournamentId, n);
+        return ResponseEntity.ok(leaderboardService.getTopNLeaderboard(tournamentId, n));
     }
 
     @PostMapping("/updateScore/{tournamentId}/{userId}/{score}")
     public ResponseEntity<String> updateScore(@PathVariable String tournamentId, @PathVariable String userId,
             @PathVariable int score) {
-        return leaderboardService.updateScore(tournamentId, userId, score);
+        return ResponseEntity.ok(leaderboardService.updateScore(tournamentId, userId, score));
     }
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<TournamentWithLeaderboard>> getJoinedUsersTournaments(@PathVariable String userId) {
-        return leaderboardService.getTournamentsByUserId(userId);
+        List<TournamentWithLeaderboard> tournaments = leaderboardService.getTournamentsByUserId(userId);
+        return ResponseEntity.ok(tournaments);
     }
 
     // Update leaderboard entry (rank, investAmount and winAmount)
     @PutMapping("/update/{leaderboardId}")
     public ResponseEntity<String> updateLeaderboardEntry(@PathVariable String leaderboardId, @RequestBody UpdateLeaderboardEntry updateData) {
-        return leaderboardService.updateLeaderboardEntry(leaderboardId, updateData.rank(), updateData.investAmount(), updateData.winAmount());
+        return ResponseEntity.ok(leaderboardService.updateLeaderboardEntry(leaderboardId, updateData.rank(), updateData.investAmount(), updateData.winAmount()));
     }
 
     // Approve leaderboard entry
     @PutMapping("/approve/{leaderboardId}")
     public ResponseEntity<String> approveLeaderboardEntry(@PathVariable String leaderboardId) {
-        return leaderboardService.approveLeaderboardEntry(leaderboardId);
+        try {
+            return ResponseEntity.ok(leaderboardService.approveLeaderboardEntry(leaderboardId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
-    // seed leaderboard with sample data
-    @PostMapping("/seed/{listOfUserIds}/{tournamentId}/{count}")
-    public ResponseEntity<String> seedLeaderboard(@PathVariable List<String> listOfUserIds,
-            @PathVariable String tournamentId, @PathVariable int count) {
-        return leaderboardService.seedLeaderboard(listOfUserIds,tournamentId, count);
-    }
 
 }

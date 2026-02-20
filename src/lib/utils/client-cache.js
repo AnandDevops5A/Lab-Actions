@@ -11,7 +11,7 @@ import Redis from "ioredis";
 const globalForRedis = global;
 
 if (!globalForRedis.redis) {
-  globalForRedis.redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
+  globalForRedis.redis = new Redis(process.env.REDIS_URL || "redis://127.0.0.1:6379");
 }
 
 const redis = globalForRedis.redis;

@@ -1,11 +1,17 @@
 import React from 'react'
 import { StarRating } from '../StarRating'
-// import { TournamentBadge } from './TournamentBadge'
 
+const TournamentBadge = ({ id, tournamentMap }) => {
+  const tournamentName = tournamentMap.get(id) ?? "Unknown";
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2 py-1 text-xs font-medium text-cyan-300">
+      <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+      {tournamentName}
+    </span>
+  );
+};
 
-
-const Reviews = ({ filtered,TournamentBadge,isDarkMode}) => {
-  // console.log(filtered);
+const Reviews = ({ filtered, tournamentMap, isDarkMode}) => {
   return (
      <section id="reviews" className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16 ${isDarkMode ? "bg-black/40" : "bg-blue-200/50"} `}>
         <div className="flex items-center justify-between mb-4 ">
@@ -28,7 +34,7 @@ const Reviews = ({ filtered,TournamentBadge,isDarkMode}) => {
                   <h4 className="font-bold mb-1 text-sm">{r.reviewerName}</h4>
                   <div className="mt-1 flex items-center gap-2">
                     <StarRating value={r.rating} readOnly size="sm" />
-                    <TournamentBadge id={r.tournamentId } />
+                    <TournamentBadge id={r.tournamentId} tournamentMap={tournamentMap} />
                   </div>
                 </div>
                 <time
@@ -87,6 +93,3 @@ const Reviews = ({ filtered,TournamentBadge,isDarkMode}) => {
 }
 
 export default Reviews
-
-
-

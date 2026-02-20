@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.Services.TournamentService;
+import com.golden_pearl.backend.errors.ResourceNotFoundException;
 
 import org.springframework.web.bind.annotation.RestController;
 
@@ -104,13 +105,17 @@ public class TournamentController {
     // get tournament by id
     @GetMapping("/{tournamentId}")
     public ResponseEntity<Tournament> getTournamentById(@PathVariable String tournamentId) {
-        return ResponseEntity.ok(tournamentService.getTournamentById(tournamentId));
+        try {
+            return ResponseEntity.ok(tournamentService.getTournamentById(tournamentId));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // find all tournament by list
     @PostMapping("/getTournamentsByIds/{tournamentIds}")
-    public List<Tournament> getTournamentsbyids(@PathVariable List<String> tournamentIds) {
-        return tournamentService.getTournamentsbyids(tournamentIds);
+    public ResponseEntity<List<Tournament>> getTournamentsbyids(@PathVariable List<String> tournamentIds) {
+        return ResponseEntity.ok(tournamentService.getTournamentsbyids(tournamentIds));
     }
 
 }

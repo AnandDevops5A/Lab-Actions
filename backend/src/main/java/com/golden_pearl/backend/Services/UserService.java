@@ -5,8 +5,6 @@ import java.util.List;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.golden_pearl.backend.DRO.ForgotPasswordDRO;
@@ -35,7 +33,7 @@ public class UserService {
 
     // find user by id
 
-    @Cacheable(value = "user", key = "#id")
+    @Cacheable(value = "user", key = "#id" ,sync = true)
     public User findUserById(String id) {
         if (id == null)
             return null;
@@ -46,7 +44,7 @@ public class UserService {
     }
 
     // verify user by contact and accessKey or contact and accessKey
-    public ResponseEntity<User> getUser(UserAuth userAuth) {
+    public User getUser(UserAuth userAuth) {
         User user;
         Long contact = userAuth.contact();
         String accessKey = userAuth.accessKey();
@@ -54,23 +52,19 @@ public class UserService {
         // Input validation: accessKey is mandatory, and either callsign or contact must
         // be present.
         if (accessKey == null || contact == null) {
-            return ResponseEntity.badRequest().build(); // 400 Bad Request
+            throw new IllegalArgumentException("Missing contact or access key");
         }
 
         // contact must not be null here because of the validation above
         user = userRepository.findByContactAndAccessKey(contact, accessKey);
 
-        if (user != null) {
-            return ResponseEntity.ok(user); // 200 OK with user data
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401 Unauthorized
-        }
+        return user; // Returns null if not found (Controller handles 401)
     }
 
     // update Password
-    public ResponseEntity<ForgotPasswordDTO> updatePassword(ForgotPasswordDRO fpDRO) {
+    public ForgotPasswordDTO updatePassword(ForgotPasswordDRO fpDRO) {
         if (fpDRO == null || fpDRO.contact() == null || fpDRO.email() == null) {
-            return ResponseEntity.badRequest().body(null);
+            return null;
         }
         List<User> users = userRepository.findByContactAndEmail(fpDRO.contact(), fpDRO.email());
 
@@ -88,9 +82,9 @@ public class UserService {
             } catch (Exception e) {
                 System.out.println(e);
             }
-            return ResponseEntity.ok(fDTO);
+            return fDTO;
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return null;
         }
     }
 
@@ -100,9 +94,9 @@ public class UserService {
             @CacheEvict(value = "users", allEntries = true),
             @CacheEvict(value = "adminData", allEntries = true)
     })
-    public ResponseEntity<String> confirmResetPassword(ConfirmResetDRO confirmResetData) {
+    public String confirmResetPassword(ConfirmResetDRO confirmResetData) {
         if (confirmResetData == null || confirmResetData.id() == null || confirmResetData.accessKey() == null) {
-            return ResponseEntity.badRequest().body("Invalid input");
+            throw new IllegalArgumentException("Invalid input");
         }
 
         User user = userRepository.findById(confirmResetData.id()).orElse(null);
@@ -115,9 +109,9 @@ public class UserService {
             } catch (Exception e) {
                 System.out.println(e);
             }
-            return ResponseEntity.ok("Password reset successfully");
+            return "Password reset successfully";
         } else
-            return ResponseEntity.ok("Password set....");
+            return "Password set....";
 
     }
 
@@ -126,7 +120,7 @@ public class UserService {
             @CacheEvict(value = "users", allEntries = true),
             @CacheEvict(value = "adminData", allEntries = true)
     })
-    public ResponseEntity<String> saveUser(UserRegisterData user) {
+    public String saveUser(UserRegisterData user) {
         // check data have enough data
         if ((user == null) || (user.username() == null) ||
                 (user.callSign() == null) ||
@@ -134,25 +128,24 @@ public class UserService {
                 (user.accessKey() == null)
                 || (user.email() == null)) {
             
-            return ResponseEntity.badRequest().body("All fields are required");
+            throw new IllegalArgumentException("All fields are required");
         }
         if (userRepository.existsByContact(user.contact())) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("User with this contact already exists.");
+                throw new IllegalArgumentException("User with this contact already exists.");
             }
 
         else {
             User readyUser = general.convertResponseToUser(user);
             userRepository.save(readyUser);
-            return ResponseEntity.ok("User saved successfully");
+            return "User saved successfully";
         }
 
     }
 
     // get all users
-    @Cacheable(value = "users")
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        return ResponseEntity.ok(users);
+    @Cacheable(value = "users", sync = true)
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
     // update user
@@ -161,36 +154,41 @@ public class UserService {
             @CacheEvict(value = "users", allEntries = true),
             @CacheEvict(value = "adminData", allEntries = true)
     })
-    public ResponseEntity<User> updateUser(UserDetailsUpdateReceive user) {
+    public User updateUser(UserDetailsUpdateReceive user) {
          if (user.userId() == null) {
-            return ResponseEntity.badRequest().build();
+            throw new IllegalArgumentException("User ID is required");
         }
         User existingUser = userRepository.findById(user.userId()).orElse(null);
         if (existingUser == null) {
-            return ResponseEntity.notFound().build();
+            return null;
         }
         else{
-            User updatedUser = existingUser.toBuilder()
-                    .name(user.name())
-                    .email(user.email())
-                    .contact(user.contact())
-                    .callSign(user.callSign())
-                    .accessKey(user.accessKey())
-                    .build();
-            return ResponseEntity.ok(userRepository.save(updatedUser));
+            // User updatedUser = existingUser.toBuilder()
+            //         .name(user.name())
+            //         .email(user.email())
+            //         .contact(user.contact())
+            //         .callSign(user.callSign())
+            //         .accessKey(user.accessKey())
+            //         .build();
+            existingUser.setUsername(user.name());
+            existingUser.setEmail(user.email());
+            existingUser.setContact(user.contact());
+            existingUser.setCallSign(user.callSign());
+            existingUser.setAccessKey(user.accessKey());
+
+            return userRepository.save(existingUser);
         }
 
        
     }
 
     // get users by ids
-    @Cacheable(value = "usersByIds", key = "#userIds.toString()")
-    public ResponseEntity<List<User>> getUsersByIds(List<String> userIds) {
+    @Cacheable(value = "usersByIds", key = "#userIds.toString()",sync = true)
+    public List<User> getUsersByIds(List<String> userIds) {
         if (userIds == null || userIds.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            throw new IllegalArgumentException("User IDs cannot be empty");
         }
-        List<User> users = userRepository.findAllById(userIds);
-        return ResponseEntity.ok(users);
+        return userRepository.findAllById(userIds);
     }
 
     // bulk save users
@@ -198,15 +196,15 @@ public class UserService {
             @CacheEvict(value = "users", allEntries = true),
             @CacheEvict(value = "adminData", allEntries = true)
     })
-    public ResponseEntity<List<User>> saveAllUsers(List<User> users) {
+    public List<User> saveAllUsers(List<User> users) {
         if (users == null || users.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            throw new IllegalArgumentException("Users list cannot be empty");
         } else {
             for (User user : users) {
                 user.setJoiningDate(general.getCurrentDateTime());
             }
             List<User> savedUsers = userRepository.saveAll(users);
-            return ResponseEntity.ok(savedUsers);
+            return savedUsers;
         }
     }
 

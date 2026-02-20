@@ -8,6 +8,7 @@ import com.golden_pearl.backend.DTO.ForgotPasswordDTO;
 import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.Services.UserService;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,45 +45,72 @@ public class UserController {
 
     @PostMapping("/verify")
     public ResponseEntity<User> verifyUser(@RequestBody UserAuth userAuth) {
-        return userService.getUser(userAuth);
+        try {
+            User user = userService.getUser(userAuth);
+            if (user != null) {
+                return ResponseEntity.ok(user);
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PostMapping("/updatePassword")
     public ResponseEntity<ForgotPasswordDTO> updatePassword(@RequestBody ForgotPasswordDRO fpDRO) {
-        return userService.updatePassword(fpDRO);
+        ForgotPasswordDTO result = userService.updatePassword(fpDRO);
+        if (result != null) {
+            return ResponseEntity.ok(result);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
     @PutMapping("/confirm-reset")
     public ResponseEntity<String> confirmReset(@RequestBody ConfirmResetDRO confirmResetData) {
-        return userService.confirmResetPassword(confirmResetData);
+        try {
+            return ResponseEntity.ok(userService.confirmResetPassword(confirmResetData));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/register")
     public ResponseEntity<String> saveUser(@RequestBody UserRegisterData user) {
-        return userService.saveUser(user);
-
+        try {
+            return ResponseEntity.ok(userService.saveUser(user));
+        } catch (IllegalArgumentException e) {
+            if (e.getMessage().contains("exists")) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+            }
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     // get all user by ids
     @GetMapping("/getUsersByIds/{userIds}")
     public ResponseEntity<List<User>> getUsersByIds(@PathVariable List<String> userIds) {
-        return userService.getUsersByIds(userIds);
+        return ResponseEntity.ok(userService.getUsersByIds(userIds));
     }
 
     @PutMapping("/update")
     public ResponseEntity<User> updateUser(@RequestBody UserDetailsUpdateReceive user) {
-        return userService.updateUser(user);
+        User updatedUser = userService.updateUser(user);
+        if (updatedUser != null) {
+            return ResponseEntity.ok(updatedUser);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/all")
     public ResponseEntity<List<User>> getAllUsers() {
-        return userService.getAllUsers();
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
     // save all user
     @PostMapping("/saveAll")
     public ResponseEntity<List<User>> saveAllUsers(@RequestBody List<User> users) {
-        return userService.saveAllUsers(users);
+        return ResponseEntity.ok(userService.saveAllUsers(users));
     }
 
     // testing purpose

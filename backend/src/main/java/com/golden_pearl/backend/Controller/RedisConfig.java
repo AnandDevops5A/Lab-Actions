@@ -1,5 +1,6 @@
 package com.golden_pearl.backend.Controller;
 
+import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.cache.annotation.EnableCaching;
@@ -17,5 +18,21 @@ public class RedisConfig {
         return RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(60))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+    }
+
+    @Bean
+    public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
+        int defaultTtlMinutes = 10; // Default TTL for all caches in minutes
+        return (builder) -> builder
+                .withCacheConfiguration("user",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
+                .withCacheConfiguration("users",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
+                .withCacheConfiguration("leaderboard",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
+                .withCacheConfiguration("topNLeaderboard",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
+                 .withCacheConfiguration("tournaments",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)));
     }
 }

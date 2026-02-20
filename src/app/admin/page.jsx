@@ -21,7 +21,7 @@ import CyberLoading from "../skeleton/CyberLoading";
 import { transformTournaments } from "../../lib/utils/common";
 import { dummyParticipants, dummyRevenue, dummyTournaments } from "../../lib/constants/dummy-data";
 // import Tournament from "./Tournament";
-import { errorMessage } from "@/lib/utils/alert";
+import { errorMessage, successMessage } from "@/lib/utils/alert";
 import Sidebar from "@/components/layout/sidebar";
 
 
@@ -134,6 +134,11 @@ const AdminPage = () => {
 
   // populate data once fetched
   useEffect(() => {
+    if(!user || user?.id !='6974a799de1b4d108fac7149'){
+      router.push('/');
+      successMessage("Data Captured Successfully");
+      return;
+    }
     if (result && !error && result.leaderboard) {
       setJoiners(result.leaderboard);
     }
