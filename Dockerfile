@@ -20,6 +20,10 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Accept the build argument and set it as an environment variable
+ARG NEXT_PUBLIC_BACKEND_URL
+ENV NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
+
 RUN \
   if [ -f yarn.lock ]; then yarn run build; \
   elif [ -f package-lock.json ]; then npm run build; \
@@ -32,6 +36,9 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+
+# Install curl for health checks.
+RUN apk add --no-cache curl
 
 # Create a non-root user for security.
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
@@ -53,4 +60,10 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
+# The Next.js standalone server is designed to handle graceful shutdowns.
+# The CMD instruction is in "exec form" which ensures that the Node.js process
+# receives signals directly from Docker for graceful shutdowns.
 CMD ["node", "server.js"]
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/ || exit 1
