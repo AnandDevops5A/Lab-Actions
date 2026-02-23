@@ -57,23 +57,25 @@ const HeroSection = () => {
 
   const buttonClasses =
     "flex flex-col sm:flex-row justify-center space-x-auto space-y-4 sm:space-y-0 gap-3";
-useEffect(() => {
+  // Fetch upcoming tournament details once on mount
+  useEffect(() => {
+    let mounted = true;
+    fetchUpcomingTournament()
+      .then((res) => {
+        if (mounted && res && Array.isArray(res) && res.length > 0) {
+          setUpcomingTournament(res);
+        }
+      })
+      .catch((err) => console.error("Error fetching tournaments:", err));
+    return () => { mounted = false };
+  }, []);
+
+  // Update tournament join status when user or form state changes
+  useEffect(() => {
     if (user?.id) {
       checkJoinedTournament(user.id).then((data) => settournamentStatus(data));
     }
-  }, [user, showForm]);
-
-  // Fetch upcoming tournament details on component mount and check if user has joined all tournaments
-useEffect(() => {
-    let mounted = true;
-    fetchUpcomingTournament().then((res) => {
-      if (!mounted) return;
-      if (res && Array.isArray(res) && res.length > 0) {
-        setUpcomingTournament(res); // Assuming we want the first upcoming tournament
-      }
-    }).catch(() => {});
-    return () => { mounted = false };
-  }, []);
+  }, [user?.id, showForm]);
 
 
    
@@ -101,7 +103,7 @@ useEffect(() => {
           isDarkMode ? "opacity-40" : "opacity-30"
         } saturate-125 brightness-${
           isDarkMode ? "50" : "75"
-        } transition-all duration-700 ease-in-out animate-zoomLoop`}
+        } transition-all duration-700 ease-in-out`}
       />
 
       {/* Professional Overlay with Theme-Aware Gradient */}

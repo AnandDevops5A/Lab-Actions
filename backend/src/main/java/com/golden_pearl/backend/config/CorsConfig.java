@@ -12,14 +12,13 @@ public class CorsConfig {
     @Value("${frontend.url}")
     private String frontendUrl;
 
-
     @Bean
     public WebMvcConfigurer corsConfigurer() {
-             return new WebMvcConfigurer() {
+        return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins(frontendUrl,"http://127.0.0.1:3000")
+                        .allowedOrigins(frontendUrl, "http://localhost", "http://127.0.0.1:3000")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true)

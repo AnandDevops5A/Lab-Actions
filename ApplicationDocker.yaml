@@ -1,16 +1,19 @@
+
 services:
 #frontend service
   frontend:
     image: 'anand7254/golden-pearl-frontend'
-    build:
-      context: .
-      args:
-        NEXT_PUBLIC_API_URL: '${NEXT_PUBLIC_API_URL}'
+    # build:
+    #   context: .
+    #   args:
+    #     NEXT_PUBLIC_API_URL: '${NEXT_PUBLIC_API_URL}'
     container_name: frontend
     environment:
       NEXT_PUBLIC_API_URL: '${NEXT_PUBLIC_API_URL}'
       BACKEND_URL: '${BACKEND_URL}'
       REDIS_URL: '${REDIS_URL}'
+      EMAIL_USER: '${EMAIL_USER}'
+      EMAIL_PASS: '${EMAIL_PASS}'
     ports:
       - '80:3000'
     depends_on:
@@ -19,9 +22,11 @@ services:
     networks:
       - spring-boot-mongo-net
 
- #backend service
+  #backend service
   backend:
     image: 'anand7254/golden-pearl-backend'
+    build:
+      context: ./backend
     ports:
       - '8082:8082'
     container_name: backend
@@ -32,6 +37,8 @@ services:
       REDIS_HOST: '${REDIS_HOST}'
       REDIS_PORT: '${REDIS_PORT}'
       FRONTEND_URL: '${FRONTEND_URL}'
+      MAIL_USERNAME: '${MAIL_USERNAME}'
+      MAIL_PASSWORD: '${MAIL_PASSWORD}'
     depends_on:
       - redis
     networks:

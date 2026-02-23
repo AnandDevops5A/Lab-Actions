@@ -16,49 +16,55 @@ import com.golden_pearl.backend.DTO.ForgotPasswordDTO;
 import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.Repository.UserRepository;
 import com.golden_pearl.backend.common.General;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
     private final EmailService email;
+    private final PasswordEncoder passwordEncoder;
     private final General general = new General();
 
     // constructor
 
-    public UserService(UserRepository userRepository, EmailService email) {
+    public UserService(UserRepository userRepository, EmailService email, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.email = email;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // find user by id
 
-    @Cacheable(value = "user", key = "#id" ,sync = true)
+    @Cacheable(value = "user", key = "#id", sync = true)
     public User findUserById(String id) {
         if (id == null)
             return null;
-        System.out.println("Fetching user with id: " + id);
+        // System.out.println("Fetching user with id: " + id);
         User user = userRepository.findById(id).orElse(null);
-        System.out.println("Db hit ");
+        // System.out.println("Db hit ");
         return user;
     }
 
-    // verify user by contact and accessKey or contact and accessKey
+    /**
+     * Authenticates a user using their contact and access key (password).
+     * Supports both legacy plain-text passwords and modern BCrypt hashes.
+     */
     public User getUser(UserAuth userAuth) {
-        User user;
         Long contact = userAuth.contact();
         String accessKey = userAuth.accessKey();
 
-        // Input validation: accessKey is mandatory, and either callsign or contact must
-        // be present.
-        if (accessKey == null || contact == null) {
-            throw new IllegalArgumentException("Missing contact or access key");
+        if (contact == null || accessKey == null) {
+            throw new IllegalArgumentException("Contact and Access Key are required");
         }
 
-        // contact must not be null here because of the validation above
-        user = userRepository.findByContactAndAccessKey(contact, accessKey);
+        // Check for modern BCrypt match (Hash comparison)
+        User potentialUser = userRepository.findByContact(contact);
+        if (potentialUser != null && passwordEncoder.matches(accessKey, potentialUser.getAccessKey())) {
+            return potentialUser;
+        }
 
-        return user; // Returns null if not found (Controller handles 401)
+        return null; // Authorization fails (Controller handles 401)
     }
 
     // update Password
@@ -100,8 +106,8 @@ public class UserService {
         }
 
         User user = userRepository.findById(confirmResetData.id()).orElse(null);
-        if (user != null && !(user.getAccessKey().equals(confirmResetData.accessKey()))) {
-            user.setAccessKey(confirmResetData.accessKey());
+        if (user != null) {
+            user.setAccessKey(passwordEncoder.encode(confirmResetData.accessKey()));
             userRepository.save(user);
             // send password reset email
             try {
@@ -127,15 +133,17 @@ public class UserService {
                 (user.contact() == null) ||
                 (user.accessKey() == null)
                 || (user.email() == null)) {
-            
+
             throw new IllegalArgumentException("All fields are required");
         }
         if (userRepository.existsByContact(user.contact())) {
-                throw new IllegalArgumentException("User with this contact already exists.");
-            }
+            throw new IllegalArgumentException("User with this contact already exists.");
+        }
 
         else {
             User readyUser = general.convertResponseToUser(user);
+            // Hash the password before saving
+            readyUser.setAccessKey(passwordEncoder.encode(readyUser.getAccessKey()));
             userRepository.save(readyUser);
             return "User saved successfully";
         }
@@ -155,21 +163,20 @@ public class UserService {
             @CacheEvict(value = "adminData", allEntries = true)
     })
     public User updateUser(UserDetailsUpdateReceive user) {
-         if (user.userId() == null) {
+        if (user.userId() == null) {
             throw new IllegalArgumentException("User ID is required");
         }
         User existingUser = userRepository.findById(user.userId()).orElse(null);
         if (existingUser == null) {
             return null;
-        }
-        else{
+        } else {
             // User updatedUser = existingUser.toBuilder()
-            //         .name(user.name())
-            //         .email(user.email())
-            //         .contact(user.contact())
-            //         .callSign(user.callSign())
-            //         .accessKey(user.accessKey())
-            //         .build();
+            // .name(user.name())
+            // .email(user.email())
+            // .contact(user.contact())
+            // .callSign(user.callSign())
+            // .accessKey(user.accessKey())
+            // .build();
             existingUser.setUsername(user.name());
             existingUser.setEmail(user.email());
             existingUser.setContact(user.contact());
@@ -179,11 +186,10 @@ public class UserService {
             return userRepository.save(existingUser);
         }
 
-       
     }
 
     // get users by ids
-    @Cacheable(value = "usersByIds", key = "#userIds.toString()",sync = true)
+    @Cacheable(value = "usersByIds", key = "#userIds.toString()", sync = true)
     public List<User> getUsersByIds(List<String> userIds) {
         if (userIds == null || userIds.isEmpty()) {
             throw new IllegalArgumentException("User IDs cannot be empty");

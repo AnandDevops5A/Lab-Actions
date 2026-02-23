@@ -64,7 +64,7 @@ const NavbarContent = () => {
         icons: <PenLine className={iconClass} />,
       },
     { name: 'leaderboard', href: '/Leaderboard',icons:<LucideTrophy className={iconClass}/> },
-    { name: 'Admin', href: user?.id=='6974a799de1b4d108fac7149' ? '/admin' : '/',icons:<Crown  className={iconClass}/> },
+    { name: 'Admin', href: ['917254831884', '7254831884'].includes(String(user?.contact)) ? '/admin' : '/',icons:<Crown  className={iconClass}/> },
     { name: user ?'My Profile':'Login', href: user ? '/player' : '/auth' ,icons:user ? <IdCard className={iconClass}/>:<LogIn className={iconClass}/>}
   ], [user, iconClass]);
   const [showNavbar, setShowNavbar] = useState(true);
@@ -190,7 +190,7 @@ const NavbarContent = () => {
                   href={!user  && item.name === "leaderboard" ? "/?scroll=leaderboard" : item.href}
                   onClick={() => setActiveItem(item.name)}
                   className={`group ${idx % 2 === 0 ? "animate-slideInLeft" : "animate-slideInRight"} px-4 py-2 text-sm capitalize font-semibold transition-colors duration-200 ${activeItem === item.name ? "text-slate-100 border-l-neon-red border-r-neon-red pointer-events-none" : "text-gray-200/90 border-transparent"} hover:text-slate-100 border-l-2 border-r-2 hover:border-l-neon-red hover:border-r-neon-red ${item.name !== "leaderboard" ? "focus:cursor-none" : ""} nav-item
-                  ${item.name === 'Admin' && user?.id !== '6974a799de1b4d108fac7149' ? "hidden" : "block"}`}
+                  ${item.name === 'Admin' && !['917254831884', '7254831884'].includes(String(user?.contact)) ? "hidden" : "block"}`}
                   aria-label={item.name}
                   title={item.name}
                >

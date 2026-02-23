@@ -14,15 +14,17 @@ import {
   Filler,
 } from "chart.js";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import Overview from "./Overview";
 import { useSWRBackendAPI, getJoinersByTournamentIdList } from "../../lib/api/backend-api";
 import { ThemeContext } from "../../lib/contexts/theme-context";
 import CyberLoading from "../skeleton/CyberLoading";
 import { transformTournaments } from "../../lib/utils/common";
-import { dummyParticipants, dummyRevenue, dummyTournaments } from "../../lib/constants/dummy-data";
+import { dummyRevenue } from "../../lib/constants/dummy-data";
 // import Tournament from "./Tournament";
-import { errorMessage, successMessage } from "@/lib/utils/alert";
+import { errorMessage } from "@/lib/utils/alert";
 import Sidebar from "@/components/layout/sidebar";
+import { UserContext } from "@/lib/contexts/user-context";
 
 
 const Tournament = dynamic(() => import('./Tournament'), {
@@ -82,15 +84,16 @@ const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
     const [joiners, setJoiners]=useState([]);
+    const {user}=useContext(UserContext);
   const [revenue, setRevenue] = useState(dummyRevenue);
   
   const { isDarkMode } = useContext(ThemeContext);
-  // const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter();
 
 
 
   //send request to backend to get tournaments and participants data
-  const { result, error, isLoading, mutate } = useSWRBackendAPI(
+  const { result, isLoading, mutate } = useSWRBackendAPI(
     "admin/data", //endpoint
     "GET", //method
     null, //data
@@ -99,19 +102,19 @@ const AdminPage = () => {
 
   // Derived state to avoid extra renders from useEffect syncing
   const tournaments = useMemo(() => {
-    if (result && !error && result.tournaments) {
+    if (result?.tournaments) {
       return transformTournaments(result.tournaments);
     }
     return null;
-  }, [result, error]);
+  }, [result]);
 
   //set participants if participants formed or not
   const participants = useMemo(() => {
-    if (result && !error && result.users) {
+    if (result?.users) {
       return result.users;
     }
     return null;
-  }, [result, error]);
+  }, [result]);
 
   //update joiner because tournament and users fetch from cache
   const updateJoiners = useCallback(async () => {
@@ -132,17 +135,20 @@ const AdminPage = () => {
     }, [tournaments]);
 
 
-  // populate data once fetched
+  // Authentication and Authorization check
   useEffect(() => {
-    if(!user || user?.id !='6974a799de1b4d108fac7149'){
-      router.push('/');
-      successMessage("Data Captured Successfully");
-      return;
+    const isAdmin = ['917254831884', '7254831884'].includes(String(user?.contact));
+    if (!user || !isAdmin) {
+      router.replace('/');
     }
-    if (result && !error && result.leaderboard) {
+  }, [user, router]);
+
+  // Initial population of joiners from SWR result
+  useEffect(() => {
+    if (result?.leaderboard) {
       setJoiners(result.leaderboard);
     }
-  }, [result, error]);
+  }, [result?.leaderboard]);
 
 
 

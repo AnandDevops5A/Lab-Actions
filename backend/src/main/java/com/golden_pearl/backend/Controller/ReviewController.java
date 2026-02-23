@@ -3,7 +3,6 @@ package com.golden_pearl.backend.Controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,7 +18,6 @@ import com.golden_pearl.backend.DRO.ReviewUpdateReceive;
 import com.golden_pearl.backend.Models.Review;
 import com.golden_pearl.backend.Services.ReviewService;
 
-@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/review")
 public class ReviewController {
@@ -56,11 +54,13 @@ public class ReviewController {
         reviewService.deleteReview(reviewId);
         return ResponseEntity.ok("Review deleted successfully");
     }
+
     @PutMapping("/admin-reply")
-    public ResponseEntity<String> addAdminReply(@RequestBody AdminReplyDRO adminReply){
+    public ResponseEntity<String> addAdminReply(@RequestBody AdminReplyDRO adminReply) {
         return ResponseEntity.ok(reviewService.saveAdminReply(adminReply));
 
-    } 
+    }
+
     @PutMapping("/update")
     public ResponseEntity<Review> updateReview(@RequestBody ReviewUpdateReceive review) {
         if (review == null || review.reviewId() == null || review.reviewId().isEmpty()) {

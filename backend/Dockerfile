@@ -1,5 +1,5 @@
 # Stage 1: Build the application with Maven, optimizing for layer caching
-FROM maven:3.9.6-eclipse-temurin-17 AS build
+FROM maven:3.9.6-eclipse-temurin-17-alpine AS build
 LABEL stage="builder"
 WORKDIR /app
 
@@ -12,16 +12,16 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Create the final, lightweight, and secure image
-FROM eclipse-temurin:17-jre-jammy
+FROM eclipse-temurin:17-jre-alpine
 LABEL maintainer="your-team@example.com"
 
 ARG APP_USER=appuser
 ARG APP_GROUP=appgroup
-ARG APP_PORT=8080
+ARG APP_PORT=8082
 
 # Create a non-root user for security and install necessary tools in a single layer.
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/* && \
-    groupadd -r ${APP_GROUP} && useradd --no-log-init -r -g ${APP_GROUP} ${APP_USER}
+RUN apk add --no-cache curl && \
+    addgroup -S ${APP_GROUP} && adduser -S ${APP_USER} -G ${APP_GROUP}
 
 WORKDIR /app
 

@@ -1,3 +1,4 @@
+import LZString from 'lz-string';
 import { getCache, setCache } from "./client-cache";
 import { errorMessage } from "./alert";
 import {
@@ -258,13 +259,17 @@ export async function fetchUserTournaments(userId) {
   if (!userId) return null;
   try {
     const cacheKey = `userTournamentDetails:${userId}`;
-    const cacheRes = await getCache(cacheKey);
-    if (cacheRes?.status && cacheRes?.data) {
-      return cacheRes.data;
+    // const cacheRes = await getCache(cacheKey);
+    //change to local storage
+    const cacheRes = localStorage.getItem(cacheKey);
+    if (cacheRes) {
+      const decompressed = LZString.decompressFromUTF16(cacheRes);
+      return JSON.parse(decompressed);
     }
     const response = await getUserTournamentDetails(userId);
     if (response.ok) {
-      await setCache(cacheKey, response.data, 3600);
+      const compressed = LZString.compressToUTF16(JSON.stringify(response.data));
+      localStorage.setItem(cacheKey, compressed);
       return response.data;
     }
     return null;

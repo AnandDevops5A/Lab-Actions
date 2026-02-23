@@ -1,7 +1,8 @@
 import useSWR from "swr";
 import axios from "axios";
+import LZString from "lz-string";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8082";
+const BASE_URL = (typeof window === 'undefined' ? process.env.BACKEND_URL : process.env.NEXT_PUBLIC_API_URL) || "http://localhost:8082";
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // ms
 
@@ -11,9 +12,20 @@ const RETRY_DELAY = 1000; // ms
 const fetcher = async (url, method = "GET", data = null, timeout = 10000) => {
   let lastError;
 
-  // Get token from localStorage
-  const currentUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem("currentUser")) : null;
-  const token = currentUser?.token || currentUser?.accessToken;
+  // Get token from localStorage with decompression
+  let token = null;
+  if (typeof window !== 'undefined') {
+    try {
+      const compressed = localStorage.getItem("currentUser");
+      if (compressed) {
+        const decompressed = LZString.decompressFromUTF16(compressed);
+        const currentUser = JSON.parse(decompressed);
+        token = currentUser?.token || currentUser?.accessToken;
+      }
+    } catch (error) {
+      console.error("Error retrieving token from localStorage:", error);
+    }
+  }
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {

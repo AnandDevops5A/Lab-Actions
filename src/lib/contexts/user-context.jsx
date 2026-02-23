@@ -1,7 +1,8 @@
 'use client'
 import React, { createContext, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { confirmMessage, successMessage } from "../utils/alert";
+import { confirmMessage, simpleMessage, successMessage } from "../utils/alert";
+import LZString from "lz-string";
 // Create Context
 export const UserContext = createContext();
 
@@ -22,12 +23,13 @@ export const UserProvider = ({ children }) => {
       if (user) {
       let response = await confirmMessage("Are you sure you want to logout?");
       if (response) {
+        //remove user from local storage
         localStorage.removeItem("currentUser");
         setUser(null);
         successMessage("Logged out successfully!");
         router.push("/auth");
       } else {
-        successMessage("Logout cancelled.");
+        simpleMessage("Logout cancelled.");
       }
       }
     } catch (error) {
@@ -47,7 +49,9 @@ export const UserProvider = ({ children }) => {
 
         try {
             // const cachedData = await getCache("currentUser");
-            const cachedData = JSON.parse(localStorage.getItem("currentUser"));
+            const compressed = localStorage.getItem("currentUser");
+            const decompressed = LZString.decompressFromUTF16(compressed);
+            const cachedData = JSON.parse(decompressed);
             // console.log("cachedData:", cachedData);
             if (cachedData) {
                 setUser(cachedData);

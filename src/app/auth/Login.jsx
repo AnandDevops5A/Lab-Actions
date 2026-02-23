@@ -4,23 +4,17 @@ import React, { useState, useRef, memo, useContext } from "react";
 import { Lock, Eye, EyeOff, PhoneCall, Loader2 } from "lucide-react";
 import { errorMessage, successMessage } from "../../lib/utils/alert";
 import { FetchBackendAPI } from "../../lib/api/backend-api";
-import { setCache } from "../../lib/utils/client-cache";
 import { UserContext } from "../../lib/contexts/user-context";
 import { useRouter } from "next/navigation";
+import LZString from "lz-string";
 
 const Login = memo(({ onSwitch, isDarkMode }) => {
   const contactRef = useRef(null);
   const accessKeyRef = useRef(null);
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
-  // const [error, setError] = useState('');
   const { setUser } = useContext(UserContext);
   const router = useRouter();
-
-  //verify context data saved or not
-  // useEffect(() => {
-  // 	console.log("User context has been updated:", user);
-  //   }, [user]);
 
   async function onSubmit(payload) {
     // console.log("Submitting payload:", payload);
@@ -32,13 +26,10 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
     //    console.log("Before set context is :" , user);
     // console.log("Response from backend:", res.status);
     if (res?.status === 200 && res?.data) {
-      // const status = await setCache("currentUser", res.data, 3600);
-      const store=localStorage.setItem("currentUser", JSON.stringify(res.data));
-      const status = store ? { status: true } : { status: false };
-      if (!status?.status) {
-        errorMessage("Error caching user data");
-      }
-      // Set user context regardless of cache status
+      const compressedUser = LZString.compressToUTF16(JSON.stringify(res.data));
+      localStorage.setItem("currentUser", compressedUser);
+      
+      // Set user context
       setUser(res.data);
       // console.log("After set context is :" , user);
     }

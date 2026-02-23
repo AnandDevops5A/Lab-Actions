@@ -370,7 +370,7 @@ export default function MatchJoiningForm({
 
       //update cache with adding recent join of user tournament details
       if (user?.id) {
-        await deleteCache(`userTournamentDetails:${user.id}`);
+        localStorage.removeItem(`userTournamentDetails:${user.id}`);
       }
 
       setSubmitting(false);
