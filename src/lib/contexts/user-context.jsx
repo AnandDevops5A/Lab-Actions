@@ -13,6 +13,7 @@ export const UserContext = createContext();
 export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const router = useRouter();
+  const MALIK=['917254831884', '7254831884'].includes(String(user?.contact));
 
     /**
      * Logout user and clear cache
@@ -51,7 +52,7 @@ export const UserProvider = ({ children }) => {
             // const cachedData = await getCache("currentUser");
             const compressed = localStorage.getItem("currentUser");
             const decompressed = LZString.decompressFromUTF16(compressed);
-            const cachedData = JSON.parse(decompressed);
+            const cachedData = decompressed;
             // console.log("cachedData:", cachedData);
             if (cachedData) {
                 setUser(cachedData);
@@ -66,6 +67,7 @@ export const UserProvider = ({ children }) => {
     // Memoize context value to prevent unnecessary re-renders
     const contextValue = useMemo(() => ({
         user,
+        MALIK,
         setUser,
         logout,
         getUserFromContext,

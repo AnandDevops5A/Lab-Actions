@@ -13,7 +13,7 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
   const accessKeyRef = useRef(null);
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { setUser } = useContext(UserContext);
+  const { setUser,MALIK } = useContext(UserContext);
   const router = useRouter();
 
   async function onSubmit(payload) {
@@ -53,7 +53,7 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
 
       if (result?.status === 200 && result?.data) {
         successMessage(result.message || "Login successful.");
-        router.push("/player");
+        router.push(MALIK ? "/" : "/player");
       } else {
         // Improved error handling based on status or message
         const msg = result?.message || "Invalid credentials or server error.";

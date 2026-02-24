@@ -4,7 +4,7 @@ import contactImage from "../../../app/images/contact.png"; // Make sure to have
 
 export default function ContactPage() {
   return (
-    <div className="min-h-[80vh]  flex flex-col  md:flex-row">
+    <div className="min-h-[75vh]  flex flex-col  md:flex-row" id="contact-page">
       {/* Left Side with Background Image */}
         <div className="autoblur md:w-1/2 w-full h-52 md:h-auto bg-cover bg-center lg:m-3 border-cyan-300 border rounded shadow-amber-300 imagereveal"
         style={{

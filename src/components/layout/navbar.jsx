@@ -9,7 +9,7 @@ import { UserContext } from '../../lib/contexts/user-context';
 import { LogoutButton } from '../ui/logout-button';
 import { ThemeToggle } from '../ui/theme-toggle';
 import { ThemeContext } from '../../lib/contexts/theme-context';
-import { Crown, Home, IdCard, LogIn, LucideTrophy, PenLine, Menu, X } from 'lucide-react';
+import { Crown, Home, IdCard, LogIn, LucideTrophy, PenLine, Menu, X ,Contact} from 'lucide-react';
 
 const NavbarContent = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -54,7 +54,7 @@ const NavbarContent = () => {
   // Memoized icon class to prevent recreation on every render
   const iconClass =
     "h-5 w-5 text-cyan-100 hover:scale-110 transition duration-300";
-
+  const MALIK=['917254831884', '7254831884'].includes(String(user?.contact));
   const navItems = useMemo(
     () => [
       { name: "Home", href: "/", icons: <Home className={iconClass} /> },
@@ -64,7 +64,7 @@ const NavbarContent = () => {
         icons: <PenLine className={iconClass} />,
       },
     { name: 'leaderboard', href: '/Leaderboard',icons:<LucideTrophy className={iconClass}/> },
-    { name: 'Admin', href: ['917254831884', '7254831884'].includes(String(user?.contact)) ? '/admin' : '/',icons:<Crown  className={iconClass}/> },
+    { name: MALIK ? 'Admin': 'Contact', href: MALIK ? '/admin' : '/?scroll=contact-page',icons:MALIK ? <Crown  className={iconClass}/>: <Contact className={iconClass} /> },
     { name: user ?'My Profile':'Login', href: user ? '/player' : '/auth' ,icons:user ? <IdCard className={iconClass}/>:<LogIn className={iconClass}/>}
   ], [user, iconClass]);
   const [showNavbar, setShowNavbar] = useState(true);
@@ -97,7 +97,10 @@ const NavbarContent = () => {
   useEffect(() => {
     if (scrollTarget === 'leaderboard') {
        setActiveItem('leaderboard');
-    } else {
+    } 
+   
+    
+    else {
        const active = navItems.find(item => item.href === pathname);
        if (active) {
          setActiveItem(active.name);
@@ -109,12 +112,12 @@ const NavbarContent = () => {
 
 // Scroll to target section if "scroll" query param is present (e.g., after redirect from login)
   useEffect(() => {
-    if (scrollTarget === 'leaderboard') {
+    if (scrollTarget) {
       const timer = setTimeout(() => {
         if (typeof window !== "undefined") {
-          const element = document.getElementById('leaderboard');
+          const element = document.getElementById(scrollTarget);
           if (element) {
-            const yOffset = 60;
+            const yOffset = 50;
             const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
             window.scrollTo({
               top: y,
@@ -138,7 +141,8 @@ const NavbarContent = () => {
       // console.log("Navbar mounted, checking user context.");
       if (!user) {
          await getUserFromContext();
-         // console.log("Fetched user data and save to context");
+
+         console.log("Fetched user data and save to context");
       }
     };
     fetchUserData();
@@ -190,7 +194,7 @@ const NavbarContent = () => {
                   href={!user  && item.name === "leaderboard" ? "/?scroll=leaderboard" : item.href}
                   onClick={() => setActiveItem(item.name)}
                   className={`group ${idx % 2 === 0 ? "animate-slideInLeft" : "animate-slideInRight"} px-4 py-2 text-sm capitalize font-semibold transition-colors duration-200 ${activeItem === item.name ? "text-slate-100 border-l-neon-red border-r-neon-red pointer-events-none" : "text-gray-200/90 border-transparent"} hover:text-slate-100 border-l-2 border-r-2 hover:border-l-neon-red hover:border-r-neon-red ${item.name !== "leaderboard" ? "focus:cursor-none" : ""} nav-item
-                  ${item.name === 'Admin' && !['917254831884', '7254831884'].includes(String(user?.contact)) ? "hidden" : "block"}`}
+                  `}
                   aria-label={item.name}
                   title={item.name}
                >

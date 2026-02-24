@@ -8,41 +8,30 @@ import { ThemeContext } from "../../../lib/contexts/theme-context";
 import { setUpcomingTournamentCache } from "../../../lib/utils/common";
 import HeroSection from "../tournaments/hero-section";
 import UpcomingMatches from "@/components/ui/upcoming-matches";
-// import WinnerSection from "@/components/ui/winner";
-// import Stats from "@/components/ui/stats";
-// import ContactPage from "./contact-page";
+import WinnerSection from "@/components/ui/winner";
+import Stats from "@/components/ui/stats";
+import ContactPage from "./contact-page";
 // import Footer from "@/components/layout/footer";
 
-// const ActiveTournaments = dynamic(() => import("../../ui/active-tournaments"), {
+// const WinnerSection = dynamic(() => import("../../ui/winner"), {
+//   loading: () => <SkeletonTable />, // Optional: A fallback UI while loading
+//   ssr: false, // Optional: Set to false if the component must ONLY run on the client
+// });
+
+// const ContactPage = dynamic(() => import("./contact-page"), {
 //   loading: () => (
-//     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4">
-//       <SkeletonCard />
+//     <div className="gap-4">
 //       <SkeletonCard />
 //       <SkeletonCard />
 //     </div>
-//   ),
-//   ssr: false,
+//   ), // Optional: A fallback UI while loading
+//   ssr: false, // Optional: Set to false if the component must ONLY run on the client
 // });
 
-const WinnerSection = dynamic(() => import("../../ui/winner"), {
-  loading: () => <SkeletonTable />, // Optional: A fallback UI while loading
-  ssr: false, // Optional: Set to false if the component must ONLY run on the client
-});
-
-const ContactPage = dynamic(() => import("./contact-page"), {
-  loading: () => (
-    <div className="gap-4">
-      <SkeletonCard />
-      <SkeletonCard />
-    </div>
-  ), // Optional: A fallback UI while loading
-  ssr: false, // Optional: Set to false if the component must ONLY run on the client
-});
-
-const Stats = dynamic(() => import("../../ui/stats"), {
-  loading: () => <SkeletonTable />, // Optional: A fallback UI while loading
-  ssr: false, // Optional: Set to false if the component must ONLY run on the client
-});
+// const Stats = dynamic(() => import("../../ui/stats"), {
+//   loading: () => <SkeletonTable />, // Optional: A fallback UI while loading
+//   ssr: false, // Optional: Set to false if the component must ONLY run on the client
+// });
 
 const Footer = dynamic(() => import("../../layout/footer"), {
   loading: () => <SkeletonTable />,

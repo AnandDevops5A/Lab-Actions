@@ -28,7 +28,7 @@ export const metadata = {
     title: "BGMI Elite - The Premier Esports Gaming Platform",
     description:
       "Compete in high-stakes tournaments, climb the global leaderboard, and go pro!",
-    url: "https://localhost:3000",
+    url: process.env.FRONTEND_URL,
     type: "website",
   },
 };

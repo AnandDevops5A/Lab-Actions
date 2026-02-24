@@ -43,6 +43,12 @@ services:
       - redis
     networks:
       - spring-boot-mongo-net
+    healthcheck:
+      test: ["CMD", "curl", "-fs", '${NEXT_PUBLIC_API_URL}/actuator/health']
+      interval: 5s         # Check frequently for a smoother bar
+      timeout: 5s
+      retries: 10          # Give it plenty of chances
+      start_period: 40s
 
 # Redis service for caching
   redis:

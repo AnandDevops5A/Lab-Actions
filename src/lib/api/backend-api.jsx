@@ -2,7 +2,7 @@ import useSWR from "swr";
 import axios from "axios";
 import LZString from "lz-string";
 
-const BASE_URL = (typeof window === 'undefined' ? process.env.BACKEND_URL : process.env.NEXT_PUBLIC_API_URL) || "http://localhost:8082";
+const BASE_URL = (typeof window === 'undefined' ? process.env.BACKEND_URL : process.env.NEXT_PUBLIC_API_URL);
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // ms
 
