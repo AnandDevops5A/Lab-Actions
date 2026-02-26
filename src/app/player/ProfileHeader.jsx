@@ -4,22 +4,22 @@ import profileBackImage from "../images/profile.png";
 import Image from "next/image";
 import { ThemeContext } from "../../lib/contexts/theme-context";
 
-const DynamicChargeborder = dynamic(
-  () => import("../../components/ui/charge-border"),
-  { loading: () => <p>...</p>, ssr: false }
-);
+// const DynamicChargeborder = dynamic(
+//   () => import("../../components/ui/charge-border"),
+//   { loading: () => <p>...</p>, ssr: false }
+// );
 
 const ProfileHeader = ({ player }) => {
   const { isDarkMode } = useContext(ThemeContext);
 
   return (
-  <DynamicChargeborder
-    color="#7cfc00 "
-    speed={0.3}
-    chaos={0.5}
-    thickness={2}
-    style={{ borderRadius: 14 }}
-  >
+  // <DynamicChargeborder
+  //   color="#7cfc00 "
+  //   speed={0.3}
+  //   chaos={0.5}
+  //   thickness={2}
+  //   style={{ borderRadius: 14 }}
+  // >
   <div
     className={`relative h-48 sm:h-56 md:h-64 lg:h-72 bg-cover bg-center mt-16 rounded-2xl overflow-hidden transition-all duration-300 ${
       isDarkMode ? "border-0 shadow-none" : "border-4 border-white shadow-xl"
@@ -75,7 +75,7 @@ const ProfileHeader = ({ player }) => {
       </div>
     </div>
   </div>
-    </DynamicChargeborder>
+    // </DynamicChargeborder>
   );
 };
 

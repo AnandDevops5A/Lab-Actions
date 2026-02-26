@@ -1,67 +1,62 @@
-
 services:
-#frontend service
-  frontend:
-    image: 'anand7254/golden-pearl-frontend'
-    # build:
-    #   context: .
-    #   args:
-    #     NEXT_PUBLIC_API_URL: '${NEXT_PUBLIC_API_URL}'
-    container_name: frontend
-    environment:
-      NEXT_PUBLIC_API_URL: '${NEXT_PUBLIC_API_URL}'
-      BACKEND_URL: '${BACKEND_URL}'
-      REDIS_URL: '${REDIS_URL}'
-      EMAIL_USER: '${EMAIL_USER}'
-      EMAIL_PASS: '${EMAIL_PASS}'
-    ports:
-      - '80:3000'
-    depends_on:
-      - backend
-      - redis
-    networks:
-      - spring-boot-mongo-net
-
-  #backend service
-  backend:
-    image: 'anand7254/golden-pearl-backend'
-    build:
-      context: ./backend
-    ports:
-      - '8082:8082'
-    container_name: backend
-    environment:
-      # Secrets should be loaded from a .env file, not hardcoded.
-      SPRING_DATA_MONGODB_URI: '${SPRING_DATA_MONGODB_URI}'
-      SPRING_DATA_MONGODB_DATABASE: '${SPRING_DATA_MONGODB_DATABASE}'
-      REDIS_HOST: '${REDIS_HOST}'
-      REDIS_PORT: '${REDIS_PORT}'
-      FRONTEND_URL: '${FRONTEND_URL}'
-      MAIL_USERNAME: '${MAIL_USERNAME}'
-      MAIL_PASSWORD: '${MAIL_PASSWORD}'
-    depends_on:
-      - redis
-    networks:
-      - spring-boot-mongo-net
-    healthcheck:
-      test: ["CMD", "curl", "-fs", '${NEXT_PUBLIC_API_URL}/actuator/health']
-      interval: 5s         # Check frequently for a smoother bar
-      timeout: 5s
-      retries: 10          # Give it plenty of chances
-      start_period: 40s
-
-# Redis service for caching
+  # 1. Redis Service
   redis:
-    image: 'redis:7.2'
+    image: redis:latest
     container_name: redis
-    # restart: always
-    volumes:
-      - redis_data:/data
+    ports:
+      - "6379:6379"
     networks:
-      - spring-boot-mongo-net
+      - application-net
+    restart: always
+
+  # 2. Backend Service (Spring Boot)
+  backend:
+    image: anand7254/golden-pearl-backend:latest
+    container_name: backend
+    # Load all backend-related env vars from .env (SPRING_DATA_MONGODB_URI, FRONTEND_URL, MAIL_*, etc.)
+    env_file:
+      - .env
+    # Explicit environment values still supported / can override .env if needed
+    environment:
+      - SPRING_DATA_MONGODB_URI=${SPRING_DATA_MONGODB_URI}
+      - SPRING_DATA_MONGODB_DATABASE=${SPRING_DATA_MONGODB_DATABASE}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - FRONTEND_URL=${FRONTEND_URL}
+    ports:
+      - "8082:8082"
+    depends_on:
+      - redis
+    healthcheck:
+      # Isse frontend ko pata chalega ki backend ready hai
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    networks:
+      - application-net
+    restart: always
+
+  # 3. Frontend Service (Next.js)
+  frontend:
+    image: anand7254/golden-pearl-frontend:v1
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - BACKEND_URL=http://backend:8082
+    depends_on:
+      backend:
+        condition: service_healthy
+    # Ye command PLACEHOLDER ko .env ki asli IP se replace karegi
+    command: >
+      sh -c "find .next -type f -exec sed -i \"s|PLACEHOLDER_NEXT_PUBLIC_API_URL|$NEXT_PUBLIC_API_URL|g\" {} + && node server.js"
+    networks:
+      - application-net
+    restart: always
 
 networks:
-  spring-boot-mongo-net:
-
-volumes:
-  redis_data:
+  application-net:
+    driver: bridge
