@@ -1,0 +1,139 @@
+## Production Readiness Checklist
+
+This document lists the key improvements required to run this project safely and efficiently in production (e.g. on EC2).
+
+---
+
+### 1. Security & Authentication
+
+- **Implement real authentication & authorization**
+  - Replace `anyRequest().permitAll()` with proper rules in `SecurityConfig`.
+  - Protect sensitive endpoints (admin, user data, leaderboard updates, etc.).
+  - Decide on an auth strategy (recommended: stateless JWT with exp/refresh or secure session cookies).
+- **CSRF**
+  - If you use browser cookies for auth, re‑enable CSRF protection with proper configuration.
+  - If you use stateless JWT in headers, document that CSRF is intentionally disabled and rely on tokens + CORS.
+- **Input validation & error handling**
+  - Ensure all user inputs (auth, tournament creation, reviews, etc.) are validated server side.
+  - Confirm sensitive error details are NOT exposed to clients (log them server side only).
+
+---
+
+### 2. Secrets & Configuration
+
+- **Never commit real secrets**
+  - Remove the current `.env` file from git and add `.env` to `.gitignore`.
+  - Rotate all credentials that were committed:
+    - MongoDB user & password.
+    - Email (SMTP) app password.
+- **Use environment variables / secrets manager**
+  - For EC2, store the following as environment variables or in a secrets manager and inject at runtime:
+    - `SPRING_DATA_MONGODB_URI`
+    - `SPRING_DATA_MONGODB_DATABASE`
+    - `MAIL_USERNAME`
+    - `MAIL_PASSWORD`
+    - `FRONTEND_URL`
+    - `NEXT_PUBLIC_API_URL`
+  - Keep a `.env.example` with **fake sample values only** for local development.
+
+---
+
+### 3. CORS & Frontend URL
+
+- **CORS configuration**
+  - Keep `frontend.url=${FRONTEND_URL}` in `application.properties` – **no default URL**.
+  - On EC2, set `FRONTEND_URL` to the real frontend origin (e.g. `https://app.example.com`).
+  - In `CorsConfig`, restrict `allowedOrigins` in production to:
+    - `frontendUrl` (from `FRONTEND_URL`).
+  - Only allow localhost origins (e.g. `http://localhost:3000`) in a **dev profile**, not in production.
+
+---
+
+### 4. Docker & Images
+
+- **Backend image**
+  - Consider moving JVM memory flags to an env var:
+    - Use `JAVA_TOOL_OPTIONS="-Xms256m -Xmx512m"` so memory can be tuned per environment.
+  - Ensure tests run in CI before `mvn clean package -DskipTests` in the Dockerfile.
+- **Frontend image**
+  - Continue using the Next.js standalone build with `NODE_ENV=production` (already good).
+  - For prod builds, set `NEXT_PUBLIC_API_URL` to the backend’s public endpoint (e.g. via `docker buildx bake` args or CI env).
+- **Image tags**
+  - Replace `:dev` tags with versioned, immutable tags:
+    - e.g. `lab-actions-backend:1.0.0`, `lab-actions-frontend:1.0.0`.
+  - Adopt a simple release process:
+    - Build & push images with version tags from CI.
+    - Update your deployment (Compose/ECS/etc.) to the new tag.
+
+---
+
+### 5. Docker Compose / Deployment
+
+- **Local vs production configs**
+  - Keep `ApplicationDocker.yaml` for local/dev usage.
+  - Create a `docker-compose.prod.yaml` (or similar) for EC2 that:
+    - Uses versioned image tags.
+    - Does **not** mount local volumes that are only for dev.
+    - Reads secrets from env / secrets manager, not from a committed `.env`.
+- **Network & exposure**
+  - In production:
+    - Expose only the frontend to the internet (e.g. via Nginx/ALB).
+    - Keep backend and Redis on a private network (no direct public ports).
+
+---
+
+### 6. Performance & Scalability
+
+- **Backend performance**
+  - Monitor memory and CPU usage for the Spring Boot app under expected load.
+  - Review MongoDB indexes for frequently queried fields to avoid collection scans.
+  - Confirm Redis is sized appropriately and that rate limiting keys have sensible TTL.
+- **Frontend performance**
+  - Put the frontend behind a CDN (CloudFront, Cloudflare, etc.) to cache static assets.
+  - Enable gzip/brotli compression and HTTP/2 via your reverse proxy / load balancer.
+
+---
+
+### 7. Observability (Logs, Metrics, Health)
+
+- **Logging**
+  - Keep structured logs for both frontend (server side) and backend.
+  - Ship logs to a centralized system (CloudWatch, ELK/Opensearch, etc.) for search and alerts.
+- **Metrics & health**
+  - Use Spring Boot Actuator:
+    - `/actuator/health` (already used by Docker healthchecks).
+    - `/actuator/metrics` for JVM, HTTP, DB metrics (behind auth / internal only).
+  - Configure uptime and error‑rate alerts (e.g. via CloudWatch alarms, Grafana, etc.).
+
+---
+
+### 8. Testing & CI/CD
+
+- **Automated tests**
+  - Add unit tests and integration tests for critical flows:
+    - Auth.
+    - Tournament creation/updates.
+    - Leaderboard logic.
+    - Email flows (use mocks).
+  - Ensure tests run in CI on every push to main.
+- **CI/CD pipeline**
+  - Set up a pipeline that:
+    1. Runs tests.
+    2. Builds frontend & backend Docker images.
+    3. Tags images with version + git SHA.
+    4. Pushes to a registry (e.g. ECR, Docker Hub).
+    5. Deploys to EC2/staging, then production after checks.
+
+---
+
+### 9. Documentation & Runbooks
+
+- Document:
+  - How to run the project locally (with Docker and without).
+  - How to deploy to EC2 step‑by‑step.
+  - Required environment variables and their meaning.
+- Create a short **incident checklist**:
+  - What to check if the site is slow.
+  - What to check if logins/registrations fail.
+  - How to roll back to a previous version safely.
+

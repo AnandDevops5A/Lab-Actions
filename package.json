@@ -24,7 +24,8 @@
     "react-chartjs-2": "^5.3.1",
     "react-dom": "19.2.0",
     "sweetalert2": "^11.26.17",
-    "swr": "^2.3.8"
+    "swr": "^2.3.8",
+    "test": "^3.3.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -82,13 +82,13 @@ const Signup = memo(({ onSwitch }) => {
   };
 
   async function onSubmit(payload) {
-    console.log(payload);
+    //console.log(payload);
     const res = await FetchBackendAPI("users/register", {
       method: "POST",
       data: payload,
     });
 
-    console.log("API response:", res);
+    //console.log("API response:", res);
 
     if (!res.ok) {
       return { ok: false, message: res.message || "Server Error",status: res.status,data: res.data };

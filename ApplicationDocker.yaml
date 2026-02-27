@@ -11,7 +11,7 @@ services:
 
   # 2. Backend Service (Spring Boot)
   backend:
-    image: anand7254/golden-pearl-backend:latest
+    image: lab-actions-backend:dev
     container_name: backend
     # Load all backend-related env vars from .env (SPRING_DATA_MONGODB_URI, FRONTEND_URL, MAIL_*, etc.)
     env_file:
@@ -40,7 +40,7 @@ services:
 
   # 3. Frontend Service (Next.js)
   frontend:
-    image: anand7254/golden-pearl-frontend:v1
+    image: lab-actions-frontend:dev
     container_name: frontend
     ports:
       - "3000:3000"
