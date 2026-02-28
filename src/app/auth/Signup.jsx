@@ -1,6 +1,6 @@
 "use client";
 
-import React, {  useState, useRef, memo } from "react";
+import React, { useState, useRef, memo } from "react";
 import { Users, UserPlus, Phone, Lock, Eye, EyeOff, Check, Mail } from "lucide-react";
 import { FetchBackendAPI } from "../../lib/api/backend-api";
 import { validatePassword } from "./PasswordCheck";
@@ -91,11 +91,11 @@ const Signup = memo(({ onSwitch }) => {
     //console.log("API response:", res);
 
     if (!res.ok) {
-      return { ok: false, message: res.message || "Server Error",status: res.status,data: res.data };
+      return { ok: false, message: res.message || "Server Error", status: res.status, data: res.data };
     }
-    if (res.status === 200 && res.data) {
-   
-      return { ok: true ,message:res.data};
+    if (res.status == 200 && res.data) {
+
+      return { ok: true, message: res.data };
     }
     return { ok: false, message: res.message };
   }
@@ -116,22 +116,22 @@ const Signup = memo(({ onSwitch }) => {
         accessKey: accessKeyRef.current.value,
       };
 
-      
+
 
       const res = await onSubmit(payload);
-      console.log(res);
-      if (!res.ok && res.status===409) {
+      // console.log(res);
+      if (!res.ok && res.status == 409) {
         simpleMessage("Phone number or email already registered.");
         setError(res.message || "User already exist.");
       }
-      else if( res.status!==200){
-        errorMessage(res.message || "Internal Server Error");
-
+      else if (res.status == 200) {
+        successMessage(res.message || "Succesfully Registered...");
+        
       } else {
         setSuccess(true);
         //success popup
         onSwitch?.("login")
-        successMessage(res.message || "Succesfully Registered...");
+        errorMessage(res.message || "Internal Server Error");
 
         //  Router.push("/");
       }

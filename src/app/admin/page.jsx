@@ -16,7 +16,7 @@ import {
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import Overview from "./Overview";
-import { useSWRBackendAPI, getJoinersByTournamentIdList } from "../../lib/api/backend-api";
+import { SWRBackendAPI, getJoinersByTournamentIdList } from "../../lib/api/backend-api";
 import { ThemeContext } from "../../lib/contexts/theme-context";
 import CyberLoading from "../skeleton/CyberLoading";
 import { transformTournaments } from "../../lib/utils/common";
@@ -93,7 +93,7 @@ const AdminPage = () => {
 
 
   //send request to backend to get tournaments and participants data
-  const { result, isLoading, mutate } = useSWRBackendAPI(
+  const { result, isLoading, mutate } = SWRBackendAPI(
     "admin/data", //endpoint
     "GET", //method
     null, //data

@@ -9,9 +9,7 @@ import {
   getAllTournaments,
   getAllUsers,
   getUsersByIds,
-  seedLeaderboard,
 } from "../../lib/api/backend-api";
-import { calulateWinAndReward } from "../../lib/utils/common";
 import { LeaderboardSkeleton } from "../skeleton/Skeleton";
 import { errorMessage } from "@/lib/utils/alert";
 
@@ -349,37 +347,7 @@ export default function Leaderboard() {
         >
           RESULTS: {filterPlayers?.length}
         </div>
-        <div className="flex items-center justify-center">
-          <button
-            onClick={async () => {
-              try {
-                const tId = dropdown != 0 ? dropdown : (AllTournament?.[0]?.id || AllTournament?.[0]?._id);
-                if (!tId) {
-                  errorMessage("No tournament available to seed");
-                  return;
-                }
-                if (!ListofUserId || ListofUserId.length === 0) {
-                  errorMessage("No users available to seed. Please ensure there are users in the system or use registerAll endpoint.");
-                  return;
-                }
-                const resp = await seedLeaderboard(ListofUserId, tId, 30);
-                if (resp.ok) {
-                  alert(resp.data || "Seeded leaderboard entries");
-                  setLoading(true);
-                  await getData(() => true);
-                } else {
-                  errorMessage("Seeding failed: " + resp.error);
-                }
-              } catch (e) {
-                console.error(e);
-                errorMessage("Error while seeding leaderboard");
-              }
-            }}
-            className="ml-3 px-3 py-2 bg-emerald-500 text-slate-100 rounded-md text-xs"
-          >
-            Seed Data
-          </button>
-        </div>
+        
       </section>
 
       {/* Top Three Players */}

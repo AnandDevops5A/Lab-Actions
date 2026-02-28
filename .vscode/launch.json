@@ -6,7 +6,18 @@
             "name": "BackendApplication",
             "request": "launch",
             "mainClass": "com.golden_pearl.backend.BackendApplication",
-            "projectName": "backend"
+            "projectName": "backend",
+            "env": {
+                "FRONTEND_URL": "${env:FRONTEND_URL}",
+                "SPRING_DATA_MONGODB_URI": "${env:SPRING_DATA_MONGODB_URI}",
+                "SPRING_DATA_MONGODB_DATABASE": "${env:SPRING_DATA_MONGODB_DATABASE}",
+                "REDIS_HOST": "${env:REDIS_HOST}",
+                "REDIS_PORT": "${env:REDIS_PORT}",
+                "MAIL_USERNAME": "${env:MAIL_USERNAME}",
+                "MAIL_PASSWORD": "${env:MAIL_PASSWORD}",
+                "JWT_SECRET": "${env:JWT_SECRET}",
+                "ADMIN_CONTACTS": "${env:ADMIN_CONTACTS}"
+            }
         }
     ]
 }

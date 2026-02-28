@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState, useContext } from "react";
 import { ThemeContext } from "../../lib/contexts/theme-context";
+import { FetchBackendAPI } from "@/lib/api/backend-api";
 
 const LiveTournament = ({ query = "game tournament", joinUrl = "#", showChat = true, tournamentId = null }) => {
   const { isDarkMode } = useContext(ThemeContext);
@@ -15,21 +16,18 @@ const LiveTournament = ({ query = "game tournament", joinUrl = "#", showChat = t
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    fetch(`/api/live?q=${encodeURIComponent(query)}`)
-      .then((r) => r.json())
-      .then((json) => {
+    FetchBackendAPI(`live?q=${encodeURIComponent(query)}`)
+      .then((r) => {
         if (!mounted) return;
-        if (json?.ok && Array.isArray(json.data) && json.data.length > 0) {
-          setStreams(json.data);
-          setSelected(json.data[0] || null);
+        if (r?.ok && Array.isArray(r.data) && r.data.length > 0) {
+          setStreams(r.data);
+          setSelected(r.data[0] || null);
         } else {
           setStreams([]);
           setSelected(null);
-          // fallback: check admin-saved live link
           (async () => {
             try {
-              const r2 = await fetch('/api/admin/live-link');
-              const j2 = await r2.json();
+              const r2 = await FetchBackendAPI('admin/live-link');
               if (j2?.ok && j2.data?.url) {
                 const url = j2.data.url;
                 const vid = parseYouTubeId(url);
@@ -70,10 +68,9 @@ const LiveTournament = ({ query = "game tournament", joinUrl = "#", showChat = t
 
     const fetchMeta = async () => {
       try {
-        const r = await fetch(`/api/tournaments/${encodeURIComponent(tournamentId)}/meta`);
-        const j = await r.json();
+        const r = await FetchBackendAPI(`tournaments/${encodeURIComponent(tournamentId)}/meta`);
         if (!mounted) return;
-        if (j?.ok && j.data) setMatchMeta(j.data.matchMeta || null);
+        if (r?.ok && r.data) setMatchMeta(r.data.matchMeta || null);
       } catch (e) {
         console.warn('Failed to fetch match meta', e);
       }

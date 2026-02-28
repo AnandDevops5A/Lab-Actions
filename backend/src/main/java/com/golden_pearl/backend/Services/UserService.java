@@ -181,7 +181,9 @@ public class UserService {
             existingUser.setEmail(user.email());
             existingUser.setContact(user.contact());
             existingUser.setCallSign(user.callSign());
-            existingUser.setAccessKey(user.accessKey());
+            if (user.accessKey() != null && !user.accessKey().isBlank()) {
+                existingUser.setAccessKey(passwordEncoder.encode(user.accessKey()));
+            }
 
             return userRepository.save(existingUser);
         }

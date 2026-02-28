@@ -1,6 +1,6 @@
-import useSWR from "swr";
+"use client";
+import  useSWR  from "swr";
 import axios from "axios";
-import LZString from "lz-string";
 
 const BASE_URL = (typeof window === 'undefined' ? process.env.BACKEND_URL : process.env.NEXT_PUBLIC_API_URL);
 const MAX_RETRIES = 3;
@@ -12,19 +12,11 @@ const RETRY_DELAY = 1000; // ms
 const fetcher = async (url, method = "GET", data = null, timeout = 10000) => {
   let lastError;
 
-  // Get token from localStorage with decompression
+  // Get token from context
   let token = null;
   if (typeof window !== 'undefined') {
-    try {
-      const compressed = localStorage.getItem("currentUser");
-      if (compressed) {
-        const decompressed = LZString.decompressFromUTF16(compressed);
-        const currentUser = JSON.parse(decompressed);
-        token = currentUser?.token || currentUser?.accessToken;
-      }
-    } catch (error) {
-      console.error("Error retrieving token from localStorage:", error);
-    }
+    const { user } = useUserContext();
+    token = user?.token || user?.accessToken;
   }
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
@@ -65,7 +57,7 @@ const fetcher = async (url, method = "GET", data = null, timeout = 10000) => {
 /**
  * Custom SWR hook with optimized caching and deduplication
  */
-export const useSWRBackendAPI = (
+export const SWRBackendAPI = (
   endpoint,
   method = "GET",
   data = null,
@@ -198,6 +190,16 @@ export const getTournamentByIds = async (tournamentIds) => {
 
 
 
+// delete participants from tournament
+export const deleteParticipantFromTournament = async (tournamentId, userIds) => {
+  const userIdsParam = userIds.join(",");
+  return await FetchBackendAPI(`leaderboard/deleteJoiners`, {
+    method: "DELETE",
+    data: { tournamentId, userIdsParam },
+  });
+};
+
+
 
 
 
@@ -296,15 +298,6 @@ export const getAllLeaderBoard = async () => {
 };
 
 
-
-
-
-// Seed leaderboard with sample entries
-export const seedLeaderboard = async (listofuserId,tournamentId, count = 20) => {
-  return await FetchBackendAPI(`leaderboard/seed/${listofuserId}/${tournamentId}/${count}`, {
-    method: "POST",
-  });
-};
 
 
 

@@ -18,7 +18,7 @@ const ParticipantDetailsModal = dynamic(() => import('./ParticipantDetailsModal'
   ssr: false,
 });
 
-import { approveUserFromTournament, getJoinersByTournamentId, getJoinersByTournamentIdList } from "../../lib/api/backend-api";
+import { approveUserFromTournament, deleteParticipantFromTournament, getJoinersByTournamentId, getJoinersByTournamentIdList } from "../../lib/api/backend-api";
 
 const ManageParticipant = ({ tournaments, participants, refreshData }) => {
   const { isDarkMode } = useContext(ThemeContext);
@@ -177,18 +177,10 @@ const ManageParticipant = ({ tournaments, participants, refreshData }) => {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`${BASE_URL}/tournament/${selectedTournament.id}/participant/${participantId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
+      const response = await deleteParticipantFromTournament(selectedTournament.id, [participantId]);
       if (response.ok) {
         successMessage("Participant removed successfully");
         if (refreshData) refreshData();
-      } else {
-        errorMessage("Failed to remove participant");
       }
     } catch (error) {
       errorMessage("An error occurred while removing the participant");
@@ -222,28 +214,16 @@ const ManageParticipant = ({ tournaments, participants, refreshData }) => {
     if (!confirmed) return;
 
     try {
-      const removePromises = selectedParticipants.map(participantId =>
-        fetch(`${BASE_URL}/tournament/${selectedTournament.id}/participant/${participantId}`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }).then(res => res.ok)
-      );
+      const response = await deleteParticipantFromTournament(selectedTournament.id, selectedParticipants);
 
-      const results = await Promise.all(removePromises);
-      const successCount = results.filter(Boolean).length;
-
-      if (successCount === selectedParticipants.length) {
-        successMessage(`Successfully removed ${successCount} participant(s)`);
-        setSelectedParticipants([]);
+      if (response.ok) {
+        successMessage("Participant removed successfully");
         if (refreshData) refreshData();
       } else {
-        errorMessage(`Failed to remove ${selectedParticipants.length - successCount} participant(s)`);
+        errorMessage("Failed to remove participant");
       }
     } catch (error) {
-      console.error("Bulk remove error:", error);
-      errorMessage("An error occurred during bulk removal");
+      errorMessage("An error occurred while removing the participant");
     }
   }, [selectedTournament, selectedParticipants, refreshData]);
 

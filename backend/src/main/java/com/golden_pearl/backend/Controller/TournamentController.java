@@ -1,13 +1,5 @@
 package com.golden_pearl.backend.Controller;
 
-/**
- * TournamentController handles all tournament-related operations including
- * creating, updating, retrieving tournaments, and managing user registrations.
- * This controller provides REST endpoints for tournament management in the
- * Golden Pearl backend application.
- */
-
-import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -15,8 +7,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -29,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.golden_pearl.backend.DRO.TournamentReceiveData;
 import com.golden_pearl.backend.Models.User;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/tournament")
@@ -46,7 +37,7 @@ public class TournamentController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<List<Tournament>> addTournament(@RequestBody TournamentReceiveData tournamentDetails) {
+    public ResponseEntity<List<Tournament>> addTournament(@Valid @RequestBody TournamentReceiveData tournamentDetails) {
         Tournament readyTournament = new Tournament();
         readyTournament.setTournamentName(tournamentDetails.tournamentName());
         readyTournament.setPrizePool(tournamentDetails.prizePool());

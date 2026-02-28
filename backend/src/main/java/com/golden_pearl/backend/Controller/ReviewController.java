@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
 
 import com.golden_pearl.backend.DRO.AdminReplyDRO;
 import com.golden_pearl.backend.DRO.ReviewDRO;
@@ -29,7 +30,7 @@ public class ReviewController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Review> addReview(@RequestBody ReviewDRO review) {
+    public ResponseEntity<Review> addReview(@Valid @RequestBody ReviewDRO review) {
         return ResponseEntity.ok(reviewService.addReview(review));
     }
 
@@ -56,13 +57,13 @@ public class ReviewController {
     }
 
     @PutMapping("/admin-reply")
-    public ResponseEntity<String> addAdminReply(@RequestBody AdminReplyDRO adminReply) {
+    public ResponseEntity<String> addAdminReply(@Valid @RequestBody AdminReplyDRO adminReply) {
         return ResponseEntity.ok(reviewService.saveAdminReply(adminReply));
 
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Review> updateReview(@RequestBody ReviewUpdateReceive review) {
+    public ResponseEntity<Review> updateReview(@Valid @RequestBody ReviewUpdateReceive review) {
         if (review == null || review.reviewId() == null || review.reviewId().isEmpty()) {
             return ResponseEntity.badRequest().build();
         }

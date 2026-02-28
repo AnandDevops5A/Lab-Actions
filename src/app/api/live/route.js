@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getRedisClientInstance } from '../../../lib/utils/action-redis';
+import { FetchBackendAPI } from '@/lib/api/backend-api';
 
 // Simple in-memory cache to avoid hitting YouTube quota during rapid requests.
 const cache = new Map(); // key -> { expires: ts, data }
@@ -10,22 +11,20 @@ async function fetchYouTubeLive(query, apiKey) {
     query,
   )}&maxResults=6&key=${apiKey}`;
 
-  const res = await fetch(searchUrl, { cache: 'no-store' });
+  const res = await FetchBackendAPI(searchUrl, { cache: 'no-store' });
   if (!res.ok) {
     throw new Error(`YouTube search failed: ${res.status}`);
   }
-  const json = await res.json();
-  const items = json.items || [];
+  const items = res.data.items || [];
   if (items.length === 0) return [];
 
   const videoIds = items.map((it) => it.id.videoId).filter(Boolean).join(',');
   if (!videoIds) return [];
 
   const videosUrl = `https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails,statistics&id=${videoIds}&key=${apiKey}`;
-  const vres = await fetch(videosUrl, { cache: 'no-store' });
+  const vres = await FetchBackendAPI(videosUrl, { cache: 'no-store' });
   if (!vres.ok) throw new Error(`YouTube videos failed: ${vres.status}`);
-  const vjson = await vres.json();
-  const videosById = (vjson.items || []).reduce((acc, v) => {
+  const videosById = (vres.data.items || []).reduce((acc, v) => {
     acc[v.id] = v;
     return acc;
   }, {});

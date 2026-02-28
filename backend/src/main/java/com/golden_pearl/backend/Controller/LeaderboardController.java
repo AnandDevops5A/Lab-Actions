@@ -1,10 +1,10 @@
 package com.golden_pearl.backend.Controller;
 
 import java.util.List;
+import java.util.stream.Stream;
 
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
 
+import com.golden_pearl.backend.DRO.DeleteJoinersRequestDRO;
 import com.golden_pearl.backend.DRO.LeaderboardRegisterReceiveData;
 import com.golden_pearl.backend.DRO.UpdateLeaderboardEntry;
 import com.golden_pearl.backend.DRO.UpdateRank;
@@ -43,7 +45,7 @@ public class LeaderboardController {
 
     // register user for tournament
     @PostMapping("/register")
-    public ResponseEntity<String> registerUserForTournament(@RequestBody LeaderboardRegisterReceiveData registerData) {
+    public ResponseEntity<String> registerUserForTournament(@Valid @RequestBody LeaderboardRegisterReceiveData registerData) {
         try {
             String result = leaderboardService.registerUserForTournament(registerData);
             return ResponseEntity.ok(result);
@@ -86,7 +88,7 @@ public class LeaderboardController {
     
 
     @PostMapping("/updateRank")
-    public ResponseEntity<String> updateRank(@RequestBody UpdateRank updateRankData) {
+    public ResponseEntity<String> updateRank(@Valid @RequestBody UpdateRank updateRankData) {
         return ResponseEntity.ok(leaderboardService.updateRank(updateRankData.tournamentId(), updateRankData.userId(),
                 updateRankData.rank()));
     }
@@ -111,7 +113,7 @@ public class LeaderboardController {
 
     // Update leaderboard entry (rank, investAmount and winAmount)
     @PutMapping("/update/{leaderboardId}")
-    public ResponseEntity<String> updateLeaderboardEntry(@PathVariable String leaderboardId, @RequestBody UpdateLeaderboardEntry updateData) {
+    public ResponseEntity<String> updateLeaderboardEntry(@PathVariable String leaderboardId, @Valid @RequestBody UpdateLeaderboardEntry updateData) {
         return ResponseEntity.ok(leaderboardService.updateLeaderboardEntry(leaderboardId, updateData.rank(), updateData.investAmount(), updateData.winAmount()));
     }
 
@@ -124,6 +126,16 @@ public class LeaderboardController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
-
+    @DeleteMapping("/deleteJoiners")
+    public ResponseEntity<String> deleteJoiners(@Valid @RequestBody DeleteJoinersRequestDRO deleteJoinersRequest) {
+        try {
+            return ResponseEntity.ok(leaderboardService.deleteJoiners(deleteJoinersRequest.tournamentId(),Stream.of(deleteJoinersRequest.userIds().split(",")).map(String::trim).toList()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
+    }
 }

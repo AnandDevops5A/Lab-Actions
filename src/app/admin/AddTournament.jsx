@@ -4,6 +4,7 @@ import { X } from "lucide-react"; // Icon library for the cross button
 import { errorMessage, successMessage } from "../../lib/utils/alert";
 import { setCache } from "../../lib/utils/client-cache";
 import { dateInLongFormat } from "@/lib/utils/common";
+import { FetchBackendAPI } from "@/lib/api/backend-api";
 
 const inputBoxes = [
   { label: "Prize", type: "number", placeholder: "500", name: "prizePool" },
@@ -62,14 +63,13 @@ const AddTournamentForm = ({ onClose, refreshData}) => {
 // console.log(data);
   // Submit data to backend
   try {
-    // TODO: Replace with your API endpoint
-    const response = await fetch("http://localhost:8082/tournament/add", {
+   
+
+    const response = await FetchBackendAPI("tournament/add", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
+      data: data,
     });
+
 
     if (response.ok) {
       const responseData = await response.json();
@@ -82,7 +82,9 @@ const AddTournamentForm = ({ onClose, refreshData}) => {
       // Reset form or redirect
       e.target.reset();
       if (refreshData) refreshData();
-      onClose(true);
+      setTimeout(() => {
+        onClose(true);
+      }, 1000);
     } else {
       errorMessage("Failed to create tournament");
     }

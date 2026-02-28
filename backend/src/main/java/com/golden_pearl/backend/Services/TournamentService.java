@@ -41,12 +41,8 @@ public class TournamentService {
         // The startDateTime should be set in the request body by the client
         if (tournamentDetails == null)
             return null;
-        // tournamentDetails.setDateTime(general.getCurrentDateTime());
-        Tournament t= tournamentRepository.save(tournamentDetails);
-        if(t!=null) {
-            return getUpcomingTournaments();
-        }
-        return null;
+        tournamentRepository.save(tournamentDetails);
+        return getUpcomingTournaments();
     }
 
     // get tournament by id

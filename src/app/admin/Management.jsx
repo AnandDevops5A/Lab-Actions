@@ -4,7 +4,6 @@ import { ThemeContext } from "../../lib/contexts/theme-context";
 import { deleteTournamentById } from "../../lib/api/backend-api";
 import { errorMessage, successMessage, confirmMessage } from "../../lib/utils/alert";
 
-const BASE_URL = "http://localhost:8082";
 import {
   Search,
   Filter,
@@ -161,30 +160,15 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
     if (!confirmed) return;
 
     try {
-      const deletePromises = selectedTournaments.map((id) =>
-        fetch(`${BASE_URL}/tournament/delete/${id}`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }).then((res) => res.ok),
-      );
-
-      const results = await Promise.all(deletePromises);
-      const successCount = results.filter(Boolean).length;
-
-      if (successCount === selectedTournaments.length) {
-        successMessage(`Successfully deleted ${successCount} tournament(s)`);
-        setSelectedTournaments([]);
+      const response = await deleteTournamentById(selectedTournaments);
+      if (response.ok) {
+        successMessage("Tournament deleted successfully");
         if (refreshData) refreshData();
       } else {
-        errorMessage(
-          `Failed to delete ${selectedTournaments.length - successCount} tournament(s)`,
-        );
+        errorMessage("Failed to delete tournament");
       }
     } catch (error) {
-      console.error("Bulk delete error:", error);
-      errorMessage("An error occurred during bulk deletion");
+      errorMessage("An error occurred while deleting the tournament");
     }
   }, [selectedTournaments, refreshData]);
 

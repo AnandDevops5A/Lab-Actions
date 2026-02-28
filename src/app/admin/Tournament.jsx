@@ -4,6 +4,7 @@ import { ThemeContext } from "../../lib/contexts/theme-context";
 import CyberLoading from "../skeleton/CyberLoading";
 import dynamic from "next/dynamic";
 import { errorMessage, successMessage, confirmMessage } from "../../lib/utils/alert";
+import { deleteTournamentById } from "@/lib/api/backend-api";
 
 
 const Table = dynamic(() => import('./Table'), {
@@ -31,20 +32,10 @@ const Tournament = ({ tournaments, refreshData }) => {
 
   const performDeletion = useCallback(async (id) => {
     try {
-      const response = await fetch(`http://localhost:8082/tournament/delete/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
+      const response = await deleteTournamentById(id);
       if (response.ok) {
-        const responseData = await response.json();
-        const msg = typeof responseData === 'string' ? responseData : (responseData?.message || "Tournament deleted successfully");
-        successMessage(msg);
+        successMessage("Tournament deleted successfully");
         if (refreshData) refreshData();
-      } else {
-        errorMessage("Failed to delete tournament.");
       }
     } catch (error) {
       console.error("Error deleting tournament:", error);

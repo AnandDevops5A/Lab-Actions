@@ -1,15 +1,10 @@
 package com.golden_pearl.backend.Services;
 
-import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 import org.springframework.data.domain.PageRequest;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -18,8 +13,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
-
+import com.golden_pearl.backend.DRO.DeleteJoinersRequestDRO;
 import com.golden_pearl.backend.DRO.LeaderboardRegisterReceiveData;
 import com.golden_pearl.backend.DTO.TournamentWithLeaderboard;
 import com.golden_pearl.backend.Models.LeaderBoard;
@@ -27,6 +23,9 @@ import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.Repository.LeaderboardRepository;
 import com.golden_pearl.backend.errors.ResourceNotFoundException;
+
+import jakarta.validation.Valid;
+
 import com.golden_pearl.backend.common.General;
 
 @Service
@@ -367,6 +366,24 @@ public class LeaderboardService {
     @Cacheable(value = "allLeaderboards", sync = true)
     public List<LeaderBoard> getAllLeaderboard() {
         return leaderboardRepository.findAll();
+    }
+
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "leaderboard", key = "#tournamentId"),
+            @CacheEvict(value = "topNLeaderboard", allEntries = true),
+            @CacheEvict(value = "userTournaments", allEntries = true),
+            @CacheEvict(value = "userTournamentsDetails", allEntries = true),
+            @CacheEvict(value = "adminData", allEntries = true),
+            @CacheEvict(value = "allLeaderboards", allEntries = true)
+    })
+    public String deleteJoiners(String tournamentId, List<String> userIds) {
+        List<LeaderBoard> entries = leaderboardRepository.findByTournamentIdAndUserIdIn(tournamentId, userIds);
+        if (entries == null) {
+            throw new ResourceNotFoundException("No entries found for this tournament and users");
+        }
+        leaderboardRepository.deleteAll(entries);
+        return "Joiners deleted successfully";
     }
 
 }

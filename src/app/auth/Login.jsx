@@ -7,6 +7,7 @@ import { FetchBackendAPI } from "../../lib/api/backend-api";
 import { UserContext } from "../../lib/contexts/user-context";
 import { useRouter } from "next/navigation";
 import LZString from "lz-string";
+import { setSecureCookie } from "../api/httpcookies/cookiesManagement";
 
 const Login = memo(({ onSwitch, isDarkMode }) => {
   const contactRef = useRef(null);
@@ -26,8 +27,13 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
     //    console.log("Before set context is :" , user);
     // console.log("Response from backend:", res.status);
     if (res?.status === 200 && res?.data) {
+
       const compressedUser = LZString.compressToUTF16(JSON.stringify(res.data));
-      localStorage.setItem("currentUser", compressedUser);
+      const result = await setSecureCookie("currentUser", compressedUser);
+      if (!result.success) {
+        errorMessage(result.message || "Failed to set cookie");
+        return;
+      }
       
       // Set user context
       setUser(res.data);

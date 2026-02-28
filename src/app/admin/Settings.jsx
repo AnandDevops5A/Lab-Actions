@@ -1,5 +1,6 @@
 "use client";
 
+import { FetchBackendAPI } from "@/lib/api/backend-api";
 import React, { useEffect, useState, useCallback } from "react";
 
 /**
@@ -24,12 +25,11 @@ const Settings = () => {
 
     const fetchLiveUrl = async () => {
       try {
-        const response = await fetch("/api/admin/live-link");
-        if (!response.ok) throw new Error("Failed to fetch settings");
+        const responseData = await FetchBackendAPI("admin/live-link");
+        if (!responseData.ok) throw new Error("Failed to fetch settings");
 
-        const data = await response.json();
-        if (isMounted && data?.ok && data?.data?.url) {
-          setLiveUrl(data.data.url);
+        if (isMounted && responseData?.data?.url) {
+          setLiveUrl(responseData.data.url);
           setSaved(true);
           setIsEditing(false);
           setError("");
@@ -62,7 +62,7 @@ const Settings = () => {
     setError("");
 
     try {
-      const response = await fetch("/api/admin/live-link", {
+      const response = await FetchBackendAPI("admin/live-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: liveUrl.trim() }),

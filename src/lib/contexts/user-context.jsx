@@ -3,6 +3,7 @@ import React, { createContext, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { confirmMessage, simpleMessage, successMessage } from "../utils/alert";
 import LZString from "lz-string";
+import { deleteSecureCookie, getSecureCookie } from "@/app/api/httpcookies/cookiesManagement";
 // Create Context
 export const UserContext = createContext();
 
@@ -25,15 +26,14 @@ export const UserProvider = ({ children }) => {
       let response = await confirmMessage("Are you sure you want to logout?");
       if (response) {
         //remove user from local storage
-        localStorage.removeItem("currentUser");
-        setUser(null);
-        successMessage("Logged out successfully!");
-        router.push("/auth");
-      } else {
-        simpleMessage("Logout cancelled.");
-      }
-      }
-    } catch (error) {
+       await deleteSecureCookie("currentUser");
+       setUser(null);
+       successMessage("Logged out successfully!");
+    router.push(MALIK ? "/auth" : "/");
+    } else {
+      simpleMessage("Logout cancelled.");
+    }
+    } }catch (error) {
       console.error("Logout error:", error);
     }
   }, [user, router]);
@@ -43,26 +43,25 @@ export const UserProvider = ({ children }) => {
      * Memoized to prevent recreation on every render
      */
     const getUserFromContext = useCallback(async () => {
-        // Early return if user already exists
-        if (user !== null) {
-            return user;
-        }
-
-        try {
-            // const cachedData = await getCache("currentUser");
-            const compressed = localStorage.getItem("currentUser");
-            const decompressed = LZString.decompressFromUTF16(compressed);
-            const cachedData = decompressed;
-            // console.log("cachedData:", cachedData);
-            if (cachedData) {
-                setUser(cachedData);
-                return cachedData;
-            }
-        } catch (error) {
-            console.error("Error fetching user from context:", error);
-        }
-        return null;
-    }, [user]);
+      if (user !== null) return user;
+  
+      try {
+          const compressed = await getSecureCookie("currentUser");
+          if (!compressed?.success || !compressed.data) return null;
+  
+          const decompressed = LZString.decompressFromUTF16(compressed.data);
+          if (!decompressed) return null;
+  
+          const userData = JSON.parse(decompressed);
+          
+          // Ensure you update state correctly
+          setUser(userData); 
+          return userData;
+      } catch (error) {
+          console.error("Failed to parse user data:", error);
+          return null;
+      }
+  }, [user]);
 
     // Memoize context value to prevent unnecessary re-renders
     const contextValue = useMemo(() => ({
