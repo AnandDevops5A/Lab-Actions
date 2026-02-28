@@ -19,7 +19,7 @@ jobs:
       # Build Frontend
       - name: Build and Push Frontend
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest ./frontend
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest ./
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest
 
       # Build Backend
