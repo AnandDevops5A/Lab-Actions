@@ -49,8 +49,8 @@ jobs:
             
             
             # Nayi image pull karna aur update karna
-            docker-compose pull
-            docker-compose up -d
+            sudo docker-compose pull
+            sudo docker-compose up -d
             
             # Faltu images delete karna taaki storage na bhare
-            docker image prune -f
+            sudo docker image prune -f
