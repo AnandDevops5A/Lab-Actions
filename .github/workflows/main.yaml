@@ -44,9 +44,10 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             # EC2 par login 
+            cd /home/ec2-user/app
             docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
             
-            cd /home/ec2-user
+            
             # Nayi image pull karna aur update karna
             docker compose pull
             docker compose up -d
