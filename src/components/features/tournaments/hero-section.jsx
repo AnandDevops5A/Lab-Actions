@@ -8,9 +8,10 @@ import CyberLoading from "../../../app/skeleton/CyberLoading";
 import { UserContext } from "../../../lib/contexts/user-context";
 import { askLogin } from "../../../lib/utils/alert";
 import { useRouter } from "next/navigation";
-import { fetchUpcomingTournament, fetchUserTournaments } from "@/lib/utils/common";
+import { fetchUpcomingTournament
+  // , fetchUserTournaments 
+} from "@/lib/utils/common";
 import { ArrowDownNarrowWide } from "lucide-react";
-// import MatchJoiningForm from "@/components/forms/match-joining-form";
 
 const MatchJoiningForm = dynamic(() => import("../../forms/match-joining-form"), {
   loading: () => <CyberLoading />,
@@ -20,11 +21,14 @@ const MatchJoiningForm = dynamic(() => import("../../forms/match-joining-form"),
 
 
 //get upcoming tournament details and check if user has joined all tournament or not
-const checkJoinedTournament = async (userId) => {
+const checkJoinedTournament = async (userId,userTournaments = []) => {
   if (!userId) return false;
 
+// const [upcomingTournament, userTournaments] = await Promise.all([
+//     fetchUpcomingTournament(),
+//     fetchUserTournaments(userId)
+//   ]);
   const upcomingTournament = await fetchUpcomingTournament();
-  const userTournaments = await fetchUserTournaments(userId);
 
   if (!upcomingTournament || !Array.isArray(upcomingTournament)) {
     return false;
@@ -51,7 +55,7 @@ const HeroSection = () => {
   const themeContext = useContext(ThemeContext);
   const { isDarkMode } = themeContext || { isDarkMode: true };
   const [showForm, setShowForm] = useState(false);
-  const { user } = use(UserContext);
+  const { user,userJoinedTournaments } = use(UserContext);
   const router = useRouter();
   const [upcomingTournament, setUpcomingTournament] = useState(null);
 
@@ -73,9 +77,13 @@ const HeroSection = () => {
   // Update tournament join status when user or form state changes
   useEffect(() => {
     if (user?.id) {
-      checkJoinedTournament(user.id).then((data) => settournamentStatus(data));
+      // re‑evaluate status whenever the list of joined tournaments changes
+      checkJoinedTournament(user.id, userJoinedTournaments).then((data) => settournamentStatus(data));
     }
-  }, [user?.id, showForm]);
+  }, [user?.id, showForm, userJoinedTournaments]);
+
+
+  const hasUpcoming = upcomingTournament && upcomingTournament.length > 0;
 
 
    
@@ -137,33 +145,40 @@ const HeroSection = () => {
       {/* Hero Content */}
       <div className="relative text-center max-w-4xl px-4 z-10 animate-slideInUp">
         {/* Professional H1 */}
-        {tournamentStatus ? (
+        {!hasUpcoming ? (
           <h1
             className={`text-3xl md:text-5xl lg:text-7xl font-black mb-6 tracking-tighter drop-shadow-2xl leading-tight hover-lift duration-500 transition-colors ${
               isDarkMode ? "text-slate-200" : "text-slate-700"
             }`}
           >
-            <span
-              className={`font-black inline-block mx-2 ` }
-            >
-                          Grab your <span className="text-transparent bg-clip-text bg-linear-to-r from-red-500 to-pink-500 animate-gradientFlow">Bounty</span>
+            Stay Tuned for{" "}
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-red-500 to-pink-500 animate-gradientFlow">
+              Upcoming Tournaments
+            </span>
+          </h1>
+        ) : tournamentStatus ? (
+          <h1
+            className={`text-3xl md:text-5xl lg:text-7xl font-black mb-6 tracking-tighter drop-shadow-2xl leading-tight hover-lift duration-500 transition-colors ${
+              isDarkMode ? "text-slate-200" : "text-slate-700"
+            }`}
+          >
+            <span className={`font-black inline-block mx-2 `}>
+              Grab your{" "}
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-red-500 to-pink-500 animate-gradientFlow">
+                Bounty
+              </span>
             </span>
           </h1>
         ) : (
           <h1
-            className={`text-[55px] md:text-7xl lg:text-[90px] font-black mb-6 tracking-tighter drop-shadow-2xl leading-tight  transition-colors ${
+            className={`text-[55px] md:text-7xl lg:text-[90px] font-black mb-6 tracking-tighter drop-shadow-2xl leading-tight transition-colors ${
               isDarkMode ? "text-slate-200" : "text-slate-800"
             }`}
           >
-                        Waiting for <span className="text-transparent bg-clip-text bg-linear-to-r from-red-500 to-pink-500 animate-gradientFlow">you</span>
-
-            <span
-              className={`inline-block ${
-                isDarkMode
-                  ? "bg-linear-to-r from-red-500 to-pink-500 bg-clip-text text-transparent"
-                  : "bg-linear-to-r from-red-600 to-pink-600 bg-clip-text text-transparent"
-              }`}
-            ></span>
+            Waiting for{" "}
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-red-500 to-pink-500 animate-gradientFlow">
+              you
+            </span>
             <span className="animate-bounce">🎉</span>
           </h1>
         )}
@@ -183,19 +198,23 @@ const HeroSection = () => {
             isDarkMode ? "text-gray-200" : "text-slate-700"
           }`}
         >
-          {/* <TypingWrapper> */}
-          Unleash your skill into raw Bounty💰.
-          <br />
-          Dominate {""}
-          <span
-            className={`font-semibold ${
-              isDarkMode ? "text-cyan-300" : "text-blue-600"
-            }`}
-          >
-            official tournaments,
-          </span>{" "}
-          crush rivals, and carve your legacy in fire.
-          {/* </TypingWrapper> */}
+          {!hasUpcoming ? (
+            "Stay tuned for exciting tournaments coming soon. Prepare your skills and get ready to dominate!"
+          ) : (
+            <>
+              Unleash your skill into raw Bounty💰.
+              <br />
+              Dominate{" "}
+              <span
+                className={`font-semibold ${
+                  isDarkMode ? "text-cyan-300" : "text-blue-600"
+                }`}
+              >
+                official tournaments,
+              </span>{" "}
+              crush rivals, and carve your legacy in fire.
+            </>
+          )}
         </p>
 
         {/* Stats Row - Professional Touch */}
@@ -264,7 +283,9 @@ const HeroSection = () => {
         </div>
 
         {/* Professional Call to Action Buttons */}
-        <div className={`${buttonClasses} justify-center items-center`}>
+        <div className={`${buttonClasses} justify-center items-center relative`}>
+          {/* Cartoon Hand Animation */}
+          
           <button
             onClick={() => {
               if (user ){ 
@@ -272,9 +293,9 @@ const HeroSection = () => {
               else askLogin(router);
               
             }}
-            disabled={tournamentStatus}
+            disabled={!hasUpcoming || tournamentStatus}
             className={`group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold uppercase tracking-widest transition-all duration-300 hover-lift rounded-lg overflow-hidden
-               ${tournamentStatus ? (isDarkMode ? "bg-gray-700/50 cursor-not-allowed hover:shadow-none" : "bg-gray-200/50 cursor-not-allowed hover:shadow-none") :
+               ${!hasUpcoming || tournamentStatus ? (isDarkMode ? "bg-gray-700/50 cursor-not-allowed hover:shadow-none" : "bg-gray-200/50 cursor-not-allowed hover:shadow-none") :
                  (isDarkMode ? "bg-red-600/70 hover:bg-red-600/90" : "bg-red-500/70 hover:bg-red-500/90") }`}
           >
             <div
@@ -285,7 +306,7 @@ const HeroSection = () => {
               } transition-all duration-300 rounded-lg`}
             ></div>
             <span className={`relative flex items-center gap-2 text-slate-100 font-bold ${isDarkMode ? "text-cyan-400" : "text-blue-600"} `}>
-              {tournamentStatus ? "All Joined ✅🫡" : "Join Tournament 🤺🎮"}
+              {!hasUpcoming ? "No Tournaments Available" : tournamentStatus ? "All Joined ✅🫡" : "Join Tournament 🤺🎮"}
             </span>
           </button>
 
@@ -296,13 +317,15 @@ const HeroSection = () => {
               const tid = upcomingTournament?.id || '';
               router.push(`/live?q=${encodeURIComponent(q)}${tid ? `&tournamentId=${encodeURIComponent(tid)}` : ''}`);
             }}
+            disabled={!hasUpcoming}
             className={`group relative inline-flex items-center justify-center px-10 py-4 text-lg font-bold uppercase tracking-widest border-2 rounded-lg transition-all duration-300 hover-lift hover-glow ${
-              isDarkMode
+              !hasUpcoming ? (isDarkMode ? "border-gray-500 text-gray-500 cursor-not-allowed" : "border-gray-400 text-gray-400 cursor-not-allowed") :
+              (isDarkMode
                 ? "border-cyan-400 text-cyan-400 hover:bg-cyan-400/10"
-                : "border-blue-600 text-blue-600 hover:bg-blue-600/10"
+                : "border-blue-600 text-blue-600 hover:bg-blue-600/10")
             }`}
           >
-            Watch Tournament 🖥️
+            {!hasUpcoming ? "No Live Tournaments" : "Watch Tournament 🖥️"}
           </button>
         </div>
 

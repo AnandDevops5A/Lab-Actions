@@ -18,9 +18,11 @@ import com.golden_pearl.backend.DRO.ReviewDRO;
 import com.golden_pearl.backend.DRO.ReviewUpdateReceive;
 import com.golden_pearl.backend.Models.Review;
 import com.golden_pearl.backend.Services.ReviewService;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 
 @RestController
 @RequestMapping("/review")
+@RateLimiter(name = "apiRateLimiter")
 public class ReviewController {
 
     private final ReviewService reviewService;

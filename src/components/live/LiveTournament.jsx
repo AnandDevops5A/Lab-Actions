@@ -28,8 +28,8 @@ const LiveTournament = ({ query = "game tournament", joinUrl = "#", showChat = t
           (async () => {
             try {
               const r2 = await FetchBackendAPI('admin/live-link');
-              if (j2?.ok && j2.data?.url) {
-                const url = j2.data.url;
+              if (r2?.ok && r2.data?.url) {
+                const url = r2.data.url;
                 const vid = parseYouTubeId(url);
                 if (vid) {
                   const fallback = {

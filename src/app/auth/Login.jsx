@@ -14,32 +14,64 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
   const accessKeyRef = useRef(null);
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { setUser,MALIK } = useContext(UserContext);
+  const { setUser,MALIK,refreshUserTournaments } = useContext(UserContext);
   const router = useRouter();
 
+  const handleLoginError = (error) => {
+    // Log the full error for debugging purposes
+    console.error("Login API Error:", { status: error.status, message: error.error });
+
+    // Provide user-friendly messages based on the error status
+    switch (error.status) {
+      case 401: // Unauthorized
+      case 403: // Forbidden
+        errorMessage("Invalid credentials. Please check your Player ID and Access Key.");
+        break;
+      case 404: // Not Found
+        errorMessage("Player account not found.");
+        break;
+      case 429: // Too Many Requests
+        errorMessage(error.error || "Too many login attempts. Please try again later.");
+        break;
+      default:
+        // For 500 or other unexpected statuses
+        errorMessage(error.error || "An unexpected server error occurred. Please try again.");
+        break;
+    }
+  };
+
   async function onSubmit(payload) {
-    // console.log("Submitting payload:", payload);
     const res = await FetchBackendAPI("users/verify", {
       method: "POST",
       data: payload,
     });
-    //    console.log("Response from backend:", res);
-    //    console.log("Before set context is :" , user);
-    // console.log("Response from backend:", res.status);
-    if (res?.status === 200 && res?.data) {
 
-      const compressedUser = LZString.compressToUTF16(JSON.stringify(res.data));
-      const result = await setSecureCookie("currentUser", compressedUser);
-      if (!result.success) {
-        errorMessage(result.message || "Failed to set cookie");
-        return;
-      }
-      
-      // Set user context
-      setUser(res.data);
-      // console.log("After set context is :" , user);
+    if (!res.ok) {
+      return res; // Pass API error through to the handler
     }
-    return res;
+
+    // On successful API response, proceed with setting the session
+    try {
+      const compressedUser = LZString.compressToUTF16(JSON.stringify(res.data));
+      const cookieResult = await setSecureCookie("currentUser", compressedUser);
+
+      if (!cookieResult.success) {
+        throw new Error(cookieResult.message || "Failed to save user session.");
+      }
+
+      setUser(res.data);
+      // Refresh user tournaments immediately after login to ensure we have the latest data
+      refreshUserTournaments(true,res.data);
+      return res;
+    } catch (sessionError) {
+      console.error("Session handling error after login:", sessionError);
+      // Return a structured error for the handler
+      return {
+        ok: false,
+        error: "Could not start your session. Please try again.",
+        status: 500, // Represents a client-side internal error
+      };
+    }
   }
 
   async function handleSubmit(e) {
@@ -47,27 +79,29 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
     const contact = contactRef.current?.value || "";
     const accessKey = accessKeyRef.current?.value || "";
 
-    if (!contact.trim() || !accessKey) {
+    if (!contact.trim() || !accessKey.trim()) {
       errorMessage("Please enter both Player ID and accessKey.");
       return;
     }
     setLoading(true);
 
     try {
-      const payload = { contact: contact.trim(), accessKey };
+      const payload = { contact: contact.trim(), accessKey: accessKey.trim() };
       const result = await onSubmit(payload);
 
-      if (result?.status === 200 && result?.data) {
-        successMessage(result.message || "Login successful.");
-        router.push(MALIK ? "/" : "/player");
+      if (result.ok) {
+        successMessage("Login successful!");
+        if (MALIK) {
+          router.push("/");
+        } else {
+          router.push("/player");
+        }
       } else {
-        // Improved error handling based on status or message
-        const msg = result?.message || "Invalid credentials or server error.";
-        errorMessage(msg);
+        handleLoginError(result);
       }
     } catch (err) {
-      console.error("Login Error:", err);
-      errorMessage(err?.message || "Unexpected error.");
+      console.error("Fatal login process error:", err);
+      errorMessage("A critical error occurred. Please refresh and try again.");
     } finally {
       setLoading(false);
     }

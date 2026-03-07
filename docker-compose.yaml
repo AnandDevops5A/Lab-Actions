@@ -1,80 +1,161 @@
 services:
-  # 1. Redis Service
+  # ====== 1. REDIS SERVICE ======
+  # In-memory caching layer optimized for t2.micro
   redis:
-    image: redis:latest
+    image: redis:7-alpine
     container_name: redis
     ports:
       - "6379:6379"
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
     networks:
       - application-net
     restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    volumes:
+      - redis-data:/data
 
-  # 2. Backend Service (Spring Boot)
-  backend:
+  # ====== 2. BACKEND SERVICE - INSTANCE 1 ======
+  # Primary backend with port 8082
+  backend-1:
     image: anand7254/golden-pearl-backend:latest
-    container_name: backend
-    # Load all backend-related env vars from .env (SPRING_DATA_MONGODB_URI, FRONTEND_URL, MAIL_*, etc.)
+    container_name: backend-1
     env_file:
       - .env
-    # Explicit environment values still supported / can override .env if needed
     environment:
       - SPRING_DATA_MONGODB_URI=${SPRING_DATA_MONGODB_URI}
       - SPRING_DATA_MONGODB_DATABASE=${SPRING_DATA_MONGODB_DATABASE}
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - FRONTEND_URL=${FRONTEND_URL}
       - JWT_SECRET=${JWT_SECRET}
       - ADMIN_CONTACTS=${ADMIN_CONTACTS}
+      - SERVER_PORT=8082
+      - JAVA_OPTS=-Xmx256m -Xms128m
     ports:
       - "8082:8082"
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     healthcheck:
-      # Isse frontend ko pata chalega ki backend ready hai
       test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
-      interval: 30s
-      timeout: 10s
+      interval: 20s
+      timeout: 5s
       retries: 3
-      start_period: 90s
+      start_period: 60s
     networks:
       - application-net
     restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.4'
+          memory: 300M
+        reservations:
+          cpus: '0.2'
+          memory: 200M
 
-  # 3. Frontend Service (Next.js)
-  frontend:
-    image: anand7254/golden-pearl-frontend:latest
-    container_name: frontend
-    ports:
-      - "3000:3000"
+  # ====== 3. BACKEND SERVICE - INSTANCE 2 ======
+  # Secondary backend with port 8083
+  backend-2:
+    image: anand7254/golden-pearl-backend:latest
+    container_name: backend-2
+    env_file:
+      - .env
     environment:
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-      - BACKEND_URL=http://backend:8082
+      - SPRING_DATA_MONGODB_URI=${SPRING_DATA_MONGODB_URI}
+      - SPRING_DATA_MONGODB_DATABASE=${SPRING_DATA_MONGODB_DATABASE}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - FRONTEND_URL=${FRONTEND_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_CONTACTS=${ADMIN_CONTACTS}
+      - SERVER_PORT=8083
+      - JAVA_OPTS=-Xmx256m -Xms128m
+    ports:
+      - "8083:8083"
     depends_on:
-      backend:
-        condition: service_started
-    # Ye command PLACEHOLDER ko .env ki asli IP se replace karegi
-    command: >
-      sh -c "find .next -type f -exec sed -i \"s|PLACEHOLDER_NEXT_PUBLIC_API_URL|$NEXT_PUBLIC_API_URL|g\" {} + && node server.js"
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     networks:
       - application-net
     restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.4'
+          memory: 300M
+        reservations:
+          cpus: '0.2'
+          memory: 200M
 
+  # ====== 4. DOZZLE SERVICE ======
+  # Log aggregator for monitoring containers (accessible on port 9999)
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    ports:
+      - "9999:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - application-net
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 100M
+        reservations:
+          cpus: '0.1'
+          memory: 50M
+
+  # ====== NGINX REVERSE PROXY & LOAD BALANCER ======
+  # Uncomment to enable Nginx with load balancing between two backends
   nginx:
-    image: nginx:latest
+    image: nginx:alpine
     container_name: nginx-proxy
     restart: always
     ports:
       - "80:80"
-      # - "443:443"
+      - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./cache:/var/cache/nginx
     depends_on:
-      - frontend
-      - backend
+      - backend-1
+      - backend-2
     networks:
       - application-net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 100M
+        reservations:
+          cpus: '0.1'
+          memory: 50M
 
+volumes:
+  redis-data:
+    driver: local
 
 networks:
   application-net:

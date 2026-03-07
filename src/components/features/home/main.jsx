@@ -1,37 +1,45 @@
 "use client";
 import dynamic from "next/dynamic";
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import image from "../../../app/images/image.jpg";
 import { SkeletonCard, SkeletonTable } from "../../../app/skeleton/Skeleton";
 import { ThemeContext } from "../../../lib/contexts/theme-context";
 
-import { setUpcomingTournamentCache } from "../../../lib/utils/common";
 import HeroSection from "../tournaments/hero-section";
-import UpcomingMatches from "@/components/ui/upcoming-matches";
-import WinnerSection from "@/components/ui/winner";
-import Stats from "@/components/ui/stats";
-import ContactPage from "./contact-page";
-// import Footer from "@/components/layout/footer";
 
-// const WinnerSection = dynamic(() => import("../../ui/winner"), {
-//   loading: () => <SkeletonTable />, // Optional: A fallback UI while loading
-//   ssr: false, // Optional: Set to false if the component must ONLY run on the client
-// });
+// Optimizing with dynamic imports for below-the-fold content to reduce initial bundle size
+const UpcomingMatches = dynamic(() => import("@/components/ui/upcoming-matches"), {
+  loading: () => (
+    <div className="container mx-auto px-4 py-12">
+      <SkeletonTable />
+    </div>
+  ),
+});
 
-// const ContactPage = dynamic(() => import("./contact-page"), {
-//   loading: () => (
-//     <div className="gap-4">
-//       <SkeletonCard />
-//       <SkeletonCard />
-//     </div>
-//   ), // Optional: A fallback UI while loading
-//   ssr: false, // Optional: Set to false if the component must ONLY run on the client
-// });
+const WinnerSection = dynamic(() => import("@/components/ui/winner"), {
+  loading: () => (
+    <div className="py-12">
+      <SkeletonTable />
+    </div>
+  ),
+});
 
-// const Stats = dynamic(() => import("../../ui/stats"), {
-//   loading: () => <SkeletonTable />, // Optional: A fallback UI while loading
-//   ssr: false, // Optional: Set to false if the component must ONLY run on the client
-// });
+const Stats = dynamic(() => import("@/components/ui/stats"), {
+  loading: () => (
+    <div className="py-12">
+      <SkeletonTable />
+    </div>
+  ),
+});
+
+const ContactPage = dynamic(() => import("./contact-page"), {
+  loading: () => (
+    <div className="container mx-auto px-4 py-12 flex flex-col md:flex-row gap-4">
+      <div className="w-full md:w-1/2"><SkeletonCard /></div>
+      <div className="w-full md:w-1/2"><SkeletonCard /></div>
+    </div>
+  ),
+});
 
 const Footer = dynamic(() => import("../../layout/footer"), {
   loading: () => <SkeletonTable />,
@@ -43,16 +51,6 @@ const Footer = dynamic(() => import("../../layout/footer"), {
 const Main = () => {
   const themeContext = useContext(ThemeContext);
   const { isDarkMode } = themeContext || { isDarkMode: true };
-
-  // const [upcomingTournament, setUpcomingTournament] = useState(null);
-
-  useEffect(() => {
-    let isMounted = true;
-    setUpcomingTournamentCache();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   return (
     <div

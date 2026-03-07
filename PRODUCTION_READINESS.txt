@@ -137,3 +137,14 @@ This document lists the key improvements required to run this project safely and
   - What to check if logins/registrations fail.
   - How to roll back to a previous version safely.
 
+### 10. Accessibility & Best Practices (Lighthouse Remediation)
+
+- **Accessibility (Current Score: 76 -> Target: 100)**
+  - **Automated Checks:** Add `eslint-plugin-jsx-a11y` to the build pipeline.
+  - **Contrast & Labels:** Fix low-contrast colors and ensure every form input has a `<label>`.
+  - **Semantics:** Replace `<div>` with `<button>` for interactive elements to ensure keyboard navigation support.
+  - **ARIA:** Audit dynamic components (modals, dropdowns) for correct `aria-*` attributes.
+- **Best Practices**
+  - **Security Headers:** Implement `Content-Security-Policy`, `X-Frame-Options`, and `X-Content-Type-Options`.
+  - **Console Errors:** Eliminate all console errors/warnings in the production build.
+  - **HTTPS:** Ensure all resources are loaded over HTTPS.

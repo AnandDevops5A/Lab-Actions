@@ -9,7 +9,6 @@ import {
   useCallback,
   useRef,
 } from "react";
-import { getCache, setCache, deleteCache } from "../../lib/utils/client-cache";
 import {
   errorMessage,
   simpleMessage,
@@ -24,7 +23,7 @@ import { UserContext } from "../../lib/contexts/user-context";
 import CyberLoading from "../../app/skeleton/CyberLoading";
 import {
   fetchUpcomingTournament,
-  fetchUserTournaments,
+  // fetchUserTournaments,
   generateRandomNumberForQR,
 } from "@/lib/utils/common";
 import Swal from "sweetalert2";
@@ -184,7 +183,7 @@ export default function MatchJoiningForm({
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = controlledSetOpen || setInternalOpen;
-  const { user } = useContext(UserContext);
+  const { user,userJoinedTournaments,refreshUserTournaments } = useContext(UserContext);
   const { isDarkMode } = useContext(ThemeContext);
 
   // Use useRef for form fields to avoid re-renders on every keystroke
@@ -250,20 +249,14 @@ export default function MatchJoiningForm({
           }
         });
 
-
         if (!isMounted) return;
 
         if (!upcomingData || upcomingData.length === 0) {
           alreadyRegistered();
           return;
         }
-        // 2. Get user's joined tournaments
-        const backendJoinedRes = await fetchUserTournaments(user.id);
-        let userJoinedTournaments = backendJoinedRes || [];
 
-        if (!isMounted) return;
-
-        // 3. Filter available tournaments
+        // 2. Filter using tournaments already stored in context
         const joinedTournamentNames = new Set(
           userJoinedTournaments
             .map((t) => t.tournamentName || t.id)
@@ -295,7 +288,7 @@ export default function MatchJoiningForm({
     return () => {
       isMounted = false;
     };
-  }, [open, user?.id, alreadyRegistered, setOpen]);
+  }, [open, user?.id, userJoinedTournaments, alreadyRegistered, setOpen]);
 
   async function handleChange(e) {
     const { name, value } = e.target;
@@ -350,7 +343,7 @@ export default function MatchJoiningForm({
     try {
       const response = await joinTournament(payload);
       // console.log(payload);
-      console.log(response);
+      // console.log(response);
 
       if (!response.ok) {
         errorMessage(
@@ -372,7 +365,7 @@ export default function MatchJoiningForm({
       if (user?.id) {
         localStorage.removeItem(`userTournamentDetails:${user.id}`);
       }
-
+      await refreshUserTournaments(true);
       setSubmitting(false);
       setSuccess(true);
       setTimeout(() => {

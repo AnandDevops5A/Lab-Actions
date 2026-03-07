@@ -1,10 +1,11 @@
 "use client";
 import React from "react";
-import { X } from "lucide-react"; // Icon library for the cross button
+import { X, Loader2 } from "lucide-react"; // Icon library for the cross button
 import { errorMessage, successMessage } from "../../lib/utils/alert";
-import { setCache } from "../../lib/utils/client-cache";
 import { dateInLongFormat } from "@/lib/utils/common";
 import { FetchBackendAPI } from "@/lib/api/backend-api";
+import { APICacheContext } from "@/lib/contexts/api-cache-context";
+import { useContext } from "react";
 
 const inputBoxes = [
   { label: "Prize", type: "number", placeholder: "500", name: "prizePool" },
@@ -21,7 +22,10 @@ const inputBoxes = [
 
 
 const AddTournamentForm = ({ onClose, refreshData}) => {
+  const [loading, setLoading] = React.useState(false);
+  const { setCache } = useContext(APICacheContext);
   const handleSubmit = async (e) => {
+    setLoading(true);
   e.preventDefault();
 
   // Extract form data
@@ -72,11 +76,9 @@ const AddTournamentForm = ({ onClose, refreshData}) => {
 
 
     if (response.ok) {
-      const responseData = await response.json();
-      const cacheData = await setCache('upcomingTournament', responseData);
-      // console.log(response.data);
-      console.log("caching data", cacheData);
-      if(!cacheData) errorMessage("Error in caching data");
+      const responseData = await response.data;
+      // Cache the tournament data using context-based caching
+      setCache('upcomingTournament', responseData, 3600000); // 1 hour TTL
       successMessage("Tournament created successfully!");
       // console.log(response);
       // Reset form or redirect
@@ -87,10 +89,13 @@ const AddTournamentForm = ({ onClose, refreshData}) => {
       }, 1000);
     } else {
       errorMessage("Failed to create tournament");
+      
     }
   } catch (error) {
     console.error("Error submitting form:", error);
     errorMessage("Internal Server Error");
+  }finally{
+    setLoading(false);
   }
 
 };
@@ -179,12 +184,22 @@ const AddTournamentForm = ({ onClose, refreshData}) => {
             {/* Submit Button */}
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-green-600 hover:bg-green-500 text-slate-100 font-black py-4 uppercase 
-            tracking-[0.2em] relative overflow-hidden group transition-all rounded-lg "
+            tracking-[0.2em] relative overflow-hidden group transition-all rounded-lg disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              <span className="relative ">Add ➕ </span>
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Processing...
+                </span>
+              ) : (
+                <span className="relative ">Add ➕ </span>
+              )}
               {/* Glitch Overlay effect */}
-              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+              {!loading && (
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+              )}
             </button>
           </form>
         </div>
@@ -194,6 +209,3 @@ const AddTournamentForm = ({ onClose, refreshData}) => {
 };
 
 export default AddTournamentForm;
-
-
-

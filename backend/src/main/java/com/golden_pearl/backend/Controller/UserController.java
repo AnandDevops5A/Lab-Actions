@@ -25,10 +25,12 @@ import com.golden_pearl.backend.DRO.ForgotPasswordDRO;
 import com.golden_pearl.backend.DRO.ConfirmResetDRO;
 import com.golden_pearl.backend.DRO.UserDetailsUpdateReceive;
 import jakarta.validation.Valid;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 
 // @CrossOrigin("http://localhost:8082/")
 @RestController
 @RequestMapping("/users")
+@RateLimiter(name = "apiRateLimiter")
 public class UserController {
 
     private final UserService userService;

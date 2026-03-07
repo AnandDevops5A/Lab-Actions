@@ -1,11 +1,43 @@
 import LZString from 'lz-string';
-import { getCache, setCache } from "./client-cache";
 import { errorMessage } from "./alert";
 import {
   getUpcomingTournament,
   getUserTournamentDetails,
 } from "../api/backend-api";
 import { SunDim, SunMedium, Sunset } from "lucide-react";
+
+// Simple localStorage-based caching for utility functions
+const simpleSetCache = (key, data, ttl = 3600) => {
+  if (typeof window === 'undefined') return;
+  try {
+    const cacheData = {
+      data,
+      expiresAt: Date.now() + (ttl * 1000)
+    };
+    localStorage.setItem(`cache_${key}`, JSON.stringify(cacheData));
+  } catch (error) {
+    console.warn('Failed to cache data:', error);
+  }
+};
+
+const simpleGetCache = (key) => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const cached = localStorage.getItem(`cache_${key}`);
+    if (!cached) return null;
+
+    const cacheData = JSON.parse(cached);
+    if (cacheData.expiresAt < Date.now()) {
+      localStorage.removeItem(`cache_${key}`);
+      return null;
+    }
+
+    return cacheData.data;
+  } catch (error) {
+    console.warn('Failed to get cached data:', error);
+    return null;
+  }
+};
 
 /**
  * Calculate winning rewards and stats for tournaments
@@ -76,38 +108,6 @@ export const transformTournaments = (tournaments) => {
       time: `${hour}:${minute}`,
     };
   });
-};
-
-/**
- * Set upcoming tournaments in cache with fallback
- * Better error handling and cache management
- */
-export const setUpcomingTournamentCache = async () => {
-  try {
-    const cached = await getCache("upcomingTournament");
-
-    if (cached?.status && cached?.data?.length > 0) {
-      return cached.data;
-    }
-
-    const response = await getUpcomingTournament();
-
-    if (!response.ok) {
-      errorMessage("Server Down. Please try again later.");
-      return [];
-    }
-
-    if (response.data?.length === 0) {
-      return [];
-    }
-
-    await setCache("upcomingTournament", response.data);
-    return response.data;
-  } catch (error) {
-    console.error("Cache tournament error:", error);
-    errorMessage("Something went wrong while caching tournaments");
-    return [];
-  }
 };
 
 /**
@@ -209,8 +209,8 @@ export async function generateRandomNumberForQR(
   const cacheKey = `invest4tournaments:${tournamentId}`;
 
   // 1. Fetch the existing tournament list from cache
-  const cacheRes = await getCache(cacheKey);
-  let listOfInvest = cacheRes?.status ? cacheRes.data : [];
+  const cacheRes = simpleGetCache(cacheKey);
+  let listOfInvest = cacheRes || [];
 
   // 2. CHECK FOR EXISTING USER (Requirement: return invest if available)
   const existingUser = listOfInvest.find((u) => u.userId === userId);
@@ -250,21 +250,23 @@ export async function generateRandomNumberForQR(
 
   // 7. SAVE ENTIRE UPDATED LIST BACK TO CACHE
   // Use 36000 (10 hours) as you requested
-  await setCache(cacheKey, listOfInvest, 36000);
+  simpleSetCache(cacheKey, listOfInvest, 36000);
 
   return num;
 }
 
-export async function fetchUserTournaments(userId) {
+export async function fetchUserTournaments(userId, skipCache = false) {
   if (!userId) return null;
   try {
     const cacheKey = `userTournamentDetails:${userId}`;
     // const cacheRes = await getCache(cacheKey);
     //change to local storage
-    const cacheRes = localStorage.getItem(cacheKey);
-    if (cacheRes) {
-      const decompressed = LZString.decompressFromUTF16(cacheRes);
-      return JSON.parse(decompressed);
+    if (!skipCache) {
+      const cacheRes = localStorage.getItem(cacheKey);
+      if (cacheRes) {
+        const decompressed = LZString.decompressFromUTF16(cacheRes);
+        return JSON.parse(decompressed);
+      }
     }
     const response = await getUserTournamentDetails(userId);
     if (response.ok) {
@@ -281,13 +283,13 @@ export async function fetchUserTournaments(userId) {
 
 export const fetchUpcomingTournament = async () => {
   try {
-    const cacheRes = await getCache("upcomingTournament");  
-    if (cacheRes && cacheRes.data) {
-      return cacheRes.data;
+    const cacheRes = simpleGetCache("upcomingTournament");
+    if (cacheRes) {
+      return cacheRes;
     }
     const response = await getUpcomingTournament();
     if (response.ok) {
-      await setCache("upcomingTournament", response.data, 3600);
+      simpleSetCache("upcomingTournament", response.data, 3600);
       return response.data;
     }
     return null;
@@ -296,3 +298,6 @@ export const fetchUpcomingTournament = async () => {
     return null;
   }
 };
+ 
+
+              

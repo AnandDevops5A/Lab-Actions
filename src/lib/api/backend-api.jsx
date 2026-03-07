@@ -1,114 +1,253 @@
 "use client";
-import  useSWR  from "swr";
+import React, { useState, useCallback, useEffect } from "react";
 import axios from "axios";
+import { UserContext } from "@/lib/contexts/user-context"
+import { APICacheContext } from "@/lib/contexts/api-cache-context"
+import { checkRateLimit, ENDPOINT_RATE_LIMITS, DEFAULT_RATE_LIMIT } from "@/lib/utils/rate-limiter"
+import { use } from "react";
+import { getSecureCookie } from "@/app/api/httpcookies/cookiesManagement";
+import LZString from "lz-string";
 
-const BASE_URL = (typeof window === 'undefined' ? process.env.BACKEND_URL : process.env.NEXT_PUBLIC_API_URL);
-const MAX_RETRIES = 3;
+const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL) || "http://localhost:8082";
+const MAX_RETRIES = 2;
 const RETRY_DELAY = 1000; // ms
 
+// Endpoints that should NOT be cached (sensitive data, authentication, etc.)
+const NO_CACHE_ENDPOINTS = [
+  "users/verify",      // Login - returns tokens
+  "users/register",    // Registration - sensitive data
+  "users/resetPassword", // Password reset
+  "users/confirm-reset", // Confirm password reset
+  "users/updatePassword", // Password updates
+];
+
 /**
- * Generic fetcher with retry logic and timeout
+ * Generic fetcher with retry logic, timeout, rate limiting, and context caching
  */
-const fetcher = async (url, method = "GET", data = null, timeout = 10000) => {
-  let lastError;
+const createFetcher = (cacheContext, explicitToken = null) => {
+  return async (url, method = "GET", data = null, timeout = 10000, skipCache = false) => {
+    let lastError;
 
-  // Get token from context
-  let token = null;
-  if (typeof window !== 'undefined') {
-    const { user } = useUserContext();
-    token = user?.token || user?.accessToken;
-  }
+    // Extract endpoint name for cache and rate limiting FIRST
+    const urlObj = new URL(url);
+    const endpoint = urlObj.pathname.replace(`${urlObj.origin}/`, "");
 
-  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    try {
-      const response = await axios({
-        url,
-        method,
-        data,
-        timeout,
-        headers: { 
-          "Content-Type": "application/json",
-          ...(token && { "Authorization": `Bearer ${token}` })
-        },
-      });
-
-      return response.data;
-    } catch (error) {
-      const status = error.response?.status;
-      const message = error.response?.data?.message || error.message;
-
-      lastError = { status, message };
-
-      // senior tip: Don't retry on 4xx client errors (401, 403, 404, etc.)
-      if (status && status >= 400 && status < 500) {
-        lastError.noRetry = true;
-        throw lastError;
+    // Get token from context - but skip for authentication endpoints
+    let token = null;
+    if (!NO_CACHE_ENDPOINTS.includes(endpoint) && typeof window !== 'undefined') {
+      try {
+        // Fallback: Try to read from cookie if not provided explicitly
+        const cookieRes = await getSecureCookie("currentUser");
+        if (cookieRes?.success && cookieRes.data) {
+          const decompressed = LZString.decompressFromUTF16(cookieRes.data);
+          const user = JSON.parse(decompressed);
+          token = user?.token || user?.accessToken;
+        }
+      } catch (error) {
+        console.debug("Could not get token from cookie fallback");
       }
-
-      if (attempt === MAX_RETRIES - 1) break;
-      
-      const delay = RETRY_DELAY * Math.pow(2, attempt);
-      await new Promise((resolve) => setTimeout(resolve, delay));
     }
-  }
-  throw lastError;
+
+    // Check rate limit using standalone rate limiter
+    if (!skipCache) {
+      const rateLimitCheck = checkRateLimit(endpoint);
+
+      if (!rateLimitCheck.allowed) {
+        console.warn(
+          `Rate limit exceeded for ${endpoint}. Retry after ${rateLimitCheck.retryAfter}ms`
+        );
+        
+        // Try to return cached data if available
+        const cacheKey = method === "GET" ? [url, method].join("|") : null;
+        if (cacheKey && cacheContext) {
+          const cached = cacheContext.getCache(cacheKey);
+          if (cached) {
+            console.info(`Returning cached data for ${endpoint}`);
+            return cached;
+          }
+        }
+
+        throw {
+          status: 429,
+          message: `Rate limit exceeded. Retry after ${Math.ceil(rateLimitCheck.retryAfter / 1000)}s`,
+          noRetry: true,
+        };
+      }
+    }
+
+    // Check cache for GET requests
+    let cacheKey = null;
+    if (method === "GET" && !skipCache && cacheContext && !NO_CACHE_ENDPOINTS.includes(endpoint)) {
+      cacheKey = [url, method].join("|");
+      const cached = cacheContext.getCache(cacheKey);
+      if (cached) {
+        return cached;
+      }
+    }
+
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        const response = await axios({
+          url,
+          method,
+          data,
+          timeout,
+          headers: { 
+            "Content-Type": "application/json",
+            ...(token && { "Authorization": `Bearer ${token}` })
+          },
+        });
+
+        // Cache successful GET responses
+        if (method === "GET" && cacheKey && cacheContext && !NO_CACHE_ENDPOINTS.includes(endpoint)) {
+          cacheContext.setCache(cacheKey, response.data, 300000); // 5 minute TTL
+        }
+
+        return response.data;
+      } catch (error) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
+
+        lastError = { status, message };
+
+        // Don't retry on 4xx client errors (401, 403, 404, etc.)
+        if (status && status >= 400 && status < 500) {
+          lastError.noRetry = true;
+          throw lastError;
+        }
+
+        if (attempt === MAX_RETRIES - 1) break;
+        
+        const delay = RETRY_DELAY * Math.pow(2, attempt);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+    throw lastError;
+  };
 };
 
 /**
- * Custom SWR hook with optimized caching and deduplication
+ * Custom hook for API calls with context caching
+ * Automatically clears cache on page refresh/reload
  */
-export const SWRBackendAPI = (
+export const useBackendAPI = (
   endpoint,
   method = "GET",
   data = null,
-  refreshInterval = 0,
+  options = {}
 ) => {
-  if (!endpoint) {
-    throw new Error("Endpoint is required");
+  const { skipCache = false, onError = null } = options;
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  let cacheContext = null;
+  let userContext = null;
+  let token = null;
+
+  if (typeof window !== 'undefined') {
+    try {
+      cacheContext = use(APICacheContext);
+      userContext = use(UserContext);
+      // Only get token for non-auth endpoints
+      if (!NO_CACHE_ENDPOINTS.includes(endpoint)) {
+        token = userContext?.user?.token || userContext?.user?.accessToken;
+      }
+    } catch (err) {
+      console.debug("Context not available in component");
+    }
   }
 
-  const url = `${BASE_URL}/${endpoint}`;
-  const cacheKey = data
-    ? [url, method, JSON.stringify(data)]
-    : [url, method];
+  const refreshData = useCallback(async () => {
+    if (!endpoint) {
+      setError(new Error("Endpoint is required"));
+      setIsLoading(false);
+      return;
+    }
 
-  const { data: result, error, isLoading, mutate } = useSWR(
-    cacheKey,
-    () => fetcher(url, method, data),
-    {
-      refreshInterval,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: true,
-      dedupingInterval: 2000,
-      focusThrottleInterval: 30000,
-      errorRetryCount: 2,
-      errorRetryInterval: 5000,
-    },
-  );
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const fetcher = createFetcher(cacheContext, token);
+      const url = `${BASE_URL}/${endpoint}`;
+      const data_result = await fetcher(url, method, data, 10000, skipCache);
+      setResult(data_result);
+    } catch (err) {
+      const errorObj = {
+        status: err.status || 500,
+        message: err.message || "Unknown error occurred",
+      };
+      setError(errorObj);
+      onError?.(errorObj);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [endpoint, method, data, cacheContext, token, skipCache, onError]);
+
+  // Load data on mount and when endpoint/method changes
+  useEffect(() => {
+    refreshData();
+    
+    // Clear cache on page visibility change (tab focus)
+    const handleVisibilityChange = () => {
+      if (!document.hidden && !skipCache) {
+        // Optionally refresh when tab becomes visible
+        // Uncomment line below if you want auto-refresh on tab focus
+        // refreshData();
+      }
+    };
+
+    // Detect page reload/refresh - clear cache
+    const handleBeforeUnload = () => {
+      if (cacheContext) {
+        cacheContext.clearCache();
+      }
+    };
+
+    window.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [refreshData, skipCache, cacheContext]);
 
   return {
     result,
     error,
     isLoading,
-    mutate,
+    mutate: refreshData,
     isEmpty: !result,
     isError: !!error,
+    refresh: refreshData, // Alias for mutate
   };
 };
 
 /**
- * Backend API call with advanced error handling and retries
+ * Backend API call with advanced error handling, rate limiting, and context caching
  */
 export async function FetchBackendAPI(
   endpoint,
-  { method = "POST", data = null, timeout = 15000 } = {},
+  { method = "POST", data = null, timeout = 15000, skipCache = false, token = null } = {},
 ) {
   if (!endpoint) throw new Error("Endpoint is required");
 
   const url = `${BASE_URL}/${endpoint}`;
 
+  let cacheContext = null;
+  if (typeof window !== 'undefined') {
+    try {
+      cacheContext = use(APICacheContext);
+    } catch (error) {
+      console.debug("APICacheContext not available");
+    }
+  }
+
   try {
-    const response = await fetcher(url, method, data, timeout);
+    const fetcher = createFetcher(cacheContext, token);
+    const response = await fetcher(url, method, data, timeout, skipCache);
     return {
       ok: true,
       data: response,
@@ -180,6 +319,13 @@ export const deleteTournamentById = async (tournamentId) => {
     method: "DELETE",
   });
 };
+
+export const deleteTournamentsByIds = async (tournamentIds) => {
+  return await FetchBackendAPI(`tournament/delete`, {
+    method: "DELETE",
+    data: tournamentIds,
+  });
+}
 
 
 export const getTournamentByIds = async (tournamentIds) => {

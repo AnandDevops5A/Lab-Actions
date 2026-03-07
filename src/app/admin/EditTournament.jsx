@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { errorMessage, successMessage } from "../../lib/utils/alert";
 import {  updateTournament } from "../../lib/api/backend-api";
 
@@ -14,6 +14,7 @@ const EditTournamentForm = ({ tournament, onClose, refreshData }) => {
     date: tournament.date || new Date().toISOString().split("T")[0],
     description: tournament.description || "",
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -38,6 +39,8 @@ const EditTournamentForm = ({ tournament, onClose, refreshData }) => {
       errorMessage("All required fields must be filled");
       return;
     }
+
+    setLoading(true);
 
     // Format dateTime
     const [year, month, day] = formData.date.split("-");
@@ -66,6 +69,8 @@ const EditTournamentForm = ({ tournament, onClose, refreshData }) => {
     } catch (error) {
       console.error("Error updating tournament:", error);
       errorMessage("Internal Server Error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -204,13 +209,23 @@ const EditTournamentForm = ({ tournament, onClose, refreshData }) => {
               {/* Submit Button */}
               <button
                 type="submit"
+                disabled={loading}
                 className="w-full bg-blue-600 hover:bg-blue-500 text-slate-100 font-black py-4 uppercase
-              tracking-[0.2em] relative overflow-hidden group transition-all rounded-lg"
+              tracking-[0.2em] relative overflow-hidden group transition-all rounded-lg disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
               >
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  <span>Update Tournament</span>
-                </span>
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Updating...
+                  </span>
+                ) : (
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    <span>Update Tournament</span>
+                  </span>
+                )}
+                {!loading && (
+                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                )}
               </button>
             </form>
           </div>

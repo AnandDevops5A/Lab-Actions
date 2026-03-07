@@ -8,9 +8,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.golden_pearl.backend.Services.AdminService;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 
 @RestController
 @RequestMapping("/admin")
+@RateLimiter(name = "apiRateLimiter")
 public class AdminController {
 
     private final AdminService adminService;
@@ -21,7 +23,7 @@ public class AdminController {
 
     @GetMapping("/data")
     public ResponseEntity<Map<String, Object>> getAllData() {
-        System.out.println("Admin server by x ");
+        System.out.println("Admin hit server by requesting /admin/data endpoint");
         return ResponseEntity.ok(adminService.getAllData());
     }
 }

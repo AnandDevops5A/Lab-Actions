@@ -30,8 +30,7 @@ public class Tournament {
     private Integer slot=50;
     private String platform;
     private String description;
-    // private HashMap<String, Integer> rankList;
-    // private HashMap<String, Integer> invest;
+    private String liveStreamLink;
     @DBRef(lazy=true)
     private List<LeaderBoard> leaderBoard;
 

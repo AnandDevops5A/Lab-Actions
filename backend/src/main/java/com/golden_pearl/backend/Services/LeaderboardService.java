@@ -76,10 +76,10 @@ public class LeaderboardService {
         }
 
         // Check if tournament exists
-        Tournament tournament = tournamentService.getTournamentById(registerData.tournamentId());
-        if (tournament == null) {
+        if (!tournamentService.existsById(registerData.tournamentId())) {
             throw new ResourceNotFoundException("Tournament not found");
         }
+            Tournament tournament = tournamentService.getTournamentById(registerData.tournamentId());
 
         // 2. Use Builder Pattern for cleaner object creation
         LeaderBoard newEntry = LeaderBoard.builder()
@@ -122,8 +122,7 @@ public class LeaderboardService {
     @Cacheable(value = "topNLeaderboard", key = "#tournamentId + '-' + #n", sync = true)
     public List<LeaderBoard> getTopNLeaderboard(String tournamentId, int n) {
         // Check if tournament exists
-        // Tournament tournament = tournamentRepository.findById(tournamentId)
-        if (tournamentService.getTournamentById(tournamentId) == null) {
+        if (!tournamentService.existsById(tournamentId)) {
             throw new ResourceNotFoundException("Tournament not found");
         }
 
@@ -209,13 +208,13 @@ public class LeaderboardService {
             @CacheEvict(value = "adminData", allEntries = true),
             @CacheEvict(value = "allLeaderboards", allEntries = true)
     })
-    public String registerAllUsersForTournament(Tournament tournament, List<String> userIds) {
+    public String registerAllUsersForTournament(String tournamentId, List<String> userIds) {
         if (userIds == null || userIds.isEmpty()) {
             return "No users provided for registration";
         }
 
         // Fetch all existing entries for this tournament in one query
-        List<LeaderBoard> existingEntries = leaderboardRepository.findByTournamentIdAndUserIdIn(tournament.getId(),
+        List<LeaderBoard> existingEntries = leaderboardRepository.findByTournamentIdAndUserIdIn(tournamentId,
                 userIds);
 
         if (existingEntries == null) {
@@ -232,7 +231,7 @@ public class LeaderboardService {
                 .map(userId -> {
                     LeaderBoard newEntry = new LeaderBoard();
                     newEntry.setUserId(userId);
-                    newEntry.setTournamentId(tournament.getId());
+                    newEntry.setTournamentId(tournamentId);
                     newEntry.setTime(general.getCurrentTime());
                     newEntry.setIsApproved(true);
                     return newEntry;
@@ -244,7 +243,7 @@ public class LeaderboardService {
             leaderboardRepository.saveAll(entriesToSave);
         }
 
-        return "All users registered successfully for the tournament: " + tournament.getTournamentName();
+        return "All users registered successfully for this tournament " ;
     }
 
     @Cacheable(value = "leaderboardByIds", key = "#tournamentIds.toString()", sync = true)

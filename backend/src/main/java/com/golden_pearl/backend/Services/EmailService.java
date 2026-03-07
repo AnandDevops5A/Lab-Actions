@@ -117,6 +117,26 @@ public class EmailService {
 
         sendEmailSafely(to, subject, body);
     }
+
+    //send registeration email
+    public void sendSignupSuccessEmail(String to, String username) {
+        String subject = "Welcome to Golden Pearl!";
+        String body = String.format(
+            "Dear %s,\n\n" +
+            "Welcome to the Golden Pearl community! We're thrilled to have you on board.\n\n" +
+            "Get ready to dive into an exciting world of tournaments, challenges, and camaraderie with fellow gamers. Whether you're here to compete, connect, or just have fun, there's something for everyone.\n\n" +
+            "Don't forget to complete your profile and explore our upcoming events. If you have any questions or need assistance, our support team is here to help.\n" +
+            "\ncontact on : anandorbique5a@gmail.com\n\n" +
+            "Happy gaming!\n\n" +
+            "Best regards,\n" +
+            "The Golden Pearl Team",
+            username
+        );
+
+        sendEmailSafely(to, subject, body);
+    }
+
+    
     
     private void sendEmailSafely(String to, String subject, String body) {
         try {

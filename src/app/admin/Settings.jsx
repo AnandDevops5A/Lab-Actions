@@ -1,6 +1,7 @@
 "use client";
 
 import { FetchBackendAPI } from "@/lib/api/backend-api";
+import { fetchUpcomingTournament } from "@/lib/utils/common";
 import React, { useEffect, useState, useCallback } from "react";
 
 /**
@@ -10,49 +11,40 @@ import React, { useEffect, useState, useCallback } from "react";
 const Settings = () => {
   const [platformName, setPlatformName] = useState("Gold_Pearl Tournament");
   const [adminEmail, setAdminEmail] = useState("admin@tournament.com");
+  const [tournaments, setTournaments] = useState([]);
+  const [selectedTournamentId, setSelectedTournamentId] = useState("");
   const [liveUrl, setLiveUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [isEditing, setIsEditing] = useState(true);
   const [error, setError] = useState("");
 
-  /**
-   * Fetch live URL configuration on component mount
-   * Uses proper cleanup to prevent memory leaks
-   */
   useEffect(() => {
     let isMounted = true;
-
-    const fetchLiveUrl = async () => {
+    const getTournaments = async () => {
       try {
-        const responseData = await FetchBackendAPI("admin/live-link");
-        if (!responseData.ok) throw new Error("Failed to fetch settings");
-
-        if (isMounted && responseData?.data?.url) {
-          setLiveUrl(responseData.data.url);
-          setSaved(true);
-          setIsEditing(false);
-          setError("");
+        const data = await fetchUpcomingTournament();
+        if (isMounted && data) {
+          setTournaments(data);
         }
       } catch (err) {
         if (isMounted) {
-          console.error("Fetch error:", err);
-          setError("Failed to load settings");
+          setError("Failed to load tournaments.");
+          console.error("Failed to fetch tournaments:", err);
         }
       }
     };
-
-    fetchLiveUrl();
-
+    getTournaments();
     return () => {
       isMounted = false;
     };
   }, []);
 
-  /**
-   * Memoized save handler to prevent unnecessary re-renders
-   */
   const handleSave = useCallback(async () => {
+    if (!selectedTournamentId) {
+      setError("Please select a tournament.");
+      return;
+    }
     if (!liveUrl.trim()) {
       setError("Live URL cannot be empty");
       return;
@@ -62,10 +54,12 @@ const Settings = () => {
     setError("");
 
     try {
-      const response = await FetchBackendAPI("admin/live-link", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: liveUrl.trim() }),
+      const response = await FetchBackendAPI("tournament/set-live-stream-link", {
+        method: "PUT",
+        data: {
+          tournamentId: selectedTournamentId,
+          liveStreamLink: liveUrl.trim(),
+        },
       });
 
       if (!response.ok) throw new Error("Save failed");
@@ -78,15 +72,7 @@ const Settings = () => {
     } finally {
       setSaving(false);
     }
-  }, [liveUrl]);
-
-  /**
-   * Edit mode toggle
-   */
-  const handleEdit = useCallback(() => {
-    setIsEditing(true);
-    setError("");
-  }, []);
+  }, [liveUrl, selectedTournamentId]);
 
   return (
     <div className="space-y-6">
@@ -129,14 +115,30 @@ const Settings = () => {
         <div>
           <h3 className="text-base md:text-lg font-bold mb-4">Live Stream</h3>
           <p className="text-sm text-gray-400 mb-3">Paste a YouTube live video URL (or channel live URL) to show on the public &quot;Watch&quot; page.</p>
+          {error && <p className="text-red-400 text-sm mb-2">{error}</p>}
           <div className="flex flex-col md:flex-row gap-3">
             <input value={liveUrl} onChange={e => { setLiveUrl(e.target.value); setSaved(false); }} placeholder="https://www.youtube.com/watch?v=..." disabled={!isEditing} className={`flex-1 bg-gray-900 border ${isEditing ? 'border-gray-700' : 'border-gray-600'} rounded px-3 md:px-4 py-2 text-slate-100 text-xs md:text-sm focus:border-orange-500 outline-none ${!isEditing ? 'opacity-60 cursor-not-allowed' : ''}`} />
+            <select
+              value={selectedTournamentId}
+              onChange={(e) => {
+                setSelectedTournamentId(e.target.value);
+                setIsEditing(true);
+                setSaved(false);
+              }}
+              disabled={!isEditing}
+              className={`bg-gray-900 border ${isEditing ? "border-gray-700" : "border-gray-600"} rounded px-3 md:px-4 py-2 text-slate-100 text-xs md:text-sm focus:border-orange-500 outline-none ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
+            >
+              <option value="">Select Tournament</option>
+              {tournaments.map((t) => (
+                <option key={t.id} value={t.id}>{t.tournamentName}</option>
+              ))}
+            </select>
             {saved && !isEditing ? (
               <button onClick={() => setIsEditing(true)} className="bg-linear-to-r from-gray-600 to-gray-700 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg transition text-sm md:text-base">
                 Edit Live Link
               </button>
             ) : (
-              <button onClick={handleSave} disabled={saving || liveUrl.trim() === ''} className="bg-linear-to-r from-orange-500 to-red-500 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg transition text-sm md:text-base">
+              <button onClick={handleSave} disabled={saving || !selectedTournamentId || liveUrl.trim() === ''} className="bg-linear-to-r from-orange-500 to-red-500 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg transition text-sm md:text-base">
                 {saving ? 'Saving…' : 'Save Live Link'}
               </button>
             )}

@@ -4,7 +4,7 @@ import { StarRating } from "../StarRating";
 import { askLogin, errorMessage, successMessage } from "@/lib/utils/alert";
 import { useRouter } from "next/navigation";
 import { UserContext } from "@/lib/contexts/user-context";
-import { deleteCache, setCache } from "@/lib/utils/client-cache";
+import { APICacheContext } from "@/lib/contexts/api-cache-context";
 import { addNewReview } from "@/lib/api/backend-api";
 
 const AddReview = ({
@@ -16,6 +16,7 @@ const AddReview = ({
 }) => {
   const router = useRouter();
   const { user } = useContext(UserContext);
+  const { deleteCache } = useContext(APICacheContext);
   const [isPending, startTransition] = useTransition();
 
   const [form, setForm] = useState({
@@ -68,7 +69,7 @@ const AddReview = ({
           // Optimistic update
           setReviews((prev) => [newReview, ...prev]);
           // Invalidate cache so next load gets fresh data
-          await deleteCache("reviews");
+          deleteCache("reviews");
          await loadReviews();
 
           // Reset form

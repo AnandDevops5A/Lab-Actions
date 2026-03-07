@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useContext, useMemo, useCallback } from "react";
 import { ThemeContext } from "../../lib/contexts/theme-context";
-import { deleteTournamentById } from "../../lib/api/backend-api";
+import { deleteTournamentById, deleteTournamentsByIds } from "../../lib/api/backend-api";
 import { errorMessage, successMessage, confirmMessage } from "../../lib/utils/alert";
 
 import {
@@ -151,6 +151,8 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
 
   const handleBulkDelete = useCallback(async () => {
     if (selectedTournaments.length === 0) return;
+    // console.log("deleting tournament: ",selectedTournaments)
+    // return;
 
     const confirmed = await confirmMessage(
       `Are you sure you want to delete ${selectedTournaments.length} tournament(s)? This action cannot be undone.`,
@@ -160,7 +162,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
     if (!confirmed) return;
 
     try {
-      const response = await deleteTournamentById(selectedTournaments);
+      const response = await deleteTournamentsByIds(selectedTournaments);
       if (response.ok) {
         successMessage("Tournament deleted successfully");
         if (refreshData) refreshData();
@@ -193,19 +195,6 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
     }
   };
 
-  // const formatDateTime = (dateTime) => {
-  //   const dateStr = dateTime.toString();
-  //   const year = dateStr.slice(0, 4);
-  //   const month = dateStr.slice(4, 6);
-  //   const day = dateStr.slice(6, 8);
-  //   const hour = dateStr.slice(8, 10);
-  //   const minute = dateStr.slice(10, 12);
-
-  //   return {
-  //     date: `${day}/${month}/${year}`,
-  //     time: `${hour}:${minute}`,
-  //   };
-  // };
 
   const stats = useMemo(() => {
     if (!tournaments)
@@ -224,6 +213,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
 
   const deleteTournament = useCallback(
     async (tournamentId) => {
+      console.log("detleted tournament id", tournamentId)
       const confirmed = await confirmMessage(
         "Are you sure you want to delete this tournament?",
         "Delete Tournament",
@@ -641,9 +631,7 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
                             </button>
 
                             {/* hide button for completed tournament */}
-                            {/* {new Date(tournament.dateTime).getTime() > now  */}
-                            
-                            {1<22&& (
+                            {new Date(tournament.dateTime).getTime() > now && (
                               <>
                                 <button
                                   onClick={() =>

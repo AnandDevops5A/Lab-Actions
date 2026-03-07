@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback, useMemo, useContext } from "react"; 
+import { useState, useEffect, useCallback, useMemo, useContext, useLayoutEffect } from "react"; 
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,8 +15,8 @@ import {
 } from "chart.js";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import Overview from "./Overview";
-import { SWRBackendAPI, getJoinersByTournamentIdList } from "../../lib/api/backend-api";
+import Overview from "./Overview"; 
+import { useBackendAPI, getJoinersByTournamentIdList } from "../../lib/api/backend-api";
 import { ThemeContext } from "../../lib/contexts/theme-context";
 import CyberLoading from "../skeleton/CyberLoading";
 import { transformTournaments } from "../../lib/utils/common";
@@ -84,7 +84,7 @@ const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
     const [joiners, setJoiners]=useState([]);
-    const {user}=useContext(UserContext);
+    const {user,MALIK}=useContext(UserContext);
   const [revenue, setRevenue] = useState(dummyRevenue);
   
   const { isDarkMode } = useContext(ThemeContext);
@@ -93,11 +93,11 @@ const AdminPage = () => {
 
 
   //send request to backend to get tournaments and participants data
-  const { result, isLoading, mutate } = SWRBackendAPI(
+  const { result, isLoading, mutate } = useBackendAPI(
     "admin/data", //endpoint
     "GET", //method
     null, //data
-    0 //revalidate in 10sec
+    {}
   );
 
   // Derived state to avoid extra renders from useEffect syncing
@@ -136,9 +136,9 @@ const AdminPage = () => {
 
 
   // Authentication and Authorization check
-  useEffect(() => {
-    const isAdmin = ['917254831884', '7254831884'].includes(String(user?.contact));
-    if (!user || !isAdmin) {
+  useLayoutEffect(() => {
+    // const isAdmin = ['917254831884', '7254831884'].includes(String(user?.contact));
+    if (!MALIK) {
       router.replace('/');
     }
   }, [user, router]);

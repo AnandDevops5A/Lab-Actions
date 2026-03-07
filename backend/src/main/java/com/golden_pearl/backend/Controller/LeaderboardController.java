@@ -24,9 +24,11 @@ import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.Services.LeaderboardService;
 import com.golden_pearl.backend.Services.TournamentService;
 import com.golden_pearl.backend.errors.ResourceNotFoundException;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 
 @RestController
 @RequestMapping("/leaderboard")
+@RateLimiter(name = "apiRateLimiter")
 public class LeaderboardController {
 
     private final LeaderboardService leaderboardService;
@@ -37,7 +39,7 @@ public class LeaderboardController {
         this.tournamentService = tournamentService;
     }
 
-    //get all leaderboard
+    // get all leaderboard
     @GetMapping("/all")
     public ResponseEntity<List<LeaderBoard>> getAllLeaderboard() {
         return ResponseEntity.ok(leaderboardService.getAllLeaderboard());
@@ -45,7 +47,8 @@ public class LeaderboardController {
 
     // register user for tournament
     @PostMapping("/register")
-    public ResponseEntity<String> registerUserForTournament(@Valid @RequestBody LeaderboardRegisterReceiveData registerData) {
+    public ResponseEntity<String> registerUserForTournament(
+            @Valid @RequestBody LeaderboardRegisterReceiveData registerData) {
         try {
             String result = leaderboardService.registerUserForTournament(registerData);
             return ResponseEntity.ok(result);
@@ -59,18 +62,17 @@ public class LeaderboardController {
     @PostMapping("/registerAll/{tournamentId}/users/{userIds}")
     public ResponseEntity<String> registerAllUsersForTournament(@PathVariable String tournamentId,
             @PathVariable List<String> userIds) {
-        Tournament tournament = tournamentService.getTournamentById(tournamentId);
-        if (tournament == null) {
-            return ResponseEntity.badRequest().body("Tournament not found");
+        if (userIds == null || userIds.isEmpty() || tournamentId == null
+                || tournamentId.isEmpty() || !tournamentService.existsById(tournamentId)) {
+            return ResponseEntity.badRequest().body("Service error: Invalid tournament ID or user IDs");
         }
-        return ResponseEntity.ok(leaderboardService.registerAllUsersForTournament(tournament, userIds));
+        return ResponseEntity.ok(leaderboardService.registerAllUsersForTournament(tournamentId, userIds));
     }
 
     @GetMapping("/getJoiners/{tournamentId}")
     public ResponseEntity<List<LeaderBoard>> getLeaderboard(@PathVariable String tournamentId) {
         return ResponseEntity.ok(leaderboardService.getLeaderboard(tournamentId));
     }
-
 
     // get leaderboard by tournament ids
 
@@ -84,8 +86,6 @@ public class LeaderboardController {
     public ResponseEntity<String> approveUser(@PathVariable String tournamentId, @PathVariable String userId) {
         return ResponseEntity.ok(leaderboardService.approveUserFromTournament(tournamentId, userId));
     }
-
-    
 
     @PostMapping("/updateRank")
     public ResponseEntity<String> updateRank(@Valid @RequestBody UpdateRank updateRankData) {
@@ -113,8 +113,10 @@ public class LeaderboardController {
 
     // Update leaderboard entry (rank, investAmount and winAmount)
     @PutMapping("/update/{leaderboardId}")
-    public ResponseEntity<String> updateLeaderboardEntry(@PathVariable String leaderboardId, @Valid @RequestBody UpdateLeaderboardEntry updateData) {
-        return ResponseEntity.ok(leaderboardService.updateLeaderboardEntry(leaderboardId, updateData.rank(), updateData.investAmount(), updateData.winAmount()));
+    public ResponseEntity<String> updateLeaderboardEntry(@PathVariable String leaderboardId,
+            @Valid @RequestBody UpdateLeaderboardEntry updateData) {
+        return ResponseEntity.ok(leaderboardService.updateLeaderboardEntry(leaderboardId, updateData.rank(),
+                updateData.investAmount(), updateData.winAmount()));
     }
 
     // Approve leaderboard entry
@@ -126,10 +128,12 @@ public class LeaderboardController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
     @DeleteMapping("/deleteJoiners")
     public ResponseEntity<String> deleteJoiners(@Valid @RequestBody DeleteJoinersRequestDRO deleteJoinersRequest) {
         try {
-            return ResponseEntity.ok(leaderboardService.deleteJoiners(deleteJoinersRequest.tournamentId(),Stream.of(deleteJoinersRequest.userIds().split(",")).map(String::trim).toList()));
+            return ResponseEntity.ok(leaderboardService.deleteJoiners(deleteJoinersRequest.tournamentId(),
+                    Stream.of(deleteJoinersRequest.userIds().split(",")).map(String::trim).toList()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (ResourceNotFoundException e) {

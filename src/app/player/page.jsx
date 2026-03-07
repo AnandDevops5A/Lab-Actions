@@ -11,7 +11,9 @@ import {
 import { UserContext } from "../../lib/contexts/user-context";
 import { useRouter } from "next/navigation";
 import { ThemeContext } from "../../lib/contexts/theme-context";
-import { calculateWinAndReward, fetchUserTournaments, getCurrentTime } from "@/lib/utils/common";
+import { calculateWinAndReward,
+  //  fetchUserTournaments,
+    getCurrentTime } from "@/lib/utils/common";
 
 const mockPlayer = {
   ign: "SHADOW_LORD_07",
@@ -50,9 +52,10 @@ const DynamicUpcomingTournaments = dynamic(
 
 const PlayerProfile = () => {
   //get user from context
-  const { user } = useContext(UserContext);
+  const { user,userJoinedTournaments } = useContext(UserContext);
   const { isDarkMode } = useContext(ThemeContext);
-  const [matchHistory, setMatchHistory] = useState(null);
+  // const [matchHistory, setMatchHistory] = useState(null);
+  const matchHistory = userJoinedTournaments; // Use the userJoinedTournaments from context
   const router = useRouter();
 
   useEffect(() => {
@@ -63,25 +66,25 @@ const PlayerProfile = () => {
   }, [user, router]);
 
   //Load data to player section to db
-  useEffect(() => {
-    let isMounted = true;
-    const loadUserTournamentData = async () => {
-      if (!user?.id) return;
-      try {
-       const data=await fetchUserTournaments(user.id);
-        setMatchHistory(data);
-      } catch (err) {
-        console.error("Failed to fetch tournament details", err);
-      }
-    };
+  // useEffect(() => {
+  //   let isMounted = true;
+  //   // const loadUserTournamentData = async () => {
+  //   //   if (!user?.id) return;
+  //   //   try {
+  //   //    const data=await fetchUserTournaments(user.id);
+  //   //     setMatchHistory(data);
+  //   //   } catch (err) {
+  //   //     console.error("Failed to fetch tournament details", err);
+  //   //   }
+  //   // };
 
-    // Fetch data on component mount
-    loadUserTournamentData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [user]);
+  //   // Fetch data on component mount
+  //   // loadUserTournamentData();
+    
+  //   return () => {
+  //     isMounted = false;
+  //   };
+  // }, [user]);
 
   // Memoized categorization of matches into past and upcoming.
   const { pastMatches, upcomingMatches } = useMemo(() => {

@@ -15,7 +15,6 @@
     "chart.js": "^4.5.1",
     "framer-motion": "^12.34.0",
     "gsap": "^3.13.0",
-    "ioredis": "^5.8.2",
     "lint": "^1.1.2",
     "lucide-react": "^0.555.0",
     "lz-string": "^1.5.0",

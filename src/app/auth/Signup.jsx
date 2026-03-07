@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useRef, memo } from "react";
-import { Users, UserPlus, Phone, Lock, Eye, EyeOff, Check, Mail } from "lucide-react";
+import { Users, UserPlus, Phone, Lock, Eye, EyeOff, Mail } from "lucide-react";
 import { FetchBackendAPI } from "../../lib/api/backend-api";
 import { validatePassword } from "./PasswordCheck";
-import { errorMessage, simpleMessage, successMessage } from "../../lib/utils/alert";
+import { errorMessage, successMessage } from "../../lib/utils/alert";
 
 // ✅ Constants outside component
 const COUNTRIES = [
@@ -59,8 +59,25 @@ const Signup = memo(({ onSwitch }) => {
 
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+
+  const handleSignupError = (error) => {
+    console.error("Signup API Error:", { status: error.status, message: error.error });
+
+    switch (error.status) {
+      case 409:
+        errorMessage("User already exists. Please try logging in.");
+        break;
+      case 400:
+        errorMessage(error.error || "Invalid registration details. Please check your inputs.");
+        break;
+      case 429:
+        errorMessage("Too many registration attempts. Please try again later.");
+        break;
+      default:
+        errorMessage(error.error || "An unexpected error occurred. Please try again.");
+        break;
+    }
+  };
 
   const validateForm = () => {
     const username = usernameRef.current?.value || "";
@@ -82,29 +99,20 @@ const Signup = memo(({ onSwitch }) => {
   };
 
   async function onSubmit(payload) {
-    //console.log(payload);
-    const res = await FetchBackendAPI("users/register", {
+    return await FetchBackendAPI("users/register", {
       method: "POST",
       data: payload,
     });
-
-    //console.log("API response:", res);
-
-    if (!res.ok) {
-      return { ok: false, message: res.message || "Server Error", status: res.status, data: res.data };
-    }
-    if (res.status == 200 && res.data) {
-
-      return { ok: true, message: res.data };
-    }
-    return { ok: false, message: res.message };
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError("");
+    
     const validationError = validateForm();
-    if (validationError) return setError(validationError);
+    if (validationError) {
+      errorMessage(validationError);
+      return;
+    }
 
     setLoading(true);
     try {
@@ -116,31 +124,19 @@ const Signup = memo(({ onSwitch }) => {
         accessKey: accessKeyRef.current.value,
       };
 
+      const result = await onSubmit(payload);
 
-
-      const res = await onSubmit(payload);
-      // console.log(res);
-      if (!res.ok && res.status == 409) {
-        simpleMessage("Phone number or email already registered.");
-        setError(res.message || "User already exist.");
-      }
-      else if (res.status == 200) {
-        successMessage(res.message || "Succesfully Registered...");
-        
+      if (result.ok) {
+        successMessage("Registration successful! Please login.");
+        onSwitch?.("login");
       } else {
-        setSuccess(true);
-        //success popup
-        onSwitch?.("login")
-        errorMessage(res.message || "Internal Server Error");
-
-        //  Router.push("/");
+        handleSignupError(result);
       }
     } catch (err) {
-      // setError(err?.message || "Unexpected error.");
-      errorMessage(err?.message || "Unexpected error.");
+      console.error("Fatal signup error:", err);
+      errorMessage("A critical error occurred. Please refresh and try again.");
     } finally {
       setLoading(false);
-      //rediect to profile page after 2 seconds
     }
   }
 
@@ -230,23 +226,6 @@ const Signup = memo(({ onSwitch }) => {
           inputRef={confirmRef}
           placeholder="Confirm Access Key"
         />
-
-        {/* Status */}
-        <div
-          role="status"
-          aria-live="polite"
-          className="min-h-5 flex items-center justify-center"
-        >
-          {error && <p className="text-sm text-red-400">{error}</p>}
-          {success && (
-            <div className="flex items-center gap-2 bg-green-900/10 px-3 py-2 rounded-md border border-green-700">
-              <Check className="w-5 h-5 text-green-300" />
-              <p className="text-sm text-green-300">
-                Registration successful — redirecting...
-              </p>
-            </div>
-          )}
-        </div>
 
         {/* Submit */}
         <button

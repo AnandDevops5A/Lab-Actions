@@ -46,7 +46,8 @@ public class SecurityConfig {
                                 "/review/all",
                                 "/review/user/**",
                                 "/review/test",
-                                "/users/test"
+                                "/users/test",
+                                "/leaderboard/getJoiners"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/tournament/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/leaderboard/**").permitAll()

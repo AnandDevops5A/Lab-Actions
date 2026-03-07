@@ -3,7 +3,7 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { ThemeContext } from "../../lib/contexts/theme-context";
 import dynamic from "next/dynamic";
-import { getCache, setCache } from "@/lib/utils/client-cache";
+import { APICacheContext } from "@/lib/contexts/api-cache-context";
 import {  errorMessage} from "@/lib/utils/alert";
 import { UserContext } from "@/lib/contexts/user-context";
 import { SkeletonCard } from "../skeleton/Skeleton";
@@ -34,24 +34,25 @@ export default function ReviewsPage() {
   const themeContext = useContext(ThemeContext);
   const { isDarkMode } = themeContext || { isDarkMode: true };
   const { user } = useContext(UserContext);
+  const { getCache, setCache } = useContext(APICacheContext);
   const [tournaments, setTournaments] = useState([]);
   const [reviews, setReviews] = useState([]);
 
   async function loadTournaments() {
     try {
-      const cacheResult = await getCache("AllTournament");
-      if (cacheResult?.status) {
-        setTournaments(Array.from(cacheResult.data));
+      const cacheResult = getCache("AllTournament");
+      if (cacheResult) {
+        setTournaments(Array.from(cacheResult));
         return;
       }
-      
+
       const dbResult = await getAllTournaments();
       if (!dbResult?.ok) {
         return errorMessage("Server Error");
       }
       let data = Array.from(dbResult.data);
       setTournaments(data);
-      await setCache("AllTournament", data);
+      setCache("AllTournament", data);
     } catch (err) {
       console.error(err);
       return errorMessage("Unexpected Error");
@@ -60,9 +61,9 @@ export default function ReviewsPage() {
 
   async function loadReviews() {
     try {
-      const cacheResult = await getCache("reviews");
-      if (cacheResult?.status) {
-        return setReviews(cacheResult.data);
+      const cacheResult = getCache("reviews");
+      if (cacheResult) {
+        return setReviews(cacheResult);
       }
 
       const dbResult = await getAllReviews();
@@ -71,7 +72,7 @@ export default function ReviewsPage() {
       }
 
       setReviews(dbResult.data);
-      await setCache("reviews", dbResult.data);
+      setCache("reviews", dbResult.data);
       return;
     } catch (err) {
       return errorMessage("Unexpected Error");
