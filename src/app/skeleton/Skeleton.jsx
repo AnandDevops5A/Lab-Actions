@@ -94,7 +94,48 @@ const SkeletonCard = () => (
       </div>
     </div>
   );
-  export { SkeletonCard, SkeletonChart, SkeletonTable ,LeaderboardSkeleton,UpcomingSkeletonCard};
+
+  const BannerSkeleton = () => (
+    <div className="max-w-7xl mx-auto p-4 md:p-8 animate-pulse">
+      <div className="flex flex-col lg:flex-row gap-8 items-center">
+        {/* Left Skeleton */}
+        <div className="flex-1 w-full space-y-8">
+          <div className="space-y-4">
+            <div className="h-4 bg-gray-700 rounded w-1/4"></div>
+            <div className="h-14 bg-gray-600 rounded w-3/4"></div>
+            <div className="h-14 bg-gray-600 rounded w-1/2 -mt-2"></div>
+          </div>
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-700 rounded"></div>
+            <div className="h-4 bg-gray-700 rounded w-5/6"></div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="h-24 bg-gray-700 rounded-lg"></div>
+            <div className="h-24 bg-gray-700 rounded-lg"></div>
+            <div className="h-24 bg-gray-700 rounded-lg"></div>
+            <div className="h-24 bg-gray-700 rounded-lg"></div>
+          </div>
+          <div className="flex gap-4">
+            <div className="h-14 w-48 bg-gray-600 rounded-lg"></div>
+            <div className="h-14 w-36 bg-gray-700 rounded-lg"></div>
+          </div>
+        </div>
+        {/* Right Skeleton */}
+        <div className="flex-1 w-full h-[600px] lg:h-[500px]">
+          <div className="h-full flex flex-col gap-2">
+            <div className="h-1/2 bg-gray-700 rounded-lg"></div>
+            <div className="h-1/2 grid grid-cols-4 gap-2">
+              <div className="bg-gray-700 rounded-lg"></div>
+              <div className="bg-gray-700 rounded-lg"></div>
+              <div className="bg-gray-700 rounded-lg"></div>
+              <div className="bg-gray-700 rounded-lg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+  export { SkeletonCard, SkeletonChart, SkeletonTable ,LeaderboardSkeleton,UpcomingSkeletonCard,BannerSkeleton};
 
 
 

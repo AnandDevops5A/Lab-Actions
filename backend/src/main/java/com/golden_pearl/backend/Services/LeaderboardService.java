@@ -2,8 +2,11 @@ package com.golden_pearl.backend.Services;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.cache.annotation.CacheEvict;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.golden_pearl.backend.DRO.DeleteJoinersRequestDRO;
 import com.golden_pearl.backend.DRO.LeaderboardRegisterReceiveData;
+import com.golden_pearl.backend.DTO.TournamentDTO;
 import com.golden_pearl.backend.DTO.TournamentWithLeaderboard;
 import com.golden_pearl.backend.Models.LeaderBoard;
 import com.golden_pearl.backend.Models.Tournament;
@@ -32,7 +36,7 @@ import com.golden_pearl.backend.common.General;
 public class LeaderboardService {
 
     private final LeaderboardRepository leaderboardRepository;
-     private final UserService userService;
+    private final UserService userService;
     private final TournamentService tournamentService;
     public final General general = new General();
     public final EmailService emailService;
@@ -79,7 +83,7 @@ public class LeaderboardService {
         if (!tournamentService.existsById(registerData.tournamentId())) {
             throw new ResourceNotFoundException("Tournament not found");
         }
-            Tournament tournament = tournamentService.getTournamentById(registerData.tournamentId());
+        Tournament tournament = tournamentService.getTournamentById(registerData.tournamentId());
 
         // 2. Use Builder Pattern for cleaner object creation
         LeaderBoard newEntry = LeaderBoard.builder()
@@ -243,7 +247,7 @@ public class LeaderboardService {
             leaderboardRepository.saveAll(entriesToSave);
         }
 
-        return "All users registered successfully for this tournament " ;
+        return "All users registered successfully for this tournament ";
     }
 
     @Cacheable(value = "leaderboardByIds", key = "#tournamentIds.toString()", sync = true)
@@ -251,7 +255,6 @@ public class LeaderboardService {
         return leaderboardRepository.findByTournamentIdIn(tournamentIds);
     }
 
- 
     @Caching(evict = {
             @CacheEvict(value = "leaderboard", key = "#tournamentId"),
             @CacheEvict(value = "topNLeaderboard", allEntries = true),
@@ -383,6 +386,28 @@ public class LeaderboardService {
         }
         leaderboardRepository.deleteAll(entries);
         return "Joiners deleted successfully";
+    }
+
+    public Object getLastTournamentTopPlayers() {
+        TournamentDTO lastTournament = tournamentService.getLastTournament();
+        if (lastTournament == null) {
+            return new ArrayList<>();
+        }
+        List<LeaderBoard> topPlayers = leaderboardRepository.findTop5ByTournamentIdOrderByRankAsc(
+                lastTournament.id());
+
+        return topPlayers.stream().map(player -> {
+            User user = userService.findUserById(player.getUserId());
+            if (user != null) {
+                Map<String, Object> playerDetails = new HashMap<>();
+                playerDetails.put("id", user.getId());
+                playerDetails.put("name", user.getUsername());
+                playerDetails.put("rank", player.getRank());
+                playerDetails.put("score", player.getScore());
+                return playerDetails;
+            }
+            return null;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
 }

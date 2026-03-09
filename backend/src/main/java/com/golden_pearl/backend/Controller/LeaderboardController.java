@@ -142,4 +142,11 @@ public class LeaderboardController {
             return ResponseEntity.status(500).body(e.getMessage());
         }
     }
+    
+    @GetMapping("/lastTournamentTopPlayers")
+    public ResponseEntity<Object> getLastTournamentTopPlayers() {
+        return ResponseEntity.ok(leaderboardService.getLastTournamentTopPlayers());
+    }
+
+
 }

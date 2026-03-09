@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { getRedisClientInstance } from '../../../lib/utils/action-redis';
 import { FetchBackendAPI } from '@/lib/api/backend-api';
 
 // Simple in-memory cache to avoid hitting YouTube quota during rapid requests.
@@ -57,22 +56,7 @@ export async function GET(request) {
     const key = `yt_live::${q}`;
     const now = Date.now();
 
-    // Try Redis first (if configured), then in-memory fallback
-    const redis = await getRedisClientInstance();
-    if (redis) {
-      try {
-        const raw = await redis.get(key);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && parsed._expires && parsed._expires > now) {
-            return NextResponse.json({ ok: true, data: parsed.data });
-          }
-        }
-      } catch (e) {
-        console.warn('Redis get failed', e.message || e);
-      }
-    }
-
+    // Check in-memory cache
     const cached = cache.get(key);
     if (cached && cached.expires > now) {
       return NextResponse.json({ ok: true, data: cached.data });
@@ -86,17 +70,6 @@ export async function GET(request) {
     const data = await fetchYouTubeLive(q, apiKey);
     if (cache.size > 100) cache.clear();
     cache.set(key, { expires: now + CACHE_TTL, data });
-
-    // store to redis if available
-    const redis2 = await getRedisClientInstance();
-    if (redis2) {
-      try {
-        const payload = JSON.stringify({ _expires: now + CACHE_TTL, data });
-        await redis2.set(key, payload, 'PX', CACHE_TTL);
-      } catch (e) {
-        console.warn('Redis set failed', e.message || e);
-      }
-    }
 
     return NextResponse.json({ ok: true, data });
   } catch (err) {

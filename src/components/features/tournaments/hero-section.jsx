@@ -12,6 +12,7 @@ import { fetchUpcomingTournament
   // , fetchUserTournaments 
 } from "@/lib/utils/common";
 import { ArrowDownNarrowWide } from "lucide-react";
+import { getNextTournamentDetails } from "@/lib/api/backend-api";
 
 const MatchJoiningForm = dynamic(() => import("../../forms/match-joining-form"), {
   loading: () => <CyberLoading />,
@@ -24,10 +25,6 @@ const MatchJoiningForm = dynamic(() => import("../../forms/match-joining-form"),
 const checkJoinedTournament = async (userId,userTournaments = []) => {
   if (!userId) return false;
 
-// const [upcomingTournament, userTournaments] = await Promise.all([
-//     fetchUpcomingTournament(),
-//     fetchUserTournaments(userId)
-//   ]);
   const upcomingTournament = await fetchUpcomingTournament();
 
   if (!upcomingTournament || !Array.isArray(upcomingTournament)) {
@@ -58,12 +55,14 @@ const HeroSection = () => {
   const { user,userJoinedTournaments } = use(UserContext);
   const router = useRouter();
   const [upcomingTournament, setUpcomingTournament] = useState(null);
+  const [liveTournament, setLiveTournament] = useState(null);
 
   const buttonClasses =
     "flex flex-col sm:flex-row justify-center space-x-auto space-y-4 sm:space-y-0 gap-3";
   // Fetch upcoming tournament details once on mount
   useEffect(() => {
     let mounted = true;
+
     fetchUpcomingTournament()
       .then((res) => {
         if (mounted && res && Array.isArray(res) && res.length > 0) {
@@ -71,6 +70,8 @@ const HeroSection = () => {
         }
       })
       .catch((err) => console.error("Error fetching tournaments:", err));
+      // After fetching tournaments, check load live tournament details for the watch button
+      loadWatchTournamentDetails();
     return () => { mounted = false };
   }, []);
 
@@ -82,6 +83,15 @@ const HeroSection = () => {
     }
   }, [user?.id, showForm, userJoinedTournaments]);
 
+  const loadWatchTournamentDetails = async () => {
+    const res=await getNextTournamentDetails();
+    console.table([res])
+    console.log(res.data)
+    if(res?.ok && res?.data)
+    setLiveTournament(res?.data || null);
+  else{
+    console.error("Failed to fetch next tournament details", res?.error || "Unknown error");}
+  }
 
   const hasUpcoming = upcomingTournament && upcomingTournament.length > 0;
 
@@ -312,10 +322,18 @@ const HeroSection = () => {
 
           <button
             onClick={() => {
-              // Navigate to live viewer with tournament query
-              const q = upcomingTournament?.tournamentName || upcomingTournament?.id || 'game tournament';
-              const tid = upcomingTournament?.id || '';
-              router.push(`/live?q=${encodeURIComponent(q)}${tid ? `&tournamentId=${encodeURIComponent(tid)}` : ''}`);
+              const link = liveTournament?.liveStreamLink;
+              if (link) {
+                let url="http://localhost:3000/live?q=game tournament&tournamentURL="+encodeURIComponent(link);
+                window.open(url, '_blank');
+              } else {
+                const q =
+                  liveTournament?.tournamentName ||
+                  liveTournament?.id ||
+                  "game tournament";
+                const tid = liveTournament?.id || "";
+                router.push(`/live?q=${encodeURIComponent(q)}${tid ? `&tournamentURL=${encodeURIComponent(link)}` : ""}`);
+              }
             }}
             disabled={!hasUpcoming}
             className={`group relative inline-flex items-center justify-center px-10 py-4 text-lg font-bold uppercase tracking-widest border-2 rounded-lg transition-all duration-300 hover-lift hover-glow ${

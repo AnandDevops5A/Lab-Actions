@@ -345,7 +345,12 @@ export const deleteParticipantFromTournament = async (tournamentId, userIds) => 
   });
 };
 
-
+//get  next tournament details
+export const getNextTournamentDetails = async () => {
+  return await FetchBackendAPI("tournament/next", {
+    method: "GET",
+  });
+};
 
 
 
@@ -442,6 +447,12 @@ export const getAllLeaderBoard = async () => {
     method: "GET",
   });
 };
+
+export const getLastTournamentTopPlayers = async () => {
+  return await FetchBackendAPI("leaderboard/lastTournamentTopPlayers", {
+    method: "GET",
+  });
+}
 
 
 

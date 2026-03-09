@@ -2,10 +2,11 @@
 import dynamic from "next/dynamic";
 import React, { useContext } from "react";
 import image from "../../../app/images/image.jpg";
-import { SkeletonCard, SkeletonTable } from "../../../app/skeleton/Skeleton";
+import { BannerSkeleton, SkeletonCard, SkeletonTable } from "../../../app/skeleton/Skeleton";
 import { ThemeContext } from "../../../lib/contexts/theme-context";
 
 import HeroSection from "../tournaments/hero-section";
+import CyberLoading from "@/app/skeleton/CyberLoading";
 
 // Optimizing with dynamic imports for below-the-fold content to reduce initial bundle size
 const UpcomingMatches = dynamic(() => import("@/components/ui/upcoming-matches"), {
@@ -14,6 +15,10 @@ const UpcomingMatches = dynamic(() => import("@/components/ui/upcoming-matches")
       <SkeletonTable />
     </div>
   ),
+});
+
+const BannerSection = dynamic(() => import("./Banner"), {
+  loading: () => <BannerSkeleton />,
 });
 
 const WinnerSection = dynamic(() => import("@/components/ui/winner"), {
@@ -64,6 +69,8 @@ const Main = () => {
         {/* 3. Upcoming Tournaments Section */}
         {/* <ActiveTournaments /> */}
         <UpcomingMatches/>
+          {/* 1. Banner Section (Dynamic & Engaging) */}
+        <BannerSection />
         {/*4. Winner section*/}
         <WinnerSection />
         {/* 5. Leaderboard & Stats Section (Engaging Data) */}

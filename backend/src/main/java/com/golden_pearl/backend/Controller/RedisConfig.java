@@ -33,6 +33,11 @@ public class RedisConfig {
                 .withCacheConfiguration("topNLeaderboard",
                         cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
                  .withCacheConfiguration("tournaments",
-                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)));
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
+                .withCacheConfiguration("tournaments",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
+                .withCacheConfiguration("upcomingTournaments",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(20))); 
+                
     }
 }

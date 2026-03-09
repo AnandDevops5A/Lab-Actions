@@ -15,8 +15,9 @@ function LiveStreamContent() {
   const search = useSearchParams();
   const q = search.get("q") || "game tournament";
   const tournamentId = search.get("tournamentId") || null;
+  const tournamentURL = search.get("tournamentURL") || null;
 
-  return <LiveTournament query={q} tournamentId={tournamentId} showChat={true} />;
+  return <LiveTournament query={q} tournamentId={tournamentId} tournamentURL={tournamentURL} showChat={true} />;
 }
 
 export default function LivePage() {
@@ -30,7 +31,7 @@ export default function LivePage() {
     >
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header Section */}
-        <div className="flex items-center gap-3 border-b pb-4 border-gray-700/50">
+        {/* <div className="flex items-center gap-3 border-b pb-4 border-gray-700/50">
           <div className={`p-3 rounded-xl ${isDarkMode ? "bg-red-500/10" : "bg-red-100"}`}>
             <Tv className={`w-8 h-8 ${isDarkMode ? "text-red-500" : "text-red-600"}`} />
           </div>
@@ -42,7 +43,7 @@ export default function LivePage() {
               Watch ongoing tournaments and events in real-time
             </p>
           </div>
-        </div>
+        </div> */}
 
         {/* Live Content */}
         <Suspense fallback={<SkeletonCard />}>

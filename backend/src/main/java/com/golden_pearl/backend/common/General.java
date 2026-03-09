@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 import com.golden_pearl.backend.DRO.UserRegisterData;
 import com.golden_pearl.backend.DTO.ResponseUserData;
+import com.golden_pearl.backend.Models.Tournament;
+import com.golden_pearl.backend.DTO.TournamentDTO;
 import com.golden_pearl.backend.Models.User;
 
 import lombok.Data;
@@ -81,4 +83,26 @@ public class General {
         return  ThreadLocalRandom.current().nextInt(100_000, 1_000_000);
     
     }
+     public TournamentDTO convertToDTO(Tournament tournament) {
+        if (tournament == null) {
+            return null;
+        }
+        return new TournamentDTO(
+                tournament.getId(),
+                tournament.getTournamentName(),
+                tournament.getPrizePool(),
+                tournament.getDateTime(),
+                tournament.getEntryFee(),
+                tournament.getSlot(),
+                tournament.getPlatform(),
+                tournament.getDescription());
+    }
+
+    public List<TournamentDTO> convertToDTOs(List<Tournament> tournaments) {
+        return tournaments.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+    
+
 }

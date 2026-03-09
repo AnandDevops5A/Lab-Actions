@@ -72,4 +72,8 @@ public interface LeaderboardRepository extends MongoRepository<LeaderBoard, Stri
         "} }"
     })
     List<TournamentWithLeaderboard> findTournamentsByUserIdWithDetails(String userId);
+
+    List<LeaderBoard> findTop5ByTournamentIdOrderByRankAsc(String id);
+    List<LeaderBoard> findByTournamentIdAndRankBetween(String tournamentId, int start, int end);
+
 }

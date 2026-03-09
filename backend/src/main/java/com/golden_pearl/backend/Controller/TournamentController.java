@@ -25,6 +25,7 @@ import com.golden_pearl.backend.DRO.TournamentUpdateDRO;
 import com.golden_pearl.backend.Models.User;
 import jakarta.validation.Valid;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import org.springframework.cache.annotation.CacheEvict;
 
 @RestController
 @RequestMapping("/tournament")
@@ -42,8 +43,8 @@ public class TournamentController {
     }
     @GetMapping("/all")
     public ResponseEntity<List<TournamentDTO>> getAllTournaments() {
-        List<Tournament> tournaments = tournamentService.getAllTournaments();
-        return ResponseEntity.ok(convertToDTOs(tournaments));
+        List<TournamentDTO> tournaments = tournamentService.getAllTournaments();
+        return ResponseEntity.ok(tournaments);
     }
 
     @PostMapping("/add")
@@ -55,15 +56,20 @@ public class TournamentController {
         readyTournament.setSlot(tournamentDetails.slot());
         readyTournament.setPlatform(tournamentDetails.platform());
         readyTournament.setDescription(tournamentDetails.description());
-        List<Tournament> returnUpcoming = tournamentService.addTournament(readyTournament);
-        return ResponseEntity.status(201).body(convertToDTOs(returnUpcoming));
+        List<TournamentDTO> returnUpcoming = tournamentService.addTournament(readyTournament);
+        return ResponseEntity.status(201).body(returnUpcoming);
     }
 
     // delete tournament by id
     @DeleteMapping("/delete/{tournamentIds}")
     public ResponseEntity<String> deleteTournament(@PathVariable String tournamentIds) {
-        tournamentService.deleteTournamentById(tournamentIds);
+        if (tournamentIds == null || tournamentIds.isEmpty())
+            return ResponseEntity.badRequest().body("No tournament IDs provided for deletion");
+        else if(tournamentService.deleteTournamentById(tournamentIds))
         return ResponseEntity.ok("Tournament(s) deleted successfully");
+        else
+        return ResponseEntity.badRequest().body("Tournament deletion failed...");
+            
     }
 
      // delete tournament by id
@@ -73,39 +79,41 @@ public class TournamentController {
         // return null;
         if (tournamentIds == null || tournamentIds.isEmpty())
             return ResponseEntity.badRequest().body("No tournament IDs provided for deletion");
-        tournamentService.deleteTournamentsByIds(tournamentIds);
+        if(tournamentService.deleteTournamentsByIds(tournamentIds))
         return ResponseEntity.ok("Tournament(s) deleted successfully");
+    else
+        return ResponseEntity.badRequest().body("Something went wrong");
     }
 
     @PutMapping("/update")
     public ResponseEntity<TournamentDTO> updateTournament(@Valid @RequestBody TournamentUpdateDRO tournamentDetails) {
-                Tournament updatedTournament = tournamentService.updateTournament(tournamentDetails);
-        return ResponseEntity.ok(convertToDTO(updatedTournament));
+        TournamentDTO updatedTournament = tournamentService.updateTournament(tournamentDetails);
+        return ResponseEntity.ok(updatedTournament);
     }
 
     @GetMapping("/upcoming")
     public ResponseEntity<List<TournamentDTO>> getUpcomingTournaments() {
-        List<Tournament> tournaments = tournamentService.getUpcomingTournaments();
-        return ResponseEntity.ok(convertToDTOs(tournaments));
+        List<TournamentDTO> tournaments = tournamentService.getUpcomingTournaments();
+        return ResponseEntity.ok(tournaments);
     }
 
     @GetMapping("/completed")
     public ResponseEntity<List<TournamentDTO>> getCompletedTournaments() {
-        List<Tournament> tournaments = tournamentService.getCompletedTournaments();
-        return ResponseEntity.ok(convertToDTOs(tournaments));
+        List<TournamentDTO> tournaments = tournamentService.getCompletedTournaments();
+        return ResponseEntity.ok(tournaments);
     }
 
     // service for the user who not login or registered
     @GetMapping("/lastTournament")
     public ResponseEntity<TournamentDTO> getLastTournaments() {
-        Tournament tournament = tournamentService.getLastTournament();
-        return ResponseEntity.ok(convertToDTO(tournament));
+        TournamentDTO tournament = tournamentService.getLastTournament();
+        return ResponseEntity.ok(tournament);
     }
 
     @PostMapping("/saveAll")
     public ResponseEntity<List<TournamentDTO>> saveAllTournaments(@RequestBody List<TournamentUpdateDRO> tournaments) {
-        List<Tournament> savedTournaments = tournamentService.saveAllTournaments(tournaments);
-        return ResponseEntity.status(201).body(convertToDTOs(savedTournaments));
+        List<TournamentDTO> savedTournaments = tournamentService.saveAllTournaments(tournaments);
+        return ResponseEntity.status(201).body(savedTournaments);
     }
 
     // get participants of a tournament
@@ -121,8 +129,8 @@ public class TournamentController {
             if (tournamentId == null || tournamentId.isEmpty()||!tournamentService.existsById(tournamentId)) {
                 return ResponseEntity.badRequest().build();
             }
-            Tournament tournament = tournamentService.getTournamentById(tournamentId);
-            return ResponseEntity.ok(convertToDTO(tournament));
+            TournamentDTO tournament = tournamentService.getTournamentDTOById(tournamentId);
+            return ResponseEntity.ok(tournament);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
@@ -131,17 +139,20 @@ public class TournamentController {
     // find all tournament by list
     @PostMapping("/getTournamentsByIds/{tournamentIds}")
     public ResponseEntity<List<TournamentDTO>> getTournamentsbyids(@PathVariable List<String> tournamentIds) {
-        List<Tournament> tournaments = tournamentService.getTournamentsbyids(tournamentIds);
-        return ResponseEntity.ok(convertToDTOs(tournaments));
+        List<TournamentDTO> tournaments = tournamentService.getTournamentsbyids(tournamentIds);
+        return ResponseEntity.ok(tournaments);
     }
 
     //get tournament which is going to start first
     @GetMapping("/next")
-    public ResponseEntity<TournamentDTO> getNextTournament() {
+    public ResponseEntity<Tournament> getNextTournament() {
         Tournament tournament = tournamentService.getNextTournament();
-        return ResponseEntity.ok(convertToDTO(tournament));
+        if (tournament == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(tournament);
     }
-
+    
     //set link for specific tournament
     @PutMapping("/set-live-stream-link")
     public ResponseEntity<String> setLiveStreamLink(@RequestBody TournamentLiveStreamLinkDRO tournamentLiveStreamLinkDRO) {
@@ -150,30 +161,11 @@ public class TournamentController {
         }
          if(tournamentService.setLiveStreamLink(tournamentLiveStreamLinkDRO)){
             return ResponseEntity.ok("Live stream link set successfully");
-         };
+         }
         return ResponseEntity.status(500).body("Failed to set live stream link");
     }
 
 
-    private TournamentDTO convertToDTO(Tournament tournament) {
-        if (tournament == null) {
-            return null;
-        }
-        return new TournamentDTO(
-                tournament.getId(),
-                tournament.getTournamentName(),
-                tournament.getPrizePool(),
-                tournament.getDateTime(),
-                tournament.getEntryFee(),
-                tournament.getSlot(),
-                tournament.getPlatform(),
-                tournament.getDescription());
-    }
-
-    private List<TournamentDTO> convertToDTOs(List<Tournament> tournaments) {
-        return tournaments.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
+   
 
 }
