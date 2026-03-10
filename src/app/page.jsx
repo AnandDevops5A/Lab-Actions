@@ -32,10 +32,10 @@ export const metadata = {
     
   ],
   openGraph: {
-    title: "BGMI Elite - The Premier Esports Gaming Platform",
+    title: "Game-Time - The Premier Esports Gaming Platform",
     description:
       "Compete in high-stakes tournaments, climb the global leaderboard, and go pro!",
-    url: process.env.FRONTEND_URL,
+    url: "/",
     type: "website",
   },
 };

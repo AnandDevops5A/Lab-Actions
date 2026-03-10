@@ -138,7 +138,6 @@ const NavbarContent = () => {
     // By chance if user refresh page
     // On component mount, check if user data is in context; if not, try to get from cache
     const fetchUserData = async () => {
-      // console.log("Navbar mounted, checking user context.");
       if (!user) {
          await getUserFromContext();
 
@@ -146,9 +145,7 @@ const NavbarContent = () => {
       }
     };
     fetchUserData();
-    // return () => {
-    //   setMounted(false);
-    // };
+    
   }, [getUserFromContext, user]);
 
  
@@ -172,7 +169,7 @@ const NavbarContent = () => {
             <Link
               href="/"
               className="shrink-0 flex items-center space-x-2"
-              aria-label="BGMI Elite Home"
+              aria-label="Game-Time Home"
             >
               <div className="h-10 w-10 bg-linear-to-br from-red-600 via-orange-600 to-yellow-600 rounded-full flex items-center justify-center shadow-lg shadow-red-500/50">
                 <Image src="/gun.svg" alt="Pearl Esports Logo"
@@ -183,7 +180,7 @@ const NavbarContent = () => {
                   />
               </div>
               <span className="text-2xl font-extrabold bg-linear-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent tracking-wider">
-                WarPath</span>
+                Game-Time</span>
             </Link>
 
             {/* Desktop Nav Links */}
