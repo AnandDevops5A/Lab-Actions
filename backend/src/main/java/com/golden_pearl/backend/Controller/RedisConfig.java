@@ -32,12 +32,37 @@ public class RedisConfig {
                         cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
                 .withCacheConfiguration("topNLeaderboard",
                         cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
-                 .withCacheConfiguration("tournaments",
-                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
                 .withCacheConfiguration("tournaments",
                         cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
+                .withCacheConfiguration("tournamentsIds", // This line was a duplicate of "tournaments"
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
                 .withCacheConfiguration("upcomingTournaments",
-                        cacheConfiguration().entryTtl(Duration.ofMinutes(20))); 
-                
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(20)))
+                .withCacheConfiguration("tournament",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
+                .withCacheConfiguration("completedTournaments",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
+                .withCacheConfiguration("lastTournament",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
+                .withCacheConfiguration("tournamentsByIds",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
+                .withCacheConfiguration("nextTournament",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
+                .withCacheConfiguration("reviews",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
+                .withCacheConfiguration("userReviews",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
+                .withCacheConfiguration("adminData",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
+                .withCacheConfiguration("userTournaments",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
+                .withCacheConfiguration("userTournamentsDetails",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
+                .withCacheConfiguration("allLeaderboards",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
+                .withCacheConfiguration("leaderboardByIds",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)))
+                .withCacheConfiguration("usersByIds",
+                        cacheConfiguration().entryTtl(Duration.ofMinutes(defaultTtlMinutes)));
     }
 }

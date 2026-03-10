@@ -2,6 +2,8 @@ package com.golden_pearl.backend.Controller;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,14 +18,14 @@ import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 public class AdminController {
 
     private final AdminService adminService;
-
+    private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
     public AdminController(AdminService adminService) {
         this.adminService = adminService;
     }
 
     @GetMapping("/data")
     public ResponseEntity<Map<String, Object>> getAllData() {
-        System.out.println("Admin hit server by requesting /admin/data endpoint");
+        logger.info("Admin hit server by requesting /admin/data endpoint");
         return ResponseEntity.ok(adminService.getAllData());
     }
 }

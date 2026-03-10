@@ -2,6 +2,8 @@ package com.golden_pearl.backend.Services;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.stream.Collectors;
 
 import org.springframework.cache.annotation.CacheEvict;
@@ -22,12 +24,15 @@ import com.golden_pearl.backend.errors.ResourceNotFoundException;
 public class TournamentService {
 
     private final TournamentRepository tournamentRepository;
+        private static final Logger logger = LoggerFactory.getLogger(TournamentService.class);
+
     private final General general = new General();
 
     // constructor
     public TournamentService(TournamentRepository tournamentRepository) {
         this.tournamentRepository = tournamentRepository;
     }
+    
  // get all tournamentsIds
 
     @Cacheable(value = "tournamentsIds", sync = true)
@@ -58,7 +63,7 @@ public class TournamentService {
     public List<TournamentDTO> addTournament(Tournament tournamentDetails) {
         // The startDateTime should be set in the request body by the client
         if (tournamentDetails == null)
-            return null;
+            return new ArrayList<>();
         tournamentRepository.save(tournamentDetails);
         return getUpcomingTournaments();
     }
@@ -68,7 +73,6 @@ public class TournamentService {
     public Tournament getTournamentById(String id) {
         if (id == null)
             return null;
-        System.out.println("Fetching tournament with id: " + id);
         return tournamentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tournament not found with id: " + id));
     }
@@ -92,14 +96,14 @@ public class TournamentService {
         if (id == null || !existsById(id))
             return false;
         tournamentRepository.deleteById(id);
-        // System.out.println("Tournament deleted successfully");
+        logger.info("Tournament with id {} deleted successfully", id);
         return true;
     }
 
      // delete tournament by id
     @Caching(evict = {
-            @CacheEvict(value = "tournament", key = "#id" ),
             @CacheEvict(value = "tournaments", allEntries = true),
+            @CacheEvict(value = "tournament", allEntries = true),
                 @CacheEvict(value = "tournamentsIds", allEntries = true),
             @CacheEvict(value = "upcomingTournaments", allEntries = true),
             @CacheEvict(value = "completedTournaments", allEntries = true),
@@ -107,26 +111,27 @@ public class TournamentService {
             @CacheEvict(value = "adminData", allEntries = true)
     })
     public boolean deleteTournamentsByIds(List<String> ids) {
-        if (ids == null || ids.isEmpty())
+        if (ids == null || ids.isEmpty()) {
             return false;
-            for (String id : ids) {
-                if (!existsById(id)) {
-                    System.out.println("Tournament not found with id: " + id);
-                    return false;
-                }
+        }
+        for (String id : ids) {
+            if (!existsById(id)) {
+                logger.info("Tournament with id {} not found", id);
+                return false;
             }
+        }
         tournamentRepository.deleteAllById(ids);
-            System.out.println("Tournaments deleted successfully: " + ids.size());
-            return true;
+        logger.info("Tournaments deleted successfully: {}", ids.size());
+        return true;
     }
 
     // update tournament by id
-    @Caching(put = { @CachePut(value = "tournament", key = "#tournamentDetails.id") },
-     evict = {
+    @Caching(evict = {
+            @CacheEvict(value = "tournament", key = "#tournamentDetails.id"),
             @CacheEvict(value = "tournaments", allEntries = true),
             @CacheEvict(value = "upcomingTournaments", allEntries = true),
             @CacheEvict(value = "lastTournament", allEntries = true),
-            @CacheEvict(value = "adminData", allEntries = true)
+            @CacheEvict(value = "adminData", allEntries = true),
     })
     public TournamentDTO updateTournament(TournamentUpdateDRO tournamentDetails) {
         if ( !existsById(tournamentDetails.id()))
@@ -141,7 +146,7 @@ public class TournamentService {
         existingTournament.setDescription(tournamentDetails.description() != null ? tournamentDetails.description() : existingTournament.getDescription());
         existingTournament.setEntryFee(tournamentDetails.entryFee() != null ? tournamentDetails.entryFee() : existingTournament.getEntryFee());
         existingTournament.setSlot(tournamentDetails.slot() != null ? tournamentDetails.slot() : existingTournament.getSlot());
-        System.out.println("Tournament updated successfully");
+        logger.info("Tournament updated successfully");
         return general.convertToDTO(tournamentRepository.save(existingTournament));
     }
 
@@ -165,9 +170,12 @@ public class TournamentService {
 
     // save all tournaments
     @Caching(evict = {
+            @CacheEvict(value = "tournament", allEntries = true),
             @CacheEvict(value = "tournaments", allEntries = true),
             @CacheEvict(value = "tournamentsIds", allEntries = true),
-            @CacheEvict(value = "upcomingTournaments", allEntries = true),           
+            @CacheEvict(value = "upcomingTournaments", allEntries = true),
+            @CacheEvict(value = "completedTournaments", allEntries = true),
+            @CacheEvict(value = "lastTournament", allEntries = true),
             @CacheEvict(value = "adminData", allEntries = true)
     })
     public List<TournamentDTO> saveAllTournaments(List<TournamentUpdateDRO> tournaments) {
@@ -192,8 +200,8 @@ public class TournamentService {
         //checking all id exists or not
         for (String id : tournamentIds) {
             if (!existsById(id)) {
-                System.out.println("Tournament not found with id: " + id);
-                return null;
+                logger.info("Tournament not found with id: {}", id);
+                return new ArrayList<>();
             }
         }
         return general.convertToDTOs(tournamentRepository.findAllById(tournamentIds));
@@ -224,6 +232,7 @@ public class TournamentService {
         return tournament;
     }
 
+    @CacheEvict(value = "tournament", key = "#tournamentLiveStreamLinkDRO.tournamentId")
     public boolean setLiveStreamLink(TournamentLiveStreamLinkDRO tournamentLiveStreamLinkDRO) {
         if (tournamentLiveStreamLinkDRO == null || !existsById(tournamentLiveStreamLinkDRO.tournamentId()))
             return false;
@@ -233,10 +242,10 @@ public class TournamentService {
        try {
         tournament.setLiveStreamLink(tournamentLiveStreamLinkDRO.liveStreamLink());
         tournamentRepository.save(tournament);
-        System.out.println("Live stream link set successfully");
+        logger.info("Live stream link set successfully");
         return true;
        } catch (Exception e) {
-        System.err.println("Failed to set live stream link: " + e.getMessage());
+        logger.error("Failed to set live stream link: {}", e.getMessage());
         return false;
        } 
         

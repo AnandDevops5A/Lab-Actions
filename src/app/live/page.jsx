@@ -4,7 +4,6 @@ import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { SkeletonCard } from "../skeleton/Skeleton";
 import { ThemeContext } from "../../lib/contexts/theme-context";
-import { Tv } from "lucide-react";
 
 const LiveTournament = dynamic(() => import("@/components/live/LiveTournament"), {
   ssr: false,

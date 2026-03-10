@@ -1,7 +1,6 @@
 package com.golden_pearl.backend.Controller;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,7 +24,6 @@ import com.golden_pearl.backend.DRO.TournamentUpdateDRO;
 import com.golden_pearl.backend.Models.User;
 import jakarta.validation.Valid;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
-import org.springframework.cache.annotation.CacheEvict;
 
 @RestController
 @RequestMapping("/tournament")
@@ -65,24 +63,21 @@ public class TournamentController {
     public ResponseEntity<String> deleteTournament(@PathVariable String tournamentIds) {
         if (tournamentIds == null || tournamentIds.isEmpty())
             return ResponseEntity.badRequest().body("No tournament IDs provided for deletion");
-        else if(tournamentService.deleteTournamentById(tournamentIds))
-        return ResponseEntity.ok("Tournament(s) deleted successfully");
+        else if (tournamentService.deleteTournamentById(tournamentIds))
+            return ResponseEntity.ok("Tournament(s) deleted successfully");
         else
-        return ResponseEntity.badRequest().body("Tournament deletion failed...");
-            
+            return ResponseEntity.badRequest().body("Tournament deletion failed...");
     }
 
      // delete tournament by id
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteTournaments(@RequestBody List<String> tournamentIds) {
-        System.out.println("deleting tournament: " + tournamentIds.size());
-        // return null;
         if (tournamentIds == null || tournamentIds.isEmpty())
             return ResponseEntity.badRequest().body("No tournament IDs provided for deletion");
         if(tournamentService.deleteTournamentsByIds(tournamentIds))
-        return ResponseEntity.ok("Tournament(s) deleted successfully");
-    else
-        return ResponseEntity.badRequest().body("Something went wrong");
+            return ResponseEntity.ok("Tournament(s) deleted successfully");
+        else
+            return ResponseEntity.badRequest().body("Something went wrong");
     }
 
     @PutMapping("/update")

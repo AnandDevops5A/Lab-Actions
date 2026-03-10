@@ -33,25 +33,30 @@ public class EmailService {
     public void sendJoinEmail(String to, User u, Tournament t,LeaderBoard l) {
         
         String subject = "Registration Confirmed: " + t.getTournamentName();
-        String body = String.format(
-            "Hello %s,\n\n" +
-            "Congratulations! Your registration for \"%s\" has been successfully processed.\n\n" +
-            "--- TOURNAMENT DETAILS ---\n" +
-            "Tournament: %s\n" +
-            "Plateform: %s\n" +
-            "Given GameId: %s\n  "+
-            "Transaction ID: %s\n" +
-            "Prize Pool: %s\n" +
-            "Status: Submit for Admin Approval\n" +
-            "Date: %s\n" +
-            "--------------------------\n\n" +
-            "What's next?\n" +
-            "1. Check the tournament bracket on our website.\n" +
-            "2. Ensure your equipment/software is updated.\n" +
-            "3. Join our Discord server for live updates.\n\n" +
-            "If you have any questions or need to withdraw, please contact support or reply to this email.\n\n" +
-            "Best regards,\n" +
-            "The Tournament Administration Team",
+        String body = String.format("""
+            Hello %s,
+
+            Congratulations! Your registration for "%s" has been successfully processed.
+
+            --- TOURNAMENT DETAILS ---
+            Tournament: %s
+            Plateform: %s
+            Given GameId: %s
+            Transaction ID: %s
+            Prize Pool: %s
+            Status: Submit for Admin Approval
+            Date: %s
+            --------------------------
+
+            What's next?
+            1. Check the tournament bracket on our website.
+            2. Ensure your equipment/software is updated.
+            3. Join our Discord server for live updates.
+
+            If you have any questions or need to withdraw, please contact support or reply to this email.
+
+            Best regards,
+            The Tournament Administration Team""",
             u.getUsername(), t.getTournamentName(), t.getTournamentName(),t.getPlatform(),l.getGameId(), l.getTransactionId(), t.getPrizePool(), t.getDateTime()
         );
 
@@ -61,23 +66,28 @@ public class EmailService {
     @Async
     public void sendApprovalEmail(String to, User u, Tournament t) {
         String subject = "Application Approved: " + t.getTournamentName();
-        String body = String.format(
-            "Dear %s,\n\n" +
-            "We are pleased to inform you that your application for the \"%s\" has been APPROVED.\n"+
-            "You Transaction Id is verified successfully...\n" +
-            "--- PARTICIPATION SUMMARY ---\n" +
-            "Tournament: %s\n" +
-            "Admission Status: Official Participant\n" +
-            "Check-in Time: 5 minutes before start\n" +
-            "------------------------------\n\n" +
-            "IMPORTANT NEXT STEPS:\n" +
-            "• Review the official rules and code of conduct.\n" +
-            "• Ensure your profile information is up to date.\n" +
-            "• Watch your inbox for the final bracket and schedule announcement.\n\n" +
-            "We are excited to have you with us. If you can no longer attend, please update your status in the dashboard as soon as possible to allow waitlisted players to join.\n\n" +
-            "Good luck and have fun!\n\n" +
-            "Best regards,\n" +
-            "Tournament Operations Team",
+        String body = String.format("""
+            Dear %s,
+
+            We are pleased to inform you that your application for the "%s" has been APPROVED.
+            You Transaction Id is verified successfully...
+            --- PARTICIPATION SUMMARY ---
+            Tournament: %s
+            Admission Status: Official Participant
+            Check-in Time: 5 minutes before start
+            ------------------------------
+
+            IMPORTANT NEXT STEPS:
+            • Review the official rules and code of conduct.
+            • Ensure your profile information is up to date.
+            • Watch your inbox for the final bracket and schedule announcement.
+
+            We are excited to have you with us. If you can no longer attend, please update your status in the dashboard as soon as possible to allow waitlisted players to join.
+
+            Good luck and have fun!
+
+            Best regards,
+            Tournament Operations Team""",
             u.getUsername(), t.getTournamentName(), t.getTournamentName()
         );
 
@@ -87,14 +97,19 @@ public class EmailService {
     @Async
     public void sendForgetPasswordEmailOTP(String to, String username,int otp) {
         String subject = "Your Password Reset Code";
-        String body = String.format(
-            "Dear %s,\n\n" +
-            "We have received a request to reset the password for your account.\n\n" +
-            "Please use the following One-Time Password (OTP) to proceed. This code is valid for 10 minutes.\n\n" +
-            "Your OTP: %d\n\n" +
-            "If you did not initiate this request, please disregard this email. For your security, never share this code with anyone.\n\n" +
-            "Sincerely,\n" +
-            "The Golden Pearl Security Team",
+        String body = String.format("""
+            Dear %s,
+
+            We have received a request to reset the password for your account.
+
+            Please use the following One-Time Password (OTP) to proceed. This code is valid for 10 minutes.
+
+            Your OTP: %d
+
+            If you did not initiate this request, please disregard this email. For your security, never share this code with anyone.
+
+            Sincerely,
+            The Golden Pearl Security Team""",
             username,
             otp
         );
@@ -105,14 +120,18 @@ public class EmailService {
     @Async
     public void sendPasswordResetEmail(String to, String username) {
         String subject = "Security Notification: Password Changed Successfully";
-        String body = String.format(
-            "Dear comrade🥷, %s,\n\n" +
-            "This is an automated notification to confirm that the password for your account has been successfully changed.\n\n" +
-            "If you initiated this change, no further action is required.\n\n" +
-            "However, if you did not perform this action, please contact our support team immediately to secure your account.\n\n" +
-            "Thank you,\n" +
-            "Golden Pearl Security Team",
-           username
+        String body = String.format("""
+            Dear comrade🥷, %s,
+
+            This is an automated notification to confirm that the password for your account has been successfully changed.
+
+            If you initiated this change, no further action is required.
+
+            However, if you did not perform this action, please contact our support team immediately to secure your account.
+
+            Thank you,
+            Golden Pearl Security Team""",
+            username
         );
 
         sendEmailSafely(to, subject, body);
@@ -121,15 +140,21 @@ public class EmailService {
     //send registeration email
     public void sendSignupSuccessEmail(String to, String username) {
         String subject = "Welcome to Golden Pearl!";
-        String body = String.format(
-            "Dear %s,\n\n" +
-            "Welcome to the Golden Pearl community! We're thrilled to have you on board.\n\n" +
-            "Get ready to dive into an exciting world of tournaments, challenges, and camaraderie with fellow gamers. Whether you're here to compete, connect, or just have fun, there's something for everyone.\n\n" +
-            "Don't forget to complete your profile and explore our upcoming events. If you have any questions or need assistance, our support team is here to help.\n" +
-            "\ncontact on : anandorbique5a@gmail.com\n\n" +
-            "Happy gaming!\n\n" +
-            "Best regards,\n" +
-            "The Golden Pearl Team",
+        String body = String.format("""
+            Dear %s,
+
+            Welcome to the Golden Pearl community! We're thrilled to have you on board.
+
+            Get ready to dive into an exciting world of tournaments, challenges, and camaraderie with fellow gamers. Whether you're here to compete, connect, or just have fun, there's something for everyone.
+
+            Don't forget to complete your profile and explore our upcoming events. If you have any questions or need assistance, our support team is here to help.
+
+            contact on : anandorbique5a@gmail.com
+
+            Happy gaming!
+
+            Best regards,
+            The Golden Pearl Team""",
             username
         );
 

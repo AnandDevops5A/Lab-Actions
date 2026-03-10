@@ -2,6 +2,8 @@ package com.golden_pearl.backend.Services;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -33,23 +35,17 @@ public class UserService {
         this.email = email;
         this.passwordEncoder = passwordEncoder;
     }
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     // find user by id
-
     @Cacheable(value = "user", key = "#id", sync = true)
     public User findUserById(String id) {
         if (id == null)
             return null;
-        // System.out.println("Fetching user with id: " + id);
-        User user = userRepository.findById(id).orElse(null);
-        // System.out.println("Db hit ");
-        return user;
+        return userRepository.findById(id).orElse(null);
     }
 
-    /**
-     * Authenticates a user using their contact and access key (password).
-     * Supports both legacy plain-text passwords and modern BCrypt hashes.
-     */
+    
     public User getUser(UserAuth userAuth) {
         Long contact = userAuth.contact();
         String accessKey = userAuth.accessKey();
@@ -78,15 +74,15 @@ public class UserService {
         if (users != null && !users.isEmpty()) {
             // Use .get(0) instead of [0]
             User user = users.get(0);
-            int OTP = general.generateOTP();
+            int otp = general.generateOTP();
             ForgotPasswordDTO fDTO = ForgotPasswordDTO.builder()
-                    .id(user.getId()).username(user.getUsername()).otp(OTP).build();
+                    .id(user.getId()).username(user.getUsername()).otp(otp).build();
             // send otp through mail
             try {
-                email.sendForgetPasswordEmailOTP(user.getEmail(), user.getUsername(), OTP);
+                email.sendForgetPasswordEmailOTP(user.getEmail(), user.getUsername(), otp);
 
             } catch (Exception e) {
-                System.out.println(e);
+                logger.error("Failed to send OTP email to {}: {}", user.getEmail(), e.getMessage());
             }
             return fDTO;
         } else {
@@ -113,7 +109,7 @@ public class UserService {
             try {
                 email.sendPasswordResetEmail(user.getEmail(), user.getUsername());
             } catch (Exception e) {
-                System.out.println(e);
+                logger.error("Failed to send password reset email to {}: {}", user.getEmail(), e.getMessage());
             }
             return "Password reset successfully";
         } else
@@ -170,13 +166,7 @@ public class UserService {
         if (existingUser == null) {
             return null;
         } else {
-            // User updatedUser = existingUser.toBuilder()
-            // .name(user.name())
-            // .email(user.email())
-            // .contact(user.contact())
-            // .callSign(user.callSign())
-            // .accessKey(user.accessKey())
-            // .build();
+            
             existingUser.setUsername(user.name());
             existingUser.setEmail(user.email());
             existingUser.setContact(user.contact());
@@ -211,8 +201,8 @@ public class UserService {
             for (User user : users) {
                 user.setJoiningDate(general.getCurrentDateTime());
             }
-            List<User> savedUsers = userRepository.saveAll(users);
-            return savedUsers;
+            return userRepository.saveAll(users);
+            
         }
     }
 

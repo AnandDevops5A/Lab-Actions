@@ -20,7 +20,6 @@ import com.golden_pearl.backend.DRO.UpdateLeaderboardEntry;
 import com.golden_pearl.backend.DRO.UpdateRank;
 import com.golden_pearl.backend.DTO.TournamentWithLeaderboard;
 import com.golden_pearl.backend.Models.LeaderBoard;
-import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.Services.LeaderboardService;
 import com.golden_pearl.backend.Services.TournamentService;
 import com.golden_pearl.backend.errors.ResourceNotFoundException;
