@@ -26,14 +26,15 @@ public class UserService {
     private final UserRepository userRepository;
     private final EmailService email;
     private final PasswordEncoder passwordEncoder;
-    private final General general = new General();
+    private final General general;
 
     // constructor
 
-    public UserService(UserRepository userRepository, EmailService email, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, EmailService email, PasswordEncoder passwordEncoder, General general) {
         this.userRepository = userRepository;
         this.email = email;
         this.passwordEncoder = passwordEncoder;
+        this.general = general;
     }
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 

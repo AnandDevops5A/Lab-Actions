@@ -38,15 +38,16 @@ public class LeaderboardService {
     private final LeaderboardRepository leaderboardRepository;
     private final UserService userService;
     private final TournamentService tournamentService;
-    public final General general = new General();
+    public final General general;
     public final EmailService emailService;
 
     public LeaderboardService(LeaderboardRepository leaderboardRepository, TournamentService tournamentService,
-            UserService userService, EmailService emailService) {
+            UserService userService, EmailService emailService, General general) {
         this.leaderboardRepository = leaderboardRepository;
         this.tournamentService = tournamentService;
         this.userService = userService;
         this.emailService = emailService;
+        this.general = general;
     }
 
     // register user for tournament
@@ -394,7 +395,7 @@ public class LeaderboardService {
             return new ArrayList<>();
         }
         List<LeaderBoard> topPlayers = leaderboardRepository.findTop5ByTournamentIdOrderByRankAsc(
-                lastTournament.id());
+                lastTournament.getId());
 
         return topPlayers.stream().map(player -> {
             User user = userService.findUserById(player.getUserId());

@@ -1,18 +1,18 @@
 services:
 #main database service
-  mongodb:
-    image: 'mongo:6.0'
-    container_name: mongodb
-    # restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: anand
-      MONGO_INITDB_ROOT_PASSWORD: secret
-    ports:
-      - '27017:27017'
-    volumes:
-      - 'mongo-data:/data/db'
-    networks:
-      - spring-boot-mongo-net
+  # mongodb:
+  #   image: 'mongo:6.0'
+  #   container_name: mongodb
+  #   # restart: always
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: anand
+  #     MONGO_INITDB_ROOT_PASSWORD: secret
+  #   ports:
+  #     - '27017:27017'
+  #   volumes:
+  #     - 'mongo-data:/data/db'
+  #   networks:
+  #     - spring-boot-mongo-net
 
 
 # Datbase GUI service

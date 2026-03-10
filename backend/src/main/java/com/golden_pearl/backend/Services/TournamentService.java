@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import java.util.stream.Collectors;
 
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
@@ -26,11 +25,12 @@ public class TournamentService {
     private final TournamentRepository tournamentRepository;
         private static final Logger logger = LoggerFactory.getLogger(TournamentService.class);
 
-    private final General general = new General();
+    private final General general;
 
     // constructor
-    public TournamentService(TournamentRepository tournamentRepository) {
+    public TournamentService(TournamentRepository tournamentRepository, General general) {
         this.tournamentRepository = tournamentRepository;
+        this.general = general;
     }
     
  // get all tournamentsIds
@@ -261,8 +261,8 @@ public class TournamentService {
         // Find the DTO with the minimum dateTime using a stream for cleaner code
         // and then map it to the full Tournament entity.
         return upcomingTournaments.stream()
-                .min((t1, t2) -> Long.compare(t1.dateTime(), t2.dateTime()))
-                .map(dto -> getTournamentById(dto.id()))
+                .min((t1, t2) -> Long.compare(t1.getDateTime(), t2.getDateTime()))
+                .map(dto -> getTournamentById(dto.getId()))
                 .orElse(null);
     }
 }

@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Component;
+
 import com.golden_pearl.backend.DRO.UserRegisterData;
 import com.golden_pearl.backend.DTO.ResponseUserData;
 import com.golden_pearl.backend.Models.Tournament;
@@ -17,6 +19,7 @@ import com.golden_pearl.backend.Models.User;
 
 import lombok.Data;
 
+@Component
 @Data
 public class General {
 
@@ -95,7 +98,9 @@ public class General {
                 tournament.getEntryFee(),
                 tournament.getSlot(),
                 tournament.getPlatform(),
-                tournament.getDescription());
+                tournament.getDescription(),
+                tournament.getLiveStreamLink() 
+            );
     }
 
     public List<TournamentDTO> convertToDTOs(List<Tournament> tournaments) {

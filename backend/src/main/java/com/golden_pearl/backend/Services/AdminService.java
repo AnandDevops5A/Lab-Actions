@@ -5,6 +5,7 @@ import com.golden_pearl.backend.Repository.UserRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import com.golden_pearl.backend.Models.LeaderBoard;
 import com.golden_pearl.backend.Models.Tournament;
@@ -28,12 +28,14 @@ public class AdminService {
     private final TournamentRepository tournamentRepository;
     private final LeaderboardRepository leaderBoardRepository;
     private static final Logger logger = LoggerFactory.getLogger(AdminService.class);
-    // 1. Define a specific thread pool (bean) to avoid common pool issues
-    private final Executor executor = Executors.newFixedThreadPool(10);
-    public AdminService(UserRepository userRepository, TournamentRepository tournamentRepository, LeaderboardRepository leaderBoardRepository) {
+    private final Executor executor;
+
+    public AdminService(UserRepository userRepository, TournamentRepository tournamentRepository,
+            LeaderboardRepository leaderBoardRepository, @Qualifier("taskExecutor") Executor executor) {
         this.userRepository = userRepository;
         this.tournamentRepository = tournamentRepository;
         this.leaderBoardRepository = leaderBoardRepository;
+        this.executor = executor;
     }
 
     @Cacheable(value = "adminData", sync = true)
