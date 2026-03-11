@@ -1,5 +1,6 @@
 package com.golden_pearl.backend.Services;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -58,6 +59,14 @@ public class UserService {
         // Check for modern BCrypt match (Hash comparison)
         User potentialUser = userRepository.findByContact(contact);
         if (potentialUser != null && passwordEncoder.matches(accessKey, potentialUser.getAccessKey())) {
+            //add last login time
+            List<Long> loginTimeLines = potentialUser.getLoginTimeLines();
+            if (loginTimeLines == null) {
+                loginTimeLines = new ArrayList<>();
+            }
+            loginTimeLines.add(general.getCurrentDateTime());
+            potentialUser.setLoginTimeLines(loginTimeLines);
+            userRepository.save(potentialUser);
             return potentialUser;
         }
 

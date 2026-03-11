@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +20,7 @@ public class AdminController {
 
     private final AdminService adminService;
     private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
-    public AdminController(AdminService adminService) {
+    public AdminController(@Lazy AdminService adminService) {
         this.adminService = adminService;
     }
 

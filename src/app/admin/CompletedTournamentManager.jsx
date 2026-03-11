@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useContext, useMemo, useEffect, useCallback } from "react";
+import React, { useState, useContext, useMemo } from "react";
 import { ThemeContext } from "../../lib/contexts/theme-context";
 import { Trophy } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -17,7 +17,6 @@ const ParticipantList = dynamic(() => import('./ParticipantList'), {
 const CompletedTournamentManager = ({ tournaments, refreshData, joiners, updateJoiners}) => {
   const { isDarkMode } = useContext(ThemeContext);
   const [selectedTournament, setSelectedTournament] = useState(null);
-  // const [joiners, setJoiners]=useState([]);
 
   const parseTournamentDate = (dateTime) => {
     const dateStr = dateTime.toString();

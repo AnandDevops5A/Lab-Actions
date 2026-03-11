@@ -8,7 +8,11 @@ import { SunDim, SunMedium, Sunset } from "lucide-react";
 
 // Simple localStorage-based caching for utility functions
 const simpleSetCache = (key, data, ttl = 3600) => {
+
   if (typeof window === 'undefined') return;
+  if(key === "" || key === null || key === undefined) return;
+  if(data === "" || data === null || data === undefined) return;
+
   try {
     const cacheData = {
       data,
@@ -289,7 +293,7 @@ export const fetchUpcomingTournament = async () => {
     }
     const response = await getUpcomingTournament();
     if (response.ok) {
-      simpleSetCache("upcomingTournament", response.data, 3600);
+      simpleSetCache("upcomingTournament", response.data, 60); // Set TTL to 1 minute (60 seconds)
       return response.data;
     }
     return null;

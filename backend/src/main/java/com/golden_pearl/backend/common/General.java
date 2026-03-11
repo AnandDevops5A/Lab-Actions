@@ -28,9 +28,9 @@ public class General {
         return Long.parseLong(LocalDateTime.now().format(formatter));
     }
 
-    public Integer getCurrentTime() {
+    public Short getCurrentTime() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmm");
-        return Integer.parseInt(LocalDateTime.now().format(formatter));
+        return Short.parseShort(LocalDateTime.now().format(formatter));
     }
 
 

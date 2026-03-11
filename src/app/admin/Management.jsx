@@ -9,22 +9,13 @@ import {
   Filter,
   Edit3,
   Trash2,
-  Users,
   Trophy,
   Calendar,
-  Clock,
-  DollarSign,
   Eye,
-  Settings,
   Plus,
   ChevronDown,
   ChevronUp,
-  MoreHorizontal,
-  BarChart3,
-  Play,
-  Pause,
   CheckCircle,
-  XCircle,
   IndianRupee,
 } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -151,9 +142,6 @@ const TournamentManagement = ({ tournaments, refreshData }) => {
 
   const handleBulkDelete = useCallback(async () => {
     if (selectedTournaments.length === 0) return;
-    // console.log("deleting tournament: ",selectedTournaments)
-    // return;
-
     const confirmed = await confirmMessage(
       `Are you sure you want to delete ${selectedTournaments.length} tournament(s)? This action cannot be undone.`,
       "Bulk Delete Tournaments",

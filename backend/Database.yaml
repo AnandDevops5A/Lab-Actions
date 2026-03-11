@@ -33,7 +33,7 @@ services:
   #     - spring-boot-mongo-net
 # Redis service for caching
   redis:
-    image: 'redis:7.2'
+    image: 'redis:7-alpine'
     container_name: redis
     # restart: always
     ports:

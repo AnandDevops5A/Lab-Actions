@@ -76,9 +76,12 @@ public class LeaderboardController {
     // get leaderboard by tournament ids
 
     @PostMapping("/getJoiners")
-    public ResponseEntity<List<LeaderBoard>> getLeaderboardByTournamentIds(@RequestBody List<String> tournamentIds) {
+    public ResponseEntity<List<LeaderBoard>> getLeaderboardByTournamentIds(
+            @Valid @RequestBody List<String> tournamentIds) {
         return ResponseEntity.ok(leaderboardService.getLeaderboardByTournamentIds(tournamentIds));
     }
+
+
 
     // approve user from tournament
     @PostMapping("/approve/{tournamentId}/user/{userId}")

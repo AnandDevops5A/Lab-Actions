@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.DTO.TournamentDTO;
 import com.golden_pearl.backend.Services.TournamentService;
+import com.golden_pearl.backend.common.General;
 import com.golden_pearl.backend.errors.ResourceNotFoundException;
 
 import org.springframework.web.bind.annotation.RestController;
@@ -160,7 +161,11 @@ public class TournamentController {
         return ResponseEntity.status(500).body("Failed to set live stream link");
     }
 
-
+    @GetMapping("/time")
+    public short getCurrentTime(){
+        General general = new General();
+        return general.getCurrentTime();
+    }
    
 
 }

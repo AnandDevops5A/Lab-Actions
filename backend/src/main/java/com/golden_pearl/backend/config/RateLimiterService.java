@@ -11,7 +11,7 @@ public class RateLimiterService {
     private final StringRedisTemplate redisTemplate;
 
     // Configurable limits
-    private static final int MAX_ATTEMPTS = 5;
+    private static final int MAX_ATTEMPTS = 3;
     private static final int BLOCK_DURATION_MINUTES = 5;
 
     public RateLimiterService(StringRedisTemplate redisTemplate) {

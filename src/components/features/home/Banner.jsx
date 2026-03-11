@@ -40,7 +40,7 @@ const Banner = () => {
     return <CyberLoading />;
   }
 
-  if (players.length === 0) {
+  if (players?.length === 0) {
     return (
       <div className={`h-screen flex items-center justify-center transition-colors duration-500 font-sans ${!isdarkMode ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'}`}>
         

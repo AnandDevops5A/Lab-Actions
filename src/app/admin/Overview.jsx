@@ -6,8 +6,9 @@ import { ThemeContext } from "../../lib/contexts/theme-context";
 const Overview = ({
   tournaments,
   participants,
-  revenue,
   chartOptions,
+  joiners,
+  isRevalidating,
 }) => {
   const { isDarkMode } = useContext(ThemeContext);
   const cardStyle = `bg-linear-to-br
@@ -22,6 +23,7 @@ const Overview = ({
       const totalGames = safeParticipants.reduce((acc, p) => acc + (p.totalPlay || 0), 0);
       const totalWins = safeParticipants.reduce((acc, p) => acc + (p.totalWin || 0), 0);
       const avgWinRate = totalGames > 0 ? ((totalWins / totalGames) * 100).toFixed(1) + "%" : "0%";
+      const totalInvestment = safeParticipants.reduce((acc, p) => acc + (p.investAmount || 0), 0);
 
       return [
         {
@@ -37,10 +39,8 @@ const Overview = ({
           icon: "👥",
         },
         {
-          label: "Total Revenue",
-          value: `₹${(revenue || [])
-            .reduce((sum, r) => sum + (r.amount || 0), 0)
-            .toLocaleString()}`,
+          label: "Total Investment",
+          value: `₹${totalInvestment.toLocaleString()}`,
           color: "from-green-500 to-emerald-500",
           icon: "💰",
         },
@@ -52,7 +52,7 @@ const Overview = ({
         },
       ];
     },
-    [tournaments, participants, revenue]
+    [tournaments, participants]
   );
 
   // 1. Platform Distribution (Doughnut)
@@ -93,14 +93,13 @@ const Overview = ({
   // 2. Tournament Capacity vs Filled (Bar)
   const capacityData = useMemo(() => {
     const safeTournaments = (tournaments || []).slice(0, 8); // Show last 8
+    const safeJoiners = joiners || [];
     return {
       labels: safeTournaments.map((t) => t.tournamentName.length > 10 ? t.tournamentName.substring(0, 10) + "..." : t.tournamentName),
       datasets: [
         {
           label: "Participants",
-          data: safeTournaments.map((t) =>
-            t.rankList ? Object.keys(t.rankList).length : t.participants || 0
-          ),
+          data: safeTournaments.map((t) => safeJoiners.filter(j => j.tournamentId === t.id).length),
           backgroundColor: "rgba(75, 192, 192, 0.7)",
           borderRadius: 4,
         },
@@ -141,12 +140,28 @@ const Overview = ({
     const counts = {};
 
     safeParticipants.forEach((p) => {
-      if (!p.joiningDate) return;
-      // joiningDate is number YYYYMMDD (e.g., 20231025)
-      const dateStr = p.joiningDate.toString();
-      if (dateStr.length !== 8) return;
+      if (!p.joiningDate) {
+        return;
+      }
 
-      const key = dateStr.substring(0, 6); // YYYYMM
+      let date;
+      const joiningDateValue = p.joiningDate;
+
+      // Handle YYYYMMDD number format
+      if (typeof joiningDateValue === 'number' && joiningDateValue.toString().length === 8) {
+        const dateStr = joiningDateValue.toString();
+        const year = parseInt(dateStr.substring(0, 4), 10);
+        const month = parseInt(dateStr.substring(4, 6), 10) - 1; // JS months are 0-indexed
+        const day = parseInt(dateStr.substring(6, 8), 10);
+        date = new Date(year, month, day);
+      } else {
+        // Handle other valid date formats (ISO string, timestamp, Date object)
+        date = new Date(joiningDateValue);
+      }
+
+      if (isNaN(date.getTime())) return;
+
+      const key = `${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}`;
       counts[key] = (counts[key] || 0) + 1;
     });
 
@@ -228,7 +243,7 @@ const Overview = ({
             <p className="text-2xl md:text-3xl font-bold text-slate-100">
               {stat.value}
             </p>
-            <p className="text-green-400 text-xs mt-2">Updated just now</p>
+            <p className="text-green-400 text-xs mt-2">{isRevalidating ? "Updating... 🐱‍🏍" : "updated just now 😊"}</p>
           </div>
         ))}
       </div>
@@ -245,19 +260,21 @@ const Overview = ({
 
         <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-inner inset-1">
           <h2 className="text-lg md:text-xl font-bold mb-4 text-slate-100">
-            Top 5 Earners
-          </h2>
-          <Bar data={topEarnersData} options={chartOptions} />
-        </div>
-
-        <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-inner inset-1">
-          <h2 className="text-lg md:text-xl font-bold mb-4 text-slate-100">
             Platform Distribution
           </h2>
           <div className="h-64 flex justify-center">
              <Doughnut data={platformData} options={{...chartOptions, maintainAspectRatio: false}} />
           </div>
         </div>
+
+        <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-inner inset-1">
+          <h2 className="text-lg md:text-xl font-bold mb-4 text-slate-100">
+            Top 5 Earners
+          </h2>
+          <Bar data={topEarnersData} options={chartOptions} />
+        </div>
+
+        
         
         <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-inner inset-1">
           <h2 className="text-lg md:text-xl font-bold mb-4 text-slate-100">

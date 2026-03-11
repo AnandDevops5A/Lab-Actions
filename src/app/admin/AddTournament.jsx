@@ -4,8 +4,7 @@ import { X, Loader2 } from "lucide-react"; // Icon library for the cross button
 import { errorMessage, successMessage } from "../../lib/utils/alert";
 import { dateInLongFormat } from "@/lib/utils/common";
 import { FetchBackendAPI } from "@/lib/api/backend-api";
-import { APICacheContext } from "@/lib/contexts/api-cache-context";
-import { useContext } from "react";
+
 
 const inputBoxes = [
   { label: "Prize", type: "number", placeholder: "500", name: "prizePool" },
@@ -23,7 +22,6 @@ const inputBoxes = [
 
 const AddTournamentForm = ({ onClose, refreshData}) => {
   const [loading, setLoading] = React.useState(false);
-  const { setCache } = useContext(APICacheContext);
   const handleSubmit = async (e) => {
     setLoading(true);
   e.preventDefault();
@@ -76,12 +74,7 @@ const AddTournamentForm = ({ onClose, refreshData}) => {
 
 
     if (response.ok) {
-      const responseData = await response.data;
-      // Cache the tournament data using context-based caching
-      setCache('upcomingTournament', responseData, 3600000); // 1 hour TTL
       successMessage("Tournament created successfully!");
-      // console.log(response);
-      // Reset form or redirect
       e.target.reset();
       if (refreshData) refreshData();
       setTimeout(() => {

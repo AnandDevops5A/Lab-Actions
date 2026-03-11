@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, useContext, useMemo } from "react";
 import { getJoinersByTournamentIdList } from "../../lib/api/backend-api";
-import { Trophy, Users, Swords, Gamepad2 } from "lucide-react";
+import { Trophy, Users, Swords } from "lucide-react";
 import { ThemeContext } from "../../lib/contexts/theme-context";
 import { fetchUpcomingTournament } from "@/lib/utils/common";
 import { UserContext } from "@/lib/contexts/user-context";
@@ -140,7 +140,11 @@ const UpcomingMatches = () => {
 
     const fetchJoinerCounts = async () => {
       try {
-        const tournamentIds = tournaments.map((t) => t.id);
+        let tournamentIds = tournaments.map((t) => t.id);
+        if(tournamentIds.length === 0) return;
+        //convert tournament id to list of string
+        tournamentIds = tournamentIds.map(id => String(id));
+        //  console.log(tournamentIds)
         const joinersRes = await getJoinersByTournamentIdList(tournamentIds);
 
         if (joinersRes.ok && isMounted) {
@@ -164,8 +168,6 @@ const UpcomingMatches = () => {
     };
   }, [tournaments, userJoinedTournaments]);
 
-  // console.table("userJoinedTournaments:", userJoinedTournaments);
-  // console.log(typeof userJoinedTournaments, Array.isArray(userJoinedTournaments));
   const userJoinedTournamentNames = useMemo(() => {
     // Defensive check to ensure we have an array before mapping
     if (( userJoinedTournaments && Array.isArray(userJoinedTournaments) && userJoinedTournaments.length > 0)) {
@@ -174,7 +176,6 @@ const UpcomingMatches = () => {
     }
     return [];
   }, [userJoinedTournaments]);
-  // console.log("userJoinedTournamentNames:", userJoinedTournamentNames);
 
 
   return (

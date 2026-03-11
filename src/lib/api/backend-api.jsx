@@ -1,25 +1,24 @@
 "use client";
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, use, useRef } from "react";
 import axios from "axios";
 import { UserContext } from "@/lib/contexts/user-context"
 import { APICacheContext } from "@/lib/contexts/api-cache-context"
 import { checkRateLimit, ENDPOINT_RATE_LIMITS, DEFAULT_RATE_LIMIT } from "@/lib/utils/rate-limiter"
-import { use } from "react";
 import { getSecureCookie } from "@/app/api/httpcookies/cookiesManagement";
 import LZString from "lz-string";
 
-const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL) || "http://localhost:8082";
+const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL) ;
 const MAX_RETRIES = 2;
 const RETRY_DELAY = 1000; // ms
 
 // Endpoints that should NOT be cached (sensitive data, authentication, etc.)
-const NO_CACHE_ENDPOINTS = [
+const NO_CACHE_ENDPOINTS = new Set([
   "users/verify",      // Login - returns tokens
   "users/register",    // Registration - sensitive data
   "users/resetPassword", // Password reset
   "users/confirm-reset", // Confirm password reset
   "users/updatePassword", // Password updates
-];
+]);
 
 /**
  * Generic fetcher with retry logic, timeout, rate limiting, and context caching
@@ -34,7 +33,7 @@ const createFetcher = (cacheContext, explicitToken = null) => {
 
     // Get token from context - but skip for authentication endpoints
     let token = null;
-    if (!NO_CACHE_ENDPOINTS.includes(endpoint) && typeof window !== 'undefined') {
+    if (!NO_CACHE_ENDPOINTS.has(endpoint) && typeof window !== 'undefined') {
       try {
         // Fallback: Try to read from cookie if not provided explicitly
         const cookieRes = await getSecureCookie("currentUser");
@@ -77,7 +76,7 @@ const createFetcher = (cacheContext, explicitToken = null) => {
 
     // Check cache for GET requests
     let cacheKey = null;
-    if (method === "GET" && !skipCache && cacheContext && !NO_CACHE_ENDPOINTS.includes(endpoint)) {
+    if (method === "GET" && !skipCache && cacheContext && !NO_CACHE_ENDPOINTS.has(endpoint)) {
       cacheKey = [url, method].join("|");
       const cached = cacheContext.getCache(cacheKey);
       if (cached) {
@@ -99,7 +98,7 @@ const createFetcher = (cacheContext, explicitToken = null) => {
         });
 
         // Cache successful GET responses
-        if (method === "GET" && cacheKey && cacheContext && !NO_CACHE_ENDPOINTS.includes(endpoint)) {
+        if (method === "GET" && cacheKey && cacheContext && !NO_CACHE_ENDPOINTS.has(endpoint)) {
           cacheContext.setCache(cacheKey, response.data, 300000); // 5 minute TTL
         }
 
@@ -136,10 +135,12 @@ export const useBackendAPI = (
   data = null,
   options = {}
 ) => {
-  const { skipCache = false, onError = null } = options;
+  const { skipCache = false, onError = null, revalidateInterval = 0 } = options;
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRevalidating, setIsRevalidating] = useState(false);
+  const isRevalidatingRef = useRef(false);
   
   let cacheContext = null;
   let userContext = null;
@@ -150,7 +151,7 @@ export const useBackendAPI = (
       cacheContext = use(APICacheContext);
       userContext = use(UserContext);
       // Only get token for non-auth endpoints
-      if (!NO_CACHE_ENDPOINTS.includes(endpoint)) {
+      if (!NO_CACHE_ENDPOINTS.has(endpoint)) {
         token = userContext?.user?.token || userContext?.user?.accessToken;
       }
     } catch (err) {
@@ -158,70 +159,95 @@ export const useBackendAPI = (
     }
   }
 
-  const refreshData = useCallback(async () => {
+  const performFetch = useCallback(async ({ forceRefresh = false, isBackground = false } = {}) => {
     if (!endpoint) {
       setError(new Error("Endpoint is required"));
-      setIsLoading(false);
+      if (!isBackground) setIsLoading(false);
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
+    if (isBackground) {
+      if (isRevalidatingRef.current) return;
+      isRevalidatingRef.current = true;
+      setIsRevalidating(true);
+    } else {
+      setIsLoading(true);
+      setError(null);
+    }
 
     try {
       const fetcher = createFetcher(cacheContext, token);
       const url = `${BASE_URL}/${endpoint}`;
-      const data_result = await fetcher(url, method, data, 10000, skipCache);
+      const data_result = await fetcher(url, method, data, 10000, forceRefresh || skipCache);
       setResult(data_result);
+      setError(null);
     } catch (err) {
       const errorObj = {
         status: err.status || 500,
         message: err.message || "Unknown error occurred",
       };
-      setError(errorObj);
-      onError?.(errorObj);
+      if (!isBackground) {
+        setError(errorObj);
+        onError?.(errorObj);
+      } else {
+        console.error(`Background revalidation for ${endpoint} failed:`, err.message);
+      }
     } finally {
-      setIsLoading(false);
+      if (isBackground) {
+        isRevalidatingRef.current = false;
+        setIsRevalidating(false);
+      } else {
+        setIsLoading(false);
+      }
     }
   }, [endpoint, method, data, cacheContext, token, skipCache, onError]);
 
+  const mutate = useCallback(() => performFetch({ forceRefresh: true, isBackground: false }), [performFetch]);
+
   // Load data on mount and when endpoint/method changes
   useEffect(() => {
-    refreshData();
+    performFetch({ forceRefresh: false, isBackground: false }); // Initial fetch
+
+    let intervalId = null;
+    if (revalidateInterval > 0) {
+      intervalId = setInterval(() => {
+        performFetch({ forceRefresh: true, isBackground: true });
+      }, revalidateInterval);
+    }
     
     // Clear cache on page visibility change (tab focus)
     const handleVisibilityChange = () => {
       if (!document.hidden && !skipCache) {
         // Optionally refresh when tab becomes visible
         // Uncomment line below if you want auto-refresh on tab focus
-        // refreshData();
+        // performFetch({ forceRefresh: true, isBackground: true });
       }
     };
 
     // Detect page reload/refresh - clear cache
     const handleBeforeUnload = () => {
-      if (cacheContext) {
-        cacheContext.clearCache();
-      }
+      cacheContext?.clearCache();
     };
 
     window.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
+      if (intervalId) clearInterval(intervalId);
       window.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [refreshData, skipCache, cacheContext]);
+  }, [performFetch, revalidateInterval, skipCache, cacheContext]);
 
   return {
     result,
     error,
     isLoading,
-    mutate: refreshData,
+    isRevalidating,
+    mutate,
     isEmpty: !result,
     isError: !!error,
-    refresh: refreshData, // Alias for mutate
+    refresh: mutate, // Alias for mutate
   };
 };
 
@@ -420,6 +446,7 @@ export const getJoinersByTournamentId = async (tournamentId) => {
 
 export const getJoinersByTournamentIdList = async (tournamentIds) => {
   //it return all the leaderboard related to this tournament list
+
   return await FetchBackendAPI(`leaderboard/getJoiners`, {
     method: "POST",
     data: tournamentIds,

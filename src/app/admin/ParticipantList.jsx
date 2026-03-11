@@ -7,7 +7,6 @@ import {
   Save,
   X,
   Users,
-  CheckCircle,
   Receipt,
 } from "lucide-react";
 import {
@@ -443,7 +442,7 @@ const ParticipantList = ({
                             <Edit3 className="w-4 h-4" />
                           </button>
 
-                          {!participant.isApproved ? (
+                          {/* {!participant.isApproved ? (
                             <button
                               onClick={() =>
                                 approveParticipant &&
@@ -469,7 +468,7 @@ const ParticipantList = ({
                             >
                               Approved
                             </div>
-                          )}
+                          )} */}
                         </div>
                       </div>
                     )}
