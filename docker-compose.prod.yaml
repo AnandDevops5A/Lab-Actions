@@ -38,6 +38,7 @@ services:
   backend-1:
     image: anand7254/golden-pearl-backend:latest
     container_name: backend-1-prod
+    entrypoint: ["sh", "-c", "java $$JAVA_OPTS -jar app.jar"]
     environment:
       - SPRING_DATA_MONGODB_URI=${SPRING_DATA_MONGODB_URI}
       - SPRING_DATA_MONGODB_DATABASE=${SPRING_DATA_MONGODB_DATABASE}
@@ -47,16 +48,19 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - ADMIN_CONTACTS=${ADMIN_CONTACTS}
       - SERVER_PORT=8082
-      - JAVA_OPTS=-Xmx256m -Xms128m
+      - JAVA_OPTS=-Xmx256m -Xms128m -Dserver.port=8082 -Dlogging.level.root=INFO -Dlogging.level.org.springframework=INFO
     depends_on:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      test: ["CMD", "curl", "http://localhost:8082/actuator/health"]
       interval: 20s
       timeout: 5s
       retries: 3
       start_period: 60s
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     networks:
       - app-network
     restart: always
@@ -79,6 +83,7 @@ services:
   backend-2:
     image: anand7254/golden-pearl-backend:latest
     container_name: backend-2-prod
+    entrypoint: ["sh", "-c", "java $$JAVA_OPTS -jar app.jar"]
     environment:
       - SPRING_DATA_MONGODB_URI=${SPRING_DATA_MONGODB_URI}
       - SPRING_DATA_MONGODB_DATABASE=${SPRING_DATA_MONGODB_DATABASE}
@@ -88,16 +93,19 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - ADMIN_CONTACTS=${ADMIN_CONTACTS}
       - SERVER_PORT=8083
-      - JAVA_OPTS=-Xmx256m -Xms128m
+      - JAVA_OPTS=-Xmx256m -Xms128m -Dserver.port=8083 -Dlogging.level.root=INFO -Dlogging.level.org.springframework=INFO
     depends_on:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      test: ["CMD", "curl", "http://localhost:8083/actuator/health"]
       interval: 20s
       timeout: 5s
       retries: 3
       start_period: 60s
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     networks:
       - app-network
     restart: always

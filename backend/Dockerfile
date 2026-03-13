@@ -23,6 +23,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:8082/actuator/health || exit 1
 
 # SMOOTH PERFORMANCE FIX: Added JVM Memory Options
-# -Xmx512m: Maximum 512MB RAM use karega
-# -Xms256m: Start 256MB se karega
-ENTRYPOINT ["java", "-Xmx512m", "-Xms256m", "-jar", "app.jar"]
+# Use JAVA_OPTS environment variable for flexible configuration
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
