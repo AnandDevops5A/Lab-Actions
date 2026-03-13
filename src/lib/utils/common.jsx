@@ -1,6 +1,7 @@
 import LZString from 'lz-string';
 import { errorMessage } from "./alert";
 import {
+  getLastTournamentTopPlayers,
   getUpcomingTournament,
   getUserTournamentDetails,
 } from "../api/backend-api";
@@ -303,5 +304,24 @@ export const fetchUpcomingTournament = async () => {
   }
 };
  
-
+export const loadLastTournamentTopPlayers = async () => {
+  try {
+    const cacheKey = "lastTournamentTopPlayers";
+    const cacheRes = simpleGetCache(cacheKey);
+    if (cacheRes) {
+      return cacheRes;
+    } else {
+      const response = await getLastTournamentTopPlayers();
+      if (response.ok) {
+        simpleSetCache(cacheKey, response.data, 300); // Cache for 5 minutes
+      if (response.status === 200) {
+        return response.data;
+      }
+      }
+      return null;
+    }  } catch (error) {
+    console.error("Error fetching last tournament top players:", error);
+    return null;
+  }
+};
               

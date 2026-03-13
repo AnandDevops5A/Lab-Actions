@@ -388,26 +388,59 @@ public class LeaderboardService {
         return "Joiners deleted successfully";
     }
 
-    public Object getLastTournamentTopPlayers() {
+    @Transactional
+    @Cacheable(value = "lastTournamentTopPlayers", sync = true)
+    public Map<String, Object> getLastTournamentTopPlayers() {
+
         TournamentDTO lastTournament = tournamentService.getLastTournament();
+        Map<String, Object> response = new HashMap<>();
+
         if (lastTournament == null) {
-            return new ArrayList<>();
+            response.put("tournament", null);
+            response.put("players", Collections.emptyList());
+            return response;
         }
-        List<LeaderBoard> topPlayers = leaderboardRepository.findTop5ByTournamentIdOrderByRankAsc(
-                lastTournament.getId());
+        response.put("tournament", lastTournament);
 
-        return topPlayers.stream().map(player -> {
-            User user = userService.findUserById(player.getUserId());
-            if (user != null) {
-                Map<String, Object> playerDetails = new HashMap<>();
-                playerDetails.put("id", user.getId());
-                playerDetails.put("name", user.getUsername());
-                playerDetails.put("rank", player.getRank());
-                playerDetails.put("score", player.getScore());
-                return playerDetails;
-            }
-            return null;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        List<LeaderBoard> topPlayers = leaderboardRepository
+                .findTop5ByTournamentIdOrderByRankAsc(lastTournament.getId());
+
+        if (topPlayers == null || topPlayers.isEmpty()) {
+            response.put("players", Collections.emptyList());
+            return response;
+        }
+
+        List<String> userIds = topPlayers.stream()
+                .map(LeaderBoard::getUserId)
+                .collect(Collectors.toList());
+
+        // Fetch users once
+        List<User> users = userService.getUsersByIds(userIds);
+
+        // Convert list to map for fast lookup
+        Map<String, User> userMap = users.stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
+
+        List<Map<String, Object>> playerDetailsList = topPlayers.stream()
+                .map(player -> {
+                    User user = userMap.get(player.getUserId());
+                    if (user == null)
+                        return null;
+
+                    Map<String, Object> playerDetails = new HashMap<>();
+                    playerDetails.put("id", user.getId());
+                    playerDetails.put("name", user.getUsername());
+                    playerDetails.put("rank", player.getRank());
+                    playerDetails.put("winAmount", player.getWinAmount());
+                    playerDetails.put("score", player.getScore());
+                    playerDetails.put("img", "https://api.dicebear.com/8.x/pixel-art/svg?seed=" + user.getUsername());
+
+                    return playerDetails;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        response.put("players", playerDetailsList);
+        return response;
     }
-
 }

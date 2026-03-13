@@ -78,7 +78,12 @@ public class ReviewController {
 
     @GetMapping("/test")
     public String testEndpoint() {
-        return "ReviewController is working!";
+        //return frontend url from environment variables with success message
+        String frontendUrl = System.getenv("FRONTEND_URL");
+       if (frontendUrl == null || frontendUrl.isEmpty()) {
+            return "Frontend URL not configured";
+        }
+        return "Backend is working! Frontend URL: " + frontendUrl;
     }
 
 }
