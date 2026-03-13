@@ -2,6 +2,7 @@ package com.golden_pearl.backend.Services;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,9 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import com.golden_pearl.backend.DRO.DeleteJoinersRequestDRO;
 import com.golden_pearl.backend.DRO.LeaderboardRegisterReceiveData;
 import com.golden_pearl.backend.DTO.TournamentDTO;
 import com.golden_pearl.backend.DTO.TournamentWithLeaderboard;
@@ -26,9 +25,6 @@ import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.Repository.LeaderboardRepository;
 import com.golden_pearl.backend.errors.ResourceNotFoundException;
-
-import jakarta.validation.Valid;
-
 import com.golden_pearl.backend.common.General;
 
 @Service

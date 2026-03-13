@@ -1,78 +1,188 @@
-version: '3.8'
+version: '3.9'
 
 services:
-  # Nginx acts as a reverse proxy, and is the only service exposed to the internet.
-  nginx:
-    image: nginx:1.25
-    ports:
-      - "80:80"
-      - "443:443" # Enable for HTTPS
-    volumes:
-      # Mount the production Nginx configuration
-      - ./nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
-      # Mount SSL certificates for HTTPS
-      # - /path/to/your/certs:/etc/nginx/certs:ro
-    depends_on:
-      - frontend
-      - backend
-    networks:
-      - app-network
-
-  frontend:
-    # Use a specific, versioned image from your container registry
-    image: your-registry/lab-actions-frontend:1.0.1
-    restart: always
-    environment:
-      # This should be set to your backend's public API endpoint.
-      # It's often best to build this into the image, but can be set here.
-      - NEXT_PUBLIC_API_URL=https://app.example.com/api
-    networks:
-      - app-network
-    # No ports are exposed directly to the host machine.
-
-  backend:
-    # Use a specific, versioned image from your container registry
-    image: your-registry/lab-actions-backend:1.0.1
-    restart: always
-    environment:
-      # These secrets MUST be injected by your deployment environment (e.g., EC2 user data, ECS secrets, etc.).
-      # The ${VAR} syntax reads from the host's environment variables.
-      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/labdb?authSource=admin
-      - SPRING_DATA_MONGODB_DATABASE=labdb
-      - MAIL_USERNAME=${MAIL_USERNAME}
-      - MAIL_PASSWORD=${MAIL_PASSWORD}
-      - FRONTEND_URL=https://app.example.com
-      - JAVA_TOOL_OPTIONS=-Xms256m -Xmx512m
-    depends_on:
-      - mongo
-      - redis
-    networks:
-      - app-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  mongo:
-    image: mongo:6.0
-    restart: always
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
-    volumes:
-      - mongo-data:/data/db
-    networks:
-      - app-network
-
+  # ====== 1. REDIS SERVICE ======
+  # In-memory caching layer optimized for production
   redis:
     image: redis:7.0-alpine
-    restart: always
+    container_name: redis-container-prod
+    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru --tcp-keepalive 300
+    user: redis
     networks:
       - app-network
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 20s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.15'
+          memory: 150M
+        reservations:
+          cpus: '0.05'
+          memory: 80M
+    volumes:
+      - ./redis-data:/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  # ====== 2. BACKEND SERVICE - INSTANCE 1 ======
+  # Primary backend with port 8082
+  backend-1:
+    image: anand7254/golden-pearl-backend:latest
+    container_name: backend-1-prod
+    environment:
+      - SPRING_DATA_MONGODB_URI=${SPRING_DATA_MONGODB_URI}
+      - SPRING_DATA_MONGODB_DATABASE=${SPRING_DATA_MONGODB_DATABASE}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - FRONTEND_URL=${FRONTEND_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_CONTACTS=${ADMIN_CONTACTS}
+      - SERVER_PORT=8082
+      - JAVA_OPTS=-Xmx256m -Xms128m
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    networks:
+      - app-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 250M
+        reservations:
+          cpus: '0.1'
+          memory: 150M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ====== 3. BACKEND SERVICE - INSTANCE 2 ======
+  # Secondary backend with port 8083
+  backend-2:
+    image: anand7254/golden-pearl-backend:latest
+    container_name: backend-2-prod
+    environment:
+      - SPRING_DATA_MONGODB_URI=${SPRING_DATA_MONGODB_URI}
+      - SPRING_DATA_MONGODB_DATABASE=${SPRING_DATA_MONGODB_DATABASE}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - FRONTEND_URL=${FRONTEND_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_CONTACTS=${ADMIN_CONTACTS}
+      - SERVER_PORT=8083
+      - JAVA_OPTS=-Xmx256m -Xms128m
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    networks:
+      - app-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 250M
+        reservations:
+          cpus: '0.1'
+          memory: 150M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ====== 4. CERTBOT SERVICE ======
+  # Automatic SSL certificate management with Let's Encrypt
+  certbot:
+    image: certbot/certbot:latest
+    container_name: certbot-prod
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt
+      - ./letsencrypt:/var/lib/letsencrypt
+      - ./nginx/certs:/etc/nginx/certs
+    command: certonly --webroot --webroot-path=/var/www/certbot --email your-email@example.com --agree-tos --no-eff-email -d your-domain.com
+    networks:
+      - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 50M
+        reservations:
+          cpus: '0.05'
+          memory: 25M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ====== NGINX REVERSE PROXY & LOAD BALANCER ======
+  nginx:
+    image: nginx:1.25
+    container_name: nginx-proxy-prod
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.prod.conf:/etc/nginx/conf.d/default.conf
+      - ./cache:/var/cache/nginx
+      - ./letsencrypt:/etc/letsencrypt:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - ./certbot-webroot:/var/www/certbot:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      - backend-1
+      - backend-2
+    networks:
+      - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 50M
+        reservations:
+          cpus: '0.05'
+          memory: 25M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
-  mongo-data:
+  redis-data:
+    driver: local
 
 networks:
   app-network:
