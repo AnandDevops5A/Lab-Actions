@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, memo, useContext } from "react";
 import { Lock, Eye, EyeOff, PhoneCall, Loader2, Mail} from "lucide-react";
+import { useSession, signIn, signOut } from "next-auth/react"
 import { errorMessage, successMessage } from "../../lib/utils/alert";
 import { FetchBackendAPI } from "../../lib/api/backend-api";
 import { UserContext } from "../../lib/contexts/user-context";
@@ -9,7 +10,6 @@ import { useRouter } from "next/navigation";
 import LZString from "lz-string";
 import { setSecureCookie } from "../api/httpcookies/cookiesManagement";
 
-import { signIn } from 'next-auth/react';
 const Login = memo(({ onSwitch, isDarkMode }) => {
   const contactRef = useRef(null);
   const accessKeyRef = useRef(null);
@@ -216,7 +216,7 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
         </div>
 
         {/* Google Sign-in Button */}
-        <button
+        {/* <button
           type="button"
           disabled={loading}
           className="btn relative w-full overflow-hidden rounded-lg px-6 py-3 font-extrabold text-lg bg-red-500 text-white shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:ring-offset-gray-950 flex items-center justify-center"
@@ -226,7 +226,7 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
           <span className={`${isDarkMode ? "text-slate-100" : "text-black"}`}>
             {loading ? "Signing in..." : "Sign In with Google"}
           </span>
-        </button>
+        </button> */}
 
 
         {/* Switch to Signup */}
