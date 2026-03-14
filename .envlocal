@@ -1,11 +1,11 @@
 
-SPRING_DATA_MONGODB_URI=mongodb+srv://anandorbique5a_db_user:seNUhQFu4h5Fjr8x@cluster0.349xea4.mongodb.net/?appName=golden_pearl_db"
+SPRING_DATA_MONGODB_URI="mongodb+srv://anandorbique5a_db_user:seNUhQFu4h5Fjr8x@cluster0.349xea4.mongodb.net/?appName=golden_pearl_db"
 SPRING_DATA_MONGODB_DATABASE=golden_pearl_dev
 FRONTEND_URL=http://localhost:3000
 MONGO_ROOT_USER=anand
 MONGO_ROOT_PASSWORD=secret
 MONGO_DB_NAME=golden_pearl_db
 MAIL_USERNAME="anandorbique5a@gmail.com"
-MAIL_PASSWORD="ajiw gkua dmgc cvid"
+MAIL_PASSWORD="tbvf sxom vowb fptp  "
 JWT_SECRET="QSpsvYYNpsFVuDakwdbcmRxaxENamMAj"
 ADMIN_CONTACTS="917254831884,7254831884"
