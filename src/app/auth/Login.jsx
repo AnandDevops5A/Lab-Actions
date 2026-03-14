@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, memo, useContext } from "react";
-import { Lock, Eye, EyeOff, PhoneCall, Loader2 } from "lucide-react";
+import { Lock, Eye, EyeOff, PhoneCall, Loader2, Mail} from "lucide-react";
 import { errorMessage, successMessage } from "../../lib/utils/alert";
 import { FetchBackendAPI } from "../../lib/api/backend-api";
 import { UserContext } from "../../lib/contexts/user-context";
@@ -9,12 +9,13 @@ import { useRouter } from "next/navigation";
 import LZString from "lz-string";
 import { setSecureCookie } from "../api/httpcookies/cookiesManagement";
 
+import { signIn } from 'next-auth/react';
 const Login = memo(({ onSwitch, isDarkMode }) => {
   const contactRef = useRef(null);
   const accessKeyRef = useRef(null);
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { setUser,MALIK,refreshUserTournaments } = useContext(UserContext);
+  const { setUser, MALIK, refreshUserTournaments } = useContext(UserContext);
   const router = useRouter();
 
   const handleLoginError = (error) => {
@@ -108,7 +109,7 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
   }
 
   return (
-    <div className="w-full ">
+    <div className="w-full max-h-screen overflow-auto">
       {/* Aggressive Cyberpunk Heading */}
       <div className="px-4 py-6 text-center">
         <h1
@@ -123,8 +124,8 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
       </div>
 
       {/* Form Start */}
-      <form
-        onSubmit={handleSubmit}
+      <div className="overflow-y-auto"> <form
+        // onSubmit={handleSubmit}
         className="space-y-4 p-4"
         aria-describedby="login-error"
       >
@@ -214,6 +215,20 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
           </button>
         </div>
 
+        {/* Google Sign-in Button */}
+        <button
+          type="button"
+          disabled={loading}
+          className="btn relative w-full overflow-hidden rounded-lg px-6 py-3 font-extrabold text-lg bg-red-500 text-white shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:ring-offset-gray-950 flex items-center justify-center"
+          onClick={() => signIn('google')}
+        >
+          <Mail className="w-5 h-5 mr-2" />
+          <span className={`${isDarkMode ? "text-slate-100" : "text-black"}`}>
+            {loading ? "Signing in..." : "Sign In with Google"}
+          </span>
+        </button>
+
+
         {/* Switch to Signup */}
         <p className="mt-4 text-sm text-gray-300 text-center">
           New here?{" "}
@@ -225,10 +240,11 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
             Register Me 😊
           </span>
         </p>
-      </form>
+      </form></div>
     </div>
   );
 });
+
 
 Login.displayName = "Login";
 export default Login;

@@ -141,7 +141,7 @@ export default function Page() {
               ? "bg-black/30 neon-glow-frame"
               : "bg-white/30 shadow-slate-500 shadow-inner"
           } transition-all 
-          duration-700 ease-in-out rounded-xl p-3 min-h-[420px]`}
+          duration-700 ease-in-out rounded-xl p-3 min-h-[450px]`}
         >
           <div ref={container} className="relative w-full h-full">
             <div className="absolute top-0 left-0 w-full">
