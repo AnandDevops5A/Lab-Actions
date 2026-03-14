@@ -7,7 +7,7 @@ import { checkRateLimit, ENDPOINT_RATE_LIMITS, DEFAULT_RATE_LIMIT } from "@/lib/
 import { getSecureCookie } from "@/app/api/httpcookies/cookiesManagement";
 import LZString from "lz-string";
 
-const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL) ;
+const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL) || "http://52.64.152.180:8082" ;
 const MAX_RETRIES = 2;
 const RETRY_DELAY = 1000; // ms
 
