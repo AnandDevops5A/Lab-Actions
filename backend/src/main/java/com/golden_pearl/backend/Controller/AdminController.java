@@ -14,7 +14,7 @@ import com.golden_pearl.backend.Services.AdminService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
 @RateLimiter(name = "apiRateLimiter")
 public class AdminController {
 

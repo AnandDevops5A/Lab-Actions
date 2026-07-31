@@ -26,7 +26,7 @@ import com.golden_pearl.backend.errors.ResourceNotFoundException;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 
 @RestController
-@RequestMapping("/leaderboard")
+@RequestMapping("/api/leaderboard")
 @RateLimiter(name = "apiRateLimiter")
 public class LeaderboardController {
 

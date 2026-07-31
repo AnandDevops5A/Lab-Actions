@@ -27,8 +27,7 @@ public class TournamentService {
 
     private final TournamentRepository tournamentRepository;
     private static final Logger logger = LoggerFactory.getLogger(TournamentService.class);
-    
-   
+
     private final General general;
 
     // constructor
@@ -66,10 +65,15 @@ public class TournamentService {
     })
     public List<TournamentDTO> addTournament(Tournament tournamentDetails) {
         // The startDateTime should be set in the request body by the client
-        if (tournamentDetails == null)
+        try {
+            if (tournamentDetails == null)
+                return new ArrayList<>();
+            tournamentRepository.save(tournamentDetails);
+            return getUpcomingTournaments();
+        } catch (Exception e) {
+            logger.error("Failed to add tournament: {}", e.getMessage());
             return new ArrayList<>();
-        tournamentRepository.save(tournamentDetails);
-        return getUpcomingTournaments();
+        }
     }
 
     // get tournament by id

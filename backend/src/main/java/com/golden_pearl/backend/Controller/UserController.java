@@ -11,6 +11,7 @@ import com.golden_pearl.backend.Services.UserService;
 import com.golden_pearl.backend.security.AdminPolicy;
 import com.golden_pearl.backend.security.JwtService;
 
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,18 +30,21 @@ import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 
 // @CrossOrigin("http://localhost:8082/")
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 @RateLimiter(name = "apiRateLimiter")
 public class UserController {
 
     private final UserService userService;
     private final JwtService jwtService;
     private final AdminPolicy adminPolicy;
+    private final MongoTemplate mongoTemplate;
 
-    public UserController(UserService userService, JwtService jwtService, AdminPolicy adminPolicy) {
+    public UserController(UserService userService, JwtService jwtService, AdminPolicy adminPolicy,
+            MongoTemplate mongoTemplate) {
         this.userService = userService;
         this.jwtService = jwtService;
         this.adminPolicy = adminPolicy;
+        this.mongoTemplate = mongoTemplate;
     }
 
     // find user by id
@@ -73,8 +77,7 @@ public class UserController {
                         user.getTotalWin(),
                         user.isActive(),
                         token,
-                        isAdmin
-                );
+                        isAdmin);
                 return ResponseEntity.ok(dto);
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -142,8 +145,16 @@ public class UserController {
 
     // testing purpose
     @GetMapping("/test")
-    public String testEndpoint() {
-        return "UserController is working!";
+    public String isDatabaseUp() {
+        String collectionName = "initCollection";
+
+        if (!mongoTemplate.collectionExists(collectionName)) {
+            mongoTemplate.createCollection(collectionName);
+            return "Database 'golden_pearl_db' created with collection: " + collectionName;
+        } else {
+            return "Database 'golden_pearl_db' already exists.";
+        }
     }
+    
 
 }

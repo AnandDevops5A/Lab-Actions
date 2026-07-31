@@ -24,10 +24,12 @@ import com.golden_pearl.backend.DRO.TournamentReceiveData;
 import com.golden_pearl.backend.DRO.TournamentUpdateDRO;
 import com.golden_pearl.backend.Models.User;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 
+@Slf4j
 @RestController
-@RequestMapping("/tournament")
+@RequestMapping("/api/tournament")
 @RateLimiter(name = "apiRateLimiter")
 public class TournamentController {
 
@@ -36,10 +38,12 @@ public class TournamentController {
     public TournamentController(TournamentService tournamentService) {
         this.tournamentService = tournamentService;
     }
+
     @GetMapping("/allIds")
     public ResponseEntity<List<String>> getAllTournamentsIds() {
         return ResponseEntity.ok(tournamentService.getAllTournamentsIds());
     }
+
     @GetMapping("/all")
     public ResponseEntity<List<TournamentDTO>> getAllTournaments() {
         List<TournamentDTO> tournaments = tournamentService.getAllTournaments();
@@ -47,16 +51,25 @@ public class TournamentController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<List<TournamentDTO>> addTournament(@Valid @RequestBody TournamentReceiveData tournamentDetails) {
-        Tournament readyTournament = new Tournament();
-        readyTournament.setTournamentName(tournamentDetails.tournamentName());
-        readyTournament.setPrizePool(tournamentDetails.prizePool());
-        readyTournament.setDateTime(tournamentDetails.dateTime());
-        readyTournament.setSlot(tournamentDetails.slot());
-        readyTournament.setPlatform(tournamentDetails.platform());
-        readyTournament.setDescription(tournamentDetails.description());
-        List<TournamentDTO> returnUpcoming = tournamentService.addTournament(readyTournament);
-        return ResponseEntity.status(201).body(returnUpcoming);
+    public ResponseEntity<List<TournamentDTO>> addTournament(
+            @Valid @RequestBody TournamentReceiveData tournamentDetails) {
+        try {
+            System.out.println("Received tournament details: " + tournamentDetails);
+            Tournament readyTournament = new Tournament();
+            readyTournament.setTournamentName(tournamentDetails.tournamentName());
+            readyTournament.setPrizePool(tournamentDetails.prizePool());
+            readyTournament.setDateTime(tournamentDetails.dateTime());
+            readyTournament.setSlot(tournamentDetails.slot());
+            readyTournament.setPlatform(tournamentDetails.platform());
+            readyTournament.setDescription(tournamentDetails.description());
+            // System.out.println("Ready tournament: " + readyTournament);
+            List<TournamentDTO> returnUpcoming = tournamentService.addTournament(readyTournament);
+            return ResponseEntity.status(201).body(returnUpcoming);
+        } catch (Exception e) {
+            log.error("Error occurred while adding tournament: {}", e.getMessage(), e);
+            // System.out.println("Error occurred while adding tournament" + e.getMessage());
+            return ResponseEntity.status(500).body(null);
+        }
     }
 
     // delete tournament by id
@@ -70,12 +83,12 @@ public class TournamentController {
             return ResponseEntity.badRequest().body("Tournament deletion failed...");
     }
 
-     // delete tournament by id
+    // delete tournament by id
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteTournaments(@RequestBody List<String> tournamentIds) {
         if (tournamentIds == null || tournamentIds.isEmpty())
             return ResponseEntity.badRequest().body("No tournament IDs provided for deletion");
-        if(tournamentService.deleteTournamentsByIds(tournamentIds))
+        if (tournamentService.deleteTournamentsByIds(tournamentIds))
             return ResponseEntity.ok("Tournament(s) deleted successfully");
         else
             return ResponseEntity.badRequest().body("Something went wrong");
@@ -122,7 +135,7 @@ public class TournamentController {
     @GetMapping("/{tournamentId}")
     public ResponseEntity<TournamentDTO> getTournamentById(@PathVariable String tournamentId) {
         try {
-            if (tournamentId == null || tournamentId.isEmpty()||!tournamentService.existsById(tournamentId)) {
+            if (tournamentId == null || tournamentId.isEmpty() || !tournamentService.existsById(tournamentId)) {
                 return ResponseEntity.badRequest().build();
             }
             TournamentDTO tournament = tournamentService.getTournamentDTOById(tournamentId);
@@ -139,7 +152,7 @@ public class TournamentController {
         return ResponseEntity.ok(tournaments);
     }
 
-    //get tournament which is going to start first
+    // get tournament which is going to start first
     @GetMapping("/next")
     public ResponseEntity<Tournament> getNextTournament() {
         Tournament tournament = tournamentService.getNextTournament();
@@ -148,24 +161,27 @@ public class TournamentController {
         }
         return ResponseEntity.ok(tournament);
     }
-    
-    //set link for specific tournament
+
+    // set link for specific tournament
     @PutMapping("/set-live-stream-link")
-    public ResponseEntity<String> setLiveStreamLink(@RequestBody TournamentLiveStreamLinkDRO tournamentLiveStreamLinkDRO) {
-        if(tournamentLiveStreamLinkDRO==null || tournamentLiveStreamLinkDRO.tournamentId()==null || tournamentLiveStreamLinkDRO.tournamentId().isEmpty() || tournamentLiveStreamLinkDRO.liveStreamLink()==null || tournamentLiveStreamLinkDRO.liveStreamLink().isEmpty()){
+    public ResponseEntity<String> setLiveStreamLink(
+            @RequestBody TournamentLiveStreamLinkDRO tournamentLiveStreamLinkDRO) {
+        if (tournamentLiveStreamLinkDRO == null || tournamentLiveStreamLinkDRO.tournamentId() == null
+                || tournamentLiveStreamLinkDRO.tournamentId().isEmpty()
+                || tournamentLiveStreamLinkDRO.liveStreamLink() == null
+                || tournamentLiveStreamLinkDRO.liveStreamLink().isEmpty()) {
             return ResponseEntity.badRequest().body("Invalid input: tournamentId and liveStreamLink are required");
         }
-         if(tournamentService.setLiveStreamLink(tournamentLiveStreamLinkDRO)){
+        if (tournamentService.setLiveStreamLink(tournamentLiveStreamLinkDRO)) {
             return ResponseEntity.ok("Live stream link set successfully");
-         }
+        }
         return ResponseEntity.status(500).body("Failed to set live stream link");
     }
 
     @GetMapping("/time")
-    public short getCurrentTime(){
+    public short getCurrentTime() {
         General general = new General();
         return general.getCurrentTime();
     }
-   
 
 }

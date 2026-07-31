@@ -38,38 +38,37 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers(
-                                "/actuator/health",
-                                "/users/register",
-                                "/users/verify",
-                                "/users/updatePassword",
-                                "/users/confirm-reset",
-                                "/review/all",
-                                "/review/user/**",
-                                "/review/test",
-                                "/users/test",
-                                "/tournament/next",
-                                "/leaderboard/getJoiners"
-                        ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/tournament/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/leaderboard/**").permitAll()
+                                "/api/actuator/health",
+                                "/api/users/register",
+                                "/api/users/verify",
+                                "/api/users/updatePassword",
+                                "/api/users/confirm-reset",
+                                "/api/review/all",
+                                "/api/review/user/**",
+                                "/api/tournament/next",
+                                "/api/leaderboard/getJoiners",
+                                "/api/review/test",
+                                "/api/users/test")
+                        .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/tournament/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/leaderboard/**").permitAll()
 
                         // Admin-only endpoints
                         .requestMatchers(
-                                "/admin/**",
-                                "/tournament/add",
-                                "/tournament/delete/**",
-                                "/tournament/update",
-                                "/tournament/saveAll",
-                                "/leaderboard/approve/**",
-                                "/leaderboard/update/**",
-                                "/leaderboard/updateRank",
-                                "/leaderboard/updateScore/**",
-                                "/review/admin-reply"
-                        ).hasRole("ADMIN")
+                                "/api/admin/data",
+                                "/api/tournament/add",
+                                "/api/tournament/delete/**",
+                                "/api/tournament/update",
+                                "/api/tournament/saveAll",
+                                "/api/leaderboard/approve/**",
+                                "/api/leaderboard/update/**",
+                                "/api/leaderboard/updateRank",
+                                "/api/leaderboard/updateScore/**",
+                                "/api/review/admin-reply")
+                        .hasRole("ADMIN")
 
                         // Everything else requires a valid token
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

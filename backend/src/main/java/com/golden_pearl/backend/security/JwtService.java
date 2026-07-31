@@ -24,17 +24,18 @@ public class JwtService {
     private final Duration ttl;
 
     public JwtService(
-            @Value("${JWT_SECRET:}") String jwtSecret,
-            @Value("${JWT_ISSUER:golden-pearl}") String issuer,
-            @Value("${JWT_TTL_SECONDS:86400}") long ttlSeconds
+            @Value("${jwt.secret}") String jwtSecret,
+            @Value("${jwt.issuer:golden-pearl}") String issuer,
+            @Value("${jwt.ttl.seconds:86400}") long ttlSeconds
     ) {
         if (jwtSecret == null || jwtSecret.isBlank()) {
-            throw new IllegalStateException("JWT_SECRET must be set (env var).");
+            throw new IllegalStateException("JWT_SECRET must be set (properties/env).");
         }
         // JJWT HMAC requires sufficiently long keys (32+ bytes is a safe baseline).
         if (jwtSecret.getBytes(StandardCharsets.UTF_8).length < 32) {
             throw new IllegalStateException("JWT_SECRET is too short. Use at least 32+ characters (recommended: 64).");
         }
+
         this.signingKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
         this.issuer = issuer;
         this.ttl = Duration.ofSeconds(ttlSeconds);
@@ -66,4 +67,3 @@ public class JwtService {
                 .getPayload();
     }
 }
-
