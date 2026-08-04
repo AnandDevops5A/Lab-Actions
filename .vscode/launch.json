@@ -7,7 +7,7 @@
             "request": "launch",
             "mainClass": "com.golden_pearl.backend.BackendApplication",
             "projectName": "backend",
-            "envFile": "${workspaceFolder}/.envlocal"
+            // "envFile": "${workspaceFolder}/.envlocal"
         }
     ]
 }

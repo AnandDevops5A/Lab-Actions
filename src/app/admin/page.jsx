@@ -115,8 +115,8 @@ const AdminPage = () => {
   );
 
   const handleSetInterval = useCallback(() => {
-    const newInterval = parseInt(customIntervalInput, 10);
-    if (!isNaN(newInterval) && newInterval > 0) {
+    const newInterval = Number.parseInt(customIntervalInput, 10);
+    if (!Number.isNaN(newInterval) && newInterval > 0) {
       setRevalidationInterval(newInterval * 1000);
       successMessage(`Refresh interval set to ${newInterval} seconds.`);
     } else {
@@ -198,12 +198,12 @@ const AdminPage = () => {
       monthlyData[monthKey].registrations += 1;
     });
 
-    const sortedKeys = Object.keys(monthlyData).sort();
+    const sortedKeys = Object.keys(monthlyData).sort((a, b) => a.localeCompare(b));
 
     const labels = sortedKeys.map((key) => {
       const year = key.substring(0, 4);
       const month = key.substring(4, 6);
-      const date = new Date(parseInt(year), parseInt(month) - 1);
+      const date = new Date(Number.parseInt(year), Number.parseInt(month) - 1);
       return date.toLocaleDateString("default", {
         month: "short",
         year: "numeric",
@@ -348,6 +348,8 @@ const AdminPage = () => {
                 </div>
                 <button
                   onClick={handleSetInterval}
+                  // disable this button if the custom interval is 0 or negative or if the custom interval is equal to the current revalidation interval
+                  disabled={!customIntervalInput || customIntervalInput == (revalidationInterval / 1000)}
                   className="bg-linear-to-r from-orange-500 to-red-500 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg hover:shadow-orange-500/50 hover:scale-110 transition text-sm md:text-base flex items-center justify-center"
                 >
                   Save <Clock className="w-4 h-4 ml-2" />

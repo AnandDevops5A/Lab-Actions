@@ -194,16 +194,42 @@ export const FormatDate = ({ dateNum }) => {
   );
 };
 
-export const dateInLongFormat = (date, time) => {
-  // Split date into parts
-  const [year, month, day] = date.split("-");
+     //old method
+// export const dateInLongFormat = (date, time) => {
+//   // Split date into parts
+//   const [year, month, day] = date.split("-");
 
-  // Remove colon from time
-  const timeFormatted = time.replace(":", "");
+//   // Remove colon from time
+//   const timeFormatted = time.replace(":", "");
 
-  // Concatenate into desired format
-  return `${year}${month}${day}${timeFormatted}`;
+//   // Concatenate into desired format
+//   return `${year}${month}${day}${timeFormatted}`;
+// };
+
+    //new method
+export const dateInLongFormat = (dateStr, timeStr) => {
+  if (!dateStr || !timeStr) return null;
+
+  // 1. Remove all spaces ("07 - 08 - 2026" -> "07-08-2026")
+  const cleanDate = dateStr.replaceAll(" ", "");
+  const cleanTime = timeStr.replaceAll(" ", "");
+
+  // 2. Split DD-MM-YYYY
+  const parts = cleanDate.split("-");
+  
+  let isoDate = cleanDate;
+  // If format is DD-MM-YYYY, convert to YYYY-MM-DD
+  if (parts.length === 3 && parts[0].length === 2 && parts[2].length === 4) {
+    isoDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+  }
+
+  // 3. Create ISO string: "2026-08-07T13:00:00" and get epoch millis
+  const timestamp = new Date(`${isoDate}T${cleanTime}:00`).getTime();
+
+  return Number.isNaN(timestamp) ? null : timestamp;
 };
+
+
 
 export async function generateRandomNumberForQR(
   tournamentId,

@@ -72,7 +72,6 @@ const AddTournamentForm = ({ onClose, refreshData}) => {
       data: data,
     });
 
-
     if (response.ok) {
       successMessage("Tournament created successfully!");
       e.target.reset();
@@ -81,6 +80,7 @@ const AddTournamentForm = ({ onClose, refreshData}) => {
         onClose(true);
       }, 1000);
     } else {
+      console.log(response)
       errorMessage("Failed to create tournament");
       
     }

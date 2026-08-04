@@ -1,6 +1,7 @@
 package com.golden_pearl.backend.common;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,12 +26,12 @@ public class General {
 
     public long getCurrentDateTime() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
-        return Long.parseLong(LocalDateTime.now().format(formatter));
+        return Long.parseLong(LocalDateTime.now(ZoneId.of("Asia/Kolkata")).format(formatter));
     }
 
     public Short getCurrentTime() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmm");
-        return Short.parseShort(LocalDateTime.now().format(formatter));
+        return Short.parseShort(LocalDateTime.now(ZoneId.of("Asia/Kolkata")).format(formatter));
     }
 
 
@@ -56,7 +57,7 @@ public class General {
                 .stream()
                 .sorted(Map.Entry.comparingByValue()) // ascending order
                 .map(Map.Entry::getKey) // extract keys
-                .collect(Collectors.toList()); // collect into List
+                .toList(); // collect into List
 
     }
 

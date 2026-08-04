@@ -35,12 +35,12 @@ const cardStyles = [
 const parseTournamentDate = (dateVal) => {
   if (!dateVal) return null;
   const dateStr = dateVal.toString();
-  if (dateStr.length === 12 && !isNaN(dateStr)) {
-    const year = parseInt(dateStr.slice(0, 4));
-    const month = parseInt(dateStr.slice(4, 6)) - 1;
-    const day = parseInt(dateStr.slice(6, 8));
-    const hour = parseInt(dateStr.slice(8, 10));
-    const minute = parseInt(dateStr.slice(10, 12));
+  if (dateStr.length === 12 && !Number.isNaN(dateStr)) {
+    const year = Number.parseInt(dateStr.slice(0, 4));
+    const month = Number.parseInt(dateStr.slice(4, 6)) - 1;
+    const day = Number.parseInt(dateStr.slice(6, 8));
+    const hour = Number.parseInt(dateStr.slice(8, 10));
+    const minute = Number.parseInt(dateStr.slice(10, 12));
     return new Date(year, month, day, hour, minute);
   }
   return new Date(dateVal);
@@ -52,11 +52,11 @@ const CountdownTimer = ({ targetDate, isDarkMode }) => {
   useEffect(() => {
     const calculateTimeLeft = () => {
       const target = parseTournamentDate(targetDate);
-      if (!target || isNaN(target.getTime())) {
+      if (!target || Number.isNaN(target.getTime())) {
         setTimeLeft("Date TBC");
         return;
       }
-      const difference = target.getTime() - new Date().getTime();
+      const difference = target.getTime() - Date.now();
 
       if (difference > 0) {
         const d = Math.floor(difference / (1000 * 60 * 60 * 24));
@@ -149,7 +149,7 @@ const UpcomingMatches = () => {
 
         if (joinersRes.ok && isMounted) {
           const counts = joinersRes.data.reduce((acc, joiner) => {
-            if (joiner && joiner.tournamentId) {
+            if (joiner?.tournamentId) {
               acc[joiner.tournamentId] = (acc[joiner.tournamentId] || 0) + 1;
             }
             return acc;

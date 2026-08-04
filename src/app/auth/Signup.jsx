@@ -125,7 +125,7 @@ const Signup = memo(({ onSwitch }) => {
       };
 
       const result = await onSubmit(payload);
-
+      // console.log(result)
       if (result.ok) {
         successMessage("Registration successful! Please login.");
         onSwitch?.("login");
