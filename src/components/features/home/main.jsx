@@ -15,6 +15,7 @@ const UpcomingMatches = dynamic(() => import("@/components/ui/upcoming-matches")
       <SkeletonTable />
     </div>
   ),
+  ssr: false, // Optional: disable server-side rendering for this component
 });
 
 const BannerSection = dynamic(() => import("./Banner"), {
@@ -26,7 +27,8 @@ const WinnerSection = dynamic(() => import("@/components/ui/winner"), {
     <div className="py-12">
       <SkeletonTable />
     </div>
-  ),
+  
+  ),ssr: false, // Optional: disable server-side rendering for this component
 });
 
 const Stats = dynamic(() => import("@/components/ui/stats"), {
@@ -34,7 +36,7 @@ const Stats = dynamic(() => import("@/components/ui/stats"), {
     <div className="py-12">
       <SkeletonTable />
     </div>
-  ),
+  ),ssr: false, // Optional: disable server-side rendering for this component
 });
 
 const ContactPage = dynamic(() => import("./contact-page"), {
@@ -43,7 +45,7 @@ const ContactPage = dynamic(() => import("./contact-page"), {
       <div className="w-full md:w-1/2"><SkeletonCard /></div>
       <div className="w-full md:w-1/2"><SkeletonCard /></div>
     </div>
-  ),
+  ),ssr: false, // Optional: disable server-side rendering for this component
 });
 
 const Footer = dynamic(() => import("../../layout/footer"), {

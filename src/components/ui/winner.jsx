@@ -1,90 +1,122 @@
 'use client'
 import React, { useContext } from 'react';
-import { Trophy, Star, CheckCircle } from 'lucide-react'; 
+import { Trophy, Star, CheckCircle } from 'lucide-react';
 import GamingBackground from './gaming-background';
 import { ThemeContext } from '@/lib/contexts/theme-context';
 
-const WinnerSection = () => {
-  // Array of achievements to map over
-  const { isDarkMode } = useContext(ThemeContext);
+/**
+ * Shares the token system introduced in Banner.jsx
+ * Dark  : void #0a0710  panel #150f26  cyan #00f0ff  magenta #ff2e6e  amber #ffb627
+ * Display : 'Chakra Petch'  |  Body : 'Inter'  |  Data/HUD : 'JetBrains Mono'
+ */
 
-  const achievements = [
+const WinnerSection = () => {
+  const { isdarkMode } = useContext(ThemeContext);
+  const isDark = !isdarkMode; // matches Banner's context polarity
+
+  const principles = [
     {
       icon: Trophy,
-      stat: 'Future Goals',
+      code: 'PROTOCOL_01',
       title: 'Community-Driven Tournaments',
       description: 'Our goal is to build the best tournament platform with you. Your participation and feedback shape our future.',
-      color: 'text-yellow-400',
+      accent: '#ffb627',
     },
     {
       icon: Star,
-      stat: 'Fair Play',
+      code: 'PROTOCOL_02',
       title: 'Commitment to Integrity',
       description: 'We are dedicated to ensuring a fair and competitive environment for all players. Together, we build trust.',
-      color: 'text-red-500',
+      accent: '#ff2e6e',
     },
     {
       icon: CheckCircle,
-      stat: 'Growing Rewards',
+      code: 'PROTOCOL_03',
       title: 'Bigger Prize Pools',
       description: 'As our community grows, so will the rewards. We are committed to offering exciting and valuable prizes.',
-      color: 'text-green-400',
+      accent: '#00f0ff',
     },
   ];
 
   return (
-    <section className="relative bg-gray-950 py-16 sm:py-24 overflow-hidden">
-      <GamingBackground isDarkMode={isDarkMode} />
+    <section
+      className={`relative py-16 sm:py-24 overflow-hidden ${isDark ? 'bg-[#0a0710] text-[#f1edf7]' : 'bg-[#f4f1fb] text-[#1a1330]'}`}
+      style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+    >
+      <GamingBackground isDarkMode={isDark} />
+
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Aggressive and Modern Headline */}
-        <div className="text-center mb-12 sm:mb-20  fadeup">
-          <p className="text-sm font-extrabold  tracking-widest text-yellow-600">
-            WE Will RISE ✨ TOGETHER 
-          </p>
-          <h2 className="mt-2 text-5xl sm:text-6xl md:text-7xl font-extrabold text-slate-100 leading-tight autoblur">
-            We Don&apos;t Just Compete. <p className="text-red-500">We Conquer.</p>
+
+        {/* Headline */}
+        <div className="text-center mb-14 sm:mb-20 section-fade">
+          <span
+            className={`inline-block text-[11px] uppercase tracking-[0.35em] mb-3 ${isDark ? 'text-[#00f0ff]' : 'text-[#007d91]'}`}
+            style={{ fontFamily: "'JetBrains Mono', monospace" }}
+          >
+            // Our_Creed
+          </span>
+          <h2
+            className="text-4xl sm:text-5xl md:text-6xl uppercase font-bold leading-[0.95]"
+            style={{ fontFamily: "'Chakra Petch', sans-serif" }}
+          >
+            We Don&apos;t Just Compete.
+            <br />
+            <span className={isDark ? 'text-[#ff2e6e]' : 'text-[#c4006a]'}>We Conquer.</span>
           </h2>
         </div>
 
-        {/* Achievement Grid */}
-        <div className=" grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 md:gap-12">
-          {achievements.map((achievement, index) => (
+        {/* Principle Cards */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 md:gap-6">
+          {principles.map((p, index) => (
             <div
               key={index}
-              className="fadeup bg-gray-900 border border-gray-800 p-8 rounded-xl shadow-2xl transition duration-300 transform hover:scale-[1.02] hover:shadow-red-900/50 relative overflow-hidden flex flex-col h-full"
+              className={`section-fade relative flex h-full flex-col overflow-hidden p-8 border-t-2 transition-transform duration-300 hover:-translate-y-1 ${
+                isDark ? 'bg-[#150f26] border-gray-800' : 'bg-white border-gray-200 shadow-sm'
+              }`}
+              style={{ borderTopColor: p.accent, animationDelay: `${index * 120}ms` }}
             >
-              {/* Vibrant Corner Accent */}
-              <span className={`absolute top-0 right-0 h-1/2 w-1/2 rounded-bl-full opacity-10 ${achievement.color.replace('text', 'bg')}`}></span>
-              
-                <achievement.icon className={`autorotate w-12 h-12 mb-4 ${achievement.color}`} />
-              
-              <p className={`text-[2rem] font-extrabold mb-2 min-h-20 ${achievement.color} drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}>
-                {achievement.stat}
-              </p>
-              
-              <h3 className="text-lg font-bold uppercase tracking-wider text-slate-100 mb-3 min-h-14 drop-shadow-md">
-                {achievement.title}
+              {/* corner brackets, echoing Banner's HUD motif */}
+              <div className="absolute top-3 right-3 w-3.5 h-3.5 border-t-2 border-r-2" style={{ borderColor: p.accent, opacity: 0.6 }} />
+
+              <div className="flex items-center justify-between mb-6">
+                <p.icon className="w-9 h-9" style={{ color: p.accent }} />
+                <span
+                  className={`text-[10px] tracking-[0.2em] ${isDark ? 'text-[#948dab]' : 'text-[#6b6280]'}`}
+                  style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                >
+                  {p.code}
+                </span>
+              </div>
+
+              <h3
+                className="text-xl font-bold uppercase tracking-wide mb-3"
+                style={{ fontFamily: "'Chakra Petch', sans-serif" }}
+              >
+                {p.title}
               </h3>
-              
-              <p className="text-slate-300 text-base grow drop-shadow-sm">
-                {achievement.description}
+
+              <p className={`text-sm leading-relaxed grow ${isDark ? 'text-[#948dab]' : 'text-[#6b6280]'}`}>
+                {p.description}
               </p>
             </div>
           ))}
         </div>
-        
-        {/* Call to Action (Aggressive) */}
-        {/* <div className="fadeup mt-16 sm:mt-24 text-center">
-          <a
-            href="#contact"
-            className=" inline-block px-12 py-4 text-lg font-extrabold uppercase tracking-wider text-slate-100 bg-red-600 rounded-lg shadow-xl hover:bg-red-700 transition duration-300 transform hover:-translate-y-1 ring-4 ring-red-600 ring-offset-4 ring-offset-gray-950"
-          >
-            Join the Ranks
-          </a>
-        </div> */}
-        
       </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        @keyframes section-fade-in {
+          from { opacity: 0; transform: translateY(14px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .section-fade {
+          animation: section-fade-in 0.6s ease-out both;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .section-fade { animation: none; }
+        }
+      `}} />
     </section>
   );
 };
