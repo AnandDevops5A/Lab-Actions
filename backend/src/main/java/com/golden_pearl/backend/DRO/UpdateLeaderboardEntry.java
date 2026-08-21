@@ -1,5 +1,7 @@
 package com.golden_pearl.backend.DRO;
 
-public record UpdateLeaderboardEntry(Integer rank, Integer investAmount, Integer winAmount) {
+import java.math.BigDecimal;
+
+public record UpdateLeaderboardEntry(Integer rank, BigDecimal investAmount, BigDecimal winAmount) {
 
 }

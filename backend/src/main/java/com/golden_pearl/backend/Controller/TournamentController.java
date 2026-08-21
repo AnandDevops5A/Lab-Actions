@@ -178,10 +178,6 @@ public class TournamentController {
         return ResponseEntity.status(500).body("Failed to set live stream link");
     }
 
-    @GetMapping("/time")
-    public short getCurrentTime() {
-        General general = new General();
-        return general.getCurrentTime();
-    }
+    
 
 }

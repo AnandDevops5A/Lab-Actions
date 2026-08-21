@@ -1,5 +1,6 @@
 package com.golden_pearl.backend.Services;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Collections;
@@ -88,7 +89,7 @@ public class LeaderboardService {
                 .tempEmail(registerData.tempEmail())
                 .transactionId(registerData.transactionId())
                 .gameId(registerData.gameId())
-                .time(general.getCurrentTime())
+                .time(general.getCurrentDateTime())
                 .isApproved(false) // Explicitly set default state if needed
                 .build();
 
@@ -232,7 +233,7 @@ public class LeaderboardService {
                     LeaderBoard newEntry = new LeaderBoard();
                     newEntry.setUserId(userId);
                     newEntry.setTournamentId(tournamentId);
-                    newEntry.setTime(general.getCurrentTime());
+                    newEntry.setTime(general.getCurrentDateTime());
                     newEntry.setIsApproved(true);
                     return newEntry;
                 })
@@ -293,8 +294,8 @@ public class LeaderboardService {
             @CacheEvict(value = "adminData", allEntries = true),
             @CacheEvict(value = "allLeaderboards", allEntries = true)
     })
-    public String updateLeaderboardEntry(String leaderboardId, Integer rank, Integer investAmount,
-            Integer winAmount) {
+    public String updateLeaderboardEntry(String leaderboardId, Integer rank, BigDecimal investAmount,
+            BigDecimal winAmount) {
         // Find the LeaderBoard entry
         LeaderBoard entry = leaderboardRepository.findById(leaderboardId)
                 .orElseThrow(() -> new ResourceNotFoundException("Leaderboard entry not found"));

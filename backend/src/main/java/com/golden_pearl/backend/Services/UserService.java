@@ -1,7 +1,9 @@
 package com.golden_pearl.backend.Services;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +11,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.golden_pearl.backend.DRO.ForgotPasswordDRO;
 import com.golden_pearl.backend.DRO.UserAuth;
@@ -44,10 +47,13 @@ public class UserService {
     public User findUserById(String id) {
         if (id == null)
             return null;
-        return userRepository.findById(id).orElse(null);
+        Optional<User> userOptional = userRepository.findByIdWithLoginTimelines(id);
+        return userOptional.isPresent() ? userOptional.get() : null;
+        
     }
 
     
+    @Transactional
     public User getUser(UserAuth userAuth) {
         Long contact = userAuth.contact();
         String accessKey = userAuth.accessKey();
@@ -57,15 +63,19 @@ public class UserService {
         }
 
         // Check for modern BCrypt match (Hash comparison)
-        User potentialUser = userRepository.findByContact(contact);
-        if (potentialUser != null && passwordEncoder.matches(accessKey, potentialUser.getAccessKey())) {
+        Optional<User> potentialUserOptional = userRepository.findByContactWithLoginTimelines(contact);
+        if (potentialUserOptional.isPresent() && passwordEncoder.matches(accessKey, potentialUserOptional.get().getAccessKey())) {
+            User potentialUser = potentialUserOptional.get();
             //add last login time
-            List<Long> loginTimeLines = potentialUser.getLoginTimeLines();
+            List<LocalDateTime> loginTimeLines = potentialUser.getLoginTimeLines();
             if (loginTimeLines == null) {
                 loginTimeLines = new ArrayList<>();
             }
             loginTimeLines.add(general.getCurrentDateTime());
             potentialUser.setLoginTimeLines(loginTimeLines);
+            if (potentialUser.getPlayerId() != null) {
+                potentialUser.getPlayerId().size();
+            }
             userRepository.save(potentialUser);
             return potentialUser;
         }
@@ -150,6 +160,8 @@ public class UserService {
             User readyUser = general.convertResponseToUser(user);
             // Hash the password before saving
             readyUser.setAccessKey(passwordEncoder.encode(readyUser.getAccessKey()));
+            readyUser.setJoiningDate(general.getCurrentDate());
+            readyUser.setLoginTimeLines(new ArrayList<>()); // Initialize loginTimeLines as an empty list
             userRepository.save(readyUser);
             return "User saved successfully";
         }
@@ -209,7 +221,7 @@ public class UserService {
             throw new IllegalArgumentException("Users list cannot be empty");
         } else {
             for (User user : users) {
-                user.setJoiningDate(general.getCurrentDateTime());
+                user.setJoiningDate(general.getCurrentDate());
             }
             return userRepository.saveAll(users);
             

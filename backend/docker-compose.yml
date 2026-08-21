@@ -22,39 +22,40 @@ services:
   #     - spring-boot-mongo-net
   #   restart: always
 
-  # --- Database: MongoDB ---
-  mongodb:
-    image: mongo:6.0
-    container_name: mongodb
+  # --- Database: PostgreSQL ---
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=anand
-      - MONGO_INITDB_ROOT_PASSWORD=secret
+      - POSTGRES_DB=golden_pearl_db
+      - POSTGRES_USER=anand
+      - POSTGRES_PASSWORD=secret
     ports:
-      - "27017:27017"
+      - "5432:5432"
     volumes:
-      - mongo-data:/data/db
+      - postgres-data:/var/lib/postgresql/data
     networks:
-      - spring-boot-mongo-net
+      - spring-boot-postgres-net
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U anand -d golden_pearl_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # --- Database Web GUI: Mongo Express ---
-  mongo-express:
-    image: mongo-express:1.0.0-alpha.4
-    container_name: mongo-express
+  
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
     restart: always
-    ports:
-      - "8081:8081"
     environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: anand
-      ME_CONFIG_MONGODB_ADMINPASSWORD: secret
-      ME_CONFIG_MONGODB_SERVER: mongodb
-      ME_CONFIG_MONGODB_PORT: 27017
-      ME_CONFIG_BASICAUTH_USERNAME: admin
-      ME_CONFIG_BASICAUTH_PASSWORD: pass
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: secret
+    ports:
+      - "8081:80"
     depends_on:
-      - mongodb
-    networks:
-      - spring-boot-mongo-net
+      - postgres
+
 
   # --- Cache: Redis ---
   redis:
@@ -64,7 +65,7 @@ services:
       - "6379:6379"
     command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
     networks:
-      - spring-boot-mongo-net
+      - spring-boot-postgres-net
     restart: always
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -93,9 +94,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
-  mongo-data:
+  postgres-data:
   redis-data:
 
 networks:
-  spring-boot-mongo-net:
+  spring-boot-postgres-net:
     driver: bridge

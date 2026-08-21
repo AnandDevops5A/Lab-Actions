@@ -1,4 +1,24 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_DB: golden_pearl_db
+      POSTGRES_USER: anand
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - application-net
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U anand -d golden_pearl_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # ====== 1. REDIS SERVICE ======
   # In-memory caching layer optimized for t2.micro
   redis:
@@ -32,10 +52,11 @@ services:
     image: anand7254/golden-pearl-backend:latest
     container_name: backend-1
     env_file:
-      - .env
+      - ./backend/.env
     environment:
-      - SPRING_DATA_MONGODB_URI=${SPRING_DATA_MONGODB_URI}
-      - SPRING_DATA_MONGODB_DATABASE=${SPRING_DATA_MONGODB_DATABASE}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/golden_pearl_db
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-anand}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-secret}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - FRONTEND_URL=${FRONTEND_URL}
@@ -46,6 +67,8 @@ services:
     ports:
       - "8082:8082"
     depends_on:
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
@@ -72,10 +95,11 @@ services:
     image: anand7254/golden-pearl-backend:latest
     container_name: backend-2
     env_file:
-      - .env
+      - ./backend/.env
     environment:
-      - SPRING_DATA_MONGODB_URI=${SPRING_DATA_MONGODB_URI}
-      - SPRING_DATA_MONGODB_DATABASE=${SPRING_DATA_MONGODB_DATABASE}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/golden_pearl_db
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-anand}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-secret}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - FRONTEND_URL=${FRONTEND_URL}
@@ -86,6 +110,8 @@ services:
     ports:
       - "8083:8083"
     depends_on:
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
@@ -160,6 +186,8 @@ services:
           memory: 50M
 
 volumes:
+  postgres-data:
+    driver: local
   redis-data:
     driver: local
 

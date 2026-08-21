@@ -169,19 +169,19 @@ public class TournamentService {
     // get completed tournaments
     @Cacheable(value = "completedTournaments", sync = true)
     public List<TournamentDTO> getCompletedTournaments() {
-        return general.convertToDTOs(tournamentRepository.findByDateTimeLessThan(general.getCurrentDateTime()));
+        return general.convertToDTOs(tournamentRepository.findAllCompletedTournaments(general.getCurrentDateTime()));
     }
 
     // get upcoming tournaments
     @Cacheable(value = "upcomingTournaments", sync = true)
     public List<TournamentDTO> getUpcomingTournaments() {
-        return general.convertToDTOs(tournamentRepository.findByDateTimeGreaterThan(general.getCurrentDateTime()));
+        return general.convertToDTOs(tournamentRepository.findAllUpcomingTournaments(general.getCurrentDateTime()));
     }
 
     // get last tournament
     @Cacheable(value = "lastTournament", sync = true)
     public TournamentDTO getLastTournament() {
-        return general.convertToDTO(tournamentRepository.findFirstByDateTimeLessThan(general.getCurrentDateTime()));
+        return general.convertToDTO(tournamentRepository.findLastCompletedTournament(general.getCurrentDateTime()));
     }
 
     // save all tournaments

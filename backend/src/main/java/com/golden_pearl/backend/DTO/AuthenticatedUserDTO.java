@@ -1,5 +1,7 @@
 package com.golden_pearl.backend.DTO;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 public record AuthenticatedUserDTO(
@@ -9,10 +11,9 @@ public record AuthenticatedUserDTO(
         String callSign,
         String email,
         Long contact,
-        Long joiningDate,
-        Integer withdrawAmount,
-        Integer balanceAmount,
-        Integer totalWin,
+        LocalDate joiningDate,
+        BigDecimal withdrawAmount,
+        BigDecimal balanceAmount,
         boolean active,
         String token,
         boolean admin

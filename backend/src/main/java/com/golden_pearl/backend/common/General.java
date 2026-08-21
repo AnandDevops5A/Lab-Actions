@@ -1,5 +1,6 @@
 package com.golden_pearl.backend.common;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -24,14 +25,12 @@ import lombok.Data;
 @Data
 public class General {
 
-    public long getCurrentDateTime() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
-        return Long.parseLong(LocalDateTime.now(ZoneId.of("Asia/Kolkata")).format(formatter));
+    public LocalDateTime getCurrentDateTime() {
+        return LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
     }
 
-    public Short getCurrentTime() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmm");
-        return Short.parseShort(LocalDateTime.now(ZoneId.of("Asia/Kolkata")).format(formatter));
+    public LocalDate getCurrentDate() {
+        return LocalDate.now(ZoneId.of("Asia/Kolkata"));
     }
 
 
@@ -43,7 +42,6 @@ public class General {
             responseUserData.setUserId(user.getId());
             responseUserData.setUsername(user.getUsername());
             responseUserData.setCallSign(user.getCallSign());
-            responseUserData.setTotalWin(user.getTotalWin());
             // Add other fields as necessary
 
             responseUserDataSet.add(responseUserData);
@@ -74,12 +72,18 @@ public class General {
         return sortedUsers;
     }
 
-    public User convertResponseToUser(UserRegisterData userData) {
-        User user = User.builder().username(userData.username()).callSign(userData.callSign())
-                .email(userData.email()).contact(userData.contact()).accessKey(userData.accessKey()).joiningDate(getCurrentDateTime())
-                .build();
-        return user;
-
+  public User convertResponseToUser(UserRegisterData user) {
+        if (user == null) {
+            return null;
+        }
+        User newUser = new User();
+        newUser.setCallSign(user.callSign());
+        newUser.setUsername(user.username());
+        newUser.setEmail(user.email());
+        newUser.setContact(user.contact());
+        newUser.setAccessKey(user.accessKey());
+        // Set other fields as necessary
+        return newUser;
     }
 
     public Integer generateOTP(){
