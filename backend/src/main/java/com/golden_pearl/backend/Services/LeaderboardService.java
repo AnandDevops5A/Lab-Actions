@@ -1,4 +1,4 @@
-package com.golden_pearl.backend.Services;
+package com.golden_pearl.backend.services;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

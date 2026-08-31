@@ -1,4 +1,4 @@
-package com.golden_pearl.backend.Services;
+package com.golden_pearl.backend.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

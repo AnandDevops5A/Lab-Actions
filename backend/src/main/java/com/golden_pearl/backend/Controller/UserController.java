@@ -7,9 +7,9 @@ import com.golden_pearl.backend.DRO.UserRegisterData;
 import com.golden_pearl.backend.DTO.ForgotPasswordDTO;
 import com.golden_pearl.backend.DTO.AuthenticatedUserDTO;
 import com.golden_pearl.backend.Models.User;
-import com.golden_pearl.backend.Services.UserService;
 import com.golden_pearl.backend.security.AdminPolicy;
 import com.golden_pearl.backend.security.JwtService;
+import com.golden_pearl.backend.services.UserService;
 
 import jakarta.persistence.EntityManager;
 import org.springframework.http.HttpStatus;

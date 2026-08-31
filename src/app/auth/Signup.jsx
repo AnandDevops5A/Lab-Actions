@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useState, useRef, memo } from "react";
-import { Users, UserPlus, Phone, Lock, Eye, EyeOff, Mail } from "lucide-react";
+import { Users, UserPlus, Phone, Lock, Eye, EyeOff, Mail, Loader2 } from "lucide-react";
 import { FetchBackendAPI } from "../../lib/api/backend-api";
 import { validatePassword } from "./PasswordCheck";
 import { errorMessage, successMessage } from "../../lib/utils/alert";
 
-// ✅ Constants outside component
 const COUNTRIES = [
   { code: "+91", label: "India", emoji: "🇮🇳" },
   { code: "+1", label: "USA", emoji: "🇺🇸" },
@@ -16,7 +15,6 @@ const COUNTRIES = [
   { code: "+61", label: "Australia", emoji: "🇦🇺" },
 ];
 
-// ✅ Reusable InputField
 function InputField({
   id,
   icon: Icon,
@@ -24,11 +22,12 @@ function InputField({
   inputRef,
   placeholder,
   extraClass = "",
+  children,
 }) {
   return (
-    <div className="relative group">
+    <div className="relative group w-full">
       <Icon
-        className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#00E5FF] opacity-90"
+        className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-cyan-400 opacity-90 transition-colors group-focus-within:text-cyan-300"
         aria-hidden
       />
       <label htmlFor={id} className="sr-only">
@@ -40,15 +39,14 @@ function InputField({
         type={type}
         ref={inputRef}
         placeholder={placeholder}
-        className={`w-full bg-transparent border-b border-[#00E5FF]/10 py-3 pl-12 pr-4 text-slate-100 placeholder-gray-400 focus:outline-none focus:border-[#FF4170] transition-colors ${extraClass}`}
+        className={`w-full bg-transparent border-b border-cyan-500/20 py-3 pl-12 pr-4 text-slate-100 placeholder-gray-500 focus:outline-none focus:border-cyan-400 transition-colors ${extraClass}`}
       />
+      {children}
     </div>
   );
 }
 
-const Signup = memo(({ onSwitch }) => {
-
-
+const Signup = memo(({ onSwitch, isDarkMode = true }) => {
   const usernameRef = useRef(null);
   const emailRef = useRef(null);
   const callSignRef = useRef(null);
@@ -107,7 +105,7 @@ const Signup = memo(({ onSwitch }) => {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    
+
     const validationError = validateForm();
     if (validationError) {
       errorMessage(validationError);
@@ -125,7 +123,6 @@ const Signup = memo(({ onSwitch }) => {
       };
 
       const result = await onSubmit(payload);
-      // console.log(result)
       if (result.ok) {
         successMessage("Registration successful! Please login.");
         onSwitch?.("login");
@@ -142,50 +139,57 @@ const Signup = memo(({ onSwitch }) => {
 
   return (
     <div className="w-full">
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-4 p-4"
-        aria-live="polite"
-      >
+      {/* Header */}
+      <div className="px-4 py-4 text-center">
+        <h1
+          className={`text-2xl sm:text-3xl font-extrabold uppercase tracking-widest ${
+            isDarkMode ? "text-cyan-400" : "text-cyan-600"
+          } drop-shadow-[0_0_15px_rgba(0,229,255,0.4)] leading-tight`}
+        >
+          <span className="text-pink-500">CREATE</span> ACCOUNT
+        </h1>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4 p-4" aria-live="polite">
         <InputField
           id="username"
           icon={Users}
           inputRef={usernameRef}
           placeholder="Aapka Name"
         />
+
         <InputField
           id="callSign"
           icon={UserPlus}
           inputRef={callSignRef}
           placeholder="Call Sign"
         />
+
         <InputField
           id="email"
           icon={Mail}
+          type="email"
           inputRef={emailRef}
-          placeholder="Email"
+          placeholder="Email Address"
         />
 
-
-        {/* Contact field with country select */}
-        <div className="relative group gap-1">
+        {/* Contact Field with Country Select */}
+        <div className="relative group w-full">
           <Phone
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#FF4170] opacity-90"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-pink-500 opacity-90 transition-colors group-focus-within:text-pink-400"
             aria-hidden
           />
           <select
             aria-label="Country code"
             ref={countryRef}
             defaultValue={COUNTRIES[0].code}
-            className="absolute left-10 top-1/2 -translate-y-1/2 bg-transparent text-slate-100 text-sm pl-2 pr-6 py-1 rounded-md focus:outline-none focus:border-[#00E5FF]/30"
-            disabled //only indian number are allowed
+            className="absolute left-10 top-1/2 -translate-y-1/2 bg-transparent text-slate-100 text-sm pl-2 pr-2 py-1 focus:outline-none disabled:opacity-80"
+            disabled
           >
             {COUNTRIES.map((c) => (
-              <option
-                key={c.code}
-                value={c.code}
-                className="bg-black text-slate-100"
-              >{`${c.emoji} ${c.code}`}</option>
+              <option key={c.code} value={c.code} className="bg-slate-900 text-slate-100">
+                {`${c.emoji} ${c.code}`}
+              </option>
             ))}
           </select>
           <input
@@ -194,11 +198,11 @@ const Signup = memo(({ onSwitch }) => {
             name="contact"
             ref={contactRef}
             placeholder="Local number"
-            className="w-full bg-transparent border-b border-[#00E5FF]/10 py-3 pl-36 pr-4 text-slate-100 placeholder-gray-400 focus:outline-none focus:border-[#FF4170] transition-colors"
+            className="w-full bg-transparent border-b border-cyan-500/20 py-3 pl-36 pr-4 text-slate-100 placeholder-gray-500 focus:outline-none focus:border-pink-500 transition-colors"
           />
         </div>
 
-        {/* Password */}
+        {/* Set Password Field */}
         <InputField
           id="accessKey"
           icon={Lock}
@@ -206,19 +210,18 @@ const Signup = memo(({ onSwitch }) => {
           inputRef={accessKeyRef}
           placeholder="Set Access Key"
           extraClass="pr-12"
-        />
-        <button
-          type="button"
-          onClick={() => setShowPwd(!showPwd)}
-          className="absolute right-3 top-[38%] text-slate-100/80 hover:text-slate-100 p-1"
         >
-          {showPwd ? (
-            <EyeOff className="w-5 h-5" />
-          ) : (
-            <Eye className="w-5 h-5" />
-          )}
-        </button>
+          <button
+            type="button"
+            onClick={() => setShowPwd(!showPwd)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-100 p-1 transition-colors cursor-pointer"
+            aria-label={showPwd ? "Hide password" : "Show password"}
+          >
+            {showPwd ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          </button>
+        </InputField>
 
+        {/* Confirm Password Field */}
         <InputField
           id="confirm"
           icon={Lock}
@@ -227,23 +230,36 @@ const Signup = memo(({ onSwitch }) => {
           placeholder="Confirm Access Key"
         />
 
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={loading}
-          aria-busy={loading}
-          className="btn w-full rounded-lg px-6 py-3 font-extrabold text-lg bg-linear-to-r from-[#00E5FF] via-[#FF0055] to-[#9b59ff] text-black shadow-lg 
-                     hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed focus:ring-2 focus:ring-offset-2 focus:ring-[#00E5FF] focus:ring-offset-gray-950"
-        >
-          {loading ? "Please wait..." : "Submit"}
-        </button>
+        {/* Action Button */}
+        <div className="pt-2">
+          <button
+            type="submit"
+            disabled={loading}
+            aria-busy={loading}
+            className="btn relative w-full overflow-hidden rounded-lg px-6 py-3 font-extrabold text-lg 
+                       bg-gradient-to-r from-cyan-400 via-pink-500 to-purple-600 text-black shadow-lg 
+                       hover:shadow-cyan-500/30 disabled:opacity-60 disabled:cursor-not-allowed focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 focus:ring-offset-gray-950 transition-all cursor-pointer"
+          >
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                <span>Creating Account...</span>
+              </div>
+            ) : (
+              <span className={isDarkMode ? "text-slate-950" : "text-black"}>
+                Submit
+              </span>
+            )}
+          </button>
+        </div>
 
-        <p className="mt-4 text-sm text-gray-300 text-center">
+        {/* Switch Link */}
+        <p className="mt-4 text-sm text-gray-400 text-center">
           Already have an account?{" "}
           <button
             type="button"
             onClick={() => onSwitch?.("login")}
-            className="text-[#00E5FF] font-semibold hover:text-[#00B8E6] transition-colors cursor-pointer"
+            className="text-cyan-400 font-semibold hover:text-cyan-300 transition-colors cursor-pointer uppercase tracking-wide text-xs"
           >
             Back to Login
           </button>

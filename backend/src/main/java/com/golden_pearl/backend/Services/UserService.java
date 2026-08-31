@@ -1,4 +1,4 @@
-package com.golden_pearl.backend.Services;
+package com.golden_pearl.backend.services;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

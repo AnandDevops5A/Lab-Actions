@@ -1,4 +1,4 @@
-package com.golden_pearl.backend.Services;
+package com.golden_pearl.backend.services;
 
 import com.golden_pearl.backend.Repository.TournamentRepository;
 import com.golden_pearl.backend.Repository.UserRepository;

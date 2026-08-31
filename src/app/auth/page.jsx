@@ -20,139 +20,132 @@ const ForgotPassword = dynamic(() => import("./ForgotPassword"), {
   ssr: false,
 });
 
-// Extract styles to avoid re-allocation on every render
-const INLINE_STYLES = `
-  @keyframes glow-pulse { 0%,100%{box-shadow:0 0 15px rgba(0,229,255,0.6),0 0 5px rgba(255,65,112,0.6);} 50%{box-shadow:0 0 25px rgba(0,229,255,0.8),0 0 10px rgba(255,65,112,0.8);} }
-  .neon-glow-frame { animation: glow-pulse 5s infinite alternate; border:2px solid; border-image: linear-gradient(to right,#00E5FF,#FF4170) 1; border-radius:1rem }
-  .forms-viewport { perspective: 1200px; }
-  .arrow-pulse { animation: arrowPulse 1.6s infinite; }
-  @keyframes arrowPulse { 0%{transform:translateX(0);opacity:.9}50%{transform:translateX(4px);opacity:1}100%{transform:translateX(0);opacity:.9} }
-  .group:focus-within svg, .group:hover svg { filter: drop-shadow(0 6px 18px rgba(0,229,255,0.12)); transform: translateY(-1px); transition: all .24s ease; }
-`;
-
-export default function Page() {
+export default function AuthPageWrapper() {
   const [mode, setMode] = useState("login");
   const [loadedForms, setLoadedForms] = useState(["login"]);
 
-  const container = useRef(null);
-  const mainContainerRef = useRef(null);
+  const containerRef = useRef(null);
+  const formRefs = useRef({
+    login: null,
+    signup: null,
+    "forgot-password": null,
+  });
 
-  // Get theme context
   const themeContext = useContext(ThemeContext);
-  const { isDarkMode } = themeContext || { isDarkMode: true };
+  const isDarkMode = themeContext?.isDarkMode ?? true;
 
+  // Set initial 3D transform positions safely
   useGSAP(
     () => {
-      gsap.set(container.current.children, {
-        autoAlpha: 0,
-        rotationY: 90,
-        xPercent: 100,
-      });
-      gsap.set(container.current.children[0], {
-        autoAlpha: 1,
-        rotationY: 0,
-        xPercent: 0,
+      Object.entries(formRefs.current).forEach(([key, el]) => {
+        if (!el) return;
+        if (key === "login") {
+          gsap.set(el, { autoAlpha: 1, rotationY: 0, xPercent: 0, display: "block" });
+        } else {
+          gsap.set(el, { autoAlpha: 0, rotationY: 90, xPercent: 100, display: "none" });
+        }
       });
     },
-    { scope: container },
+    { scope: containerRef }
   );
 
-  const handleSwitch = (newMode) => {
+  const { contextSafe } = useGSAP({ scope: containerRef });
+
+  const handleSwitch = contextSafe((newMode) => {
     if (newMode === mode) return;
 
     if (!loadedForms.includes(newMode)) {
       setLoadedForms((prev) => [...prev, newMode]);
     }
 
-    const fromEl =
-      mode === "login"
-        ? container.current.children[0]
-        : mode === "signup"
-          ? container.current.children[1]
-          : container.current.children[2];
-    const toEl =
-      newMode === "login"
-        ? container.current.children[0]
-        : newMode === "signup"
-          ? container.current.children[1]
-          : container.current.children[2];
+    // Delay slightly to allow dynamic components to mount
+    requestAnimationFrame(() => {
+      const fromEl = formRefs.current[mode];
+      const toEl = formRefs.current[newMode];
 
-    const direction = newMode === "login" ? -1 : 1;
-    const newHeight = newMode === "signup" ? 500 : 420;
+      if (!fromEl || !toEl) return;
 
-    gsap.timeline()
-      .to(mainContainerRef.current, {
-        minHeight: newHeight,
-        duration: 0.6,
-        ease: "power3.inOut",
-      })
-      .to(
-        fromEl,
-        {
-          rotationY: -90 * direction,
-          xPercent: -100 * direction,
-          autoAlpha: 0,
-          duration: 0.7,
-          ease: "power3.inOut",
+      const direction = newMode === "login" ? -1 : 1;
+
+      gsap.killTweensOf([fromEl, toEl]);
+
+      const tl = gsap.timeline({
+        defaults: { ease: "power3.inOut", duration: 0.6 },
+      });
+
+      // Prepare target element for entrance animation
+      gsap.set(toEl, {
+        display: "block",
+        rotationY: 90 * direction,
+        xPercent: 100 * direction,
+        autoAlpha: 0,
+      });
+
+      tl.to(fromEl, {
+        rotationY: -90 * direction,
+        xPercent: -100 * direction,
+        autoAlpha: 0,
+        onComplete: () => {
+          gsap.set(fromEl, { display: "none" });
         },
-        0,
-      )
-      .set(
-        toEl,
-        {
-          rotationY: 90 * direction,
-          xPercent: 100 * direction,
-          autoAlpha: 1,
-        },
-        0,
-      )
-      .to(
+      }).to(
         toEl,
         {
           rotationY: 0,
           xPercent: 0,
-          duration: 0.7,
-          ease: "power3.inOut",
+          autoAlpha: 1,
         },
-        0,
+        "<"
       );
 
-    setMode(newMode);
-  };
+      setMode(newMode);
+    });
+  });
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center p-4 antialiased relative
-	 ${
-     isDarkMode
-       ? "bg-[radial-gradient(ellipse_at_top_left,#0f172a_0%,#1e293b_60%)]"
-       : "bg-[radial-gradient(ellipse_at_top_left,#93c5fd_0%,#fef9c3_90%)]"
-   }`}
+      className={`min-h-screen flex items-center justify-center p-4 antialiased relative transition-colors duration-500 ${
+        isDarkMode
+          ? "bg-[radial-gradient(ellipse_at_top_left,#0f172a_0%,#020617_80%)]"
+          : "bg-[radial-gradient(ellipse_at_top_left,#e0f2fe_0%,#f8fafc_90%)]"
+      }`}
     >
-      <style>{INLINE_STYLES}</style>
+      {/* Background Grid Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
 
-      <div className="absolute inset-0 bg-black/30 z-0"></div>
-
-      <div className="w-full max-w-md mx-auto relative top-10 forms-viewport">
+      {/* Auth Card Viewport */}
+      <div className="w-full max-w-md mx-auto relative z-10 [perspective:1200px]">
         <div
-          ref={mainContainerRef}
-          className={`relative w-full  ${
+          className={`w-full transition-all duration-300 rounded-2xl border min-h-[400px] ${
             isDarkMode
-              ? "bg-black/30 neon-glow-frame"
-              : "bg-white/30 shadow-slate-500 shadow-inner"
-          } transition-all 
-          duration-700 ease-in-out rounded-xl p-3 min-h-[420px]`}
+              ? "bg-slate-950/70 border-cyan-500/20 shadow-[0_0_50px_-12px_rgba(0,229,255,0.2)]"
+              : "bg-white/80 border-slate-200 shadow-2xl shadow-slate-300"
+          } backdrop-blur-xl p-4 sm:p-6`}
         >
-          <div ref={container} className="relative w-full h-full">
-            <div className="absolute top-0 left-0 w-full">
+          <div ref={containerRef} className="w-full h-full relative">
+            {/* Login Form */}
+            <div
+              ref={(el) => (formRefs.current["login"] = el)}
+              className="w-full [backface-visibility:hidden]"
+            >
               <Login onSwitch={handleSwitch} isDarkMode={isDarkMode} />
             </div>
-            <div className="absolute top-0 left-0 w-full">
+
+            {/* Signup Form */}
+            <div
+              ref={(el) => (formRefs.current["signup"] = el)}
+              className="w-full [backface-visibility:hidden]"
+            >
               {loadedForms.includes("signup") && (
-                <Signup onSwitch={handleSwitch} />
+                <Signup onSwitch={handleSwitch} isDarkMode={isDarkMode} />
               )}
             </div>
-            <div className="absolute top-0 left-0 w-full">
+
+            {/* Forgot Password Form */}
+            <div
+              ref={(el) => (formRefs.current["forgot-password"] = el)}
+              className="w-full [backface-visibility:hidden]"
+            >
               {loadedForms.includes("forgot-password") && (
                 <ForgotPassword
                   onSwitch={handleSwitch}

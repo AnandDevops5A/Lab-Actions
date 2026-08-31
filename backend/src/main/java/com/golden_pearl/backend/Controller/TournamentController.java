@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.DTO.TournamentDTO;
-import com.golden_pearl.backend.Services.TournamentService;
 import com.golden_pearl.backend.common.General;
 import com.golden_pearl.backend.errors.ResourceNotFoundException;
+import com.golden_pearl.backend.services.TournamentService;
 
 import org.springframework.web.bind.annotation.RestController;
 

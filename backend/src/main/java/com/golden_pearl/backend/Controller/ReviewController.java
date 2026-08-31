@@ -17,7 +17,8 @@ import com.golden_pearl.backend.DRO.AdminReplyDRO;
 import com.golden_pearl.backend.DRO.ReviewDRO;
 import com.golden_pearl.backend.DRO.ReviewUpdateReceive;
 import com.golden_pearl.backend.Models.Review;
-import com.golden_pearl.backend.Services.ReviewService;
+import com.golden_pearl.backend.services.ReviewService;
+
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 
 @RestController

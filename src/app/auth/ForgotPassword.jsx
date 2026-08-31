@@ -1,383 +1,137 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-import {
-  Mail,
-  ArrowLeft,
-  Loader2,
-  CheckCircle,
-  Phone,
-  KeyRound,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import { resetPassword, confirmPasswordReset } from "@/lib/api/backend-api";
-import { errorMessage, successMessage } from "@/lib/utils/alert";
-import { validatePassword } from "./PasswordCheck";
+import React, { useState, useRef, memo } from "react";
+import { PhoneCall, Loader2, KeyRound, ArrowRight } from "lucide-react";
+import { FetchBackendAPI } from "../../lib/api/backend-api";
+import { errorMessage, successMessage } from "../../lib/utils/alert";
 
-const COUNTRIES = [
-  { code: "+91", label: "India", emoji: "🇮🇳" },
-  { code: "+1", label: "USA", emoji: "🇺🇸" },
-  { code: "+44", label: "UK", emoji: "🇬🇧" },
-  { code: "+92", label: "Pakistan", emoji: "🇵🇰" },
-  { code: "+971", label: "UAE", emoji: "🇦🇪" },
-  { code: "+61", label: "Australia", emoji: "🇦🇺" },
-];
-
-const ForgotPassword = ({ onSwitch, isDarkMode }) => {
-  const [countryCode, setCountryCode] = useState(COUNTRIES[0].code);
-  const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState("details"); // 'details', 'verify', 'success'
-  const [otpVerified, setOtpVerified] = useState(false);
-  const [showPwd, setShowPwd] = useState(false);
-  const emailRef = useRef(null);
+const ForgotPassword = memo(({ onSwitch, isDarkMode }) => {
   const contactRef = useRef(null);
-  const otpRef = useRef(null);
-  const [userId,setUserId] = useState(null);
-  const newPasswordRef = useRef(null);
-  const confirmPasswordRef = useRef(null);
-  const [responseOTP, setResponseOTP] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  //verify reset credential
-  const handleDetailsSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
-    setLoading(true);
+    const contact = contactRef.current?.value || "";
 
-    const payload = {
-      email: emailRef.current?.value,
-      contact: `${contactRef.current?.value}`,
-    };
-
-    if (!payload.email || !contactRef.current?.value) {
-      errorMessage("Please provide both email and contact number.");
-      setLoading(false);
+    if (!contact.trim()) {
+      errorMessage("Please enter your registered Player ID, Phone, or Email.");
       return;
     }
 
+    setLoading(true);
     try {
-      const res = await resetPassword(payload);
-      if (res.data) {
-        successMessage(
-          `Hi, ${res.data.username} otp: ${res.data.otp}. An OTP has been sent to your details.`,
-        );
+      // Adjust the endpoint if your API path differs
+      const result = await FetchBackendAPI("users/forgot-password", {
+        method: "POST",
+        data: { contact: contact.trim() },
+      });
 
-        setResponseOTP(res.data.otp);
-        setUserId(res.data.id);
-        setStep("verify");
+      if (result.ok) {
+        successMessage("Recovery instructions transmitted.");
+        setIsSubmitted(true);
       } else {
-        errorMessage(res.error || "Invalid details. Please try again.");
-        errorMessage(res.error || "Invalid details. Please try again.");
+        errorMessage(result.error || "Failed to initiate recovery. User not found.");
       }
     } catch (err) {
-      errorMessage("Failed to send OTP. Please try again.");
-      errorMessage(err?.message || "Unexpected error.");
+      console.error("Forgot password error:", err);
+      errorMessage("A critical error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    const otp = otpRef.current?.value || "";
-    if (!otp && !responseOTP && otp.length !== 6) {
-      errorMessage("Please enter OTP");
-      setLoading(false);
-      return;
-    }
-    if (responseOTP == otp) {
-      setOtpVerified(true);
-      successMessage("OTP Verified Successfully");
-      setLoading(false);
-      return;
-    } else {
-      errorMessage("Invalid OTP");
-      setLoading(false);
-      return;
-    }
-  };
-
-  // after succesfull verify credential
-  const handleResetSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    const newPassword = newPasswordRef.current?.value;
-    const confirmPassword = confirmPasswordRef.current?.value;
-
-    if ( !newPassword || !confirmPassword) {
-      errorMessage("Please fill all fields for verification.");
-      setLoading(false);
-      return;
-    }
-
-    const passwordValidation = validatePassword(newPassword);
-    if (!passwordValidation.valid) {
-      errorMessage(passwordValidation.message);
-      setLoading(false);
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      errorMessage("New passwords do not match.");
-  
-      setLoading(false);
-      return;
-    }
-
-    const payload = {
-      id: userId,
-      accessKey: newPassword,
-    };
-
-    try {
-      // NOTE: This assumes a new API endpoint `users/confirm-password-reset` exists.
-      const res = await confirmPasswordReset(payload);
-    //  res.ok && successMessage("Password has been reset successfully!");
-      if (res.ok) {
-        successMessage(res.data || "Password has been reset successfully!");
-        setStep("success");
-      } else {
-        errorMessage(
-          res.error || "Failed to reset password",
-        );
-       
-      }
-    } catch (err) {
-      errorMessage(err?.message || "Unexpected error.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }
 
   return (
     <div className="w-full">
-      <div className="px-4 py-6 text-center">
-        <h1
-          className={`sm:text-xl text-3xl font-extrabold uppercase tracking-widest ${
-            isDarkMode ? "text-amber-400" : "text-amber-600"
-          } drop-shadow-[0_0_15px_rgba(251,191,36,0.4)] leading-tight`}
-        >
-          <span className="text-orange-500">RECOVER</span> ACCESS
+      {/* Header Section */}
+      <div className="text-center space-y-2 mb-6">
+        <div className="inline-flex items-center justify-center p-2 rounded-xl bg-pink-950/40 border border-pink-500/30 text-[#FF4170] mb-1 shadow-[0_0_15px_rgba(255,65,112,0.2)]">
+          <KeyRound className="w-6 h-6 animate-pulse" />
+        </div>
+
+        <h1 className="text-2xl sm:text-3xl font-black tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#FF4170] via-slate-100 to-[#00E5FF] drop-shadow-[0_0_12px_rgba(255,65,112,0.4)]">
+          SYSTEM <span className="text-slate-100">RECOVERY</span>
         </h1>
+        <p className="text-xs uppercase tracking-widest font-mono text-pink-400/70">
+          [ OVERRIDE_PROTOCOL // INITIATED ]
+        </p>
       </div>
 
-      {step === "success" ? (
-        <div className="flex flex-col items-center text-center p-4 animate-in fade-in zoom-in duration-300">
-          <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mb-4">
-            <CheckCircle className="w-8 h-8 text-green-500" />
-          </div>
-          <h3
-            className={`text-lg font-semibold mb-2 ${isDarkMode ? "text-slate-100" : "text-slate-800"}`}
-          >
-            Password Reset Successfully
-          </h3>
-          <p
-            className={`text-sm mb-6 ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}
-          >
-            You can now log in with your new password.
-          </p>
-          <button
-            onClick={() => {
-              onSwitch("login")
-              setStep("details");
-            }}
-            className="text-sm font-medium text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
-          >
-            Back to Login
-          </button>
-        </div>
-      ) : step === "details" ? (
-        <form onSubmit={handleDetailsSubmit} className="space-y-4 p-4">
-          <div className="relative group">
-            <Mail
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-amber-400 opacity-90"
-              aria-hidden
-            />
-            <input
-              type="email"
-              name="email"
-              ref={emailRef}
-              placeholder="Email Address"
-              required
-              className="w-full bg-transparent border-b border-amber-500/20 py-3 pl-12 pr-4 text-slate-100 placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors"
-            />
+      {!isSubmitted ? (
+        <form onSubmit={handleSubmit} className="space-y-4 p-2 sm:p-4">
+          {/* Contact Input Group */}
+          <div className="space-y-1.5">
+            <label
+              htmlFor="reset-contact"
+              className="block text-xs font-mono uppercase tracking-wider text-cyan-300/80"
+            >
+              Registered Contact
+            </label>
+            <div className="relative group">
+              <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-400/70 group-focus-within:text-[#00E5FF] transition-colors pointer-events-none">
+                <PhoneCall className="w-5 h-5" aria-hidden="true" />
+              </div>
+              <input
+                id="reset-contact"
+                name="contact"
+                ref={contactRef}
+                required
+                placeholder="Player ID, Email, or Phone"
+                className="w-full bg-slate-900/60 border border-slate-800 rounded-lg py-3 pl-11 pr-4 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-[#00E5FF] focus:ring-1 focus:ring-[#00E5FF] focus:shadow-[0_0_15px_rgba(0,229,255,0.25)] transition-all font-sans"
+              />
+            </div>
+            <p className="text-[10px] text-slate-500 font-mono mt-1 text-center">
+              Enter your registered details to receive a secure reset link.
+            </p>
           </div>
 
-          <div className="relative group">
-            <Phone
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-orange-500 opacity-90"
-              aria-hidden
-            />
-            <select
-              aria-label="Country code"
-              value={countryCode}
-              onChange={(e) => setCountryCode(e.target.value)}
-              className="absolute left-10 top-1/2 -translate-y-1/2 bg-transparent text-slate-100 text-sm pl-2 pr-6 py-1 rounded-md focus:outline-none focus:border-amber-500/30 [&>option]:bg-black"
-              disabled
-            >
-              {COUNTRIES.map((c) => (
-                <option
-                  key={c.code}
-                  value={c.code}
-                >{`${c.emoji} ${c.code}`}</option>
-              ))}
-            </select>
-            <input
-              type="number"
-              name="contact"
-              ref={contactRef}
-              placeholder="Mobile Number"
-              required
-              className="w-full bg-transparent border-b border-amber-500/20 py-3 pl-36 pr-4 text-slate-100 placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors"
-            />
-          </div>
+          {/* Action Button */}
           <div className="pt-2">
             <button
               type="submit"
               disabled={loading}
-              className="btn relative w-full overflow-hidden rounded-lg px-6 py-3 font-extrabold text-lg 
-                         bg-linear-to-r from-amber-400 via-orange-500 to-red-500 text-black shadow-lg 
-                         hover:shadow-orange-500/50 disabled:opacity-60 disabled:cursor-not-allowed focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 focus:ring-offset-gray-950"
+              className="relative w-full group overflow-hidden rounded-lg py-3.5 px-6 font-mono font-bold uppercase text-sm tracking-widest text-slate-950 bg-gradient-to-r from-[#FF4170] via-[#D8305C] to-[#00E5FF] hover:brightness-110 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(255,65,112,0.4)] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
             >
               {loading ? (
-                <div className="flex items-center justify-center cursor-progress">
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                  <span>Sending OTP...</span>
-                </div>
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                  <span>Transmitting...</span>
+                </>
               ) : (
-                <span
-                  className={`${isDarkMode ? "text-slate-100" : "text-black"} cursor-pointer`}
-                >
-                  Send OTP
-                </span>
+                <>
+                  <span>Request Reset</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </>
               )}
             </button>
           </div>
         </form>
       ) : (
-        // step === 'verify'
-        <form
-          onSubmit={otpVerified ? handleResetSubmit : handleVerifyOtp}
-          className="space-y-4 p-4 relative"
-        >
-          <div className="flex gap-2 items-center">
-            <div className="relative group flex-1">
-              <KeyRound
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-amber-400 opacity-90"
-                aria-hidden
-              />
-              <input
-                type="text"
-                name="otp"
-                ref={otpRef}
-                placeholder="Enter OTP"
-                required
-                disabled={otpVerified}
-                className="w-full bg-transparent border-b border-amber-500/20 py-3 pl-12 pr-4 text-slate-100 placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-            </div>
-            {!otpVerified && (
-              <span
-                type="button"
-                onClick={handleVerifyOtp}
-                disabled={loading}
-                className="px-3 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/50 rounded-md text-sm font-semibold transition-colors whitespace-nowrap cursor-pointer"
-              >
-                {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  "Verify"
-                )}
-              </span>
-            )}
-            {otpVerified && <CheckCircle className="w-6 h-6 text-green-500" />}
+        <div className="p-4 text-center space-y-4">
+          <div className="p-4 bg-cyan-950/30 border border-cyan-500/20 rounded-lg shadow-[0_0_15px_rgba(0,229,255,0.1)]">
+            <p className="text-sm text-cyan-100 font-mono leading-relaxed">
+              If those details match our system, a recovery protocol has been dispatched. Please check your messages.
+            </p>
           </div>
-
-          {otpVerified && (
-            <>
-              <div className="relative group animate-in fade-in slide-in-from-top-2 duration-300">
-                <KeyRound
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-orange-500 opacity-90"
-                  aria-hidden
-                />
-                <input
-                  type={showPwd ? "text" : "password"}
-                  name="newPassword"
-                  ref={newPasswordRef}
-                  placeholder="New Password"
-                  required
-                  className="w-full bg-transparent border-b border-amber-500/20 py-3 pl-12 pr-12 text-slate-100 placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPwd(!showPwd)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-100/80 hover:text-slate-100 p-1 cursor-pointer"
-                  aria-label={showPwd ? "Hide password" : "Show password"}
-                >
-                  {showPwd ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
-              <div className="relative group animate-in fade-in slide-in-from-top-2 duration-300 delay-75">
-                <KeyRound
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-orange-500 opacity-90"
-                  aria-hidden
-                />
-                <input
-                  type={showPwd ? "text" : "password"}
-                  name="confirmPassword"
-                  ref={confirmPasswordRef}
-                  placeholder="Confirm New Password"
-                  required
-                  className="w-full bg-transparent border-b border-amber-500/20 py-3 pl-12 pr-4 text-slate-100 placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors"
-                />
-              </div>
-              <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-300 delay-100">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="btn relative w-full overflow-hidden rounded-lg px-6 py-3 font-extrabold text-lg 
-                         bg-linear-to-r from-amber-400 via-orange-500 to-red-500 text-black shadow-lg 
-                         hover:shadow-orange-500/50 disabled:opacity-60 disabled:cursor-not-allowed focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 focus:ring-offset-gray-950"
-                >
-                  {loading ? (
-                    <div className="flex items-center justify-center">
-                      <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                      <span>Resetting...</span>
-                    </div>
-                  ) : (
-                    <span
-                      className={`${isDarkMode ? "text-slate-100" : "text-black"} cursor-pointer`}
-                    >
-                      Reset Password
-                    </span>
-                  )}
-                </button>
-              </div>
-            </>
-          )}
-
-        </form>
-      )}
-
-      {step !== "success" && (
-        <div className="text-center mt-4">
-          <button
-            type="button"
-            onClick={() => onSwitch("login")}
-            className="text-sm text-amber-400 hover:text-orange-400 inline-flex items-center gap-2 transition-colors font-semibold tracking-wide uppercase"
-          >
-            <ArrowLeft className="w-4 h-4" /> Return to Login
-          </button>
         </div>
       )}
+
+      {/* Footer Navigation Switcher */}
+      <div className="pt-4 text-center border-t border-slate-800/60 mt-2">
+        <p className="text-xs text-slate-400">
+          Remembered your key?{" "}
+          <button
+            type="button"
+            onClick={() => onSwitch?.("login")}
+            className="text-[#00E5FF] font-semibold hover:text-cyan-300 underline underline-offset-4 focus:outline-none focus:ring-1 focus:ring-[#00E5FF] rounded px-1 transition-all cursor-pointer"
+          >
+            Return to Login
+          </button>
+        </p>
+      </div>
     </div>
   );
-};
+});
 
+ForgotPassword.displayName = "ForgotPassword";
 export default ForgotPassword;

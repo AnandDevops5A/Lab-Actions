@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.golden_pearl.backend.Services.AdminService;
+import com.golden_pearl.backend.services.AdminService;
+
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 
 @RestController

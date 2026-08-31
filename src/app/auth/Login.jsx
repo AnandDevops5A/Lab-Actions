@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, memo, useContext } from "react";
-import { Lock, Eye, EyeOff, PhoneCall, Loader2 } from "lucide-react";
+import { Lock, Eye, EyeOff, PhoneCall, Loader2, ShieldCheck, ArrowRight } from "lucide-react";
 import { errorMessage, successMessage } from "../../lib/utils/alert";
 import { FetchBackendAPI } from "../../lib/api/backend-api";
 import { UserContext } from "../../lib/contexts/user-context";
@@ -14,27 +14,25 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
   const accessKeyRef = useRef(null);
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { setUser,MALIK,refreshUserTournaments } = useContext(UserContext);
+  const { setUser, MALIK, refreshUserTournaments } = useContext(UserContext);
+  const [error, setError] = useState(null);
   const router = useRouter();
 
   const handleLoginError = (error) => {
-    // Log the full error for debugging purposes
     console.error("Login API Error:", { status: error.status, message: error.error });
 
-    // Provide user-friendly messages based on the error status
     switch (error.status) {
-      case 401: // Unauthorized
-      case 403: // Forbidden
+      case 401:
+      case 403:
         errorMessage("Invalid credentials. Please check your Player ID and Access Key.");
         break;
-      case 404: // Not Found
+      case 404:
         errorMessage("Player account not found.");
         break;
-      case 429: // Too Many Requests
+      case 429:
         errorMessage(error.error || "Too many login attempts. Please try again later.");
         break;
       default:
-        // For 500 or other unexpected statuses
         errorMessage(error.error || "An unexpected server error occurred. Please try again.");
         break;
     }
@@ -47,10 +45,9 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
     });
 
     if (!res.ok) {
-      return res; // Pass API error through to the handler
+      return res;
     }
 
-    // On successful API response, proceed with setting the session
     try {
       const compressedUser = LZString.compressToUTF16(JSON.stringify(res.data));
       const cookieResult = await setSecureCookie("currentUser", compressedUser);
@@ -60,16 +57,14 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
       }
 
       setUser(res.data);
-      // Refresh user tournaments immediately after login to ensure we have the latest data
-      refreshUserTournaments(true,res.data);
+      refreshUserTournaments(true, res.data);
       return res;
     } catch (sessionError) {
       console.error("Session handling error after login:", sessionError);
-      // Return a structured error for the handler
       return {
         ok: false,
         error: "Could not start your session. Please try again.",
-        status: 500, // Represents a client-side internal error
+        status: 500,
       };
     }
   }
@@ -101,6 +96,7 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
       }
     } catch (err) {
       console.error("Fatal login process error:", err);
+      setError("A critical error occurred. Please refresh and try again.");
       errorMessage("A critical error occurred. Please refresh and try again.");
     } finally {
       setLoading(false);
@@ -108,123 +104,140 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
   }
 
   return (
-    <div className="w-full ">
-      {/* Aggressive Cyberpunk Heading */}
-      <div className="px-4 py-6 text-center">
-        <h1
-          // Aggressive, cyberpunk styling
-          className={`sm:text-xl text-3xl font-extrabold uppercase tracking-widest ${
-            isDarkMode ? "text-[#FF4170] neon-glow-frame" : "text-[#00E5FF] "
-          } 
-                       drop-shadow-[0_0_8px_#FF4170] leading-tight`}
-        >
-          <span className="text-[#00E5FF]">VERIFY</span> YOURSELF
+    <div className="w-full">
+      {/* Header Section */}
+      <div className="text-center space-y-2 mb-6">
+        <div className="inline-flex items-center justify-center p-2 rounded-xl bg-cyan-950/40 border border-cyan-500/30 text-[#00E5FF] mb-1 shadow-[0_0_15px_rgba(0,229,255,0.2)]">
+          <ShieldCheck className="w-6 h-6 animate-pulse" />
+        </div>
+
+        <h1 className="text-2xl sm:text-3xl font-black tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#00E5FF] via-slate-100 to-[#FF4170] drop-shadow-[0_0_12px_rgba(0,229,255,0.4)]">
+          VERIFY <span className="text-slate-100">YOURSELF</span>
         </h1>
+        <p className="text-xs uppercase tracking-widest font-mono text-cyan-400/70">
+          [ ACCESS_CONTROL_LEVEL // 01 ]
+        </p>
       </div>
 
-      {/* Form Start */}
+      {/* Form Area */}
       <form
         onSubmit={handleSubmit}
-        className="space-y-4 p-4"
-        aria-describedby="login-error"
+        className="space-y-4 p-2 sm:p-4"
+        aria-describedby={error ? "login-error" : undefined}
       >
-        {/* contact Input */}
-        <div className="relative group">
-          <PhoneCall
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#00E5FF] opacity-90"
-            aria-hidden
-          />
-          <label htmlFor="contact" className="sr-only">
-            Player ID or Contact
+        {/* Contact Input Group */}
+        <div className="space-y-1.5">
+          <label htmlFor="contact" className="block text-xs font-mono uppercase tracking-wider text-cyan-300/80">
+            Identity / Contact
           </label>
-          <input
-            id="contact"
-            name="contact"
-            ref={contactRef}
-            placeholder="Player ID or Contact"
-            className="w-full bg-transparent border-b border-[#00E5FF]/10 py-3 pl-12 pr-4 text-slate-100 placeholder-gray-400 focus:outline-none focus:border-[#FF4170] transition-colors"
-            autoComplete="username"
-          />
+          <div className="relative group">
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-400/70 group-focus-within:text-[#00E5FF] transition-colors pointer-events-none">
+              <PhoneCall className="w-5 h-5" aria-hidden="true" />
+            </div>
+            <input
+              id="contact"
+              name="contact"
+              ref={contactRef}
+              required
+              placeholder="Player ID or Phone Number"
+              className="w-full bg-slate-900/60 border border-slate-800 rounded-lg py-3 pl-11 pr-4 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-[#00E5FF] focus:ring-1 focus:ring-[#00E5FF] focus:shadow-[0_0_15px_rgba(0,229,255,0.25)] transition-all font-sans"
+              autoComplete="username"
+            />
+          </div>
         </div>
 
-        {/* accessKey Input */}
-        <div className="relative group">
-          <Lock
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#FF4170] opacity-90"
-            aria-hidden
-          />
-          <label htmlFor="accessKey" className="sr-only">
-            accessKey
-          </label>
-          <input
-            id="accessKey"
-            name="accessKey"
-            ref={accessKeyRef}
-            placeholder="Secure Access Key"
-            type={showPwd ? "text" : "password"}
-            className="w-full bg-transparent border-b border-[#00E5FF]/10 py-3 pl-12 pr-12 text-slate-100 placeholder-gray-400 focus:outline-none focus:border-[#FF4170] transition-colors"
-            autoComplete="current-password"
-          />
+        {/* Access Key Input Group */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label htmlFor="accessKey" className="block text-xs font-mono uppercase tracking-wider text-[#FF4170]/80">
+              Access Key
+            </label>
+            {/* Navigates to Forgot Password */}
+            <button
+              type="button"
+              onClick={() => onSwitch?.("forgot-password")}
+              className="text-xs font-mono text-cyan-400 hover:text-cyan-300 hover:underline underline-offset-4 transition-colors cursor-pointer"
+            >
+              Key Lost?
+            </button>
+          </div>
+          <div className="relative group">
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#FF4170]/70 group-focus-within:text-[#FF4170] transition-colors pointer-events-none">
+              <Lock className="w-5 h-5" aria-hidden="true" />
+            </div>
+            <input
+              id="accessKey"
+              name="accessKey"
+              ref={accessKeyRef}
+              required
+              placeholder="••••••••••••"
+              type={showPwd ? "text" : "password"}
+              className="w-full bg-slate-900/60 border border-slate-800 rounded-lg py-3 pl-11 pr-11 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-[#FF4170] focus:ring-1 focus:ring-[#FF4170] focus:shadow-[0_0_15px_rgba(255,65,112,0.25)] transition-all font-sans"
+              autoComplete="current-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPwd((prev) => !prev)}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 focus:text-cyan-400 focus:outline-none transition-colors p-0.5 cursor-pointer"
+              aria-label={showPwd ? "Hide access key" : "Show access key"}
+            >
+              {showPwd ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
+            </button>
+          </div>
+        </div>
 
-          <span
-            // type="button"
-            onClick={() => setShowPwd((s) => !s)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-100/80 hover:text-slate-100 p-1"
-            aria-label={showPwd ? "Hide accessKey" : "Show accessKey"}
+        {/* Dynamic Error State Alert */}
+        {error && (
+          <div
+            id="login-error"
+            role="status"
+            aria-live="polite"
+            className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-mono flex items-center gap-2"
           >
-            {showPwd ? (
-              <EyeOff className="w-5 h-5" />
-            ) : (
-              <Eye className="w-5 h-5" />
-            )}
-          </span>
-        </div>
+            <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-ping" />
+            <span>{error}</span>
+          </div>
+        )}
 
-        <div className="text-right -mt-2">
-          <button
-            type="button"
-            onClick={() => onSwitch?.("forgot-password")}
-            className="text-xs font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
-          >
-            Forgot Password?
-          </button>
-        </div>
-
-        {/* Error Message
-				<div role="status" aria-live="polite" className="min-h-5">
-					{error ? <p id="login-error" className="text-sm text-red-400">{error}</p> : null}
-				</div> */}
-
-        {/* Submit Button */}
+        {/* Action Button */}
         <div className="pt-2">
           <button
             type="submit"
             disabled={loading}
             aria-busy={loading}
-            className="btn relative w-full overflow-hidden rounded-lg px-6 py-3 font-extrabold text-lg 
-                         bg-linear-to-r from-[#00E5FF] via-[#FF0055] to-[#9b59ff] text-black shadow-lg 
-                         hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed focus:ring-2 focus:ring-offset-2 focus:ring-[#00E5FF] focus:ring-offset-gray-950 flex items-center justify-center"
+            className="relative w-full group overflow-hidden rounded-lg py-3.5 px-6 font-mono font-bold uppercase text-sm tracking-widest text-slate-950 bg-gradient-to-r from-[#00E5FF] via-[#00B8E6] to-[#FF4170] hover:brightness-110 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(0,229,255,0.4)] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
           >
             {loading ? (
-              <Loader2 className="w-5 h-5 animate-spin mr-2" />
-            ) : null}
-            <span className={`${isDarkMode ? "text-slate-100" : "text-black"}`}>
-              {loading ? "Signing in..." : "Sign In"}
-            </span>
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                <span>Authenticating...</span>
+              </>
+            ) : (
+              <>
+                <span>Initialize Session</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
           </button>
         </div>
 
-        {/* Switch to Signup */}
-        <p className="mt-4 text-sm text-gray-300 text-center">
-          New here?{" "}
-          <span
-            // type="button"
-            onClick={() => onSwitch?.("signup")}
-            className="text-[#00E5FF] font-semibold hover:text-[#00B8E6] transition-colors inline-flex items-center gap-2 cursor-pointer"
-          >
-            Register Me 😊
-          </span>
-        </p>
+        {/* Footer Navigation Switcher */}
+        <div className="pt-4 text-center border-t border-slate-800/60">
+          <p className="text-xs text-slate-400">
+            Unregistered Agent?{" "}
+            <button
+              type="button"
+              onClick={() => onSwitch?.("signup")}
+              className="text-[#00E5FF] font-semibold hover:text-cyan-300 underline underline-offset-4 focus:outline-none focus:ring-1 focus:ring-[#00E5FF] rounded px-1 transition-all cursor-pointer"
+            >
+              Request Access
+            </button>
+          </p>
+        </div>
       </form>
     </div>
   );
