@@ -94,7 +94,7 @@ ChartJS.register(
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("overview");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [tournaments, setTournaments] = useState([]);
   const [joiners, setJoiners] = useState([]);
   const { user, MALIK } = useContext(UserContext);

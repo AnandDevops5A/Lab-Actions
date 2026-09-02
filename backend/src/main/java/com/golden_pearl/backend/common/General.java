@@ -29,6 +29,10 @@ public class General {
         return LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
     }
 
+    public Long getCurrentTimeMillis() {
+        return getCurrentDateTime().atZone(ZoneId.of("Asia/Kolkata")).toInstant().toEpochMilli();
+    }
+
     public LocalDate getCurrentDate() {
         return LocalDate.now(ZoneId.of("Asia/Kolkata"));
     }

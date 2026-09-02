@@ -1,14 +1,12 @@
 package com.golden_pearl.backend.services;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
-import org.hibernate.validator.internal.util.stereotypes.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -30,6 +28,21 @@ public class TournamentService {
 
     private final General general;
 
+    // Every cache that can hold data derived from a Tournament row. Kept as one
+    // list so every mutating method evicts the same set -- previously several
+    // methods (setLiveStreamLink, saveAllTournaments, delete*, addTournament)
+    // forgot to evict "nextTournament" and "tournamentsByIds", which meant
+    // those endpoints could serve stale data indefinitely after a write.
+    private static final String CACHE_TOURNAMENT = "tournament";
+    private static final String CACHE_TOURNAMENTS = "tournaments";
+    private static final String CACHE_TOURNAMENTS_IDS = "tournamentsIds";
+    private static final String CACHE_TOURNAMENTS_BY_IDS = "tournamentsByIds";
+    private static final String CACHE_UPCOMING = "upcomingTournaments";
+    private static final String CACHE_COMPLETED = "completedTournaments";
+    private static final String CACHE_LAST = "lastTournament";
+    private static final String CACHE_NEXT = "nextTournament";
+    private static final String CACHE_ADMIN_DATA = "adminData";
+
     // constructor
     public TournamentService(TournamentRepository tournamentRepository, General general) {
         this.tournamentRepository = tournamentRepository;
@@ -38,30 +51,49 @@ public class TournamentService {
 
     // get all tournamentsIds
 
-    @Cacheable(value = "tournamentsIds", sync = true)
+    @Cacheable(value = CACHE_TOURNAMENTS_IDS, sync = true)
     public List<String> getAllTournamentsIds() {
-        return tournamentRepository.findAllIds().stream()
-                .map(Tournament::getId)
-                .toList();
+        return tournamentRepository.findAllIds();
     }
 
+    // Delegates straight to the repository instead of pulling every id into
+    // memory and doing a linear List.contains() scan. This is an indexed
+    // existence check at the DB level (or a single cache hit if the entity is
+    // already cached), and it stays correct even if the tournamentsIds cache
+    // hasn't been refreshed yet.
     public boolean existsById(String id) {
-        return getAllTournamentsIds().contains(id);
+        if (id == null) {
+            return false;
+        }
+        return tournamentRepository.existsById(id);
     }
 
     // get all tournaments
 
-    @Cacheable(value = "tournaments", sync = true)
+    @Cacheable(value = CACHE_TOURNAMENTS, sync = true)
     public List<TournamentDTO> getAllTournaments() {
-        return general.convertToDTOs(tournamentRepository.findAll());
+        try {
+            List<Tournament> tournaments = tournamentRepository.findAll();
+            if (tournaments.isEmpty()) {
+                return new ArrayList<>();
+            }
+            return general.convertToDTOs(tournaments);
+        } catch (Exception e) {
+            logger.error("Failed to get all tournaments: {}", e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     // add tournament
     @Caching(evict = {
-            @CacheEvict(value = "tournaments", allEntries = true),
-            @CacheEvict(value = "tournamentsIds", allEntries = true),
-            @CacheEvict(value = "upcomingTournaments", allEntries = true),
-            @CacheEvict(value = "adminData", allEntries = true)
+            @CacheEvict(value = CACHE_TOURNAMENTS, allEntries = true),
+            @CacheEvict(value = CACHE_TOURNAMENTS_IDS, allEntries = true),
+            @CacheEvict(value = CACHE_TOURNAMENTS_BY_IDS, allEntries = true),
+            @CacheEvict(value = CACHE_UPCOMING, allEntries = true),
+            @CacheEvict(value = CACHE_COMPLETED, allEntries = true),
+            @CacheEvict(value = CACHE_LAST, allEntries = true),
+            @CacheEvict(value = CACHE_NEXT, allEntries = true),
+            @CacheEvict(value = CACHE_ADMIN_DATA, allEntries = true)
     })
     public List<TournamentDTO> addTournament(Tournament tournamentDetails) {
         // The startDateTime should be set in the request body by the client
@@ -77,7 +109,7 @@ public class TournamentService {
     }
 
     // get tournament by id
-    @Cacheable(value = "tournament", key = "#id", sync = true)
+    @Cacheable(value = CACHE_TOURNAMENT, key = "#id", sync = true)
     public Tournament getTournamentById(String id) {
         if (id == null)
             return null;
@@ -92,31 +124,40 @@ public class TournamentService {
 
     // delete tournament by id
     @Caching(evict = {
-            @CacheEvict(value = "tournament", key = "#id"),
-            @CacheEvict(value = "tournaments", allEntries = true),
-            @CacheEvict(value = "tournamentsIds", allEntries = true),
-            @CacheEvict(value = "upcomingTournaments", allEntries = true),
-            @CacheEvict(value = "completedTournaments", allEntries = true),
-            @CacheEvict(value = "lastTournament", allEntries = true),
-            @CacheEvict(value = "adminData", allEntries = true)
+            @CacheEvict(value = CACHE_TOURNAMENT, key = "#id"),
+            @CacheEvict(value = CACHE_TOURNAMENTS, allEntries = true),
+            @CacheEvict(value = CACHE_TOURNAMENTS_IDS, allEntries = true),
+            @CacheEvict(value = CACHE_TOURNAMENTS_BY_IDS, allEntries = true),
+            @CacheEvict(value = CACHE_UPCOMING, allEntries = true),
+            @CacheEvict(value = CACHE_COMPLETED, allEntries = true),
+            @CacheEvict(value = CACHE_LAST, allEntries = true),
+            @CacheEvict(value = CACHE_NEXT, allEntries = true),
+            @CacheEvict(value = CACHE_ADMIN_DATA, allEntries = true)
     })
     public boolean deleteTournamentById(String id) {
-        if (id == null || !existsById(id))
+        try {
+            if (id == null || !existsById(id))
+                return false;
+            tournamentRepository.deleteById(id);
+            logger.info("Tournament with id {} deleted successfully", id);
+            return true;
+        } catch (Exception e) {
+            logger.error("Failed to delete tournament with id {}: {}", id, e.getMessage());
             return false;
-        tournamentRepository.deleteById(id);
-        logger.info("Tournament with id {} deleted successfully", id);
-        return true;
+        }
     }
 
-    // delete tournament by id
+    // delete tournaments by ids
     @Caching(evict = {
-            @CacheEvict(value = "tournaments", allEntries = true),
-            @CacheEvict(value = "tournament", allEntries = true),
-            @CacheEvict(value = "tournamentsIds", allEntries = true),
-            @CacheEvict(value = "upcomingTournaments", allEntries = true),
-            @CacheEvict(value = "completedTournaments", allEntries = true),
-            @CacheEvict(value = "lastTournament", allEntries = true),
-            @CacheEvict(value = "adminData", allEntries = true)
+            @CacheEvict(value = CACHE_TOURNAMENT, allEntries = true),
+            @CacheEvict(value = CACHE_TOURNAMENTS, allEntries = true),
+            @CacheEvict(value = CACHE_TOURNAMENTS_IDS, allEntries = true),
+            @CacheEvict(value = CACHE_TOURNAMENTS_BY_IDS, allEntries = true),
+            @CacheEvict(value = CACHE_UPCOMING, allEntries = true),
+            @CacheEvict(value = CACHE_COMPLETED, allEntries = true),
+            @CacheEvict(value = CACHE_LAST, allEntries = true),
+            @CacheEvict(value = CACHE_NEXT, allEntries = true),
+            @CacheEvict(value = CACHE_ADMIN_DATA, allEntries = true)
     })
     public boolean deleteTournamentsByIds(List<String> ids) {
         if (ids == null || ids.isEmpty()) {
@@ -135,64 +176,82 @@ public class TournamentService {
 
     // update tournament by id
     @Caching(evict = {
-            @CacheEvict(value = "tournament", key = "#tournamentDetails.id"),
-            @CacheEvict(value = "tournaments", allEntries = true),
-            @CacheEvict(value = "upcomingTournaments", allEntries = true),
-            @CacheEvict(value = "lastTournament", allEntries = true),
-            @CacheEvict(value = "adminData", allEntries = true),
+            @CacheEvict(value = CACHE_TOURNAMENT, key = "#tournamentDetails.id"),
+            @CacheEvict(value = CACHE_TOURNAMENTS, allEntries = true),
+            @CacheEvict(value = CACHE_TOURNAMENTS_BY_IDS, allEntries = true),
+            @CacheEvict(value = CACHE_UPCOMING, allEntries = true),
+            @CacheEvict(value = CACHE_COMPLETED, allEntries = true),
+            @CacheEvict(value = CACHE_LAST, allEntries = true),
+            @CacheEvict(value = CACHE_NEXT, allEntries = true),
+            @CacheEvict(value = CACHE_ADMIN_DATA, allEntries = true)
     })
     public TournamentDTO updateTournament(TournamentUpdateDRO tournamentDetails) {
-        if (!existsById(tournamentDetails.id()))
+        try {
+            if (tournamentDetails == null || !existsById(tournamentDetails.id()))
+                return null;
+            Tournament existingTournament = getTournamentById(tournamentDetails.id());
+            if (existingTournament == null)
+                return null;
+            existingTournament
+                    .setTournamentName(tournamentDetails.tournamentName() != null ? tournamentDetails.tournamentName()
+                            : existingTournament.getTournamentName());
+            existingTournament.setPrizePool(tournamentDetails.prizePool() != null ? tournamentDetails.prizePool()
+                    : existingTournament.getPrizePool());
+            existingTournament.setDateTime(
+                    tournamentDetails.dateTime() != null ? tournamentDetails.dateTime()
+                            : existingTournament.getDateTime());
+            existingTournament.setPlatform(
+                    tournamentDetails.platform() != null ? tournamentDetails.platform()
+                            : existingTournament.getPlatform());
+            existingTournament.setDescription(tournamentDetails.description() != null ? tournamentDetails.description()
+                    : existingTournament.getDescription());
+            existingTournament.setEntryFee(
+                    tournamentDetails.entryFee() != null ? tournamentDetails.entryFee()
+                            : existingTournament.getEntryFee());
+            existingTournament
+                    .setSlot(
+                            tournamentDetails.slot() != null ? tournamentDetails.slot() : existingTournament.getSlot());
+            TournamentDTO updated = general.convertToDTO(tournamentRepository.save(existingTournament));
+            logger.info("Tournament {} updated successfully", tournamentDetails.id());
+            return updated;
+        } catch (Exception e) {
+            logger.error("Failed to update tournament: {}", e.getMessage());
             return null;
-        Tournament existingTournament = getTournamentById(tournamentDetails.id());
-        if (existingTournament == null)
-            return null;
-        existingTournament
-                .setTournamentName(tournamentDetails.tournamentName() != null ? tournamentDetails.tournamentName()
-                        : existingTournament.getTournamentName());
-        existingTournament.setPrizePool(tournamentDetails.prizePool() != null ? tournamentDetails.prizePool()
-                : existingTournament.getPrizePool());
-        existingTournament.setDateTime(
-                tournamentDetails.dateTime() != null ? tournamentDetails.dateTime() : existingTournament.getDateTime());
-        existingTournament.setPlatform(
-                tournamentDetails.platform() != null ? tournamentDetails.platform() : existingTournament.getPlatform());
-        existingTournament.setDescription(tournamentDetails.description() != null ? tournamentDetails.description()
-                : existingTournament.getDescription());
-        existingTournament.setEntryFee(
-                tournamentDetails.entryFee() != null ? tournamentDetails.entryFee() : existingTournament.getEntryFee());
-        existingTournament
-                .setSlot(tournamentDetails.slot() != null ? tournamentDetails.slot() : existingTournament.getSlot());
-        logger.info("Tournament updated successfully");
-        return general.convertToDTO(tournamentRepository.save(existingTournament));
+        }
     }
 
     // get completed tournaments
-    @Cacheable(value = "completedTournaments", sync = true)
+    @Cacheable(value = CACHE_COMPLETED, sync = true)
     public List<TournamentDTO> getCompletedTournaments() {
-        return general.convertToDTOs(tournamentRepository.findAllCompletedTournaments(general.getCurrentDateTime()));
+        List<Tournament> completedTournaments = tournamentRepository.findAllCompletedTournaments(general.getCurrentTimeMillis());
+        return general.convertToDTOs(completedTournaments != null ? completedTournaments : new ArrayList<>());
     }
 
     // get upcoming tournaments
-    @Cacheable(value = "upcomingTournaments", sync = true)
+    @Cacheable(value = CACHE_UPCOMING, sync = true)
     public List<TournamentDTO> getUpcomingTournaments() {
-        return general.convertToDTOs(tournamentRepository.findAllUpcomingTournaments(general.getCurrentDateTime()));
+        List<Tournament> upcomingTournaments = tournamentRepository.findAllUpcomingTournaments(general.getCurrentTimeMillis());
+        return general.convertToDTOs(upcomingTournaments != null ? upcomingTournaments : new ArrayList<>());
     }
 
     // get last tournament
-    @Cacheable(value = "lastTournament", sync = true)
+    @Cacheable(value = CACHE_LAST, sync = true)
     public TournamentDTO getLastTournament() {
-        return general.convertToDTO(tournamentRepository.findLastCompletedTournament(general.getCurrentDateTime()));
+        TournamentDTO lastTournament = general.convertToDTO(tournamentRepository.findLastCompletedTournament(general.getCurrentTimeMillis()));
+        return lastTournament != null ? lastTournament : new TournamentDTO();
     }
 
     // save all tournaments
     @Caching(evict = {
-            @CacheEvict(value = "tournament", allEntries = true),
-            @CacheEvict(value = "tournaments", allEntries = true),
-            @CacheEvict(value = "tournamentsIds", allEntries = true),
-            @CacheEvict(value = "upcomingTournaments", allEntries = true),
-            @CacheEvict(value = "completedTournaments", allEntries = true),
-            @CacheEvict(value = "lastTournament", allEntries = true),
-            @CacheEvict(value = "adminData", allEntries = true)
+            @CacheEvict(value = CACHE_TOURNAMENT, allEntries = true),
+            @CacheEvict(value = CACHE_TOURNAMENTS, allEntries = true),
+            @CacheEvict(value = CACHE_TOURNAMENTS_IDS, allEntries = true),
+            @CacheEvict(value = CACHE_TOURNAMENTS_BY_IDS, allEntries = true),
+            @CacheEvict(value = CACHE_UPCOMING, allEntries = true),
+            @CacheEvict(value = CACHE_COMPLETED, allEntries = true),
+            @CacheEvict(value = CACHE_LAST, allEntries = true),
+            @CacheEvict(value = CACHE_NEXT, allEntries = true),
+            @CacheEvict(value = CACHE_ADMIN_DATA, allEntries = true)
     })
     public List<TournamentDTO> saveAllTournaments(List<TournamentUpdateDRO> tournaments) {
 
@@ -200,34 +259,30 @@ public class TournamentService {
             throw new IllegalArgumentException("Tournament list cannot be null or empty");
         }
         List<Tournament> tournamentsToSave = convertTournamentDROsToTournaments(tournaments);
-        if (tournamentsToSave == null || tournamentsToSave.isEmpty())
+        if (tournamentsToSave.isEmpty())
             return new ArrayList<>();
-        else {
-            Iterable<Tournament> savedTournaments = tournamentRepository
-                    .saveAll(tournamentsToSave);
-            // type of savedTournaments is Iterable<Tournament>, we need to convert it to
-            // List<Tournament> to convert it to List<TournamentDTO>
-            List<Tournament> savedTournamentList = new ArrayList<>();
-            savedTournaments.forEach(savedTournamentList::add);
-            return general.convertToDTOs(savedTournamentList);
-        }
+
+        Iterable<Tournament> savedTournaments = tournamentRepository.saveAll(tournamentsToSave);
+        List<Tournament> savedTournamentList = new ArrayList<>();
+        savedTournaments.forEach(savedTournamentList::add);
+        return general.convertToDTOs(savedTournamentList);
     }
 
-    // register user for a tournament
-
-    @Cacheable(value = "tournamentsByIds", sync = true)
+    // get tournaments by ids
+    @Cacheable(value = CACHE_TOURNAMENTS_BY_IDS, sync = true)
     public List<TournamentDTO> getTournamentsbyids(List<String> tournamentIds) {
         if (tournamentIds == null || tournamentIds.isEmpty()) {
             throw new IllegalArgumentException("Tournament IDs cannot be null or empty");
         }
-        // checking all id exists or not
-        for (String id : tournamentIds) {
-            if (!existsById(id)) {
-                logger.info("Tournament not found with id: {}", id);
-                return new ArrayList<>();
-            }
+        List<Tournament> found = tournamentRepository.findAllById(tournamentIds);
+        // findAllById silently skips ids that don't exist; if the caller expects
+        // every id to resolve, treat a partial result as "not found" instead of
+        // returning a mismatched subset.
+        if (found.size() != tournamentIds.size()) {
+            logger.info("One or more tournament ids not found in request: {}", tournamentIds);
+            return new ArrayList<>();
         }
-        return general.convertToDTOs(tournamentRepository.findAllById(tournamentIds));
+        return general.convertToDTOs(found);
     }
 
     // convert tournamentDROs to tournaments
@@ -253,7 +308,16 @@ public class TournamentService {
         return tournament;
     }
 
-    @CacheEvict(value = "tournament", key = "#tournamentLiveStreamLinkDRO.tournamentId")
+    @Caching(evict = {
+            @CacheEvict(value = CACHE_TOURNAMENT, key = "#tournamentLiveStreamLinkDRO.tournamentId"),
+            @CacheEvict(value = CACHE_TOURNAMENTS, allEntries = true),
+            @CacheEvict(value = CACHE_TOURNAMENTS_BY_IDS, allEntries = true),
+            @CacheEvict(value = CACHE_UPCOMING, allEntries = true),
+            @CacheEvict(value = CACHE_COMPLETED, allEntries = true),
+            @CacheEvict(value = CACHE_LAST, allEntries = true),
+            @CacheEvict(value = CACHE_NEXT, allEntries = true),
+            @CacheEvict(value = CACHE_ADMIN_DATA, allEntries = true)
+    })
     public boolean setLiveStreamLink(TournamentLiveStreamLinkDRO tournamentLiveStreamLinkDRO) {
         if (tournamentLiveStreamLinkDRO == null || !existsById(tournamentLiveStreamLinkDRO.tournamentId()))
             return false;
@@ -263,27 +327,23 @@ public class TournamentService {
         try {
             tournament.setLiveStreamLink(tournamentLiveStreamLinkDRO.liveStreamLink());
             tournamentRepository.save(tournament);
-            logger.info("Live stream link set successfully");
+            logger.info("Live stream link set successfully for tournament {}", tournamentLiveStreamLinkDRO.tournamentId());
             return true;
         } catch (Exception e) {
             logger.error("Failed to set live stream link: {}", e.getMessage());
             return false;
         }
-
     }
 
-    @Cacheable(value = "nextTournament", sync = true)
-    public Tournament getNextTournament() {
+    @Cacheable(value = CACHE_NEXT, sync = true)
+    public TournamentDTO getNextTournament() {
         List<TournamentDTO> upcomingTournaments = getUpcomingTournaments();
         if (upcomingTournaments == null || upcomingTournaments.isEmpty()) {
             return null;
         }
 
-        // Find the DTO with the minimum dateTime using a stream for cleaner code
-        // and then map it to the full Tournament entity.
         return upcomingTournaments.stream()
-                .min((t1, t2) -> Long.compare(t1.getDateTime(), t2.getDateTime()))
-                .map(dto -> getTournamentById(dto.getId()))
+                .min(Comparator.comparingLong(TournamentDTO::getDateTime))
                 .orElse(null);
     }
 }

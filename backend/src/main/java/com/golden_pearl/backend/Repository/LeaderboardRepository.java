@@ -1,6 +1,7 @@
 package com.golden_pearl.backend.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +11,32 @@ import org.springframework.data.jpa.repository.Query;
 import com.golden_pearl.backend.DTO.TournamentWithLeaderboard;
 import com.golden_pearl.backend.Models.LeaderBoard;
 
+import io.lettuce.core.dynamic.annotation.Param;
+
 public interface LeaderboardRepository extends JpaRepository<LeaderBoard, String> {
+
+
+    // Fetch top leaderboard entries for a tournament with User details pre-fetched
+    @Query("SELECT lb FROM LeaderBoard lb " +
+           "JOIN FETCH lb.user " +
+           "WHERE lb.tournamentId = :tournamentId " +
+           "ORDER BY lb.score DESC, lb.createdAt ASC")
+    List<LeaderBoard> findTopByTournamentIdWithUser(@Param("tournamentId") String tournamentId);
+
+    // Fetch single leaderboard entry with User details by transactionId
+    @Query("SELECT lb FROM LeaderBoard lb " +
+           "JOIN FETCH lb.user " +
+           "WHERE lb.transactionId = :transactionId")
+    Optional<LeaderBoard> findByTransactionIdWithUser(@Param("transactionId") String transactionId);
+
+    // Fetch all entries for a specific user with both User and Tournament pre-fetched
+    @Query("SELECT lb FROM LeaderBoard lb " +
+           "JOIN FETCH lb.user " +
+           "JOIN FETCH lb.tournament " +
+           "WHERE lb.userId = :userId " +
+           "ORDER BY lb.createdAt DESC")
+    List<LeaderBoard> findAllByUserIdWithUserAndTournament(@Param("userId") String userId);
+
 
     // Find all entries for a specific tournament
     List<LeaderBoard> findByTournamentId(String tournamentId);
@@ -39,12 +65,12 @@ public interface LeaderboardRepository extends JpaRepository<LeaderBoard, String
 
      List<LeaderBoard> findByTournamentIdIn(List<String> tournamentIds);
 
-    @Query("select new com.golden_pearl.backend.DTO.TournamentWithLeaderboard(" +
-            "t.tournamentName, t.prizePool, t.dateTime, t.platform, " +
-            "l.tempEmail, l.transactionId, l.investAmount, l.winAmount, l.rank, l.isApproved) " +
-            "from LeaderBoard l join Tournament t on t.id = l.tournamentId " +
-            "where l.userId = :userId")
-    List<TournamentWithLeaderboard> findTournamentsByUserIdWithDetails(String userId);
+     //get all leaderboard entries for a specific user join tournament
+    @Query("SELECT lb FROM LeaderBoard lb " +
+           "LEFT JOIN FETCH lb.tournament " +
+           "WHERE lb.userId = :userId " +
+           "ORDER BY lb.time DESC")
+    List<LeaderBoard> findAllByUserIdWithTournament(@Param("userId") String userId);
 
     List<LeaderBoard> findTop5ByTournamentIdOrderByRankAsc(String id);
     List<LeaderBoard> findByTournamentIdAndRankBetween(String tournamentId, int start, int end);

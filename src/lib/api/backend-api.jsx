@@ -1,133 +1,162 @@
 "use client";
-import React, { useState, useCallback, useEffect, use, useRef } from "react";
+
+import React, { useState, useCallback, useEffect, useRef, use } from "react";
 import axios from "axios";
-import { UserContext } from "@/lib/contexts/user-context"
-import { APICacheContext } from "@/lib/contexts/api-cache-context"
-import { checkRateLimit, ENDPOINT_RATE_LIMITS, DEFAULT_RATE_LIMIT } from "@/lib/utils/rate-limiter"
+import { UserContext } from "@/lib/contexts/user-context";
+import { APICacheContext } from "@/lib/contexts/api-cache-context";
+import { checkRateLimit } from "@/lib/utils/rate-limiter";
 import { getSecureCookie } from "@/app/api/httpcookies/cookiesManagement";
 import LZString from "lz-string";
 
-const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || "http://localhost:8082/api/").replace(/\/$/, ""); // Remove trailing slash if present
-const MAX_RETRIES = 2;
-const RETRY_DELAY = 1000; // ms
+const BASE_URL = (
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.BACKEND_URL ||
+  "http://localhost:8082/api"
+).replace(/\/+$/, "");
 
-// Endpoints that should NOT be cached (sensitive data, authentication, etc.)
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 2000;
+
+// Sensitive endpoints that MUST NOT be cached
 const NO_CACHE_ENDPOINTS = new Set([
-  "users/verify",      // Login - returns tokens
-  "users/register",    // Registration - sensitive data
-  "users/resetPassword", // Password reset
-  "users/confirm-reset", // Confirm password reset
-  "users/updatePassword", // Password updates
+  "users/verify",
+  "users/register",
+  "users/resetPassword",
+  "users/confirm-reset",
+  "users/updatePassword",
 ]);
 
 /**
- * Generic fetcher with retry logic, timeout, rate limiting, and context caching
+ * Utility: Extract clean endpoint path from input string or path
  */
-const createFetcher = (cacheContext, explicitToken = null) => {
-  return async (url, method = "GET", data = null, timeout = 10000, skipCache = false) => {
-    let lastError;
-
-    // Extract endpoint name for cache and rate limiting FIRST
-    const urlObj = new URL(url);
-    const endpoint = urlObj.pathname.replace(`${urlObj.origin}/`, "");
-
-    // Get token from context - but skip for authentication endpoints
-    let token = null;
-    if (!NO_CACHE_ENDPOINTS.has(endpoint) && typeof window !== 'undefined') {
-      try {
-        // Fallback: Try to read from cookie if not provided explicitly
-        const cookieRes = await getSecureCookie("currentUser");
-        if (cookieRes?.success && cookieRes.data) {
-          const decompressed = LZString.decompressFromUTF16(cookieRes.data);
-          const user = JSON.parse(decompressed);
-          token = user?.token || user?.accessToken;
-        }
-      } catch (error) {
-        console.debug("Could not get token from cookie fallback");
-      }
-    }
-
-    // Check rate limit using standalone rate limiter
-    if (!skipCache) {
-      const rateLimitCheck = checkRateLimit(endpoint);
-
-      if (!rateLimitCheck.allowed) {
-        console.warn(
-          `Rate limit exceeded for ${endpoint}. Retry after ${rateLimitCheck.retryAfter}ms`
-        );
-        
-        // Try to return cached data if available
-        const cacheKey = method === "GET" ? [url, method].join("|") : null;
-        if (cacheKey && cacheContext) {
-          const cached = cacheContext.getCache(cacheKey);
-          if (cached) {
-            console.info(`Returning cached data for ${endpoint}`);
-            return cached;
-          }
-        }
-
-        throw {
-          status: 429,
-          message: `Rate limit exceeded. Retry after ${Math.ceil(rateLimitCheck.retryAfter / 1000)}s`,
-          noRetry: true,
-        };
-      }
-    }
-
-    // Check cache for GET requests
-    let cacheKey = null;
-    if (method === "GET" && !skipCache && cacheContext && !NO_CACHE_ENDPOINTS.has(endpoint)) {
-      cacheKey = [url, method].join("|");
-      const cached = cacheContext.getCache(cacheKey);
-      if (cached) {
-        return cached;
-      }
-    }
-
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      try {
-        const response = await axios({
-          url,
-          method,
-          data,
-          timeout,
-          headers: { 
-            "Content-Type": "application/json",
-            ...(token && { "Authorization": `Bearer ${token}` })
-          },
-        });
-
-        // Cache successful GET responses
-        if (method === "GET" && cacheKey && cacheContext && !NO_CACHE_ENDPOINTS.has(endpoint)) {
-          cacheContext.setCache(cacheKey, response.data, 300000); // 5 minute TTL
-        }
-
-        return response.data;
-      } catch (error) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-
-        lastError = { status, message };
-
-        // Don't retry on 4xx client errors (401, 403, 404, etc.)
-        if (status && status >= 400 && status < 500) {
-          lastError.noRetry = true;
-          throw lastError;
-        }
-
-        if (attempt === MAX_RETRIES - 1) break;
-        
-        const delay = RETRY_DELAY * Math.pow(2, attempt);
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      }
-    }
-    throw lastError;
-  };
+const normalizeEndpoint = (endpoint) => {
+  if (!endpoint) return "";
+  return endpoint.replace(/^\/+/, "").split("?")[0];
 };
 
 /**
- * Custom hook for API calls with context caching
- * Automatically clears cache on page refresh/reload
+ * Utility: Fetch Auth Token fallback from Cookies safely
+ */
+const getAuthTokenFromCookie = async () => {
+  if (typeof window === "undefined") return null;
+  try {
+    const cookieRes = await getSecureCookie("currentUser");
+    if (cookieRes?.success && cookieRes.data) {
+      const decompressed = LZString.decompressFromUTF16(cookieRes.data);
+      if (!decompressed) return null;
+      const user = JSON.parse(decompressed);
+      return user?.token || user?.accessToken || null;
+    }
+  } catch (error) {
+    console.debug("Cookie token extraction bypassed:", error);
+  }
+  return null;
+};
+
+/**
+ * Pure JavaScript Fetcher (Free from React Hooks)
+ */
+const executeRequest = async (
+  endpoint,
+  {
+    method = "GET",
+    data = null,
+    timeout = 10000,
+    skipCache = false,
+    token = null,
+    cacheContext = null,
+  } = {}
+) => {
+  const cleanEndpoint = normalizeEndpoint(endpoint);
+  const fullUrl = `${BASE_URL}/${cleanEndpoint}`;
+
+  // 1. Resolve Auth Token if missing
+  let authToken = token;
+  if (!authToken && !NO_CACHE_ENDPOINTS.has(cleanEndpoint)) {
+    authToken = await getAuthTokenFromCookie();
+  }
+
+  // 2. Check Rate Limits
+  if (!skipCache && method !== "GET") {
+    const rateCheck = checkRateLimit(cleanEndpoint);
+    if (!rateCheck.allowed) {
+      const cacheKey = method === "GET" ? `${fullUrl}|${method}` : null;
+      if (cacheKey && cacheContext) {
+        const cached = cacheContext.getCache(cacheKey);
+        if (cached) return cached;
+      }
+
+      throw {
+        status: 429,
+        message: `Rate limit exceeded. Retry after ${Math.ceil(
+          rateCheck.retryAfter / 1000
+        )}s`,
+        noRetry: true,
+      };
+    }
+  }
+
+  // 3. Cache Checking for GET Requests
+  const cacheKey =
+    method === "GET" && !skipCache && !NO_CACHE_ENDPOINTS.has(cleanEndpoint)
+      ? `${fullUrl}|${method}`
+      : null;
+
+  if (cacheKey && cacheContext) {
+    const cachedData = cacheContext.getCache(cacheKey);
+    if (cachedData !== undefined && cachedData !== null) {
+      return cachedData;
+    }
+  }
+
+  // 4. Execution with Retry Mechanism
+  let lastError;
+  const isRetryable = method === "GET"; // Restrict auto-retries to idempotent GET requests
+  const maxAttempts = isRetryable ? MAX_RETRIES : 1;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const response = await axios({
+        url: fullUrl,
+        method,
+        data,
+        timeout,
+        headers: {
+          "Content-Type": "application/json",
+          ...(authToken && { Authorization: `Bearer ${authToken}` }),
+        },
+      });
+
+      // Save to cache on success
+      if (cacheKey && cacheContext) {
+        cacheContext.setCache(cacheKey, response.data, 300000); // 5 mins TTL
+      }
+
+      return response.data;
+    } catch (error) {
+      const status = error.response?.status;
+      const message = error.response?.data?.message || error.message;
+
+      lastError = { status: status || 500, message };
+
+      // Prevent retry on 4xx Client Errors
+      if (status && status >= 400 && status < 500) {
+        lastError.noRetry = true;
+        throw lastError;
+      }
+
+      if (attempt === maxAttempts - 1) break;
+
+      const delay = RETRY_DELAY * Math.pow(2, attempt);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+
+  throw lastError;
+};
+
+/**
+ * Custom React Hook for Component-Level API Handling
  */
 export const useBackendAPI = (
   endpoint,
@@ -135,78 +164,98 @@ export const useBackendAPI = (
   data = null,
   options = {}
 ) => {
-  const { skipCache = false, onError = null, revalidateInterval = 0 } = options;
+  const { skipCache = false, onError, revalidateInterval = 0 } = options;
+
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRevalidating, setIsRevalidating] = useState(false);
+
   const isRevalidatingRef = useRef(false);
-  
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
+
+  // React 19 context extraction at HOOK top-level ONLY
   let cacheContext = null;
   let userContext = null;
-  let token = null;
 
-  if (typeof window !== 'undefined') {
-    try {
-      cacheContext = use(APICacheContext);
-      userContext = use(UserContext);
-      // Only get token for non-auth endpoints
-      if (!NO_CACHE_ENDPOINTS.has(endpoint)) {
-        token = userContext?.user?.token || userContext?.user?.accessToken;
-      }
-    } catch (err) {
-      console.debug("Context not available in component");
-    }
+  try {
+    cacheContext = use(APICacheContext);
+    userContext = use(UserContext);
+  } catch (err) {
+    // Context fallback when rendered outside providers
   }
 
-  const performFetch = useCallback(async ({ forceRefresh = false, isBackground = false } = {}) => {
-    if (!endpoint) {
-      setError(new Error("Endpoint is required"));
-      if (!isBackground) setIsLoading(false);
-      return;
-    }
+  const token =
+    userContext?.user?.token || userContext?.user?.accessToken || null;
 
-    if (isBackground) {
-      if (isRevalidatingRef.current) return;
-      isRevalidatingRef.current = true;
-      setIsRevalidating(true);
-    } else {
-      setIsLoading(true);
-      setError(null);
-    }
+  // Stable stringified payload to prevent unnecessary dependency updates
+  const serializedData = JSON.stringify(data);
 
-    try {
-      const fetcher = createFetcher(cacheContext, token);
-      const url = `${BASE_URL}/${endpoint}`;
-      const data_result = await fetcher(url, method, data, 10000, forceRefresh || skipCache);
-      setResult(data_result);
-      setError(null);
-    } catch (err) {
-      const errorObj = {
-        status: err.status || 500,
-        message: err.message || "Unknown error occurred",
-      };
-      if (!isBackground) {
-        setError(errorObj);
-        onError?.(errorObj);
-      } else {
-        console.error(`Background revalidation for ${endpoint} failed:`, err.message);
+  const performFetch = useCallback(
+    async ({ forceRefresh = false, isBackground = false } = {}) => {
+      if (!endpoint) {
+        setError({ status: 400, message: "Endpoint is required" });
+        if (!isBackground) setIsLoading(false);
+        return;
       }
-    } finally {
+
       if (isBackground) {
-        isRevalidatingRef.current = false;
-        setIsRevalidating(false);
+        if (isRevalidatingRef.current) return;
+        isRevalidatingRef.current = true;
+        setIsRevalidating(true);
       } else {
-        setIsLoading(false);
+        setIsLoading(true);
+        setError(null);
       }
-    }
-  }, [endpoint, method, data, cacheContext, token, skipCache, onError]);
 
-  const mutate = useCallback(() => performFetch({ forceRefresh: true, isBackground: false }), [performFetch]);
+      try {
+        const payloadData = serializedData ? JSON.parse(serializedData) : null;
+        const responseData = await executeRequest(endpoint, {
+          method,
+          data: payloadData,
+          skipCache: forceRefresh || skipCache,
+          token,
+          cacheContext,
+        });
 
-  // Load data on mount and when endpoint/method changes
+        setResult(responseData);
+        setError(null);
+      } catch (err) {
+        const errorObj = {
+          status: err?.status || 500,
+          message: err?.message || "An unexpected error occurred",
+        };
+
+        if (!isBackground) {
+          setError(errorObj);
+          onErrorRef.current?.(errorObj);
+        } else {
+          console.error(`Background revalidation failed: ${endpoint}`, err);
+        }
+      } finally {
+        if (isBackground) {
+          isRevalidatingRef.current = false;
+          setIsRevalidating(false);
+        } else {
+          setIsLoading(false);
+        }
+      }
+    },
+    [endpoint, method, serializedData, skipCache, token, cacheContext]
+  );
+
+  const mutate = useCallback(
+    () => performFetch({ forceRefresh: true, isBackground: false }),
+    [performFetch]
+  );
+
   useEffect(() => {
-    performFetch({ forceRefresh: false, isBackground: false }); // Initial fetch
+    let isMounted = true;
+
+    if (isMounted) {
+      performFetch({ forceRefresh: false, isBackground: false });
+    }
 
     let intervalId = null;
     if (revalidateInterval > 0) {
@@ -214,30 +263,19 @@ export const useBackendAPI = (
         performFetch({ forceRefresh: true, isBackground: true });
       }, revalidateInterval);
     }
-    
-    // Clear cache on page visibility change (tab focus)
-    const handleVisibilityChange = () => {
-      if (!document.hidden && !skipCache) {
-        // Optionally refresh when tab becomes visible
-        // Uncomment line below if you want auto-refresh on tab focus
-        // performFetch({ forceRefresh: true, isBackground: true });
-      }
-    };
 
-    // Detect page reload/refresh - clear cache
     const handleBeforeUnload = () => {
-      cacheContext?.clearCache();
+      cacheContext?.clearCache?.();
     };
 
-    window.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
+      isMounted = false;
       if (intervalId) clearInterval(intervalId);
-      window.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [performFetch, revalidateInterval, skipCache, cacheContext]);
+  }, [performFetch, revalidateInterval]);
 
   return {
     result,
@@ -245,51 +283,50 @@ export const useBackendAPI = (
     isLoading,
     isRevalidating,
     mutate,
+    refresh: mutate,
     isEmpty: !result,
     isError: !!error,
-    refresh: mutate, // Alias for mutate
   };
 };
 
 /**
- * Backend API call with advanced error handling, rate limiting, and context caching
+ * Standalone imperative API Fetcher function
  */
 export async function FetchBackendAPI(
   endpoint,
-  { method = "POST", data = null, timeout = 15000, skipCache = false, token = null } = {},
+  { method = "POST", data = null, timeout = 15000, skipCache = false, token = null } = {}
 ) {
-  if (!endpoint) throw new Error("Endpoint is required");
-
-  const url = `${BASE_URL}/${endpoint}`;
-
-  let cacheContext = null;
-  if (typeof window !== 'undefined') {
-    try {
-      cacheContext = use(APICacheContext);
-    } catch (error) {
-      console.debug("APICacheContext not available");
-    }
+  if (!endpoint) {
+    return { ok: false, error: "Endpoint is required", status: 400 };
   }
 
   try {
-    const fetcher = createFetcher(cacheContext, token);
-    const response = await fetcher(url, method, data, timeout, skipCache);
+    const response = await executeRequest(endpoint, {
+      method,
+      data,
+      timeout,
+      skipCache,
+      token,
+    });
+
     return {
       ok: true,
       data: response,
       status: 200,
     };
   } catch (error) {
-    const errorMessage = error?.message || "Unknown error occurred";
     return {
       ok: false,
-      error: errorMessage,
+      error: error?.message || "An unexpected error occurred",
       status: error?.status || 500,
     };
   }
 }
 
-//user API functions
+/* ==========================================================================
+   USER API FUNCTIONS
+   ========================================================================== */
+
 export const getUsersByIds = async (userIds) => {
   return await FetchBackendAPI(`users/getUsersByIds/${userIds}`, {
     method: "GET",
@@ -302,25 +339,24 @@ export const getAllUsers = async () => {
   });
 };
 
-export const resetPassword=async(payload)=>{
-  return await FetchBackendAPI("users/updatePassword",{
-    method:"POST",
-    data:payload
+export const resetPassword = async (payload) => {
+  return await FetchBackendAPI("users/updatePassword", {
+    method: "POST",
+    data: payload,
   });
 };
 
 export const confirmPasswordReset = async (payload) => {
-  // This endpoint is an assumption for the new functionality
   return await FetchBackendAPI("users/confirm-reset", {
     method: "PUT",
     data: payload,
   });
 };
 
+/* ==========================================================================
+   TOURNAMENT API FUNCTIONS
+   ========================================================================== */
 
-
-
-//tournament ApI functions
 export const getAllTournaments = async () => {
   return await FetchBackendAPI("tournament/all", {
     method: "GET",
@@ -333,8 +369,8 @@ export const getUpcomingTournament = async () => {
   });
 };
 
-export const updateTournament=async(updateData)=>{
-  return await FetchBackendAPI(`tournament/update`, {
+export const updateTournament = async (updateData) => {
+  return await FetchBackendAPI("tournament/update", {
     method: "PUT",
     data: updateData,
   });
@@ -347,12 +383,11 @@ export const deleteTournamentById = async (tournamentId) => {
 };
 
 export const deleteTournamentsByIds = async (tournamentIds) => {
-  return await FetchBackendAPI(`tournament/delete`, {
+  return await FetchBackendAPI("tournament/delete", {
     method: "DELETE",
     data: tournamentIds,
   });
-}
-
+};
 
 export const getTournamentByIds = async (tournamentIds) => {
   return await FetchBackendAPI(`tournament/getTournamentsByIds/${tournamentIds}`, {
@@ -360,38 +395,30 @@ export const getTournamentByIds = async (tournamentIds) => {
   });
 };
 
-
-
-// delete participants from tournament
 export const deleteParticipantFromTournament = async (tournamentId, userIds) => {
-  const userIdsParam = userIds.join(",");
-  return await FetchBackendAPI(`leaderboard/deleteJoiners`, {
+  const userIdsParam = Array.isArray(userIds) ? userIds.join(",") : userIds;
+  return await FetchBackendAPI("leaderboard/deleteJoiners", {
     method: "DELETE",
     data: { tournamentId, userIdsParam },
   });
 };
 
-//get  next tournament details
 export const getNextTournamentDetails = async () => {
   return await FetchBackendAPI("tournament/next", {
     method: "GET",
   });
 };
 
-
-
-
-
-
-// Leaderboard API functions
-
+/* ==========================================================================
+   LEADERBOARD API FUNCTIONS
+   ========================================================================== */
 
 export const approveUserFromTournament = async (tournamentId, userId) => {
   return await FetchBackendAPI(
     `leaderboard/approve/${tournamentId}/user/${userId}`,
+    { method: "PUT" }
   );
 };
-
 
 export const getTopNLeaderboard = async (tournamentId, n) => {
   return await FetchBackendAPI(`leaderboard/${tournamentId}/top/${n}`, {
@@ -399,29 +426,27 @@ export const getTopNLeaderboard = async (tournamentId, n) => {
   });
 };
 
-
 export const updateLeaderboardScore = async (tournamentId, userId, score) => {
   return await FetchBackendAPI(
     `leaderboard/updateScore/${tournamentId}/${userId}/${score}`,
-    { method: "POST" },
+    { method: "POST" }
   );
 };
 
 export const updateLeaderboardRank = async (tournamentId, userId, rank) => {
-  return await FetchBackendAPI(`leaderboard/updateRank`, {
+  return await FetchBackendAPI("leaderboard/updateRank", {
     method: "POST",
     data: { tournamentId, userId, rank },
   });
 };
 
 export const registerAllUsersForTournament = async (tournamentId, userIds) => {
-  const userIdsParam = userIds.join(",");
+  const userIdsParam = Array.isArray(userIds) ? userIds.join(",") : userIds;
   return await FetchBackendAPI(
     `leaderboard/registerAll/${tournamentId}/users/${userIdsParam}`,
-    { method: "POST" },
+    { method: "POST" }
   );
 };
-
 
 export const joinTournament = async (form) => {
   return await FetchBackendAPI("leaderboard/register", {
@@ -431,12 +456,10 @@ export const joinTournament = async (form) => {
 };
 
 export const getUserTournamentDetails = async (userId) => {
-  return await FetchBackendAPI(`leaderboard/user/${userId}`, {         
+  return await FetchBackendAPI(`leaderboard/user/${userId}`, {
     method: "GET",
   });
 };
-
-
 
 export const getJoinersByTournamentId = async (tournamentId) => {
   return await FetchBackendAPI(`leaderboard/getJoiners/${tournamentId}`, {
@@ -445,9 +468,7 @@ export const getJoinersByTournamentId = async (tournamentId) => {
 };
 
 export const getJoinersByTournamentIdList = async (tournamentIds) => {
-  //it return all the leaderboard related to this tournament list
-
-  return await FetchBackendAPI(`leaderboard/getJoiners`, {
+  return await FetchBackendAPI("leaderboard/getJoiners", {
     method: "POST",
     data: tournamentIds,
   });
@@ -461,7 +482,7 @@ export const approveParticipantForTournament = async (participantId) => {
 
 export const updateParticipantTournamentStatus = async (
   participantId,
-  updateData,
+  updateData
 ) => {
   return await FetchBackendAPI(`leaderboard/update/${participantId}`, {
     method: "PUT",
@@ -479,20 +500,17 @@ export const getLastTournamentTopPlayers = async () => {
   return await FetchBackendAPI("leaderboard/lastTournamentTopPlayers", {
     method: "GET",
   });
-}
+};
 
-
-
-
-
-//review Apis
+/* ==========================================================================
+   REVIEW API FUNCTIONS
+   ========================================================================== */
 
 export const getAllReviews = async () => {
   return await FetchBackendAPI("review/all", {
-    method: "POST",
+    method: "GET",
   });
 };
-
 
 export const addNewReview = async (review) => {
   return await FetchBackendAPI("review/add", {
@@ -519,10 +537,9 @@ export const deleteReview = async (reviewId) => {
   });
 };
 
-
 export const addAdminReply = async (row) => {
   return await FetchBackendAPI("review/admin-reply", {
-          method: "PUT",
-          data: { reviewId: row.id, adminReply: row.adminReply },
-        });
-      };
+    method: "PUT",
+    data: { reviewId: row.id, adminReply: row.adminReply },
+  });
+};

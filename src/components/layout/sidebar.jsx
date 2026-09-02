@@ -31,7 +31,7 @@ const Sidebar = ({
             Admin Panel
           </h2>
         )}
-        <span
+        <button
           
           onClick={() => setSidebarOpen(!sidebarOpen)}
           aria-pressed={sidebarOpen}
@@ -39,7 +39,7 @@ const Sidebar = ({
           className="text-2xl hover:text-orange-500 transition-all duration-500 hover:scale-105 hover:cursor-pointer active:scale-95 ml-auto p-2"
         >
           <span aria-hidden>{sidebarOpen ? "⬅️" : "☰"}</span>
-        </span>
+        </button>
       </div>
 
       <div className="mt-8 space-y-1">

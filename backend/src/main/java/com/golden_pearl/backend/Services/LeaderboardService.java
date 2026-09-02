@@ -279,7 +279,10 @@ public class LeaderboardService {
     // get tournament list by user id with rank and invest amount
     @Cacheable(value = "userTournamentsDetails", key = "#userId", sync = true)
     public List<TournamentWithLeaderboard> getTournamentsByUserId(String userId) {
-        return (leaderboardRepository.findTournamentsByUserIdWithDetails(userId));
+        List<LeaderBoard> leaderboards = leaderboardRepository.findAllByUserIdWithUserAndTournament(userId);
+        // Convert LeaderBoard entities to TournamentWithLeaderboard DTOs
+        return leaderboards.stream().map(TournamentWithLeaderboard::fromEntity).collect(Collectors.toList());
+
     }
 
     // Update leaderboard entry (rank, investAmount and winAmount) - partial updates

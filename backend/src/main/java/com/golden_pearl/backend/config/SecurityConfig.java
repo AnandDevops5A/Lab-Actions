@@ -48,7 +48,9 @@ public class SecurityConfig {
                                 "/api/tournament/next",
                                 "/api/leaderboard/getJoiners",
                                 "/api/review/test",
-                                "/api/users/test")
+                                "/api/users/test",
+                                "/api/tournament/upcoming"
+                            )
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tournament/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/leaderboard/**").permitAll()
