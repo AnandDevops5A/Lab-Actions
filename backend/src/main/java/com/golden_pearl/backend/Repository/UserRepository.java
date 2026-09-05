@@ -14,15 +14,11 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.loginTimeLines WHERE u.id = :id")
     Optional<User> findByIdWithLoginTimelines(@Param("id") String id);
-    
-     @Query("SELECT u FROM User u LEFT JOIN FETCH u.loginTimeLines WHERE u.contact = :contact")
-    Optional<User> findByContactWithLoginTimelines(@Param("contact") Long contact);
 
-    User findByContactAndAccessKey(Long contact, String accessKey);
+    Optional<User> findByPhoneNumber(String contact);
 
-    List<User> findByContactAndEmail(Long contact, String email);
+    List<User> findByPhoneNumberAndEmail(String contact, String email);
 
-
-    boolean existsByContact(Long contact);
+    boolean existsByPhoneNumber(String contact);
 
 }

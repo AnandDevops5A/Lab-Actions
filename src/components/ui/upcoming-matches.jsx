@@ -6,7 +6,10 @@ import { ThemeContext } from "../../lib/contexts/theme-context";
 import { fetchUpcomingTournament } from "@/lib/utils/common";
 import { UserContext } from "@/lib/contexts/user-context";
 import { UpcomingSkeletonCard } from "@/app/skeleton/Skeleton";
-import GamingBackground from "./gaming-background";
+import dynamic from "next/dynamic";
+// import GamingBackground from "./gaming-background";
+
+const GamingBackground = dynamic(() => import("./gaming-background"), { loading: () => (<p className="mt-1 text-[13px] font-semibold text-slate-200">Gaming Background Loading...</p>), ssr: false })
 
 // Card styles from the inspirational component
 const cardStyles = [
@@ -116,11 +119,10 @@ const UpcomingMatches = () => {
       setLoading(true);
       try {
         const tournamentData = await fetchUpcomingTournament();
-
         if (!isMounted) return;
         setTournaments(tournamentData || []);
       } catch (err) {
-        console.error("Failed to fetch tournaments:", err);
+        console.error("Failed to fetch tournaments:", err.message);
         if (isMounted) setTournaments([]);
       } finally {
         if (isMounted) setLoading(false);
@@ -141,7 +143,7 @@ const UpcomingMatches = () => {
     const fetchJoinerCounts = async () => {
       try {
         let tournamentIds = tournaments.map((t) => t.id);
-        if(tournamentIds.length === 0) return;
+        if (tournamentIds.length === 0) return;
         //convert tournament id to list of string
         tournamentIds = tournamentIds.map(id => String(id));
         //  console.log(tournamentIds)
@@ -170,7 +172,7 @@ const UpcomingMatches = () => {
 
   const userJoinedTournamentNames = useMemo(() => {
     // Defensive check to ensure we have an array before mapping
-    if (( userJoinedTournaments && Array.isArray(userJoinedTournaments) && userJoinedTournaments.length > 0)) {
+    if ((userJoinedTournaments && Array.isArray(userJoinedTournaments) && userJoinedTournaments.length > 0)) {
       return userJoinedTournaments.map((t) => String(t.tournamentName));
 
     }
@@ -280,7 +282,7 @@ const UpcomingMatches = () => {
                       disabled={userJoinedTournamentNames.includes(String(tournament.tournamentName))}
                       aria-disabled={userJoinedTournamentNames.includes(String(tournament.tournamentName))}
                       aria-label={userJoinedTournamentNames.includes(String(tournament.tournamentName)) ? "Already Joined" : "Join Tournament"}
-                      
+
                     >
                       →
                     </button>
@@ -369,7 +371,7 @@ const UpcomingMatches = () => {
         )}
       </div>
 
-      
+
     </section>
   );
 };

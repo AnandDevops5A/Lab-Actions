@@ -23,9 +23,9 @@ public class AdminPolicy {
                 .collect(Collectors.toUnmodifiableSet());
     }
 
-    public boolean isAdminContact(Long contact) {
+    public boolean isAdminContact(String contact) {
         if (contact == null)
             return false;
-        return adminContacts.contains(String.valueOf(contact));
+        return adminContacts.contains(contact);
     }
 }

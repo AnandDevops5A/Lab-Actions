@@ -123,8 +123,9 @@ const executeRequest = async (
         timeout,
         headers: {
           "Content-Type": "application/json",
-          ...(authToken && { Authorization: `Bearer ${authToken}` }),
+          ...(authToken && { Authorization: `Bearer ${authToken}` }),  //cuurent running code
         },
+        // withCredentials: true,  //pending more secure...!!!
       });
 
       // Save to cache on success

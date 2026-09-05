@@ -31,7 +31,7 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [userJoinedTournaments, setUserJoinedTournaments] = useState([]);
   const router = useRouter();
-  const MALIK = ["917254831884", "7254831884"].includes(String(user?.contact));
+  const MALIK = useMemo(() => ["917254831884", "7254831884"].includes(String(user?.contact)), [user]);
 
   const refreshUserTournaments = useCallback(
     async (force = false, providedUser = null) => {
@@ -88,7 +88,7 @@ export const UserProvider = ({ children }) => {
           }
 
           successMessage("Logged out successfully!");
-          router.push(MALIK ? "/auth" : "/");
+          router.replace(MALIK ? "/auth" : "/");
         } else {
           simpleMessage("Logout cancelled.");
         }

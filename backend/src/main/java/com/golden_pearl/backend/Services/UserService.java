@@ -34,12 +34,14 @@ public class UserService {
 
     // constructor
 
-    public UserService(UserRepository userRepository, EmailService email, PasswordEncoder passwordEncoder, General general) {
+    public UserService(UserRepository userRepository, EmailService email, PasswordEncoder passwordEncoder,
+            General general) {
         this.userRepository = userRepository;
         this.email = email;
         this.passwordEncoder = passwordEncoder;
         this.general = general;
     }
+
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     // find user by id
@@ -49,13 +51,12 @@ public class UserService {
             return null;
         Optional<User> userOptional = userRepository.findByIdWithLoginTimelines(id);
         return userOptional.isPresent() ? userOptional.get() : null;
-        
+
     }
 
-    
     @Transactional
     public User getUser(UserAuth userAuth) {
-        Long contact = userAuth.contact();
+        String contact = userAuth.contact();
         String accessKey = userAuth.accessKey();
 
         if (contact == null || accessKey == null) {
@@ -63,18 +64,19 @@ public class UserService {
         }
 
         // Check for modern BCrypt match (Hash comparison)
-        Optional<User> potentialUserOptional = userRepository.findByContactWithLoginTimelines(contact);
-        if (potentialUserOptional.isPresent() && passwordEncoder.matches(accessKey, potentialUserOptional.get().getAccessKey())) {
+        Optional<User> potentialUserOptional = userRepository.findByPhoneNumber(contact);
+        if (potentialUserOptional.isPresent()
+                && passwordEncoder.matches(accessKey, potentialUserOptional.get().getAccessKey())) {
             User potentialUser = potentialUserOptional.get();
-            //add last login time
+            // add last login time
             List<LocalDateTime> loginTimeLines = potentialUser.getLoginTimeLines();
             if (loginTimeLines == null) {
                 loginTimeLines = new ArrayList<>();
             }
             loginTimeLines.add(general.getCurrentDateTime());
             potentialUser.setLoginTimeLines(loginTimeLines);
-            if (potentialUser.getPlayerId() != null) {
-                potentialUser.getPlayerId().size();
+            if (potentialUser.getPlayerIds() != null) {
+                potentialUser.getPlayerIds().size();
             }
             userRepository.save(potentialUser);
             return potentialUser;
@@ -85,10 +87,10 @@ public class UserService {
 
     // update Password
     public ForgotPasswordDTO updatePassword(ForgotPasswordDRO fpDRO) {
-        if (fpDRO == null || fpDRO.contact() == null || fpDRO.email() == null) {
+        if (fpDRO == null || fpDRO.phoneNumber() == null || fpDRO.email() == null) {
             return null;
         }
-        List<User> users = userRepository.findByContactAndEmail(fpDRO.contact(), fpDRO.email());
+        List<User> users = userRepository.findByPhoneNumberAndEmail(fpDRO.phoneNumber(), fpDRO.email());
 
         // Use !isEmpty() instead of null check for Lists
         if (users != null && !users.isEmpty()) {
@@ -152,7 +154,7 @@ public class UserService {
 
             throw new IllegalArgumentException("All fields are required");
         }
-        if (userRepository.existsByContact(user.contact())) {
+        if (userRepository.existsByPhoneNumber(user.contact())) {
             throw new IllegalArgumentException("User with this contact already exists.");
         }
 
@@ -188,11 +190,20 @@ public class UserService {
         if (existingUser == null) {
             return null;
         } else {
-            
-            existingUser.setUsername(user.name());
-            existingUser.setEmail(user.email());
-            existingUser.setContact(user.contact());
-            existingUser.setCallSign(user.callSign());
+
+            // Update only provided fields; keep existing values if blank or null
+            if (user.name() != null && !user.name().isBlank()) {
+                existingUser.setUsername(user.name());
+            }
+            if (user.email() != null && !user.email().isBlank()) {
+                existingUser.setEmail(user.email());
+            }
+            if (user.phoneNumber() != null) {
+                existingUser.setPhoneNumber(user.phoneNumber());
+            }
+            if (user.callSign() != null && !user.callSign().isBlank()) {
+                existingUser.setCallSign(user.callSign());
+            }
             if (user.accessKey() != null && !user.accessKey().isBlank()) {
                 existingUser.setAccessKey(passwordEncoder.encode(user.accessKey()));
             }
@@ -224,7 +235,7 @@ public class UserService {
                 user.setJoiningDate(general.getCurrentDate());
             }
             return userRepository.saveAll(users);
-            
+
         }
     }
 

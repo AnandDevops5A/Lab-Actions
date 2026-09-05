@@ -37,7 +37,6 @@ public class General {
         return LocalDate.now(ZoneId.of("Asia/Kolkata"));
     }
 
-
     public List<ResponseUserData> convertUserToResponseUserData(List<User> users) {
         List<ResponseUserData> responseUserDataSet = new ArrayList<>();
 
@@ -76,7 +75,7 @@ public class General {
         return sortedUsers;
     }
 
-  public User convertResponseToUser(UserRegisterData user) {
+    public User convertResponseToUser(UserRegisterData user) {
         if (user == null) {
             return null;
         }
@@ -84,18 +83,19 @@ public class General {
         newUser.setCallSign(user.callSign());
         newUser.setUsername(user.username());
         newUser.setEmail(user.email());
-        newUser.setContact(user.contact());
+        newUser.setPhoneNumber(user.contact());
         newUser.setAccessKey(user.accessKey());
         // Set other fields as necessary
         return newUser;
     }
 
-    public Integer generateOTP(){
+    public Integer generateOTP() {
         // Generates a number between 100,000 (inclusive) and 1,000,000 (exclusive)
-        return  ThreadLocalRandom.current().nextInt(100_000, 1_000_000);
-    
+        return ThreadLocalRandom.current().nextInt(100_000, 1_000_000);
+
     }
-     public TournamentDTO convertToDTO(Tournament tournament) {
+
+    public TournamentDTO convertToDTO(Tournament tournament) {
         if (tournament == null) {
             return null;
         }
@@ -108,8 +108,7 @@ public class General {
                 tournament.getSlot(),
                 tournament.getPlatform(),
                 tournament.getDescription(),
-                tournament.getLiveStreamLink() 
-            );
+                tournament.getLiveStreamLink());
     }
 
     public List<TournamentDTO> convertToDTOs(List<Tournament> tournaments) {
@@ -117,6 +116,5 @@ public class General {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
-    
 
 }

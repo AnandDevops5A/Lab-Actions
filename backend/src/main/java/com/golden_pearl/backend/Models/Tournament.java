@@ -1,6 +1,6 @@
 package com.golden_pearl.backend.Models;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -29,15 +29,12 @@ import lombok.ToString;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(
-    name = "tournaments",
-    indexes = {
+@Table(name = "tournaments", indexes = {
         @Index(name = "idx_tournaments_date_time", columnList = "date_time"),
         @Index(name = "idx_tournaments_platform", columnList = "platform"),
         @Index(name = "idx_tournaments_tournament_name", columnList = "tournament_name"),
         @Index(name = "idx_tournaments_tournament_id", columnList = "id")
-    }
-)
+})
 // Avoid @Data on entities — see notes on User.java / LeaderBoard.java.
 // leaderBoard is @Transient (never loaded by Hibernate) so it won't throw
 // LazyInitializationException, but it's still excluded below since it's not
@@ -89,11 +86,11 @@ public class Tournament {
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
+    private LocalDateTime updatedAt;
 
     @Version
     @Column(name = "version", nullable = false)

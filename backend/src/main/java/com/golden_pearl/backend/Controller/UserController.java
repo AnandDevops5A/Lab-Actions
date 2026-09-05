@@ -62,21 +62,9 @@ public class UserController {
         try {
             User user = userService.getUser(userAuth);
             if (user != null) {
-                boolean isAdmin = adminPolicy.isAdminContact(user.getContact());
+                boolean isAdmin = adminPolicy.isAdminContact(user.getPhoneNumber());
                 String token = jwtService.createToken(user, isAdmin);
-                AuthenticatedUserDTO dto = new AuthenticatedUserDTO(
-                        user.getId(),
-                        user.getUsername(),
-                        user.getPlayerId(),
-                        user.getCallSign(),
-                        user.getEmail(),
-                        user.getContact(),
-                        user.getJoiningDate(),
-                        user.getWithdrawAmount(),
-                        user.getBalanceAmount(),
-                        user.isActive(),
-                        token,
-                        isAdmin);
+                AuthenticatedUserDTO dto = AuthenticatedUserDTO.fromEntity(user, isAdmin, token);
                 return ResponseEntity.ok(dto);
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -150,6 +138,5 @@ public class UserController {
         Long userCount = entityManager.createQuery("select count(u) from User u", Long.class).getSingleResult();
         return "PostgreSQL is connected; users table contains " + userCount + " users.";
     }
-    
 
 }
