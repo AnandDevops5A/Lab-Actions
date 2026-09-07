@@ -123,9 +123,9 @@ const executeRequest = async (
         timeout,
         headers: {
           "Content-Type": "application/json",
-          ...(authToken && { Authorization: `Bearer ${authToken}` }),  //cuurent running code
+          ...(authToken && { Authorization: `Bearer ${authToken}` }),
         },
-        // withCredentials: true,  //pending more secure...!!!
+        withCredentials: true,
       });
 
       // Save to cache on success
@@ -288,6 +288,45 @@ export const useBackendAPI = (
     isEmpty: !result,
     isError: !!error,
   };
+};
+
+export const useAdminDataStream = () => {
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRevalidating, setIsRevalidating] = useState(false);
+  const hasReceivedData = useRef(false);
+
+  useEffect(() => {
+    const source = new EventSource(`${BASE_URL}/admin/data/stream`, {
+      withCredentials: true,
+    });
+
+    source.addEventListener("admin-data", (event) => {
+      try {
+        setIsRevalidating(hasReceivedData.current);
+        setResult(JSON.parse(event.data));
+        setError(null);
+        setIsLoading(false);
+        hasReceivedData.current = true;
+        setIsRevalidating(false);
+      } catch (parseError) {
+        setError({ status: 500, message: "Invalid admin data received" });
+        setIsLoading(false);
+        console.error("Failed to parse admin SSE data", parseError);
+      }
+    });
+
+    source.onerror = () => {
+      setError({ status: 503, message: "Admin data stream disconnected" });
+      setIsLoading(false);
+      setIsRevalidating(false);
+    };
+
+    return () => source.close();
+  }, []);
+
+  return { result, error, isLoading, isRevalidating };
 };
 
 /**
@@ -470,7 +509,7 @@ export const getJoinersByTournamentId = async (tournamentId) => {
 
 export const getJoinersByTournamentIdList = async (tournamentIds) => {
   return await FetchBackendAPI("leaderboard/getJoiners", {
-    method: "POST",
+    method: "GET",
     data: tournamentIds,
   });
 };

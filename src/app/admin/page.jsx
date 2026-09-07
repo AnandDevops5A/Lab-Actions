@@ -6,7 +6,6 @@ import {
   useMemo,
   useContext,
   useLayoutEffect,
-  useRef,
 } from "react";
 import {
   Chart as ChartJS,
@@ -21,21 +20,20 @@ import {
   LineElement,
   Filler,
 } from "chart.js";
-import { Clock, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import Overview from "./Overview";
 import {
-  useBackendAPI,
+  useAdminDataStream,
   getJoinersByTournamentIdList,
   getAllTournaments,
-  FetchBackendAPI,
 } from "../../lib/api/backend-api";
 import { ThemeContext } from "../../lib/contexts/theme-context";
 import CyberLoading from "../skeleton/CyberLoading";
 import { transformTournaments } from "../../lib/utils/common";
 // import Tournament from "./Tournament";
-import { errorMessage, successMessage } from "@/lib/utils/alert";
+import { errorMessage } from "@/lib/utils/alert";
 import Sidebar from "@/components/layout/sidebar";
 import { UserContext } from "@/lib/contexts/user-context";
 
@@ -99,30 +97,12 @@ const AdminPage = () => {
   const [joiners, setJoiners] = useState([]);
   const { user, MALIK } = useContext(UserContext);
   const { isDarkMode } = useContext(ThemeContext);
-  const [revalidationInterval, setRevalidationInterval] = useState(10000);
-  const [customIntervalInput, setCustomIntervalInput] = useState("10");
 
   const router = useRouter();
 
   // //send request to backend to get tournaments and participants data
-  const { result, isLoading, mutate, isRevalidating } = useBackendAPI(
-    "admin/data", //endpoint
-    "GET", //method
-    null, //data
-    {
-      revalidateInterval: revalidationInterval,
-    },
-  );
-
-  const handleSetInterval = useCallback(() => {
-    const newInterval = Number.parseInt(customIntervalInput, 10);
-    if (!Number.isNaN(newInterval) && newInterval > 0) {
-      setRevalidationInterval(newInterval * 1000);
-      successMessage(`Refresh interval set to ${newInterval} seconds.`);
-    } else {
-      errorMessage("Please enter a valid positive number for the interval.");
-    }
-  }, [customIntervalInput]);
+  const { result, isLoading, isRevalidating } = useAdminDataStream();
+  const refreshData = useCallback(() => {}, []);
 
   //set participants if participants formed or not
   const participants = useMemo(() => {
@@ -176,7 +156,7 @@ const AdminPage = () => {
     }
   }, [result?.leaderboard, result?.tournaments]);
 
-  
+
   const { investmentData, registrationData } = useMemo(() => {
     const monthlyData = {};
 
@@ -313,9 +293,8 @@ const AdminPage = () => {
       />
       {/* Main Content */}
       <div
-        className={`flex-1 ${
-          sidebarOpen ? "md:ml-64" : "md:ml-16 "
-        } transition-all duration-300 w-full pt-15 pl-16 sm:pl-0`}
+        className={`flex-1 ${sidebarOpen ? "md:ml-64" : "md:ml-16 "
+          } transition-all duration-300 w-full pt-15 pl-16 sm:pl-0`}
       >
         {/* Header */}
         {activeTab !== "management" && (
@@ -334,26 +313,6 @@ const AdminPage = () => {
                 <p className="text-gray-400 text-xs md:text-sm">
                   Welcome back! Here&apos;s your tournament overview
                 </p>
-              </div>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:space-x-4">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    value={customIntervalInput}
-                    onChange={(e) => setCustomIntervalInput(e.target.value)}
-                    placeholder="10"
-                    className="bg-gray-800 border border-gray-700 rounded px-3 md:px-4 py-2 text-slate-100 text-xs md:text-sm w-20 text-center"
-                  />
-                  <span className="text-gray-400 text-sm">sec</span>
-                </div>
-                <button
-                  onClick={handleSetInterval}
-                  // disable this button if the custom interval is 0 or negative or if the custom interval is equal to the current revalidation interval
-                  disabled={!customIntervalInput || customIntervalInput == (revalidationInterval / 1000)}
-                  className="bg-linear-to-r from-orange-500 to-red-500 px-4 md:px-6 py-2 rounded-lg font-bold hover:shadow-lg hover:shadow-orange-500/50 hover:scale-110 transition text-sm md:text-base flex items-center justify-center"
-                >
-                  Save <Clock className="w-4 h-4 ml-2" />
-                </button>
               </div>
             </div>
           </div>
@@ -378,7 +337,7 @@ const AdminPage = () => {
 
               {
                 //  activeTab === "tournaments" && (
-                //     <Tournament tournaments={tournaments} mutate={mutate} />
+                //     <Tournament tournaments={tournaments} />
                 //   )
               }
 
@@ -392,7 +351,7 @@ const AdminPage = () => {
               {activeTab === "completed-tournaments" && (
                 <CompletedTournamentManager
                   tournaments={tournaments}
-                  refreshData={mutate}
+                  refreshData={refreshData}
                   joiners={joiners}
                   updateJoiners={updateJoiners}
                 />
@@ -406,7 +365,7 @@ const AdminPage = () => {
                 <ManageParticipant
                   tournaments={tournaments}
                   participants={participants}
-                  refreshData={mutate}
+                  refreshData={refreshData}
                 />
               )}
 

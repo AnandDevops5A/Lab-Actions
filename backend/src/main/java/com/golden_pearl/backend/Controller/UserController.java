@@ -5,6 +5,7 @@ import java.util.List;
 import com.golden_pearl.backend.DRO.UserAuth;
 import com.golden_pearl.backend.DRO.UserRegisterData;
 import com.golden_pearl.backend.DTO.ForgotPasswordDTO;
+import com.golden_pearl.backend.DTO.UserDTO;
 import com.golden_pearl.backend.DTO.AuthenticatedUserDTO;
 import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.security.AdminPolicy;
@@ -13,6 +14,7 @@ import com.golden_pearl.backend.services.UserService;
 
 import jakarta.persistence.EntityManager;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +29,8 @@ import com.golden_pearl.backend.DRO.ConfirmResetDRO;
 import com.golden_pearl.backend.DRO.UserDetailsUpdateReceive;
 import jakarta.validation.Valid;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import org.springframework.http.HttpHeaders;
+
 
 // @CrossOrigin("http://localhost:8082/")
 @RestController
@@ -64,13 +68,16 @@ public class UserController {
             if (user != null) {
                 boolean isAdmin = adminPolicy.isAdminContact(user.getPhoneNumber());
                 String token = jwtService.createToken(user, isAdmin);
-                AuthenticatedUserDTO dto = AuthenticatedUserDTO.fromEntity(user, isAdmin, token);
-                return ResponseEntity.ok(dto);
+                AuthenticatedUserDTO dto = AuthenticatedUserDTO.fromEntity(user, isAdmin);
+               ResponseCookie cookie = jwtService.generateJwtCookie(token);
+                return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(dto);
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -120,8 +127,8 @@ public class UserController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        return ResponseEntity.ok(userService.findAll());
     }
 
     // save all user
@@ -132,11 +139,14 @@ public class UserController {
 
     // testing purpose
     @GetMapping("/test")
-    public String isDatabaseUp() {
+    public Object isDatabaseUp() {
         String collectionName = "initCollection";
 
-        Long userCount = entityManager.createQuery("select count(u) from User u", Long.class).getSingleResult();
-        return "PostgreSQL is connected; users table contains " + userCount + " users.";
+    //     Long userCount = entityManager.createQuery("select count(u) from User u", Long.class).getSingleResult();
+    //     return "PostgreSQL is connected; users table contains " + userCount + " users.";
+    return userService.findAll();
+    // return true;
     }
-
 }
+
+

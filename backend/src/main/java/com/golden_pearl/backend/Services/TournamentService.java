@@ -223,22 +223,25 @@ public class TournamentService {
     // get completed tournaments
     @Cacheable(value = CACHE_COMPLETED, sync = true)
     public List<TournamentDTO> getCompletedTournaments() {
-        List<Tournament> completedTournaments = tournamentRepository.findAllCompletedTournaments(general.getCurrentTimeMillis());
+        List<Tournament> completedTournaments = tournamentRepository
+                .findAllCompletedTournaments(general.getCurrentTimeMillis());
         return general.convertToDTOs(completedTournaments != null ? completedTournaments : new ArrayList<>());
     }
 
     // get upcoming tournaments
     @Cacheable(value = CACHE_UPCOMING, sync = true)
     public List<TournamentDTO> getUpcomingTournaments() {
-        List<Tournament> upcomingTournaments = tournamentRepository.findAllUpcomingTournaments(general.getCurrentTimeMillis());
+        List<Tournament> upcomingTournaments = tournamentRepository
+                .findAllUpcomingTournaments(general.getCurrentTimeMillis());
         return general.convertToDTOs(upcomingTournaments != null ? upcomingTournaments : new ArrayList<>());
     }
 
     // get last tournament
     @Cacheable(value = CACHE_LAST, sync = true)
     public TournamentDTO getLastTournament() {
-        TournamentDTO lastTournament = general.convertToDTO(tournamentRepository.findLastCompletedTournament(general.getCurrentTimeMillis()));
-        return lastTournament != null ? lastTournament : new TournamentDTO();
+        TournamentDTO lastTournament = general
+                .convertToDTO(tournamentRepository.findLastCompletedTournament(general.getCurrentTimeMillis()));
+        return lastTournament;
     }
 
     // save all tournaments
@@ -327,7 +330,8 @@ public class TournamentService {
         try {
             tournament.setLiveStreamLink(tournamentLiveStreamLinkDRO.liveStreamLink());
             tournamentRepository.save(tournament);
-            logger.info("Live stream link set successfully for tournament {}", tournamentLiveStreamLinkDRO.tournamentId());
+            logger.info("Live stream link set successfully for tournament {}",
+                    tournamentLiveStreamLinkDRO.tournamentId());
             return true;
         } catch (Exception e) {
             logger.error("Failed to set live stream link: {}", e.getMessage());
@@ -342,8 +346,16 @@ public class TournamentService {
             return null;
         }
 
-        return upcomingTournaments.stream()
-                .min(Comparator.comparingLong(TournamentDTO::getDateTime))
+        return upcomingTournaments.stream().min(Comparator.comparing(TournamentDTO::dateTime))
                 .orElse(null);
     }
+
+    @Cacheable(value = CACHE_TOURNAMENTS, sync = true)
+    public List<TournamentDTO> getAllTournamentsSortedByDateTime() {
+    return tournamentRepository.findAll().stream()
+            .map(TournamentDTO::fromEntity)
+            .sorted(Comparator.comparing(TournamentDTO::dateTime))
+            .toList(); // or .collect(Collectors.toList()) for Java 16+
+}
+
 }

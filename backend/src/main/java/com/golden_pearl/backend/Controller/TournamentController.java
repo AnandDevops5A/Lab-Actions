@@ -119,7 +119,7 @@ public class TournamentController {
     @GetMapping("/lastTournament")
     public ResponseEntity<TournamentDTO> getLastTournaments() {
         TournamentDTO tournament = tournamentService.getLastTournament();
-        return ResponseEntity.ok(tournament != null ? tournament : new TournamentDTO());
+        return tournament != null ? ResponseEntity.ok(tournament) : ResponseEntity.notFound().build();
     }
 
     @PostMapping("/saveAll")
@@ -142,7 +142,7 @@ public class TournamentController {
                 return ResponseEntity.badRequest().build();
             }
             TournamentDTO tournament = tournamentService.getTournamentDTOById(tournamentId);
-            return ResponseEntity.ok(tournament != null ? tournament : new TournamentDTO());
+            return tournament != null ? ResponseEntity.ok(tournament) : ResponseEntity.notFound().build();
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
@@ -159,7 +159,7 @@ public class TournamentController {
     @GetMapping("/next")
     public ResponseEntity<TournamentDTO> getNextTournament() {
         TournamentDTO tournament = tournamentService.getNextTournament();
-        return ResponseEntity.ok(tournament != null ? tournament : new TournamentDTO());
+        return tournament != null ? ResponseEntity.ok(tournament) : ResponseEntity.notFound().build();
     }
 
     // set link for specific tournament

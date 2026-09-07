@@ -1,8 +1,6 @@
 "use client";
 import React, { useEffect, useState, useContext } from "react";
 import { ThemeContext } from "../../lib/contexts/theme-context";
-import { FetchBackendAPI } from "@/lib/api/backend-api";
-import { SkeletonCard } from "@/app/skeleton/Skeleton";
 import { errorMessage } from "@/lib/utils/alert";
 
 const LiveTournament = ({ query = "game tournament", joinUrl = "#", showChat = true, tournamentId = null, tournamentURL = null }) => {

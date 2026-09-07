@@ -12,12 +12,15 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.dao.DataIntegrityViolationException;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 
 import com.golden_pearl.backend.DRO.DeleteJoinersRequestDRO;
 import com.golden_pearl.backend.DRO.LeaderboardRegisterReceiveData;
 import com.golden_pearl.backend.DRO.UpdateLeaderboardEntry;
 import com.golden_pearl.backend.DRO.UpdateRank;
+import com.golden_pearl.backend.DTO.LeaderBoardDTO;
 import com.golden_pearl.backend.DTO.TournamentWithLeaderboard;
 import com.golden_pearl.backend.Models.LeaderBoard;
 import com.golden_pearl.backend.errors.ResourceNotFoundException;
@@ -26,6 +29,7 @@ import com.golden_pearl.backend.services.TournamentService;
 
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/leaderboard")
 @RateLimiter(name = "apiRateLimiter")
@@ -41,7 +45,7 @@ public class LeaderboardController {
 
     // get all leaderboard
     @GetMapping("/all")
-    public ResponseEntity<List<LeaderBoard>> getAllLeaderboard() {
+    public ResponseEntity<List<LeaderBoardDTO>> getAllLeaderboard() {
         return ResponseEntity.ok(leaderboardService.getAllLeaderboard());
     }
 
@@ -53,9 +57,15 @@ public class LeaderboardController {
             String result = leaderboardService.registerUserForTournament(registerData);
             return ResponseEntity.ok(result);
         } catch (IllegalArgumentException e) {
+            log.warn("Invalid input: {}", e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (ResourceNotFoundException e) {
+            log.warn("Resource not found: {}", e.getMessage());
             return ResponseEntity.status(404).body(e.getMessage());
+        } catch (DataIntegrityViolationException e) {
+            log.warn("Join rejected by database constraint for user {} and tournament {}",
+                    registerData.userId(), registerData.tournamentId());
+            return ResponseEntity.status(409).body("This transaction has already been used.");
         }
     }
 
@@ -64,6 +74,7 @@ public class LeaderboardController {
             @PathVariable List<String> userIds) {
         if (userIds == null || userIds.isEmpty() || tournamentId == null
                 || tournamentId.isEmpty() || !tournamentService.existsById(tournamentId)) {
+            log.warn("Invalid request: {}", "Service error: Invalid tournament ID or user IDs");
             return ResponseEntity.badRequest().body("Service error: Invalid tournament ID or user IDs");
         }
         return ResponseEntity.ok(leaderboardService.registerAllUsersForTournament(tournamentId, userIds));
@@ -76,13 +87,12 @@ public class LeaderboardController {
 
     // get leaderboard by tournament ids
 
-    @PostMapping("/getJoiners")
-    public ResponseEntity<List<LeaderBoard>> getLeaderboardByTournamentIds(
+    @GetMapping("/getJoiners")
+    public ResponseEntity<List<LeaderBoardDTO>> getLeaderboardsByTournamentIds(
             @Valid @RequestBody List<String> tournamentIds) {
+        log.info("Tournament IDs: {}", tournamentIds);
         return ResponseEntity.ok(leaderboardService.getLeaderboardByTournamentIds(tournamentIds));
     }
-
-
 
     // approve user from tournament
     @PostMapping("/approve/{tournamentId}/user/{userId}")
@@ -145,11 +155,10 @@ public class LeaderboardController {
             return ResponseEntity.status(500).body(e.getMessage());
         }
     }
-    
+
     @GetMapping("/lastTournamentTopPlayers")
     public ResponseEntity<Object> getLastTournamentTopPlayers() {
         return ResponseEntity.ok(leaderboardService.getLastTournamentTopPlayers());
     }
-
 
 }

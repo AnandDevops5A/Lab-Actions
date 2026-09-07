@@ -19,6 +19,7 @@ import com.golden_pearl.backend.DRO.UserRegisterData;
 import com.golden_pearl.backend.DRO.ConfirmResetDRO;
 import com.golden_pearl.backend.DRO.UserDetailsUpdateReceive;
 import com.golden_pearl.backend.DTO.ForgotPasswordDTO;
+import com.golden_pearl.backend.DTO.UserDTO;
 import com.golden_pearl.backend.Models.User;
 import com.golden_pearl.backend.Repository.UserRepository;
 import com.golden_pearl.backend.common.General;
@@ -45,11 +46,10 @@ public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     // find user by id
-    @Cacheable(value = "user", key = "#id", sync = true)
     public User findUserById(String id) {
         if (id == null)
             return null;
-        Optional<User> userOptional = userRepository.findByIdWithLoginTimelines(id);
+        Optional<User> userOptional = userRepository.findById(id);
         return userOptional.isPresent() ? userOptional.get() : null;
 
     }
@@ -68,16 +68,9 @@ public class UserService {
         if (potentialUserOptional.isPresent()
                 && passwordEncoder.matches(accessKey, potentialUserOptional.get().getAccessKey())) {
             User potentialUser = potentialUserOptional.get();
-            // add last login time
-            List<LocalDateTime> loginTimeLines = potentialUser.getLoginTimeLines();
-            if (loginTimeLines == null) {
-                loginTimeLines = new ArrayList<>();
-            }
-            loginTimeLines.add(general.getCurrentDateTime());
-            potentialUser.setLoginTimeLines(loginTimeLines);
-            if (potentialUser.getPlayerIds() != null) {
-                potentialUser.getPlayerIds().size();
-            }
+
+            // potentialUser.getPlayerIds().size();
+            // }
             userRepository.save(potentialUser);
             return potentialUser;
         }
@@ -162,18 +155,12 @@ public class UserService {
             User readyUser = general.convertResponseToUser(user);
             // Hash the password before saving
             readyUser.setAccessKey(passwordEncoder.encode(readyUser.getAccessKey()));
-            readyUser.setJoiningDate(general.getCurrentDate());
-            readyUser.setLoginTimeLines(new ArrayList<>()); // Initialize loginTimeLines as an empty list
+            readyUser.setPasswordResetTimeLines(new ArrayList<>()); // Initialize passwordResetTimeLines as an empty
+                                                                    // list
             userRepository.save(readyUser);
             return "User saved successfully";
         }
 
-    }
-
-    // get all users
-    @Cacheable(value = "users", sync = true)
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
     }
 
     // update user
@@ -232,11 +219,17 @@ public class UserService {
             throw new IllegalArgumentException("Users list cannot be empty");
         } else {
             for (User user : users) {
-                user.setJoiningDate(general.getCurrentDate());
+                // user.setJoiningDate(general.getCurrentDate());
             }
             return userRepository.saveAll(users);
 
         }
+    }
+
+    // get all users
+    @Cacheable(value = "users", sync = true)
+    public List<UserDTO> findAll() {
+        return userRepository.findAll().stream().map(UserDTO::fromEntity).toList();
     }
 
 }

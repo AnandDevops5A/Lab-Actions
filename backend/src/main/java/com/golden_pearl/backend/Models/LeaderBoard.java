@@ -33,23 +33,18 @@ import lombok.ToString;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString(exclude = {"user", "tournament"})
+@ToString(exclude = { "user", "tournament" })
 @Entity
-@Table(
-    name = "leaderboard",
-    indexes = {
+@Table(name = "leaderboard", indexes = {
         @Index(name = "idx_leaderboard_user_id", columnList = "user_id"),
         @Index(name = "idx_leaderboard_tournament_id", columnList = "tournament_id"),
+        @Index(name = "idx_leaderboard_tournament_id_with_user_id", columnList = "tournament_id, user_id"),
         // Primary compound index for fast leaderboard sorting
         @Index(name = "idx_leaderboard_score_rank", columnList = "tournament_id, score DESC, rank ASC")
-    },
-    uniqueConstraints = {
+}, uniqueConstraints = {
         // Enforces one leaderboard entry per user per transaction
-        @UniqueConstraint(name = "uq_leaderboard_transaction_id", columnNames = {"transaction_id"}),
-        // Prevents duplicate entries for the same user in the same tournament
-        @UniqueConstraint(name = "uq_leaderboard_user_tournament", columnNames = {"user_id", "tournament_id"})
-    }
-)
+        @UniqueConstraint(name = "uq_leaderboard_transaction_id", columnNames = { "transaction_id" }),
+})
 public class LeaderBoard {
 
     @Id

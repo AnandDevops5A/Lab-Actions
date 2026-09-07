@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.golden_pearl.backend.DRO.LeaderboardRegisterReceiveData;
+import com.golden_pearl.backend.DTO.LeaderBoardDTO;
 import com.golden_pearl.backend.DTO.TournamentDTO;
 import com.golden_pearl.backend.DTO.TournamentWithLeaderboard;
 import com.golden_pearl.backend.Models.LeaderBoard;
@@ -62,6 +63,10 @@ public class LeaderboardService {
             throw new IllegalArgumentException("Invalid registration data: Missing User ID or Tournament ID.");
         }
 
+        if (leaderboardRepository.existsByTransactionId(registerData.transactionId())) {
+            throw new IllegalArgumentException("This transaction has already been used.");
+        }
+
         // Check if user is already registered for this tournament
         LeaderBoard existingEntry = leaderboardRepository.findByTournamentIdAndUserId(registerData.tournamentId(),
                 registerData.userId());
@@ -77,14 +82,16 @@ public class LeaderboardService {
         }
 
         // Check if tournament exists
-        if (!tournamentService.existsById(registerData.tournamentId())) {
+        Tournament tournament = tournamentService.getTournamentById(registerData.tournamentId());
+        if (tournament == null) {
             throw new ResourceNotFoundException("Tournament not found");
         }
-        Tournament tournament = tournamentService.getTournamentById(registerData.tournamentId());
 
         // 2. Use Builder Pattern for cleaner object creation
         LeaderBoard newEntry = LeaderBoard.builder()
                 .userId(registerData.userId())
+                .user(user)
+                .tournament(tournament)
                 .tournamentId(registerData.tournamentId())
                 .tempEmail(registerData.tempEmail())
                 .transactionId(registerData.transactionId())
@@ -248,8 +255,9 @@ public class LeaderboardService {
     }
 
     @Cacheable(value = "leaderboardByIds", key = "#tournamentIds.toString()", sync = true)
-    public List<LeaderBoard> getLeaderboardByTournamentIds(List<String> tournamentIds) {
-        return leaderboardRepository.findByTournamentIdIn(tournamentIds);
+    public List<LeaderBoardDTO> getLeaderboardByTournamentIds(List<String> tournamentIds) {
+        return leaderboardRepository.findByTournamentIdIn(tournamentIds).stream().map(LeaderBoardDTO::fromEntity)
+                .toList();
     }
 
     @Caching(evict = {
@@ -365,11 +373,6 @@ public class LeaderboardService {
         return "Leaderboard entry approved successfully";
     }
 
-    @Cacheable(value = "allLeaderboards", sync = true)
-    public List<LeaderBoard> getAllLeaderboard() {
-        return leaderboardRepository.findAll();
-    }
-
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "leaderboard", key = "#tournamentId"),
@@ -403,7 +406,7 @@ public class LeaderboardService {
         response.put("tournament", lastTournament);
 
         List<LeaderBoard> topPlayers = leaderboardRepository
-                .findTop5ByTournamentIdOrderByRankAsc(lastTournament.getId());
+                .findTop5ByTournamentIdOrderByRankAsc(lastTournament.id());
 
         if (topPlayers == null || topPlayers.isEmpty()) {
             response.put("players", Collections.emptyList());
@@ -442,5 +445,12 @@ public class LeaderboardService {
 
         response.put("players", playerDetailsList);
         return response;
+    }
+
+    @Cacheable(value = "allLeaderboards", sync = true)
+    public List<LeaderBoardDTO> getAllLeaderboard() {
+        return leaderboardRepository.findAllLeaderBoardEntries().stream()
+                .map(LeaderBoardDTO::fromEntity)
+                .toList();
     }
 }

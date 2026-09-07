@@ -15,6 +15,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -30,15 +35,11 @@ import lombok.ToString;
 @Builder
 @Entity
 @Table(name = "tournaments", indexes = {
+        @Index(name = "idx_tournaments_id", columnList = "id"),
         @Index(name = "idx_tournaments_date_time", columnList = "date_time"),
         @Index(name = "idx_tournaments_platform", columnList = "platform"),
         @Index(name = "idx_tournaments_tournament_name", columnList = "tournament_name"),
-        @Index(name = "idx_tournaments_tournament_id", columnList = "id")
 })
-// Avoid @Data on entities — see notes on User.java / LeaderBoard.java.
-// leaderBoard is @Transient (never loaded by Hibernate) so it won't throw
-// LazyInitializationException, but it's still excluded below since it's not
-// part of this entity's persistent identity and is usually null.
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
 public class Tournament {
@@ -79,17 +80,22 @@ public class Tournament {
     @Column(name = "live_stream_link", length = 500)
     private String liveStreamLink;
 
-    // Not persisted — populated manually in service code when you need to
-    // attach leaderboard entries to a tournament response (e.g. a DTO builder).
+    // Fixed: Added @Transient so PostgreSQL doesn't look for a 'leaderBoard' column
     @Transient
     private List<LeaderBoard> leaderBoard;
 
+    // Fixed: Added Jackson serializers to handle Java 8 LocalDateTime in Redis /
+    // JSON
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime updatedAt;
 
     @Version

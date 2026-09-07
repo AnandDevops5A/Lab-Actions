@@ -100,9 +100,8 @@ const ReUseableInput = memo(
     return (
       <label className="flex flex-col">
         <span
-          className={`text-xs mb-1 ${
-            isDarkMode ? "text-gray-300" : "text-gray-600"
-          }`}
+          className={`text-xs mb-1 ${isDarkMode ? "text-gray-300" : "text-gray-600"
+            }`}
         >
           {title}
         </span>
@@ -141,9 +140,8 @@ const ReUseableDropdown = memo(
     return (
       <label className="flex flex-col">
         <span
-          className={`text-xs mb-1 ${
-            isDarkMode ? "text-gray-300" : "text-gray-600"
-          }`}
+          className={`text-xs mb-1 ${isDarkMode ? "text-gray-300" : "text-gray-600"
+            }`}
         >
           {title}
         </span>
@@ -176,6 +174,22 @@ const ReUseableDropdown = memo(
 );
 ReUseableDropdown.displayName = "ReUseableDropdown";
 
+/**
+ * Single source of truth for the "empty" form shape.
+ * Keeping this in one place stops the three separate reset points
+ * (init, alreadyRegistered, post-submit) from drifting out of sync
+ * with each other (e.g. one of them forgetting `investAmount`).
+ */
+function getInitialFormState(user) {
+  return {
+    userId: user?.id || "",
+    transactionId: "",
+    tempEmail: user?.email || "",
+    gameId: "",
+    investAmount: "",
+  };
+}
+
 export default function MatchJoiningForm({
   open: controlledOpen,
   setOpen: controlledSetOpen,
@@ -183,17 +197,12 @@ export default function MatchJoiningForm({
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = controlledSetOpen || setInternalOpen;
-  const { user,userJoinedTournaments,refreshUserTournaments } = useContext(UserContext);
+  const { user, userJoinedTournaments, refreshUserTournaments } =
+    useContext(UserContext);
   const { isDarkMode } = useContext(ThemeContext);
 
   // Use useRef for form fields to avoid re-renders on every keystroke
-  const formRef = useRef({
-    userId: user?.id || "",
-    transactionId: "",
-    tempEmail: user?.email || "",
-    gameId: "",
-    investAmount: "",
-  });
+  const formRef = useRef(getInitialFormState(user));
 
   // Keep tournamentId in state because it triggers UI updates (QR code)
   const [tournamentId, setTournamentId] = useState("");
@@ -219,21 +228,23 @@ export default function MatchJoiningForm({
     setOpen(false);
     setQrCode(null);
     setTournamentId("");
-    formRef.current = {
-      userId: user?.id || "",
-      transactionId: "",
-      tempEmail: user?.email || "",
-      gameId: "",
-    };
-  }, [
-    user?.id,
-    user?.email,
-    setOpen,
-    setSubmitting,
-    setSuccess,
-    setQrCode,
-    setTournamentId,
-  ]);
+    formRef.current = getInitialFormState(user);
+  }, [user, setOpen]);
+
+  // Derive a stable, primitive key from the joined-tournaments list so the
+  // fetch effect below only re-runs when the actual membership changes,
+  // not whenever the context hands back a new array reference with the
+  // same contents (which otherwise triggers redundant network calls).
+  const joinedTournamentsKey = useMemo(
+    () =>
+      (userJoinedTournaments || [])
+        .map((t) => t.tournamentId ?? t.id)
+        .filter(Boolean)
+        .map(String)
+        .sort()
+        .join(","),
+    [userJoinedTournaments],
+  );
 
   useEffect(() => {
     if (!open || !user?.id) return;
@@ -256,16 +267,19 @@ export default function MatchJoiningForm({
           return;
         }
 
-        // 2. Filter using tournaments already stored in context
-        const joinedTournamentNames = new Set(
-          userJoinedTournaments
-            .map((t) => t.tournamentName || t.id)
+        // 2. Filter out tournaments the user already joined.
+        // IMPORTANT: key by id, not name. Names aren't guaranteed unique
+        // or even always populated on joined-tournament records, whereas
+        // id always is - matching on id on both sides keeps this correct.
+        const joinedTournamentIds = new Set(
+          (userJoinedTournaments || [])
+            .map((t) => t.tournamentId ?? t.id)
             .filter(Boolean)
             .map(String),
         );
 
         const finalAvailable = upcomingData.filter(
-          (d) => !joinedTournamentNames.has(d.tournamentName),
+          (d) => !joinedTournamentIds.has(String(d.id)),
         );
 
         if (isMounted) {
@@ -288,18 +302,23 @@ export default function MatchJoiningForm({
     return () => {
       isMounted = false;
     };
-  }, [open, user?.id, userJoinedTournaments, alreadyRegistered, setOpen]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, user?.id, joinedTournamentsKey, alreadyRegistered]);
 
-  async function handleChange(e) {
-    const { name, value } = e.target;
-    if (name !== "tournamentId") {
-      // Update ref for non-triggering fields
-      formRef.current[name] = value;
-    } else {
-      const selectedTournament = match.find((t) => String(t.id) === value);
+  const handleChange = useCallback(
+    async (e) => {
+      const { name, value } = e.target;
+
+      if (name !== "tournamentId") {
+        // Update ref for non-triggering fields (no re-render needed)
+        formRef.current[name] = value;
+        return;
+      }
+
+      const selectedTournament = match?.find((t) => String(t.id) === value);
       if (!selectedTournament) return;
 
-      Swal.fire({
+      const result = await Swal.fire({
         title:
           "Are you want to join " + selectedTournament.tournamentName + "?",
         text: "You won't be able to revert payable for tournament!",
@@ -308,89 +327,88 @@ export default function MatchJoiningForm({
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
         confirmButtonText: "Let me In!",
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          const response = await generateRandomNumberForQR(
-            value,
-            user.id,
-            1,
-            50,
-          );
-          if (!response) {
-            errorMessage("All slots are book for the tournament...");
-            return;
-          }
-          formRef.current.investAmount = response;
-          // successMessage(qrNo+response)
-
-          setTournamentId(value);
-          setQrCode(response || null);
-          // successMessage(response)
-        }
       });
-    }
-  }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setSubmitting(true);
+      if (!result.isConfirmed) return;
 
-    const payload = {
-      ...formRef.current,
-      tournamentId,
-    };
-
-    try {
-      const response = await joinTournament(payload);
-      // console.log(payload);
-      // console.log(response);
-
-      if (!response.ok) {
-        errorMessage(
-          response.data?.message || response.data || "Failed to join tournament",
-        );
-        setSubmitting(false);
+      const response = await generateRandomNumberForQR(value, user.id, 1, 50);
+      if (!response) {
+        errorMessage("All slots are book for the tournament...");
         return;
       }
 
-      if (response.data) {
-        successMessage(
-          response.data.message ||
-            response.data ||
-            "Successfully joined tournament",
-        );
-      }
+      formRef.current.investAmount = response;
+      setTournamentId(value);
+      setQrCode(response);
+    },
+    [match, user?.id],
+  );
 
-      //update cache with adding recent join of user tournament details
-      if (user?.id) {
-        localStorage.removeItem(`userTournamentDetails:${user.id}`);
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      if (!user?.id || !tournamentId) {
+        errorMessage("Please sign in and select a tournament before joining.");
+        return;
       }
-      await refreshUserTournaments(true);
-      setSubmitting(false);
-      setSuccess(true);
-      setTimeout(() => {
-        setSuccess(false);
-        setOpen(false);
-        setQrCode(null);
-        setTournamentId("");
-        formRef.current = {
-          userId: user?.id || "",
-          transactionId: "",
-          tempEmail: user?.email || "",
-          gameId: "",
-        };
-      }, 1000);
-    } catch (error) {
-      console.error("Error joining tournament:", error);
-      // Handle JSON parse errors which likely mean the backend returned a plain text string
-      if (error.name === "SyntaxError" && error.message.includes("JSON")) {
-        errorMessage("You might be already joined or Server Error");
-      } else {
-        errorMessage("An error occurred while joining.");
+      setSubmitting(true);
+
+      const payload = {
+        ...formRef.current,
+        tournamentId,
+      };
+
+      try {
+        const response = await joinTournament(payload);
+
+        if (!response.ok) {
+          const message =
+            response.error ||
+            response.data?.message ||
+            (typeof response.data === "string"
+              ? response.data
+              : "Failed to join tournament");
+          errorMessage(message);
+          setSubmitting(false);
+          return;
+        }
+
+        if (response.data) {
+          successMessage(
+            response.data.message ||
+            (typeof response.data === "string"
+              ? response.data
+              : "Successfully joined tournament"),
+          );
+        }
+
+        // Update cache after adding a recent join of user tournament details
+        if (user?.id) {
+          localStorage.removeItem(`userTournamentDetails:${user.id}`);
+        }
+        await refreshUserTournaments(true);
+        setSubmitting(false);
+        setSuccess(true);
+        setTimeout(() => {
+          setSuccess(false);
+          setOpen(false);
+          setQrCode(null);
+          setTournamentId("");
+          formRef.current = getInitialFormState(user);
+        }, 1000);
+      } catch (error) {
+        console.error("Error joining tournament:", error);
+        // Handle JSON parse errors which likely mean the backend returned a plain text string
+        if (error.name === "SyntaxError" && error.message.includes("JSON")) {
+          errorMessage("You might be already joined or Server Error");
+        } else {
+          errorMessage("An error occurred while joining.");
+        }
+        setSubmitting(false);
       }
-      setSubmitting(false);
-    }
-  }
+    },
+    [user, tournamentId, refreshUserTournaments, setOpen],
+  );
 
   if (!open) return null;
 
@@ -476,14 +494,6 @@ export default function MatchJoiningForm({
               className="relative z-10 mt-5 space-y-4"
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* <ReUseableInput
-                  title={"Callsign"}
-                  name={"callsign"}
-                  color={"#00fff0"}
-				  placeholder={"e.g. ShadowFury"}
-                  svg={callSignSVG}
-                /> */}
-
                 <ReUseableInput
                   key={user?.email}
                   title={"Contact Email"}
@@ -536,9 +546,8 @@ export default function MatchJoiningForm({
               </div>
 
               <div
-                className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                  qrCode ? "max-h-60 opacity-100 mt-4" : "max-h-0 opacity-0"
-                }`}
+                className={`overflow-hidden transition-all duration-500 ease-in-out ${qrCode ? "max-h-60 opacity-100 mt-4" : "max-h-0 opacity-0"
+                  }`}
               >
                 {qrCode && (
                   <div
@@ -558,9 +567,8 @@ export default function MatchJoiningForm({
                 <button
                   type="submit"
                   disabled={submitting}
-                  className={` animate-slideInLeft neon-accent-btn neon-pulse-slow relative w-full inline-flex items-center justify-center overflow-hidden rounded-lg px-6 py-3 font-extrabold text-lg transition-transform duration-200 transform ${
-                    submitting ? "scale-95" : "hover:scale-105"
-                  } from-[#00fff0] via-[#ff0055] to-[#9b59ff] text-slate-100`}
+                  className={` animate-slideInLeft neon-accent-btn neon-pulse-slow relative w-full inline-flex items-center justify-center overflow-hidden rounded-lg px-6 py-3 font-extrabold text-lg transition-transform duration-200 transform ${submitting ? "scale-95" : "hover:scale-105"
+                    } from-[#00fff0] via-[#ff0055] to-[#9b59ff] text-slate-100`}
                   style={{
                     background:
                       "linear-gradient(90deg,#00fff0, #ff0055, #9b59ff)",

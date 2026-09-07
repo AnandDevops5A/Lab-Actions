@@ -3,7 +3,6 @@ package com.golden_pearl.backend.common;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -80,8 +79,8 @@ public class General {
             return null;
         }
         User newUser = new User();
-        newUser.setCallSign(user.callSign());
         newUser.setUsername(user.username());
+        newUser.setCallSign(user.callSign());
         newUser.setEmail(user.email());
         newUser.setPhoneNumber(user.contact());
         newUser.setAccessKey(user.accessKey());

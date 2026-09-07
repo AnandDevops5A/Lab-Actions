@@ -1,7 +1,5 @@
 package com.golden_pearl.backend.services;
 
-import com.golden_pearl.backend.Repository.TournamentRepository;
-import com.golden_pearl.backend.Repository.UserRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,58 +8,58 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 
-import com.golden_pearl.backend.Models.LeaderBoard;
-import com.golden_pearl.backend.Models.Tournament;
-import com.golden_pearl.backend.Models.User;
-import com.golden_pearl.backend.Repository.LeaderboardRepository;
+import com.golden_pearl.backend.DTO.LeaderBoardDTO;
+import com.golden_pearl.backend.DTO.TournamentDTO;
+import com.golden_pearl.backend.DTO.UserDTO;
 
 @Service
 @Lazy
 public class AdminService {
 
-    private final UserRepository userRepository;
-    private final TournamentRepository tournamentRepository;
-    private final LeaderboardRepository leaderBoardRepository;
+    private final UserService userService;
+    private final TournamentService tournamentService;
+    private final LeaderboardService leaderBoardService;
     private static final Logger logger = LoggerFactory.getLogger(AdminService.class);
     private final Executor executor;
 
-    public AdminService(UserRepository userRepository, TournamentRepository tournamentRepository,
-            LeaderboardRepository leaderBoardRepository, @Qualifier("taskExecutor") Executor executor) {
-        this.userRepository = userRepository;
-        this.tournamentRepository = tournamentRepository;
-        this.leaderBoardRepository = leaderBoardRepository;
+    public AdminService(UserService userService, TournamentService tournamentService,
+            LeaderboardService leaderBoardService, @Qualifier("taskExecutor") Executor executor) {
+        this.userService = userService;
+        this.tournamentService = tournamentService;
+        this.leaderBoardService = leaderBoardService;
         this.executor = executor;
     }
 
     @Cacheable(value = "adminData", sync = true)
     public Map<String, Object> getAllData() {
-    logger.info("Database hit for admin database");
+        logger.info("Fetching admin data from the database");
 
-    // 2. Use specific types instead of wildcards
-    CompletableFuture<List<User>> usersFuture = CompletableFuture.supplyAsync(userRepository::findAll, executor);
-    CompletableFuture<List<Tournament>> tournamentsFuture = CompletableFuture.supplyAsync(tournamentRepository::findAll, executor);
-    CompletableFuture<List<LeaderBoard>> leaderboardFuture = CompletableFuture.supplyAsync(leaderBoardRepository::findAll, executor);
+        CompletableFuture<List<UserDTO>> usersFuture = CompletableFuture.supplyAsync(
+                userService::findAll, executor);
+        CompletableFuture<List<TournamentDTO>> tournamentsFuture = CompletableFuture.supplyAsync(
+                tournamentService::getAllTournamentsSortedByDateTime, executor);
+        CompletableFuture<List<LeaderBoardDTO>> leaderboardFuture = CompletableFuture.supplyAsync(
+                leaderBoardService::getAllLeaderboard, executor);
 
-    // 3. Combine and handle results cleanly
-    return CompletableFuture.allOf(usersFuture, tournamentsFuture, leaderboardFuture)
-        .thenApply(v -> {
-            Map<String, Object> response = new HashMap<>();
+        try {
+            CompletableFuture.allOf(usersFuture, tournamentsFuture, leaderboardFuture).join();
+
+            Map<String, Object> response = new HashMap<>(3);
             response.put("users", usersFuture.join());
             response.put("tournaments", tournamentsFuture.join());
             response.put("leaderboard", leaderboardFuture.join());
             return response;
-        })
-        .exceptionally(ex -> {
-            logger.error("Error fetching admin data: {}", ex.getMessage());
-            return Collections.emptyMap(); // Or handle error accordingly
-        })
-        .join();
-}
+        } catch (CompletionException exception) {
+            Throwable cause = exception.getCause() == null ? exception : exception.getCause();
+            logger.error("Failed to fetch admin data", cause);
+            throw new IllegalStateException("Unable to fetch admin data", cause);
+        }
+    }
 }

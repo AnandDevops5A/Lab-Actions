@@ -6,6 +6,7 @@ import { UserProvider } from "../lib/contexts/user-context";
 import { APICacheProvider } from "../lib/contexts/api-cache-context";
 import { ThemeProvider } from "../lib/contexts/theme-context";
 import { NoConnection } from "../components/ui/no-connection";
+import { icons } from "lucide-react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,6 +23,9 @@ export const metadata = {
   description: "Join the ultimate gaming tournament. Compete, win, and claim glory.",
   keywords: "esports, tournament, gaming, BGMI, competitive",
   robots: "index, follow",
+  icons:{
+    icon: "/globe.svg",
+  }
 };
 
 export const viewport = "width=device-width, initial-scale=1, maximum-scale=5";

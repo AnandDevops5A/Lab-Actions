@@ -29,6 +29,8 @@ public interface LeaderboardRepository extends JpaRepository<LeaderBoard, String
            "WHERE lb.transactionId = :transactionId")
     Optional<LeaderBoard> findByTransactionIdWithUser(@Param("transactionId") String transactionId);
 
+       boolean existsByTransactionId(String transactionId);
+
     // Fetch all entries for a specific user with both User and Tournament pre-fetched
     @Query("SELECT lb FROM LeaderBoard lb " +
            "JOIN FETCH lb.user " +
@@ -36,7 +38,12 @@ public interface LeaderboardRepository extends JpaRepository<LeaderBoard, String
            "WHERE lb.userId = :userId " +
            "ORDER BY lb.createdAt DESC")
     List<LeaderBoard> findAllByUserIdWithUserAndTournament(@Param("userId") String userId);
-
+// Fetch all entries for a specific user with both User and Tournament pre-fetched
+    @Query("SELECT lb FROM LeaderBoard lb " +
+           "JOIN FETCH lb.user " +
+           "JOIN FETCH lb.tournament " +
+           "ORDER BY lb.createdAt DESC")
+    List<LeaderBoard> findAllLeaderBoardEntries();
 
     // Find all entries for a specific tournament
     List<LeaderBoard> findByTournamentId(String tournamentId);

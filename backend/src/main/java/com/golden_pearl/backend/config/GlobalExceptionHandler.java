@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import jakarta.servlet.http.HttpServletRequest;
 
 import com.golden_pearl.backend.errors.ResourceNotFoundException;
 
@@ -22,7 +23,9 @@ public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleResourceNotFoundException(ResourceNotFoundException e) {
+    public ResponseEntity<Map<String, Object>> handleResourceNotFoundException(
+            ResourceNotFoundException e, HttpServletRequest request) {
+        log.warn("{} {} -> 404: {}", request.getMethod(), request.getRequestURI(), e.getMessage());
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("timestamp", Instant.now().toString());
         errorResponse.put("message", "Resource not found");
@@ -31,7 +34,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException e) {
+    public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(
+            IllegalArgumentException e, HttpServletRequest request) {
+        log.warn("{} {} -> 400: {}", request.getMethod(), request.getRequestURI(), e.getMessage());
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("timestamp", Instant.now().toString());
         errorResponse.put("message", "Invalid request");
@@ -40,7 +45,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationException(MethodArgumentNotValidException e) {
+        public ResponseEntity<Map<String, Object>> handleValidationException(
+            MethodArgumentNotValidException e, HttpServletRequest request) {
+        log.warn("{} {} -> 400 validation failed: {}", request.getMethod(), request.getRequestURI(),
+            e.getBindingResult().getFieldErrors().stream()
+                .map(fieldError -> fieldError.getField() + "=" + fieldError.getDefaultMessage())
+                .collect(Collectors.joining(", ")));
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("timestamp", Instant.now().toString());
         errorResponse.put("message", "Validation failed");
@@ -54,8 +64,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneralException(Exception e) {
-        log.error("Unhandled exception", e);
+    public ResponseEntity<Map<String, Object>> handleGeneralException(
+            Exception e, HttpServletRequest request) {
+        log.error("{} {} -> 500 unhandled exception", request.getMethod(), request.getRequestURI(), e);
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("timestamp", Instant.now().toString());
         errorResponse.put("message", "An unexpected error occurred");
