@@ -81,17 +81,21 @@ public class LeaderboardController {
     }
 
     @GetMapping("/getJoiners/{tournamentId}")
-    public ResponseEntity<List<LeaderBoard>> getLeaderboard(@PathVariable String tournamentId) {
+    public ResponseEntity<List<LeaderBoardDTO>> getLeaderboard(@PathVariable String tournamentId) {
         return ResponseEntity.ok(leaderboardService.getLeaderboard(tournamentId));
     }
 
     // get leaderboard by tournament ids
-
-    @GetMapping("/getJoiners")
+    @PostMapping("/getJoiners")
     public ResponseEntity<List<LeaderBoardDTO>> getLeaderboardsByTournamentIds(
             @Valid @RequestBody List<String> tournamentIds) {
-        log.info("Tournament IDs: {}", tournamentIds);
-        return ResponseEntity.ok(leaderboardService.getLeaderboardByTournamentIds(tournamentIds));
+        try {
+            System.out.println("Tournament IDs: {}" + tournamentIds);
+            return ResponseEntity.ok(leaderboardService.getLeaderboardByTournamentIds(tournamentIds));
+        } catch (Exception e) {
+            log.warn("Error fetching leaderboard: {}", e.getMessage());
+            return ResponseEntity.status(500).body(null);
+        }
     }
 
     // approve user from tournament
@@ -107,7 +111,7 @@ public class LeaderboardController {
     }
 
     @GetMapping("/{tournamentId}/top/{n}")
-    public ResponseEntity<List<LeaderBoard>> getTopNLeaderboard(@PathVariable String tournamentId,
+    public ResponseEntity<List<LeaderBoardDTO>> getTopNLeaderboard(@PathVariable String tournamentId,
             @PathVariable int n) {
         return ResponseEntity.ok(leaderboardService.getTopNLeaderboard(tournamentId, n));
     }

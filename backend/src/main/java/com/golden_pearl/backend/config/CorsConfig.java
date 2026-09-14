@@ -10,7 +10,7 @@ import java.util.Arrays;
 @Configuration
 public class CorsConfig {
 
-    @Value("${frontend.urls:http://localhost:3000,http://127.0.0.1:3000}")
+    @Value("${frontend.urls:${FRONTEND_URL:http://localhost:3000,http://127.0.0.1:3000}}")
     private String frontendUrls;
 
     @Bean
@@ -18,8 +18,11 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
+                String configuredOrigins = frontendUrls == null || frontendUrls.isBlank()
+                        ? "http://localhost:3000,http://127.0.0.1:3000"
+                        : frontendUrls;
                 registry.addMapping("/**")
-                    .allowedOrigins(Arrays.stream(frontendUrls.split(","))
+                    .allowedOrigins(Arrays.stream(configuredOrigins.split(","))
                         .map(String::trim)
                         .filter(origin -> !origin.isEmpty())
                         .toArray(String[]::new))

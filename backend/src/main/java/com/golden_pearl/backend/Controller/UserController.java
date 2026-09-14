@@ -1,6 +1,8 @@
 package com.golden_pearl.backend.Controller;
 
+import com.golden_pearl.backend.common.General;
 import java.util.List;
+import java.util.Map;
 
 import com.golden_pearl.backend.DRO.UserAuth;
 import com.golden_pearl.backend.DRO.UserRegisterData;
@@ -31,24 +33,25 @@ import jakarta.validation.Valid;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import org.springframework.http.HttpHeaders;
 
-
 // @CrossOrigin("http://localhost:8082/")
 @RestController
 @RequestMapping("/api/users")
 @RateLimiter(name = "apiRateLimiter")
 public class UserController {
 
+    private final General general;
     private final UserService userService;
     private final JwtService jwtService;
     private final AdminPolicy adminPolicy;
     private final EntityManager entityManager;
 
     public UserController(UserService userService, JwtService jwtService, AdminPolicy adminPolicy,
-            EntityManager entityManager) {
+            EntityManager entityManager, General general) {
         this.userService = userService;
         this.jwtService = jwtService;
         this.adminPolicy = adminPolicy;
         this.entityManager = entityManager;
+        this.general = general;
     }
 
     // find user by id
@@ -62,17 +65,18 @@ public class UserController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<AuthenticatedUserDTO> verifyUser(@Valid @RequestBody UserAuth userAuth) {
+    public ResponseEntity<Map<String,Object>> verifyUser(@Valid @RequestBody UserAuth userAuth) {
         try {
             User user = userService.getUser(userAuth);
             if (user != null) {
                 boolean isAdmin = adminPolicy.isAdminContact(user.getPhoneNumber());
+                System.out.println("isAdmin: " + isAdmin);
                 String token = jwtService.createToken(user, isAdmin);
                 AuthenticatedUserDTO dto = AuthenticatedUserDTO.fromEntity(user, isAdmin);
-               ResponseCookie cookie = jwtService.generateJwtCookie(token);
+                ResponseCookie cookie = jwtService.generateJwtCookie(token);
                 return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(dto);
+                        .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                        .body(general.response("success", "Login successful...", dto));
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
@@ -142,11 +146,9 @@ public class UserController {
     public Object isDatabaseUp() {
         String collectionName = "initCollection";
 
-    //     Long userCount = entityManager.createQuery("select count(u) from User u", Long.class).getSingleResult();
-    //     return "PostgreSQL is connected; users table contains " + userCount + " users.";
-    return userService.findAll();
-    // return true;
+        Long userCount = entityManager.createQuery("select count(u) from User u", Long.class).getSingleResult();
+        return "PostgreSQL is connected; users table contains " + userCount + " users.";
+        // return userService.findAll();
+        // return true;
     }
 }
-
-

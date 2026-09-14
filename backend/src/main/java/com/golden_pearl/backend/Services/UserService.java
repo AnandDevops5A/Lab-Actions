@@ -1,6 +1,5 @@
 package com.golden_pearl.backend.services;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +33,6 @@ public class UserService {
     private final General general;
 
     // constructor
-
     public UserService(UserRepository userRepository, EmailService email, PasswordEncoder passwordEncoder,
             General general) {
         this.userRepository = userRepository;
@@ -67,12 +65,8 @@ public class UserService {
         Optional<User> potentialUserOptional = userRepository.findByPhoneNumber(contact);
         if (potentialUserOptional.isPresent()
                 && passwordEncoder.matches(accessKey, potentialUserOptional.get().getAccessKey())) {
-            User potentialUser = potentialUserOptional.get();
+            return potentialUserOptional.get();
 
-            // potentialUser.getPlayerIds().size();
-            // }
-            userRepository.save(potentialUser);
-            return potentialUser;
         }
 
         return null; // Authorization fails (Controller handles 401)

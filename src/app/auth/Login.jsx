@@ -39,26 +39,28 @@ const Login = memo(({ onSwitch, isDarkMode }) => {
   };
 
   async function onSubmit(payload) {
-    const res = await FetchBackendAPI("users/verify", {
+    const response = await FetchBackendAPI("users/verify", {
       method: "POST",
       data: payload,
     });
+    console.log("Login API Response:", response);
 
-    if (!res.ok) {
-      return res;
+    if (!response.ok) {
+      return response;
     }
 
     try {
-      const compressedUser = LZString.compressToUTF16(JSON.stringify(res.data));
+      const userData = response.data?.data ?? response.data;
+      const compressedUser = LZString.compressToUTF16(JSON.stringify(userData));
       const cookieResult = await setSecureCookie("currentUser", compressedUser);
 
       if (!cookieResult.success) {
         throw new Error(cookieResult.message || "Failed to save user session.");
       }
 
-      setUser(res.data);
-      refreshUserTournaments(true, res.data);
-      return res;
+      setUser(userData);
+      refreshUserTournaments(true, userData);
+      return response;
     } catch (sessionError) {
       console.error("Session handling error after login:", sessionError);
       return {

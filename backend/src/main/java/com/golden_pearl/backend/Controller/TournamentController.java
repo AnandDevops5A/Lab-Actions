@@ -1,6 +1,7 @@
 package com.golden_pearl.backend.Controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -102,16 +103,15 @@ public class TournamentController {
 
     @GetMapping("/upcoming")
     public ResponseEntity<List<TournamentDTO>> getUpcomingTournaments() {
-
         List<TournamentDTO> tournaments = tournamentService.getUpcomingTournaments();
-
-        return tournaments != null ? ResponseEntity.ok(tournaments) : ResponseEntity.ok(List.of());
+        System.out.println("Upcoming Tournaments: " + tournaments);
+        return ResponseEntity.ok(tournaments);
     }
 
     @GetMapping("/completed")
     public ResponseEntity<List<TournamentDTO>> getCompletedTournaments() {
         List<TournamentDTO> tournaments = tournamentService.getCompletedTournaments();
-        return tournaments != null ? ResponseEntity.ok(tournaments) : ResponseEntity.ok(List.of());
+        return ResponseEntity.ok(tournaments);
 
     }
 
@@ -119,7 +119,7 @@ public class TournamentController {
     @GetMapping("/lastTournament")
     public ResponseEntity<TournamentDTO> getLastTournaments() {
         TournamentDTO tournament = tournamentService.getLastTournament();
-        return tournament != null ? ResponseEntity.ok(tournament) : ResponseEntity.notFound().build();
+        return ResponseEntity.ok(tournament);
     }
 
     @PostMapping("/saveAll")
@@ -136,15 +136,15 @@ public class TournamentController {
 
     // get tournament by id
     @GetMapping("/{tournamentId}")
-    public ResponseEntity<TournamentDTO> getTournamentById(@PathVariable String tournamentId) {
+    public Map<String, Object> getTournamentById(@PathVariable String tournamentId) {
         try {
             if (tournamentId == null || tournamentId.isEmpty() || !tournamentService.existsById(tournamentId)) {
-                return ResponseEntity.badRequest().build();
+                return general.response("error", "Tournament not found", null);
             }
             TournamentDTO tournament = tournamentService.getTournamentDTOById(tournamentId);
-            return tournament != null ? ResponseEntity.ok(tournament) : ResponseEntity.notFound().build();
+            return general.response("success", "Tournament found", tournament);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return general.response("error", "Tournament not found", null);
         }
     }
 
@@ -157,9 +157,9 @@ public class TournamentController {
 
     // get tournament which is going to start first
     @GetMapping("/next")
-    public ResponseEntity<TournamentDTO> getNextTournament() {
+    public ResponseEntity<TournamentDTO> getnextTournament() {
         TournamentDTO tournament = tournamentService.getNextTournament();
-        return tournament != null ? ResponseEntity.ok(tournament) : ResponseEntity.notFound().build();
+        return ResponseEntity.ok(tournament);
     }
 
     // set link for specific tournament
@@ -177,7 +177,5 @@ public class TournamentController {
         }
         return ResponseEntity.status(500).body("Failed to set live stream link");
     }
-
-    
 
 }

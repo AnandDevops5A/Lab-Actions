@@ -116,19 +116,22 @@ public class LeaderboardService {
 
     // get leaderboard for a tournament
     @Cacheable(value = "leaderboard", key = "#tournamentId", sync = true)
-    public List<LeaderBoard> getLeaderboard(String tournamentId) {
+    public List<LeaderBoardDTO> getLeaderboard(String tournamentId) {
         // Check if tournament exists
         // Tournament tournament = tournamentRepository.findById(tournamentId)
         if (tournamentService.getTournamentById(tournamentId) == null) {
             throw new ResourceNotFoundException("Tournament not found");
         }
 
-        return leaderboardRepository.findByTournamentIdOrderByRankAsc(tournamentId);
+        return leaderboardRepository.findByTournamentIdOrderByRankAsc(tournamentId)
+                .stream()
+                .map(LeaderBoardDTO::fromEntity)
+                .toList();
     }
 
     // get top n leaderboard for a tournament
     @Cacheable(value = "topNLeaderboard", key = "#tournamentId + '-' + #n", sync = true)
-    public List<LeaderBoard> getTopNLeaderboard(String tournamentId, int n) {
+    public List<LeaderBoardDTO> getTopNLeaderboard(String tournamentId, int n) {
         // Check if tournament exists
         if (!tournamentService.existsById(tournamentId)) {
             throw new ResourceNotFoundException("Tournament not found");
@@ -137,7 +140,10 @@ public class LeaderboardService {
         Pageable pageable = PageRequest.of(0, n);
         Page<LeaderBoard> leaderboard = leaderboardRepository.findByTournamentIdOrderByScoreDesc(tournamentId,
                 pageable);
-        return leaderboard.getContent();
+        return leaderboard.getContent()
+                .stream()
+                .map(LeaderBoardDTO::fromEntity)
+                .toList();
     }
 
     // update rank of user
@@ -204,8 +210,11 @@ public class LeaderboardService {
 
     // get tournaments joined by a user
     @Cacheable(value = "userTournaments", key = "#userId", sync = true)
-    public List<LeaderBoard> getJoinedUsersTournaments(String userId) {
-        return leaderboardRepository.findByUserId(userId);
+    public List<LeaderBoardDTO> getJoinedUsersTournaments(String userId) {
+        return leaderboardRepository.findByUserId(userId)
+                .stream()
+                .map(LeaderBoardDTO::fromEntity)
+                .toList();
     }
 
     @Caching(evict = {
@@ -289,7 +298,7 @@ public class LeaderboardService {
     public List<TournamentWithLeaderboard> getTournamentsByUserId(String userId) {
         List<LeaderBoard> leaderboards = leaderboardRepository.findAllByUserIdWithUserAndTournament(userId);
         // Convert LeaderBoard entities to TournamentWithLeaderboard DTOs
-        return leaderboards.stream().map(TournamentWithLeaderboard::fromEntity).collect(Collectors.toList());
+        return leaderboards.stream().map(TournamentWithLeaderboard::fromEntity).toList();
 
     }
 

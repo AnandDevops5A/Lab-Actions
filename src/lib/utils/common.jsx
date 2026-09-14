@@ -6,13 +6,14 @@ import {
   getUserTournamentDetails,
 } from "../api/backend-api";
 import { SunDim, SunMedium, Sunset } from "lucide-react";
+import { storage } from '../api/storageService';
 
 // Simple localStorage-based caching for utility functions
 const simpleSetCache = (key, data, ttl = 3600) => {
 
   if (typeof window === 'undefined') return;
-  if(key === "" || key === null || key === undefined) return;
-  if(data === "" || data === null || data === undefined) return;
+  if (key === "" || key === null || key === undefined) return;
+  if (data === "" || data === null || data === undefined) return;
 
   try {
     const cacheData = {
@@ -194,7 +195,7 @@ export const FormatDate = ({ dateNum }) => {
   );
 };
 
-     //old method
+//old method
 // export const dateInLongFormat = (date, time) => {
 //   // Split date into parts
 //   const [year, month, day] = date.split("-");
@@ -206,7 +207,7 @@ export const FormatDate = ({ dateNum }) => {
 //   return `${year}${month}${day}${timeFormatted}`;
 // };
 
-    //new method
+//new method
 export const dateInLongFormat = (dateStr, timeStr) => {
   if (!dateStr || !timeStr) return null;
 
@@ -216,7 +217,7 @@ export const dateInLongFormat = (dateStr, timeStr) => {
 
   // 2. Split DD-MM-YYYY
   const parts = cleanDate.split("-");
-  
+
   let isoDate = cleanDate;
   // If format is DD-MM-YYYY, convert to YYYY-MM-DD
   if (parts.length === 3 && parts[0].length === 2 && parts[2].length === 4) {
@@ -293,16 +294,19 @@ export async function fetchUserTournaments(userId, skipCache = false) {
     // const cacheRes = await getCache(cacheKey);
     //change to local storage
     if (!skipCache) {
-      const cacheRes = localStorage.getItem(cacheKey);
+      const cacheRes = storage.get(cacheKey,null,"session");
       if (cacheRes) {
         const decompressed = LZString.decompressFromUTF16(cacheRes);
+        console.log(decompressed)
+        console.log(JSON.parse(decompressed))
         return JSON.parse(decompressed);
       }
     }
     const response = await getUserTournamentDetails(userId);
+    console.log(response.data)
     if (response.ok) {
       const compressed = LZString.compressToUTF16(JSON.stringify(response.data));
-      localStorage.setItem(cacheKey, compressed);
+      storage.setItem(cacheKey, compressed,"session");
       return response.data;
     }
     return null;
@@ -315,21 +319,25 @@ export async function fetchUserTournaments(userId, skipCache = false) {
 export const fetchUpcomingTournament = async () => {
   try {
     const cacheRes = simpleGetCache("upcomingTournament");
-    if (cacheRes) {
+    if (Array.isArray(cacheRes)) {
       return cacheRes;
     }
+
     const response = await getUpcomingTournament();
-    if (response.ok) {
-      simpleSetCache("upcomingTournament", response.data, 60); // Set TTL to 1 minute (60 seconds)
-      return response.data;
+    const tournaments = Array.isArray(response) ? response : response?.data;
+
+    if (Array.isArray(tournaments)) {
+      simpleSetCache("upcomingTournament", tournaments, 60);
+      return tournaments;
     }
+
     return null;
   } catch (error) {
     console.error("Error fetching upcoming tournaments:", error);
     return null;
   }
 };
- 
+
 export const loadLastTournamentTopPlayers = async () => {
   try {
     const cacheKey = "lastTournamentTopPlayers";
@@ -340,14 +348,15 @@ export const loadLastTournamentTopPlayers = async () => {
       const response = await getLastTournamentTopPlayers();
       if (response.ok) {
         simpleSetCache(cacheKey, response.data, 300); // Cache for 5 minutes
-      if (response.status === 200) {
-        return response.data;
-      }
+        if (response.status === 200) {
+          return response.data;
+        }
       }
       return null;
-    }  } catch (error) {
+    }
+  } catch (error) {
     console.error("Error fetching last tournament top players:", error);
     return null;
   }
 };
-              
+

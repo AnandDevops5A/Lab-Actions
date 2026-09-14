@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.golden_pearl.backend.DRO.UserRegisterData;
 import com.golden_pearl.backend.DTO.ResponseUserData;
+import com.golden_pearl.backend.Models.LeaderBoard;
 import com.golden_pearl.backend.Models.Tournament;
 import com.golden_pearl.backend.DTO.TournamentDTO;
 import com.golden_pearl.backend.Models.User;
@@ -94,26 +96,12 @@ public class General {
 
     }
 
-    public TournamentDTO convertToDTO(Tournament tournament) {
-        if (tournament == null) {
-            return null;
-        }
-        return new TournamentDTO(
-                tournament.getId(),
-                tournament.getTournamentName(),
-                tournament.getPrizePool(),
-                tournament.getDateTime(),
-                tournament.getEntryFee(),
-                tournament.getSlot(),
-                tournament.getPlatform(),
-                tournament.getDescription(),
-                tournament.getLiveStreamLink());
-    }
-
-    public List<TournamentDTO> convertToDTOs(List<Tournament> tournaments) {
-        return tournaments.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+     public Map<String, Object> response(String status, String message, Object data) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", status);
+        response.put("message", message);
+        response.put("data", data != null ? data : Map.of());
+        return response;
     }
 
 }

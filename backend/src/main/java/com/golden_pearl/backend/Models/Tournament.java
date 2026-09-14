@@ -3,10 +3,13 @@ package com.golden_pearl.backend.Models;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
@@ -80,8 +83,7 @@ public class Tournament {
     @Column(name = "live_stream_link", length = 500)
     private String liveStreamLink;
 
-    // Fixed: Added @Transient so PostgreSQL doesn't look for a 'leaderBoard' column
-    @Transient
+    @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<LeaderBoard> leaderBoard;
 
     // Fixed: Added Jackson serializers to handle Java 8 LocalDateTime in Redis /

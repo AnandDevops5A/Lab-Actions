@@ -77,7 +77,9 @@ public class TournamentService {
             if (tournaments.isEmpty()) {
                 return new ArrayList<>();
             }
-            return general.convertToDTOs(tournaments);
+            return tournaments.stream()
+                    .map(TournamentDTO::fromEntity)
+                    .toList();
         } catch (Exception e) {
             logger.error("Failed to get all tournaments: {}", e.getMessage());
             return new ArrayList<>();
@@ -119,7 +121,7 @@ public class TournamentService {
 
     public TournamentDTO getTournamentDTOById(String id) {
         Tournament tournament = getTournamentById(id);
-        return general.convertToDTO(tournament);
+        return TournamentDTO.fromEntity(tournament);
     }
 
     // delete tournament by id
@@ -211,7 +213,7 @@ public class TournamentService {
             existingTournament
                     .setSlot(
                             tournamentDetails.slot() != null ? tournamentDetails.slot() : existingTournament.getSlot());
-            TournamentDTO updated = general.convertToDTO(tournamentRepository.save(existingTournament));
+            TournamentDTO updated = TournamentDTO.fromEntity(tournamentRepository.save(existingTournament));
             logger.info("Tournament {} updated successfully", tournamentDetails.id());
             return updated;
         } catch (Exception e) {
@@ -225,7 +227,11 @@ public class TournamentService {
     public List<TournamentDTO> getCompletedTournaments() {
         List<Tournament> completedTournaments = tournamentRepository
                 .findAllCompletedTournaments(general.getCurrentTimeMillis());
-        return general.convertToDTOs(completedTournaments != null ? completedTournaments : new ArrayList<>());
+        if (completedTournaments == null || completedTournaments.isEmpty())
+            return new ArrayList<>();
+        return completedTournaments.stream()
+                .map(TournamentDTO::fromEntity)
+                .toList();
     }
 
     // get upcoming tournaments
@@ -233,15 +239,20 @@ public class TournamentService {
     public List<TournamentDTO> getUpcomingTournaments() {
         List<Tournament> upcomingTournaments = tournamentRepository
                 .findAllUpcomingTournaments(general.getCurrentTimeMillis());
-        return general.convertToDTOs(upcomingTournaments != null ? upcomingTournaments : new ArrayList<>());
+        if (upcomingTournaments == null || upcomingTournaments.isEmpty())
+            return new ArrayList<>();
+        return upcomingTournaments.stream()
+                .map(TournamentDTO::fromEntity)
+                .toList();
     }
 
     // get last tournament
     @Cacheable(value = CACHE_LAST, sync = true)
     public TournamentDTO getLastTournament() {
-        TournamentDTO lastTournament = general
-                .convertToDTO(tournamentRepository.findLastCompletedTournament(general.getCurrentTimeMillis()));
-        return lastTournament;
+        Tournament t = tournamentRepository.findLastCompletedTournament(general.getCurrentTimeMillis());
+        if (t == null)
+            return null;
+        return TournamentDTO.fromEntity(t);
     }
 
     // save all tournaments
@@ -268,7 +279,7 @@ public class TournamentService {
         Iterable<Tournament> savedTournaments = tournamentRepository.saveAll(tournamentsToSave);
         List<Tournament> savedTournamentList = new ArrayList<>();
         savedTournaments.forEach(savedTournamentList::add);
-        return general.convertToDTOs(savedTournamentList);
+        return savedTournamentList.stream().map(TournamentDTO::fromEntity).toList();
     }
 
     // get tournaments by ids
@@ -285,7 +296,7 @@ public class TournamentService {
             logger.info("One or more tournament ids not found in request: {}", tournamentIds);
             return new ArrayList<>();
         }
-        return general.convertToDTOs(found);
+        return found.stream().map(TournamentDTO::fromEntity).toList();
     }
 
     // convert tournamentDROs to tournaments
@@ -339,7 +350,7 @@ public class TournamentService {
         }
     }
 
-    @Cacheable(value = CACHE_NEXT, sync = true)
+    @Cacheable(value = CACHE_NEXT, sync = true,unless = "#result == null")
     public TournamentDTO getNextTournament() {
         List<TournamentDTO> upcomingTournaments = getUpcomingTournaments();
         if (upcomingTournaments == null || upcomingTournaments.isEmpty()) {
@@ -352,10 +363,10 @@ public class TournamentService {
 
     @Cacheable(value = CACHE_TOURNAMENTS, sync = true)
     public List<TournamentDTO> getAllTournamentsSortedByDateTime() {
-    return tournamentRepository.findAll().stream()
-            .map(TournamentDTO::fromEntity)
-            .sorted(Comparator.comparing(TournamentDTO::dateTime))
-            .toList(); // or .collect(Collectors.toList()) for Java 16+
-}
+        return tournamentRepository.findAll().stream()
+                .map(TournamentDTO::fromEntity)
+                .sorted(Comparator.comparing(TournamentDTO::dateTime))
+                .toList(); // or .collect(Collectors.toList()) for Java 16+
+    }
 
 }

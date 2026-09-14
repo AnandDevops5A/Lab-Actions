@@ -1,6 +1,8 @@
 package com.golden_pearl.backend.DTO;
 
+import java.util.List;
 
+import com.golden_pearl.backend.Models.LeaderBoard;
 
 public record TournamentDTO(
         String id,
@@ -11,9 +13,11 @@ public record TournamentDTO(
         Integer slot,
         String platform,
         String description,
-        String liveStreamLink
-) {
+        String liveStreamLink,
+        List<String> joinedUsers) {
     public static TournamentDTO fromEntity(com.golden_pearl.backend.Models.Tournament tournament) {
+        List<String> joinedUsers = tournament.getLeaderBoard().stream().map(LeaderBoard::getUserId).toList();
+
         return new TournamentDTO(
                 tournament.getId(),
                 tournament.getTournamentName(),
@@ -23,7 +27,7 @@ public record TournamentDTO(
                 tournament.getSlot(),
                 tournament.getPlatform(),
                 tournament.getDescription(),
-                tournament.getLiveStreamLink()
-        );
+                tournament.getLiveStreamLink(),
+                joinedUsers);
     }
-} 
+}

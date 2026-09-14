@@ -119,6 +119,7 @@ const UpcomingMatches = () => {
       setLoading(true);
       try {
         const tournamentData = await fetchUpcomingTournament();
+        console.log(tournamentData)
         if (!isMounted) return;
         setTournaments(tournamentData || []);
       } catch (err) {
@@ -226,7 +227,7 @@ const UpcomingMatches = () => {
           <div
             className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-7`}
           >
-            {tournaments.map((tournament, index) => {
+            {tournaments?.map((tournament, index) => {
               const style = cardStyles[index % cardStyles.length];
               const joinedCount = joinerCounts[tournament.id] || 0;
               const maxPlayers = tournament.maxPlayers || 50;

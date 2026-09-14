@@ -493,7 +493,7 @@ export default function MatchJoiningForm({
               onSubmit={handleSubmit}
               className="relative z-10 mt-5 space-y-4"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-1 gap-3">
                 <ReUseableInput
                   key={user?.email}
                   title={"Contact Email"}
@@ -507,7 +507,7 @@ export default function MatchJoiningForm({
                   }
                   isDarkMode={isDarkMode}
                 />
-                <ReUseableInput
+                {/* <ReUseableInput
                   title={"Game ID"}
                   name={"gameId"}
                   defaultValue={formRef.current.gameId}
@@ -518,7 +518,7 @@ export default function MatchJoiningForm({
                     <Gamepad2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#ff0055]" />
                   }
                   isDarkMode={isDarkMode}
-                />
+                /> */}
                 <ReUseableDropdown
                   title={"Tournament"}
                   name={"tournamentId"}
